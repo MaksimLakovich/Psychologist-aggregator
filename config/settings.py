@@ -31,7 +31,10 @@ INSTALLED_APPS = [
 
     # Добавляем это чтобы библиотека https://django-phonenumber-field.readthedocs.io/en/stable/index.html
     # использовала локализованные ошибки валидации номеров в поле PhoneNumberField
-    # 'phonenumber_field',
+    'phonenumber_field',
+
+    # После установки "poetry add django-timezone-field" для использования TimezoneField
+    'django-timezone-field',
 
     # DRF (Django REST framework) - это библиотека, которая работает со стандартными моделями Django для создания
     # API-сервера для проекта.
@@ -143,7 +146,10 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# AUTH_USER_MODEL = 'users.AppUser'
+AUTH_USER_MODEL = 'users.AppUser'
+
+# Для локальной валидации по умолчанию, после добавления phonenumber_field в INSTALLED_APPS
+PHONENUMBER_DEFAULT_REGION = "RU"
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (

@@ -187,17 +187,20 @@
 
 ### 2.1. Основные сущности приложения `users`:
 
+- `TimeStampedModel` *(это абстрактная базовая модель от которой будут наследоваться все остальные модели)*: **created_at**, **updated_at**
+
+
+- `UserRole`: **Psychologist**, **Client**, **Admin**
 - `Topic` *(это с чем клиент приходит, “запрос на терапию”)*: **type** (например, "Индивидуально", "Парная" и т.д.), **name** (например, "Развод", "Выгорание", "Панические атаки", "Тревожность" и т.д.), **slug** (человекочитаемый уникальный идентификатор, который удобно использовать в URL, API и SEO вместо ID - например, "panicheskie-ataki")
 - `Specialisation` *(это в чем психолог специализируется, “методологическая школа”)*: **name** (например, "Когнитивно-поведенческая терапия", "Психоанализ", "Гештальт-терапия", "Семейная терапия" и т.д.), **description**, **slug**
 - `Method` *(это инструменты и подходы, которые использует психолог в работе)*: **name** (например, "Схематерапия", "НЛП" и т.д.), **description**, **slug**
 - `Education`: **country**, **institution**, **degree**, **specialisation**, **year_start**, **year_end**, **document_url**, **verified** (bool)
-- `AppRole`: **Psychologist**, **Client**, **Admin**
 
 
 - `AppUser`:
   - **uuid** (как primary_key, вместо системного автоинкремента id - более безопасно)
-  - **first_name**, **last_name**, **date_joined**, **email**, **is_active**, **is_staff**, **is_superuser**, **last_login**, **password**, **age**, **phone**, **timezone**
-  - **role** (по ID, связь с моделью `AppRole` - будет автоматически определяться в зависимости от сценария создания пользователя)
+  - **first_name**, **last_name**, **email**, **is_active**, **is_staff**, **is_superuser**, **last_login**, **password**, **age**, **phone**, **timezone**
+  - **role** (по ID, связь с моделью `UserRole` - будет автоматически определяться в зависимости от сценария создания пользователя)
 
 
 - `PsychologistProfile`:
@@ -216,6 +219,20 @@
   - **therapy_experience**
   - **methods** (один ко многим, связь с моделью `Method`)
   - **topics** (один ко многим, связь с моделью `Topic`)
+
+
+#### Структура связей:
+```python
+AppUser 1───1 PsychologistProfile
+AppUser 1───1 ClientProfile
+AppUser *───1 UserRole
+PsychologistProfile *───* Specialisation
+PsychologistProfile *───* Method
+PsychologistProfile *───* Topic
+PsychologistProfile *───* Education
+ClientProfile *───* Topic
+ClientProfile *───* Method
+```
 
 
 ### 2.2. Основные сущности приложения `calendar`:
