@@ -1,8 +1,8 @@
 import uuid
 
 from django.conf import settings
-from django.contrib.auth.models import AbstractBaseUser
-from django.core.validators import MinValueValidator
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from slugify import slugify
@@ -141,7 +141,6 @@ class Specialisation(TimeStampedModel):
     slug = models.SlugField(
         unique=True,
         max_length=255,
-        null=True,
         blank=True,
         verbose_name="Slug-название специализации:",
         help_text="Укажите slug-название специализации",
@@ -192,7 +191,6 @@ class Method(TimeStampedModel):
     slug = models.SlugField(
         unique=True,
         max_length=255,
-        null=True,
         blank=True,
         verbose_name="Slug-название метода:",
         help_text="Укажите slug-название метода",
@@ -215,7 +213,7 @@ class Method(TimeStampedModel):
         ordering = ["name",]
 
 
-class AppUser(AbstractBaseUser, TimeStampedModel):
+class AppUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     """Модель представляет пользователя приложения."""
 
     # Это как primary_key вместо системного автоинкремента id, чтоб было более безопасно для публичных API
@@ -238,7 +236,7 @@ class AppUser(AbstractBaseUser, TimeStampedModel):
         help_text="Введите фамилию",
     )
     age = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(18)],
+        validators=[MinValueValidator(18), MaxValueValidator(120)],
         blank=False,
         null=False,
         verbose_name="Возраст:",
@@ -283,18 +281,13 @@ class AppUser(AbstractBaseUser, TimeStampedModel):
         verbose_name="Активный?",
         help_text="Аккаунт активен"
     )
-    is_superuser = models.BooleanField(
-        default=False,
-        verbose_name="Суперпользователь?",
-        help_text="Доступ суперпользователя"
-    )
 
     objects = AppUserManager()  # Указываю кастомный менеджер для пользователя без поля username
 
     # Определяет, какое поле будет использоваться в качестве уникального идентификатора для аутентификации юзера
     USERNAME_FIELD = "email"
     # Обязательные поля, которые должны быть указаны при создании суперпользователя через команду createsuperuser
-    REQUIRED_FIELDS = ["first_name", "last_name"]
+    REQUIRED_FIELDS = ["first_name",]
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
@@ -304,7 +297,6 @@ class AppUser(AbstractBaseUser, TimeStampedModel):
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
         ordering = ["email"]
-        db_table = "users"
 
 
 # - `Education`: **country**, **institution**, **degree**, **specialisation**, **year_start**, **year_end**,

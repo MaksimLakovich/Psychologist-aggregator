@@ -34,7 +34,7 @@ INSTALLED_APPS = [
     'phonenumber_field',
 
     # После установки "poetry add django-timezone-field" для использования TimezoneField
-    'django-timezone-field',
+    'timezone_field',
 
     # DRF (Django REST framework) - это библиотека, которая работает со стандартными моделями Django для создания
     # API-сервера для проекта.
