@@ -12,7 +12,7 @@ def generate_unique_slug(instance, value, slug_field="slug"):
     # ШАГ 2: устанавливаю текущее значение для slug в переменную slug (изначально он равен base_slug)
     slug = base_slug
     # ШАГ 3: беру класс объекта instance (например, это получится Topic) и сохраняю в переменную Model.
-    # Это позволит выполнить запросы к базе через Model.objects.filter(...), не импортируя модель внутри services.py.
+    # Это позволит выполнить запросы к базе через Model.objects.filter(...), не импортируя модель внутри slug.py.
     # Функция остается универсальной для любой модели - Topic, Method или Specialisation
     Model = instance.__class__
     # ШАГ 4: Запускаю цикл:

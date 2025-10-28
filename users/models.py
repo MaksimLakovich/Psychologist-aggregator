@@ -8,7 +8,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from timezone_field import TimeZoneField
 
 from users.managers import AppUserManager
-from users.services import generate_unique_slug
+from users.services.slug import generate_unique_slug
 
 
 class TimeStampedModel(models.Model):
