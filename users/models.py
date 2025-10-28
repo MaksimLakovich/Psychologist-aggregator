@@ -5,10 +5,10 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
-from slugify import slugify
 from timezone_field import TimeZoneField
 
 from users.managers import AppUserManager
+from users.services import generate_unique_slug
 
 
 class TimeStampedModel(models.Model):
@@ -99,7 +99,7 @@ class Topic(TimeStampedModel):
         """Если slug не указан, то метод сгенерирует его автоматически из name."""
         if not self.slug:
             # Установка "poetry add python-slugify" и импорт "from slugify import slugify"
-            self.slug = slugify(self.name)
+            self.slug = generate_unique_slug(self, self.name)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -150,7 +150,7 @@ class Specialisation(TimeStampedModel):
         """Если slug не указан, то метод сгенерирует его автоматически из name."""
         if not self.slug:
             # Установка "poetry add python-slugify" и импорт "from slugify import slugify"
-            self.slug = slugify(self.name)
+            self.slug = generate_unique_slug(self, self.name)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -200,7 +200,7 @@ class Method(TimeStampedModel):
         """Если slug не указан, то метод сгенерирует его автоматически из name."""
         if not self.slug:
             # Установка "poetry add python-slugify" и импорт "from slugify import slugify"
-            self.slug = slugify(self.name)
+            self.slug = generate_unique_slug(self, self.name)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -251,7 +251,7 @@ class AppUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     # "from phonenumber_field.modelfields import PhoneNumberField" + INSTALLED_APPS + PHONENUMBER_DEFAULT_REGION
     phone_number = PhoneNumberField(
         blank=True,
-        null=True,
+        null=False,
         verbose_name="Телефон:",
         help_text="Введите номер телефона",
     )
