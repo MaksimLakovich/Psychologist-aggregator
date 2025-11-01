@@ -2,13 +2,17 @@ import uuid
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.exceptions import ValidationError
+from django.core.validators import (FileExtensionValidator, MaxValueValidator,
+                                    MinValueValidator)
 from django.db import models
+from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from timezone_field import TimeZoneField
 
 from users.managers import AppUserManager
 from users.services.slug import generate_unique_slug
+from users.validators import validate_file_size
 
 
 class TimeStampedModel(models.Model):
@@ -17,11 +21,11 @@ class TimeStampedModel(models.Model):
 
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name="Дата создания:",
+        verbose_name="Дата создания",
     )
     updated_at = models.DateTimeField(
         auto_now=True,
-        verbose_name="Дата обновления:",
+        verbose_name="Дата обновления",
     )
 
     class Meta:
@@ -39,7 +43,7 @@ class UserRole(TimeStampedModel):
         null=True,
         blank=True,
         related_name="created_roles",
-        verbose_name="Создатель:",
+        verbose_name="Создатель",
         help_text="Укажите пользователя, создавшего запись",
     )
     role = models.CharField(
@@ -47,7 +51,7 @@ class UserRole(TimeStampedModel):
         max_length=50,
         null=False,
         blank=False,
-        verbose_name="Роль пользователя:",
+        verbose_name="Роль пользователя",
         help_text="Укажите роль пользователя",
     )
 
@@ -69,21 +73,21 @@ class Topic(TimeStampedModel):
         null=True,
         blank=True,
         related_name="created_topics",
-        verbose_name="Создатель:",
+        verbose_name="Создатель",
         help_text="Укажите пользователя, создавшего запись",
     )
     type = models.CharField(
         max_length=100,
         null=False,
         blank=False,
-        verbose_name="Вид запроса:",
+        verbose_name="Вид запроса",
         help_text="Укажите вид запроса",
     )
     name = models.CharField(
         max_length=255,
         null=False,
         blank=False,
-        verbose_name="Название запроса:",
+        verbose_name="Название запроса",
         help_text="Укажите название запроса",
     )
     slug = models.SlugField(
@@ -91,7 +95,7 @@ class Topic(TimeStampedModel):
         max_length=255,
         null=True,
         blank=True,
-        verbose_name="Slug-название запроса:",
+        verbose_name="Slug-название запроса",
         help_text="Укажите slug-название запроса",
     )
 
@@ -121,7 +125,7 @@ class Specialisation(TimeStampedModel):
         null=True,
         blank=True,
         related_name="created_specialisations",
-        verbose_name="Создатель:",
+        verbose_name="Создатель",
         help_text="Укажите пользователя, создавшего запись",
     )
     name = models.CharField(
@@ -129,20 +133,20 @@ class Specialisation(TimeStampedModel):
         max_length=255,
         null=False,
         blank=False,
-        verbose_name="Название специализации:",
+        verbose_name="Название специализации",
         help_text="Укажите название специализации",
     )
     description = models.TextField(
         null=False,
         blank=False,
-        verbose_name="Описание специализации:",
+        verbose_name="Описание специализации",
         help_text="Укажите описание специализации",
     )
     slug = models.SlugField(
         unique=True,
         max_length=255,
         blank=True,
-        verbose_name="Slug-название специализации:",
+        verbose_name="Slug-название специализации",
         help_text="Укажите slug-название специализации",
     )
 
@@ -171,7 +175,7 @@ class Method(TimeStampedModel):
         null=True,
         blank=True,
         related_name="created_methods",
-        verbose_name="Создатель:",
+        verbose_name="Создатель",
         help_text="Укажите пользователя, создавшего запись",
     )
     name = models.CharField(
@@ -179,20 +183,20 @@ class Method(TimeStampedModel):
         max_length=255,
         null=False,
         blank=False,
-        verbose_name="Название метода:",
+        verbose_name="Название метода",
         help_text="Укажите название метода",
     )
     description = models.TextField(
         null=False,
         blank=False,
-        verbose_name="Описание метода:",
+        verbose_name="Описание метода",
         help_text="Укажите описание метода",
     )
     slug = models.SlugField(
         unique=True,
         max_length=255,
         blank=True,
-        verbose_name="Slug-название метода:",
+        verbose_name="Slug-название метода",
         help_text="Укажите slug-название метода",
     )
 
@@ -226,25 +230,25 @@ class AppUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
         max_length=150,
         blank=False,
         null=False,
-        verbose_name="Имя:",
+        verbose_name="Имя",
         help_text="Введите имя",
     )
     last_name = models.CharField(
         max_length=150,
         blank=True,
-        verbose_name="Фамилия:",
+        verbose_name="Фамилия",
         help_text="Введите фамилию",
     )
     age = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(18), MaxValueValidator(120)],
         blank=False,
         null=False,
-        verbose_name="Возраст:",
+        verbose_name="Возраст",
         help_text="Введите возраст",
     )
     email = models.EmailField(
         unique=True,
-        verbose_name="Email:",
+        verbose_name="Email",
         help_text="Введите email",
     )
     # Установка "poetry add django-phonenumber-field" и "poetry add phonenumbers" + импорт
@@ -252,7 +256,7 @@ class AppUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     phone_number = PhoneNumberField(
         blank=True,
         null=False,
-        verbose_name="Телефон:",
+        verbose_name="Телефон",
         help_text="Введите номер телефона",
     )
     role = models.ForeignKey(
@@ -260,7 +264,7 @@ class AppUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        verbose_name="Роль пользователя:",
+        verbose_name="Роль пользователя",
         help_text="Укажите роль пользователя",
     )
     # Установка "poetry add django-timezone-field"
@@ -268,7 +272,7 @@ class AppUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     timezone = TimeZoneField(
         blank=True,
         null=True,
-        verbose_name="Часовой пояс:",
+        verbose_name="Часовой пояс",
         help_text="Для корректного отображения расписаний сессий",
     )
     is_staff = models.BooleanField(
@@ -299,23 +303,91 @@ class AppUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
         ordering = ["email"]
 
 
-# - `Education`: **country**, **institution**, **degree**, **specialisation**, **year_start**, **year_end**,
-# **document_url**, **verified** (bool)
-#
-# - `PsychologistProfile`:
-#   - расширяется полями модели `AppUser`
-#   - **is_verified** (флаг модерации администратором), **gander**, **bio**, **photo**, **work_experience_years**,
-#   **education_verified** (bool), **therapy_format** (например, "online", "встреча", "любой"), **price**,
-#   **status** (например, "работает", "не работает")
-#   - **specialisations** (один ко многим, связь с моделью `Specialisation`)
-#   - **methods** (один ко многим, связь с моделью `Method`)
-#   - **topics** (один ко многим, связь с моделью `Topic`)
-#   - **educations** (один ко многим, связь с моделью `Education`)
-#   - **languages** (default="русский", потом можно расширить и добавить доп. фильтрацию)
-#   - **rating** (default=null, функционал 2-го этапа)
-#
-# - `ClientProfile`:
-#   - расширяется полями модели `AppUser` (исключения: last_name, is_active, is_staff, is_superuser)
-#   - **therapy_experience**
-#   - **methods** (один ко многим, связь с моделью `Method`)
-#   - **topics** (один ко многим, связь с моделью `Topic`)
+class Education(TimeStampedModel):
+    """Модель представляет образование, которое есть у психолога."""
+    creator = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="created_educations",
+        verbose_name="Создатель",
+        help_text="Укажите пользователя, создавшего запись",
+    )
+    # Для вывода списка стран использую django_countries (poetry add django-countries)
+    country = CountryField(
+        verbose_name="Страна",
+        null=False,
+        blank=False,
+        help_text="Выберите страну учебного заведения",
+    )
+    institution = models.CharField(
+        max_length=255,
+        null=False,
+        blank=False,
+        verbose_name="Учебное учреждение",
+        help_text="Укажите название учебного учреждения",
+    )
+    degree = models.CharField(
+        max_length=255,
+        null=False,
+        blank=False,
+        verbose_name="Ученая степень / квалификация",
+        help_text="Например: Бакалавр, Магистр, Специалист, Сертификат",
+    )
+    specialisation = models.CharField(
+        max_length=255,
+        null=False,
+        blank=False,
+        verbose_name="Специализация / направление",
+        help_text="Специализация или программа обучения",
+    )
+    # Храним только год - чаще всего это то, что нужно. Диапазон: от 1900 до 2100
+    year_start = models.PositiveSmallIntegerField(
+        validators=[MaxValueValidator(2100)],
+        null=False,
+        blank=False,
+        verbose_name="Год начала обучения",
+        help_text="Укажите год начала обучения",
+    )
+    year_end = models.PositiveSmallIntegerField(
+        validators=[MaxValueValidator(2100)],
+        null=True,
+        blank=True,
+        verbose_name="Год окончания обучения",
+        help_text="Укажите год окончания обучения или оставьте пустым, если обучение в процессе",
+    )
+    document = models.FileField(
+        upload_to="education_docs/%Y/%m/%d",
+        validators=[FileExtensionValidator(['pdf', 'jpg', 'jpeg', 'png']), validate_file_size],
+        null=True,
+        blank=True,
+        verbose_name="Скан диплома/сертификата",
+        help_text="Прикрепите скан диплома/сертификата",
+    )
+    is_verified = models.BooleanField(
+        default=False,
+        verbose_name="Верификация",
+        help_text="Флаг модерации подлинности (проверяется администратором)",
+    )
+
+    def clean(self):
+        """Дополнительная логическая валидация полей - убедиться, что year_start <= year_end (если year_end указан)."""
+        super().clean()
+        if self.year_end is not None and self.year_end < self.year_start:
+            raise ValidationError(
+                {"year_end": "Год окончания не может быть раньше года начала."}
+            )
+        if self.year_start < 1900:
+            raise ValidationError(
+                {"year_start": "Некорректный год начала обучения."}
+            )
+
+    def __str__(self):
+        """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
+        return f"{self.country} / {self.institution} / {self.specialisation}"
+
+    class Meta:
+        verbose_name = "Образование"
+        verbose_name_plural = "Образования"
+        ordering = ["country", "institution", "specialisation"]

@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     # API-сервера для проекта.
     'rest_framework',
 
+    # После установки "poetry add django-countries" для использования CountryField (список стран)
+    'django_countries',
+
     # Если будем использовать Localizations/translations, то нужно добавить REST_FRAMEWORD_SIMPLEJWT в INSTALLED_APPS
     # 'rest_framework_simplejwt',
 
