@@ -2,6 +2,7 @@ import uuid
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.validators import (FileExtensionValidator, MaxValueValidator,
                                     MinValueValidator)
@@ -13,6 +14,7 @@ from timezone_field import TimeZoneField
 from users.constants import (GENDER_CHOICES, LANGUAGE_CHOICES,
                              THERAPY_FORMAT_CHOICES, WORK_STATUS_CHOICES)
 from users.managers import AppUserManager
+from users.services.defaults import default_languages
 from users.services.slug import generate_unique_slug
 from users.validators import validate_file_size
 
@@ -473,12 +475,11 @@ class PsychologistProfile(TimeStampedModel):
         verbose_name="Опыт",
         help_text="Укажите текущий опыт работы (лет)",
     )
-    languages = models.CharField(
-        choices=LANGUAGE_CHOICES,
-        default="russian",
-        blank=False,
-        verbose_name="Язык",
-        help_text="Укажите возможный язык для проведения сессий",
+    languages = ArrayField(
+        models.CharField(max_length=50, choices=LANGUAGE_CHOICES),
+        default=default_languages,
+        verbose_name="Языки",
+        help_text="Укажите языки, на которых можно проводить сессии",
     )
     therapy_format = models.CharField(
         choices=THERAPY_FORMAT_CHOICES,

@@ -12,6 +12,7 @@ LANGUAGE_CHOICES = [
 THERAPY_FORMAT_CHOICES = [
     ("online", "удаленно"),
     ("offline", "встреча"),
+    ("any", "любая"),
 ]
 
 WORK_STATUS_CHOICES = [
