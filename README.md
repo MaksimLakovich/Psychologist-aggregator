@@ -220,10 +220,10 @@
 
 
 - `ClientProfile`:
-  - расширяется полями модели `AppUser` (исключения: last_name, is_active, is_staff, is_superuser)
+  - расширяется полями модели `AppUser`
   - **therapy_experience**
-  - **methods** (один ко многим, связь с моделью `Method`)
-  - **topics** (один ко многим, связь с моделью `Topic`)
+  - **preferred_methods** (один ко многим, связь с моделью `Method`)
+  - **requested_topics** (один ко многим, связь с моделью `Topic`)
 
 
 #### Структура связей:

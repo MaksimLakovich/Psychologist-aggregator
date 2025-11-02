@@ -420,6 +420,7 @@ class PsychologistProfile(TimeStampedModel):
     specialisations = models.ManyToManyField(
         to=Specialisation,
         blank=True,
+        related_name="specialisation_psychologists",
         verbose_name="Специализация",
         help_text="Добавьте специализацию (методологическая школа)",
     )
@@ -427,6 +428,7 @@ class PsychologistProfile(TimeStampedModel):
     methods = models.ManyToManyField(
         to=Method,
         blank=True,
+        related_name="method_psychologists",
         verbose_name="Метод",
         help_text="Добавьте методы (инструмент/подход)",
     )
@@ -434,13 +436,14 @@ class PsychologistProfile(TimeStampedModel):
     topics = models.ManyToManyField(
         to=Topic,
         blank=True,
+        related_name="topic_psychologists",
         verbose_name="Запрос",
         help_text="Добавьте тему/вопрос (запрос на терапию)",
     )
     educations = models.ManyToManyField(
         to=Education,
-        null=True,
         blank=True,
+        related_name="education_psychologists",
         verbose_name="Образование",
         help_text="Добавьте образование",
     )
@@ -523,4 +526,45 @@ class PsychologistProfile(TimeStampedModel):
     class Meta:
         verbose_name = "Психолог"
         verbose_name_plural = "Психологи"
+        ordering = ["user__email"]
+
+
+class ClientProfile(TimeStampedModel):
+    """Модель представляет профиль клиента."""
+
+    user = models.OneToOneField(
+        to=AppUser,
+        on_delete=models.CASCADE,
+        related_name="client_profile",
+        verbose_name="Пользователь",
+    )
+    therapy_experience = models.BooleanField(
+        default=False,
+        verbose_name="Опыт терапии",
+        help_text="Был ли у вас опыт терапии?",
+    )
+    # methods: "Схематерапия", "НЛП" и т.д.
+    preferred_methods = models.ManyToManyField(
+        to=Method,
+        blank=True,
+        related_name="method_clients",
+        verbose_name="Предпочтительные методы",
+        help_text="Методы или подходы, которые вам близки",
+    )
+    # topics: "Развод", "Выгорание", "Панические атаки", "Тревожность" и т.д.
+    requested_topics = models.ManyToManyField(
+        to=Topic,
+        blank=True,
+        related_name="topic_clients",
+        verbose_name="Запросы",
+        help_text="Темы, с которыми вы хотите работать",
+    )
+
+    def __str__(self):
+        """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
+        return f"{self.user.email}"
+
+    class Meta:
+        verbose_name = "Клиент"
+        verbose_name_plural = "Клиенты"
         ordering = ["user__email"]
