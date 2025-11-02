@@ -10,6 +10,8 @@ from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from timezone_field import TimeZoneField
 
+from users.constants import (GENDER_CHOICES, LANGUAGE_CHOICES,
+                             THERAPY_FORMAT_CHOICES, WORK_STATUS_CHOICES)
 from users.managers import AppUserManager
 from users.services.slug import generate_unique_slug
 from users.validators import validate_file_size
@@ -359,7 +361,7 @@ class Education(TimeStampedModel):
     )
     document = models.FileField(
         upload_to="education_docs/%Y/%m/%d",
-        validators=[FileExtensionValidator(['pdf', 'jpg', 'jpeg', 'png']), validate_file_size],
+        validators=[FileExtensionValidator(["pdf", "jpg", "jpeg", "png"]), validate_file_size],
         null=True,
         blank=True,
         verbose_name="Скан диплома/сертификата",
@@ -391,3 +393,178 @@ class Education(TimeStampedModel):
         verbose_name = "Образование"
         verbose_name_plural = "Образования"
         ordering = ["country", "institution", "specialisation"]
+
+
+class PsychologistProfile(TimeStampedModel):
+    """Модель представляет профиль психолога."""
+
+    user = models.OneToOneField(
+        to=AppUser,
+        on_delete=models.CASCADE,
+        related_name="psychologist_profile",
+        verbose_name="Пользователь",
+    )
+    is_verified = models.BooleanField(
+        default=False,
+        verbose_name="Верификация пользователя",
+        help_text="Флаг модерации подлинности (проверяется администратором)",
+    )
+    gender = models.CharField(
+        choices=GENDER_CHOICES,
+        null=False,
+        blank=False,
+        verbose_name="Пол",
+        help_text="Укажите пол",
+    )
+    # specialisations: "Когнитивно-поведенческая терапия", "Психоанализ", "Гештальт-терапия", "Семейная терапия" и т.д.
+    specialisations = models.ManyToManyField(
+        to=Specialisation,
+        blank=True,
+        related_name="specialisation_psychologists",
+        verbose_name="Специализация",
+        help_text="Добавьте специализацию (методологическая школа)",
+    )
+    # methods: "Схематерапия", "НЛП" и т.д.
+    methods = models.ManyToManyField(
+        to=Method,
+        blank=True,
+        related_name="method_psychologists",
+        verbose_name="Метод",
+        help_text="Добавьте методы (инструмент/подход)",
+    )
+    # topics: "Развод", "Выгорание", "Панические атаки", "Тревожность" и т.д.
+    topics = models.ManyToManyField(
+        to=Topic,
+        blank=True,
+        related_name="topic_psychologists",
+        verbose_name="Запрос",
+        help_text="Добавьте тему/вопрос (запрос на терапию)",
+    )
+    educations = models.ManyToManyField(
+        to=Education,
+        blank=True,
+        related_name="education_psychologists",
+        verbose_name="Образование",
+        help_text="Добавьте образование",
+    )
+    is_all_education_verified = models.BooleanField(
+        default=False,
+        verbose_name="Верификация образования",
+        help_text="Флаг модерации подлинности (проверяется администратором)",
+    )
+    biography = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="О специалисте",
+        help_text="Добавьте информацию о себе",
+    )
+    photo = models.ImageField(
+        upload_to="photo/%Y/%m/%d",
+        validators=[FileExtensionValidator(["jpg", "jpeg", "png"]), validate_file_size],
+        null=True,
+        blank=True,
+        verbose_name="Фотография профиля",
+        help_text="Добавьте фотографию вашего профиля",
+    )
+    work_experience = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        null=True,
+        blank=True,
+        verbose_name="Опыт",
+        help_text="Укажите текущий опыт работы (лет)",
+    )
+    languages = models.CharField(
+        choices=LANGUAGE_CHOICES,
+        default="russian",
+        blank=False,
+        verbose_name="Язык",
+        help_text="Укажите возможный язык для проведения сессий",
+    )
+    therapy_format = models.CharField(
+        choices=THERAPY_FORMAT_CHOICES,
+        default="online",
+        blank=False,
+        verbose_name="Формат сессии",
+        help_text="Укажите возможны формат для проведения сессий",
+    )
+    price_individual = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        blank=False,
+        verbose_name="Стоимость индивидуальной сессии (руб.)",
+        help_text="Укажите стоимость индивидуальной сессии (руб.)",
+    )
+    price_couples = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        blank=False,
+        verbose_name="Стоимость парной сессии (руб.)",
+        help_text="Укажите стоимость парной сессии (руб.)",
+    )
+    work_status = models.CharField(
+        choices=WORK_STATUS_CHOICES,
+        default="working",
+        blank=False,
+        verbose_name="Рабочий статус",
+        help_text="Текущий рабочий статус психолога",
+    )
+    rating = models.DecimalField(
+        max_digits=3,
+        decimal_places=1,
+        default=0.0,
+        blank=False,
+        verbose_name="Рейтинг",
+        help_text="Рейтинг психолога",
+    )
+
+    def __str__(self):
+        """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
+        return f"{self.user.email}"
+
+    class Meta:
+        verbose_name = "Психолог"
+        verbose_name_plural = "Психологи"
+        ordering = ["user__email"]
+
+
+class ClientProfile(TimeStampedModel):
+    """Модель представляет профиль клиента."""
+
+    user = models.OneToOneField(
+        to=AppUser,
+        on_delete=models.CASCADE,
+        related_name="client_profile",
+        verbose_name="Пользователь",
+    )
+    therapy_experience = models.BooleanField(
+        default=False,
+        verbose_name="Опыт терапии",
+        help_text="Был ли у вас опыт терапии?",
+    )
+    # methods: "Схематерапия", "НЛП" и т.д.
+    preferred_methods = models.ManyToManyField(
+        to=Method,
+        blank=True,
+        related_name="method_clients",
+        verbose_name="Предпочтительные методы",
+        help_text="Методы или подходы, которые вам близки",
+    )
+    # topics: "Развод", "Выгорание", "Панические атаки", "Тревожность" и т.д.
+    requested_topics = models.ManyToManyField(
+        to=Topic,
+        blank=True,
+        related_name="topic_clients",
+        verbose_name="Запросы",
+        help_text="Темы, с которыми вы хотите работать",
+    )
+
+    def __str__(self):
+        """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
+        return f"{self.user.email}"
+
+    class Meta:
+        verbose_name = "Клиент"
+        verbose_name_plural = "Клиенты"
+        ordering = ["user__email"]
