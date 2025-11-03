@@ -19,3 +19,7 @@ WORK_STATUS_CHOICES = [
     ("working", "работает"),
     ("not_working", "не работает"),
 ]
+
+# Значение для валидатора по проверке максимально допустимого размера загружаемого файла в users/validators.py
+# 5 мб
+MAX_AVAILABLE_FILE_SIZE = 5
