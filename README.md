@@ -193,7 +193,7 @@
 
 ### 2.1. Основные сущности приложения `users`:
 
-- Детальная информация по ссылке - [Users (app_users_info.md)](docs/app_users_info.md).
+- ℹ️ Детальная информация по ссылке - [Users (app_users_info.md)](docs/app_users_info.md).
 
 
 - Список сущностей (моделей):
