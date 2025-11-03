@@ -245,8 +245,8 @@ class AppUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     )
     age = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(18), MaxValueValidator(120)],
-        blank=False,
-        null=False,
+        null=True,
+        blank=True,
         verbose_name="Возраст",
         help_text="Введите возраст",
     )

@@ -211,7 +211,14 @@
 1. Авторизация в админке (http://base_url/admin/) через встроенные механизмы Django.
 
 2. Список админок:
-   - ...
+   - ☆ `UserRoleAdmin`
+   - ☆ `TopicAdmin`
+   - ☆ `SpecialisationAdmin`
+   - ☆ `MethodAdmin`
+   - ☆ `EducationAdmin`
+   - ★ `AppUserAdmin`
+   - ⭐️`PsychologistProfileAdmin`
+   - ⭐️`ClientProfileAdmin`
 
 ---
 
