@@ -1,6 +1,15 @@
 from django.core.exceptions import ValidationError
 
+from users.constants import MAX_AVAILABLE_FILE_SIZE
+
 # from django.utils import timezone
+
+
+def validate_file_size(value):
+    """Кастомный валидатор для проверки максимально допустимого размера загружаемого файла."""
+    limit = MAX_AVAILABLE_FILE_SIZE * 1024 * 1024  # MAX_AVAILABLE_FILE_SIZE например = 5 MB
+    if value.size > limit:
+        raise ValidationError(f"Максимальный размер файла - {MAX_AVAILABLE_FILE_SIZE} МБ.")
 
 
 # class MaxYearWithOffsetValidator:
@@ -72,10 +81,3 @@ from django.core.exceptions import ValidationError
 #             [self.offset],  # позиционные аргументы конструктора
 #             {},  # именованных аргументов нет
 #         )
-
-
-def validate_file_size(value):
-    """Кастомный валидатор для проверки максимально допустимого размера загружаемого файла."""
-    limit = 10 * 1024 * 1024  # 10 MB
-    if value.size > limit:
-        raise ValidationError("Максимальный размер файла - 10 МБ.")
