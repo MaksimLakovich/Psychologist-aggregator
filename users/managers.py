@@ -33,6 +33,7 @@ class AppUserManager(BaseUserManager):
         :raises ValueError: Если is_staff или is_superuser не установлены в True."""
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
 
         if extra_fields.get("is_staff") is not True:
             raise ValueError("Суперпользователь должен иметь is_staff=True.")
