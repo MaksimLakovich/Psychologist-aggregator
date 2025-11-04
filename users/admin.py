@@ -34,7 +34,7 @@ class TopicAdmin(CreatorAndReadonlyFields):
     """Настройка отображения модели Topic в админке."""
 
     list_display = ("id", "creator", "type", "group_name", "name", "slug")
-    list_filter = ("type", "group_name", "name")
+    list_filter = ("type", "group_name")
     search_fields = ("type", "group_name", "name", "slug")
     ordering = ("type", "group_name", "name")
     list_display_links = ("name",)  # чтобы кликать на название вместо ID
