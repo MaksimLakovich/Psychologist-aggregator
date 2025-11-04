@@ -122,9 +122,13 @@
 │    ├── settings.py            # Основные настройки Django (INSTALLED_APPS, базы данных, EmailBackend, CORS, CSRF)
 │    └── urls.py                # Основной роутинг проекта (URLconf)
 ├── docs/                       # Дополнительная документация по деталям приложений в проекте
-│    ├── ...в процессе...
+│    ├── app_users_info.md
+│    ├── fixture_topics_info.md
 │    └── ...
 ├── fixtures                    # JSON-файлы для наполнения БД при необходимости (например, методы терапии, обсуждаемые темы и так далее)
+│    ├── topics.json
+│    ├── methods.json
+│    ├── specialisations.json
 │    └── ...
 │
 ├── users/                      # Приложение django-проекта ("Пользователи")
@@ -193,7 +197,8 @@
 
 ### 2.1. Основные сущности приложения `users`:
 
-- ℹ️ Детальная информация по ссылке - [Users (app_users_info.md)](docs/app_users_info.md).
+- ⚠️ **Детальная информация: [Users (app_users_info.md)](docs/app_users_info.md).**
+- ⚠ **Описание значений в справочнике `Topic`: [fixture_topics_info.md](docs/fixture_topics_info.md).**
 
 
 - Список сущностей (моделей):
