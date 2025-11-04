@@ -124,6 +124,8 @@
 ├── docs/                       # Дополнительная документация по деталям приложений в проекте
 │    ├── app_users_info.md
 │    ├── fixture_topics_info.md
+│    ├── fixture_methods_info.md
+│    ├── fixture_specialisations_info.md
 │    └── ...
 ├── fixtures                    # JSON-файлы для наполнения БД при необходимости (например, методы терапии, обсуждаемые темы и так далее)
 │    ├── topics.json
@@ -199,6 +201,8 @@
 
 - ⚠️ **Детальная информация: [Users (app_users_info.md)](docs/app_users_info.md).**
 - ⚠ **Описание значений в справочнике `Topic`: [fixture_topics_info.md](docs/fixture_topics_info.md).**
+- ⚠ **Описание значений в справочнике `Method`: [fixture_methods_info.md](docs/fixture_methods_info.md).**
+- ⚠ **Описание значений в справочнике `Specialisation`: [fixture_specialisations_info.md](docs/fixture_specialisations_info.md).**
 
 
 - Список сущностей (моделей):
