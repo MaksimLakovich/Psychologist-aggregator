@@ -5,59 +5,68 @@ from users.models import (AppUser, ClientProfile, Education, Method,
                           PsychologistProfile, Specialisation, Topic, UserRole)
 
 
+class CreatorAndReadonlyFields(admin.ModelAdmin):
+    """Базовый класс для админок, чтоб не дублировать в них повторяющийся код
+    (например, параметры для readonly_fields или функцию сохранения creator при создании объекта."""
+
+    readonly_fields = ("creator", "created_at", "updated_at")  # чтобы в админке их случайно не изменили
+
+    def save_model(self, request, obj, form, change):
+        """Автоматическое сохранение creator в создаваемом объекте."""
+        if not obj.creator_id:
+            obj.creator = request.user
+        super().save_model(request, obj, form, change)
+
+
 @admin.register(UserRole)
-class UserRoleAdmin(admin.ModelAdmin):
+class UserRoleAdmin(CreatorAndReadonlyFields):
     """Настройка отображения модели UserRole в админке."""
 
     list_display = ("id", "creator", "role")
     list_filter = ("role",)
     search_fields = ("role",)
     ordering = ("role",)
-    readonly_fields = ("creator", "created_at", "updated_at")  # чтобы в админке их случайно не изменили
     list_display_links = ("role",)  # чтобы кликать на имя роли вместо ID
 
 
 @admin.register(Topic)
-class TopicAdmin(admin.ModelAdmin):
+class TopicAdmin(CreatorAndReadonlyFields):
     """Настройка отображения модели Topic в админке."""
 
-    list_display = ("id", "creator", "type", "name", "slug")
-    list_filter = ("type", "name")
-    search_fields = ("type", "name", "slug")
-    ordering = ("type", "name")
-    readonly_fields = ("creator", "created_at", "updated_at")  # чтобы в админке их случайно не изменили
+    list_display = ("id", "creator", "type", "group_name", "name", "slug")
+    list_filter = ("type", "group_name", "name")
+    search_fields = ("type", "group_name", "name", "slug")
+    ordering = ("type", "group_name", "name")
     list_display_links = ("name",)  # чтобы кликать на название вместо ID
     prepopulated_fields = {"slug": ("name",)}  # чтобы slug создавался автоматически при вводе имени
 
 
 @admin.register(Specialisation)
-class SpecialisationAdmin(admin.ModelAdmin):
+class SpecialisationAdmin(CreatorAndReadonlyFields):
     """Настройка отображения модели Specialisation в админке."""
 
     list_display = ("id", "creator", "name", "slug")
     list_filter = ("name",)
     search_fields = ("name", "slug")
     ordering = ("name",)
-    readonly_fields = ("creator", "created_at", "updated_at")  # чтобы в админке их случайно не изменили
     list_display_links = ("name",)  # чтобы кликать на название вместо ID
     prepopulated_fields = {"slug": ("name",)}  # чтобы slug создавался автоматически при вводе имени
 
 
 @admin.register(Method)
-class MethodAdmin(admin.ModelAdmin):
+class MethodAdmin(CreatorAndReadonlyFields):
     """Настройка отображения модели Method в админке."""
 
     list_display = ("id", "creator", "name", "slug")
     list_filter = ("name",)
     search_fields = ("name", "slug")
     ordering = ("name",)
-    readonly_fields = ("creator", "created_at", "updated_at")  # чтобы в админке их случайно не изменили
     list_display_links = ("name",)  # чтобы кликать на название вместо ID
     prepopulated_fields = {"slug": ("name",)}  # чтобы slug создавался автоматически при вводе имени
 
 
 @admin.register(Education)
-class EducationAdmin(admin.ModelAdmin):
+class EducationAdmin(CreatorAndReadonlyFields):
     """Настройка отображения модели Education в админке."""
 
     list_display = (
@@ -66,7 +75,6 @@ class EducationAdmin(admin.ModelAdmin):
     list_filter = ("country", "institution", "degree", "specialisation")
     search_fields = ("country", "institution", "degree", "specialisation")
     ordering = ("country", "institution")
-    readonly_fields = ("creator", "created_at", "updated_at")  # чтобы в админке их случайно не изменили
     # list_editable = ("is_verified",)  # чтоб поле было доступно для изменения прямо из списка без захода в продукт
     list_display_links = ("institution",)  # чтобы кликать на название вместо ID
 
