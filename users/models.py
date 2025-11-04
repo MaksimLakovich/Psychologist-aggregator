@@ -87,6 +87,13 @@ class Topic(TimeStampedModel):
         verbose_name="Вид запроса",
         help_text="Укажите вид запроса",
     )
+    group_name = models.CharField(
+        max_length=100,
+        null=False,
+        blank=False,
+        verbose_name="Группа запросов",
+        help_text="Укажите название группы запроса",
+    )
     name = models.CharField(
         max_length=255,
         null=False,
@@ -118,7 +125,7 @@ class Topic(TimeStampedModel):
         verbose_name = "Тема"
         verbose_name_plural = "Темы"
         ordering = ["type", "name"]
-        unique_together = ("type", "name")
+        unique_together = ("type", "group_name", "name")
 
 
 class Specialisation(TimeStampedModel):
@@ -221,92 +228,6 @@ class Method(TimeStampedModel):
         ordering = ["name",]
 
 
-class AppUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
-    """Модель представляет пользователя приложения."""
-
-    # Это как primary_key вместо системного автоинкремента id, чтоб было более безопасно для публичных API
-    uuid = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False
-    )
-    first_name = models.CharField(
-        max_length=150,
-        blank=False,
-        null=False,
-        verbose_name="Имя",
-        help_text="Введите имя",
-    )
-    last_name = models.CharField(
-        max_length=150,
-        blank=True,
-        verbose_name="Фамилия",
-        help_text="Введите фамилию",
-    )
-    age = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(18), MaxValueValidator(120)],
-        null=True,
-        blank=True,
-        verbose_name="Возраст",
-        help_text="Введите возраст",
-    )
-    email = models.EmailField(
-        unique=True,
-        verbose_name="Email",
-        help_text="Введите email",
-    )
-    # Установка "poetry add django-phonenumber-field" и "poetry add phonenumbers" + импорт
-    # "from phonenumber_field.modelfields import PhoneNumberField" + INSTALLED_APPS + PHONENUMBER_DEFAULT_REGION
-    phone_number = PhoneNumberField(
-        blank=True,
-        null=False,
-        verbose_name="Телефон",
-        help_text="Введите номер телефона",
-    )
-    role = models.ForeignKey(
-        to="users.UserRole",
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True,
-        verbose_name="Роль пользователя",
-        help_text="Укажите роль пользователя",
-    )
-    # Установка "poetry add django-timezone-field"
-    # + импорт "from timezone_field import TimeZoneField" + INSTALLED_APPS
-    timezone = TimeZoneField(
-        blank=True,
-        null=True,
-        verbose_name="Часовой пояс",
-        help_text="Для корректного отображения расписаний сессий",
-    )
-    is_staff = models.BooleanField(
-        default=False,
-        verbose_name="Персонал?",
-        help_text="Административный доступ"
-    )
-    is_active = models.BooleanField(
-        default=False,
-        verbose_name="Активный?",
-        help_text="Аккаунт активен"
-    )
-
-    objects = AppUserManager()  # Указываю кастомный менеджер для пользователя без поля username
-
-    # Определяет, какое поле будет использоваться в качестве уникального идентификатора для аутентификации юзера
-    USERNAME_FIELD = "email"
-    # Обязательные поля, которые должны быть указаны при создании суперпользователя через команду createsuperuser
-    REQUIRED_FIELDS = ["first_name",]
-
-    def __str__(self):
-        """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.email}"
-
-    class Meta:
-        verbose_name = "Пользователь"
-        verbose_name_plural = "Пользователи"
-        ordering = ["email"]
-
-
 class Education(TimeStampedModel):
     """Модель представляет образование, которое есть у психолога."""
     creator = models.ForeignKey(
@@ -395,6 +316,92 @@ class Education(TimeStampedModel):
         verbose_name = "Образование"
         verbose_name_plural = "Образования"
         ordering = ["country", "institution", "specialisation"]
+
+
+class AppUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
+    """Модель представляет пользователя приложения."""
+
+    # Это как primary_key вместо системного автоинкремента id, чтоб было более безопасно для публичных API
+    uuid = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
+    first_name = models.CharField(
+        max_length=150,
+        blank=False,
+        null=False,
+        verbose_name="Имя",
+        help_text="Введите имя",
+    )
+    last_name = models.CharField(
+        max_length=150,
+        blank=True,
+        verbose_name="Фамилия",
+        help_text="Введите фамилию",
+    )
+    age = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(18), MaxValueValidator(120)],
+        null=True,
+        blank=True,
+        verbose_name="Возраст",
+        help_text="Введите возраст",
+    )
+    email = models.EmailField(
+        unique=True,
+        verbose_name="Email",
+        help_text="Введите email",
+    )
+    # Установка "poetry add django-phonenumber-field" и "poetry add phonenumbers" + импорт
+    # "from phonenumber_field.modelfields import PhoneNumberField" + INSTALLED_APPS + PHONENUMBER_DEFAULT_REGION
+    phone_number = PhoneNumberField(
+        blank=True,
+        null=False,
+        verbose_name="Телефон",
+        help_text="Введите номер телефона",
+    )
+    role = models.ForeignKey(
+        to="users.UserRole",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        verbose_name="Роль пользователя",
+        help_text="Укажите роль пользователя",
+    )
+    # Установка "poetry add django-timezone-field"
+    # + импорт "from timezone_field import TimeZoneField" + INSTALLED_APPS
+    timezone = TimeZoneField(
+        blank=True,
+        null=True,
+        verbose_name="Часовой пояс",
+        help_text="Для корректного отображения расписаний сессий",
+    )
+    is_staff = models.BooleanField(
+        default=False,
+        verbose_name="Персонал?",
+        help_text="Административный доступ"
+    )
+    is_active = models.BooleanField(
+        default=False,
+        verbose_name="Активный?",
+        help_text="Аккаунт активен"
+    )
+
+    objects = AppUserManager()  # Указываю кастомный менеджер для пользователя без поля username
+
+    # Определяет, какое поле будет использоваться в качестве уникального идентификатора для аутентификации юзера
+    USERNAME_FIELD = "email"
+    # Обязательные поля, которые должны быть указаны при создании суперпользователя через команду createsuperuser
+    REQUIRED_FIELDS = ["first_name", "last_name"]
+
+    def __str__(self):
+        """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
+        return f"{self.email}"
+
+    class Meta:
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
+        ordering = ["email"]
 
 
 class PsychologistProfile(TimeStampedModel):
