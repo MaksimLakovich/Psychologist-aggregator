@@ -23,7 +23,6 @@ class UserRoleAdmin(CreatorAndReadonlyFields):
     """Настройка отображения модели UserRole в админке."""
 
     list_display = ("id", "creator", "role")
-    list_filter = ("role",)
     search_fields = ("role",)
     ordering = ("role",)
     list_display_links = ("role",)  # чтобы кликать на имя роли вместо ID
@@ -45,8 +44,7 @@ class TopicAdmin(CreatorAndReadonlyFields):
 class SpecialisationAdmin(CreatorAndReadonlyFields):
     """Настройка отображения модели Specialisation в админке."""
 
-    list_display = ("id", "creator", "name", "slug")
-    list_filter = ("name",)
+    list_display = ("id", "creator", "name", "slug", "description")
     search_fields = ("name", "slug")
     ordering = ("name",)
     list_display_links = ("name",)  # чтобы кликать на название вместо ID
@@ -57,8 +55,7 @@ class SpecialisationAdmin(CreatorAndReadonlyFields):
 class MethodAdmin(CreatorAndReadonlyFields):
     """Настройка отображения модели Method в админке."""
 
-    list_display = ("id", "creator", "name", "slug")
-    list_filter = ("name",)
+    list_display = ("id", "creator", "name", "slug", "description")
     search_fields = ("name", "slug")
     ordering = ("name",)
     list_display_links = ("name",)  # чтобы кликать на название вместо ID
@@ -72,7 +69,7 @@ class EducationAdmin(CreatorAndReadonlyFields):
     list_display = (
         "id", "creator", "country", "institution", "degree", "specialisation", "year_start", "year_end", "is_verified"
     )
-    list_filter = ("country", "institution", "degree", "specialisation")
+    list_filter = ("institution", "degree", "specialisation")
     search_fields = ("country", "institution", "degree", "specialisation")
     ordering = ("country", "institution")
     # list_editable = ("is_verified",)  # чтоб поле было доступно для изменения прямо из списка без захода в продукт
