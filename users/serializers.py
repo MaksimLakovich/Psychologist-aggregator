@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 
 from users.mixins.creator_mixin import CreatorMixin
@@ -72,10 +73,12 @@ class EducationSerializer(CreatorMixin, serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"year_end": "Год окончания не может быть раньше года начала."}
             )
+
         if year_start and year_start < 1900:
             raise serializers.ValidationError(
                 {"year_start": "Некорректный год начала обучения."}
             )
+
         return attrs
 
 
@@ -103,16 +106,18 @@ class AppUserSerializer(serializers.ModelSerializer):
         user = AppUser(**validated_data)
         user.set_password(password)
         user.save()
+
         return user
 
-    def update(self, instance, validated_data):
+    def update(self, obj, validated_data):
         """Метод полностью блокирует password при выполнении update, чтоб пароль менялся только через
          отдельный дополнительный эндпоинт с хешированием пароля."""
         if "password" in validated_data:
             raise serializers.ValidationError(
                 {"password": "Пароль нельзя изменять через update. Используйте существующий метод смены пароля."}
             )
-        return super().update(instance, validated_data)
+
+        return super().update(obj, validated_data)
 
 
 class PsychologistProfileSerializer(serializers.ModelSerializer):
@@ -165,43 +170,92 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "user", "created_at", "updated_at"]
 
 
-    # class UserObtainPairSerializer(TokenObtainPairSerializer):
-    #     """Кастомный класс-сериализатор токена наследующийся от *TokenObtainPairSerializer*, позволяющий вход по email."""
-    #
-    #     # ВАЖНО! Необходимо указать, что username_field - это будет email.
-    #     # До это мы указывали в модели это "USERNAME_FIELD = "email"" но это настройка Django, например, в админке,
-    #     # логике логина, командах createsuperuser и т.п. Но это не влияет на процессы DRF. Логика сериализатора от
-    #     # DRF Simple JWT НЕ смотрит на USERNAME_FIELD модели автоматически. Поэтому чтобы Simple JWT понял, что логин
-    #     # должен быть по email, а не по username, нужно явно указать это в сериализаторе в username_field
-    #     username_field = AppUser.EMAIL_FIELD
-    #
-    #     def validate(self, attrs):
-    #         """Валидация данных при получении токена: проверка существования пользователя и корректности пароля."""
-    #         # Получаю email и password из тела запроса
-    #         email = attrs.get("email")
-    #         password = attrs.get("password")
-    #
-    #         if email and password:  # ШАГ 1: проверяю все ли данные есть
-    #             try:  # ШАГ 2: Ищу пользователя с таким email
-    #                 user = AppUser.objects.get(email=email)
-    #             except AppUser.DoesNotExist:
-    #                 raise AuthenticationFailed("Пользователь с таким email не найден.")
-    #
-    #             if not user.check_password(password):  # ШАГ 3: Проверяю пароль
-    #                 raise AuthenticationFailed("Неверный пароль.")
-    #
-    #         else:
-    #             raise AuthenticationFailed("Необходимо указать email и пароль.")
-    #
-    #         # ШАГ 4: Если все ок, то формирую словарь, чтобы передать в родительский "validate()"
-    #         data = super().validate(
-    #             {
-    #                 self.username_field: user.email,  # Ключ "email", значение - email пользователя
-    #                 "password": password,
-    #             }
-    #         )
-    #         # ШАГ 5: Добавляю еще данные в ответ (опционально, это полезно для будущего функционала)
-    #         data["email"] = user.email
-    #         data["user_id"] = user.id
-    #
-    #         return data
+class RegisterSerializer(serializers.ModelSerializer):
+    """Сериализатор-"оркестр" (он соединяет разные сериализаторы) для регистрации нового пользователя в системе.
+    В зависимости от выбранной роли создает связанный профиль: PsychologistProfile или ClientProfile."""
+
+    password = serializers.CharField(write_only=True, required=True, min_length=8)
+    confirm_password = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = AppUser
+        fields = [
+            "email",
+            "first_name",
+            "last_name",
+            "age",
+            "phone_number",
+            "role",
+            "timezone",
+            "password",
+            "confirm_password",
+        ]
+        read_only_fields = ["role",]
+
+    def validate(self, attrs):
+        """Метод для проверки совпадения паролей и базовой корректности данных регистрации."""
+        password = attrs.get("password")
+        # pop() делает attrs "чистыми" - т.е., получив значение он удаляет запись по ключу и оставляет в attrs
+        # только те поля, которые реально принадлежат модели
+        confirm_password = attrs.pop("confirm_password", None)
+        # Каждый сериализатор DRF может принимать какой-либо контекст - произвольные дополнительные данные,
+        # которые буду передавать вручную при создании сериализатора, например из вьюхи по регистрации:
+        #     role = UserRole.objects.get(role="psychologist")
+        #     serializer = RegisterSerializer(data=request.data, context={"role": role})
+        # Теперь внутри сериализатора "self.context" - это словарь {"role": <UserRole: psychologist>} и можно
+        # добавить проверку о том "А не забыла ли вью передать в сериализатор роль для создания профиля?":
+        role = self.context.get("role")
+
+        if not role:
+            raise serializers.ValidationError("Роль пользователя не указана.")
+
+        if password != confirm_password:
+            raise serializers.ValidationError({"password": "Пароли не совпадают."})
+
+        return attrs
+
+    # @transaction.atomic - это декоратор, который оборачивает блок кода в одну транзакцию базы данных.
+    # Т.е., если внутри create() произойдет любая ошибка (например, не удалось создать профиль), то:
+    # 1) Django откатит все изменения;
+    # 2) И в базе не останется "половинчатых" данных (например, пользователь без профиля).
+    @transaction.atomic
+    def create(self, validated_data):
+        """Метод для создания пользователя и автоматического профиля для него в зависимости от роли."""
+        password = validated_data.pop("password")
+        role = self.context.get("role")
+
+        # Создание пользователя
+        user = AppUser.objects.create(**validated_data, role=role)
+        user.set_password(password)
+        user.save()
+
+        # И сразу автоматическое создание профиля для данного пользователя
+        # if role.role.lower() == "psychologist":
+        #     PsychologistProfile.objects.create(user=user)
+        # elif role.role.lower() == "client":
+        #     ClientProfile.objects.create(user=user)
+        match role.role.strip().lower():
+            case "psychologist":
+                PsychologistProfile.objects.create(user=user)
+            case "client":
+                ClientProfile.objects.create(user=user)
+
+        return user
+
+    def to_representation(self, obj):
+        """Метод для настройки вывода данных после успешной регистрации."""
+        data = AppUserSerializer(obj).data
+
+        # Добавляю профиль в ответ, чтобы фронтенд мог сразу знать ID и тип профиля
+        # Использую try/except - чтобы не ловить DoesNotExist, если по какой-то причине профиль не создался
+        try:
+            if obj.role.role.lower() == "psychologist":
+                profile = PsychologistProfile.objects.get(user=obj)
+                data["profile"] = PsychologistProfileSerializer(profile).data
+            elif obj.role.role.lower() == "client":
+                profile = ClientProfile.objects.get(user=obj)
+                data["profile"] = ClientProfileSerializer(profile).data
+        except (PsychologistProfile.DoesNotExist, ClientProfile.DoesNotExist):
+            data["profile"] = None
+
+        return data
