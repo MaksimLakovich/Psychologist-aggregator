@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django_countries',
 
     # Если будем использовать Localizations/translations, то нужно добавить REST_FRAMEWORD_SIMPLEJWT в INSTALLED_APPS
-    # 'rest_framework_simplejwt',
+    'rest_framework_simplejwt',
 
     # Для использования расширенной фильтрации с помощью пакета django-filter, после его установки
     # 'django_filters',

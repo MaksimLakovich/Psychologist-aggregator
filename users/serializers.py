@@ -1,5 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
+from rest_framework_simplejwt.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from users.mixins.creator_mixin import CreatorMixin
 from users.models import (AppUser, ClientProfile, Education, Method,
@@ -257,5 +259,52 @@ class RegisterSerializer(serializers.ModelSerializer):
                 data["profile"] = ClientProfileSerializer(profile).data
         except (PsychologistProfile.DoesNotExist, ClientProfile.DoesNotExist):
             data["profile"] = None
+
+        return data
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """Кастомный класс-сериализатор JWT-токенов, позволяющий вход по email.
+    Используется вместо стандартного TokenObtainPairSerializer из SimpleJWT (потому что вход по enail)."""
+
+    # ВАЖНО! Необходимо указать, что username_field - это будет email.
+    # До этого мы указывали в модели это "USERNAME_FIELD = "email"" но это настройка Django, например, в админке,
+    # логике логина, командах createsuperuser и т.п. Но это не влияет на процессы DRF. Соответственно, логика
+    # сериализатора от DRF Simple JWT не смотрит на USERNAME_FIELD модели автоматически. Поэтому чтобы Simple JWT
+    # понял, что логин должен быть по email, а не по username, нужно явно указать это в сериализаторе в username_field
+    username_field = AppUser.EMAIL_FIELD
+
+    def validate(self, attrs):
+        """Валидация данных при получении токена: проверка существования пользователя и корректности пароля."""
+        email = attrs.get("email")
+        password = attrs.get("password")
+
+        if not email or not password:
+            raise AuthenticationFailed("Необходимо указать email и пароль.")
+
+        try:
+            user = AppUser.objects.get(email=email)
+        except AppUser.DoesNotExist:
+            raise AuthenticationFailed("Пользователь с таким email не найден.")
+
+        if not user.is_active:
+            raise AuthenticationFailed("Аккаунт деактивирован. Обратитесь в поддержку.")
+
+        if not user.check_password(password):
+            raise AuthenticationFailed("Неверный пароль.")
+
+        # Если все ок, то формирую словарь, чтобы передать в родительский "validate()"
+        data = super().validate(
+            {
+                self.username_field: user.email,  # Ключ "email", значение - email пользователя
+                "password": password,
+            }
+        )
+        # Добавляю еще полезные данные в ответ (опционально, это полезно для будущего функционала)
+        data.update({
+            "user_id": user.id,
+            "email": user.email,
+            "role": user.role.role if user.role else None,
+        })
 
         return data
