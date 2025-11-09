@@ -191,18 +191,22 @@
 
 ### users/serializers.py:
 
-1. Для **API-эндпоинтов** созданы следующие сериализаторы:  
-   - ☆ `TopicSerializer`
-   - ☆ `SpecialisationSerializer`
-   - ☆ `MethodSerializer`
-   - ☆ `EducationSerializer`
-   - ★ `AppUserSerializer`
-   - ★ `PsychologistProfileSerializer`
-   - ★ `ClientProfileSerializer`
+1. Для **API-эндпоинтов** созданы следующие базовые сериализаторы:  
+   - `TopicSerializer`
+   - `SpecialisationSerializer`
+   - `MethodSerializer`
+   - `EducationSerializer`
+   - `AppUserSerializer`
+   - `PsychologistProfileSerializer`
+   - `ClientProfileSerializer`
 
 
-2. Создан **"cериализатор-оркестр"** для API по регистрации пользователя с профилем (либо психолог, либо клиент):  
-   - ⭐️ `RegisterSerializer` - он соединяет разные сериализаторы (AppUserSerializer + PsychologistProfileSerializer + ClientProfileSerializer) для регистрации нового пользователя в системе, где в зависимости от выбранной роли создает связанный профиль: PsychologistProfile или ClientProfile.
+2. Создан **"cериализатор-оркестр"** для API-эндпоинта по ***регистрации*** пользователя с профилем (либо психолог, либо клиент):  
+   - `RegisterSerializer` - он соединяет разные сериализаторы (AppUserSerializer + PsychologistProfileSerializer + ClientProfileSerializer) для регистрации нового пользователя в системе, где в зависимости от выбранной роли создает связанный профиль: PsychologistProfile или ClientProfile.
+
+
+3. Создан класс-сериализатор для API-эндпоинта по ***авторизации*** пользователя (**получение JWT-токенов**), позволяющий вход по email:
+   - `CustomTokenObtainPairSerializer`
 
 ---
 
@@ -215,6 +219,12 @@
 ## <a id="title8"> ⚙️ Основной функционал (API + web) </a>
 
 ### 1. Базовый функционал
+
+| Название контроллера          | Тип (ViewSet / Generic)                          | Описание функционала (docstring)                                                                                         | Используемые модели / сериализаторы          |
+| ----------------------------- | ------------------------------------------------ |--------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
+| **CustomTokenObtainPairView** | `APIView` (наследуется от `TokenObtainPairView`) | Авторизация пользователя по email и паролю. Возвращает JWT-токен.                                                        | `AppUser`, `CustomTokenObtainPairSerializer` |
+| **CustomTokenRefreshView**    | `APIView` (наследуется от `TokenRefreshView`)    | Обновление JWT access-токена по refresh-токену. Стандартный эндпоинт SimpleJWT. Кастомный вход по email вместо username. | -                                            |
+
 
 | Название контроллера          | Тип (ViewSet / Generic)                          | Описание функционала (docstring)                                                                                        | Используемые модели / сериализаторы                                             | Примечания                                                                                  |
 | ----------------------------- | ------------------------------------------------ |-------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
