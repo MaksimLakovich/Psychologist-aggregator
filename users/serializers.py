@@ -302,7 +302,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         )
         # Добавляю еще полезные данные в ответ (опционально, это полезно для будущего функционала)
         data.update({
-            "user_id": user.id,
+            "user_uuid": user.uuid,
             "email": user.email,
             "role": user.role.role if user.role else None,
         })

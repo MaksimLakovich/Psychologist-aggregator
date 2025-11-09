@@ -156,9 +156,9 @@ AUTH_USER_MODEL = 'users.AppUser'
 PHONENUMBER_DEFAULT_REGION = "RU"
 
 REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',
-    ),
+    # 'DEFAULT_FILTER_BACKENDS': (
+    #     'django_filters.rest_framework.DjangoFilterBackend',
+    # ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
@@ -170,6 +170,11 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=180),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'USER_ID_FIELD': 'uuid',  # Указывает SimpleJWT, по какому полю в модели пользователя искать идентификатор.
+    # rest_framework_simplejwt по умолчанию ожидает, что у модели пользователя есть поле id, но мы для повышения
+    # безопасности в AppUser используем кастомный uuid, вместо id
+    'USER_ID_CLAIM': 'user_uuid',  # как это поле будет называться внутри токена. Т.е., имя, под которым
+    # это значение будет записано в JWT-пейлоад (опционально)
 }
 
 # Настройки для CORS и CSRF
