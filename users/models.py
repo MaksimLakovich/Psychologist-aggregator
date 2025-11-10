@@ -321,6 +321,7 @@ class Education(TimeStampedModel):
 class AppUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     """Модель представляет пользователя приложения."""
 
+    username = None  # type: ignore
     # Это как primary_key вместо системного автоинкремента id, чтоб было более безопасно для публичных API
     uuid = models.UUIDField(
         primary_key=True,
@@ -342,8 +343,8 @@ class AppUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     )
     age = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(18), MaxValueValidator(120)],
-        null=True,
-        blank=True,
+        null=False,
+        blank=False,
         verbose_name="Возраст",
         help_text="Введите возраст",
     )
@@ -393,6 +394,9 @@ class AppUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     USERNAME_FIELD = "email"
     # Обязательные поля, которые должны быть указаны при создании суперпользователя через команду createsuperuser
     REQUIRED_FIELDS = ["first_name", "last_name"]
+    # Это нужно для корректно работы сериализатора для авторизации с токеном из-за того, что мы используем email
+    # вместо username
+    EMAIL_FIELD = "email"
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
