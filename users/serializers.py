@@ -3,6 +3,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from users.constants import GENDER_CHOICES
 from users.mixins.creator_mixin import CreatorMixin
 from users.models import (AppUser, ClientProfile, Education, Method,
                           PsychologistProfile, Specialisation, Topic)
@@ -178,6 +179,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     password = serializers.CharField(write_only=True, required=True, min_length=8)
     confirm_password = serializers.CharField(write_only=True, required=True)
+    gender = serializers.ChoiceField(choices=GENDER_CHOICES, required=False, allow_blank=True)
 
     class Meta:
         model = AppUser
@@ -189,6 +191,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             "phone_number",
             "role",
             "timezone",
+            "gender",
             "password",
             "confirm_password",
         ]
@@ -200,19 +203,27 @@ class RegisterSerializer(serializers.ModelSerializer):
         # pop() делает attrs "чистыми" - т.е., получив значение он удаляет запись по ключу и оставляет в attrs
         # только те поля, которые реально принадлежат модели
         confirm_password = attrs.pop("confirm_password", None)
+
         # Каждый сериализатор DRF может принимать какой-либо контекст - произвольные дополнительные данные,
         # которые буду передавать вручную при создании сериализатора, например из вьюхи по регистрации:
         #     role = UserRole.objects.get(role="psychologist")
         #     serializer = RegisterSerializer(data=request.data, context={"role": role})
         # Теперь внутри сериализатора "self.context" - это словарь {"role": <UserRole: psychologist>} и можно
-        # добавить проверку о том "А не забыла ли вью передать в сериализатор роль для создания профиля?":
+        # добавить проверку о том "А не забыла ли вью передать в сериализатор роль для создания профиля?" или можно
+        # задать какие-либо дополнительные условия для отдельных полей (например, gender, last_name):
         role = self.context.get("role")
 
         if not role:
-            raise serializers.ValidationError("Роль пользователя не указана.")
+            raise serializers.ValidationError({"role": "Роль пользователя не указана."})
 
         if password != confirm_password:
             raise serializers.ValidationError({"password": "Пароли не совпадают."})
+
+        if role.role == "psychologist":
+            if not attrs.get("gender"):
+                raise serializers.ValidationError({"gender": "Пол обязателен для психолога."})
+            if not attrs.get("last_name"):
+                raise serializers.ValidationError({"last_name": "Фамилия обязательна для психолога."})
 
         return attrs
 
@@ -224,10 +235,13 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Метод для создания пользователя и автоматического профиля для него в зависимости от роли."""
         password = validated_data.pop("password")
+        gender = validated_data.pop("gender", "")
         role = self.context.get("role")
 
         # Создание пользователя
-        user = AppUser.objects.create(**validated_data, role=role)
+        # user = AppUser.objects.create(**validated_data, role=role)
+        # лучше так, чтоб не вызывать 2 запроса к БД при создании, а делать все 1 запросом
+        user = AppUser(**validated_data, role=role)
         user.set_password(password)
         user.save()
 
@@ -238,7 +252,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         #     ClientProfile.objects.create(user=user)
         match role.role.strip().lower():
             case "psychologist":
-                PsychologistProfile.objects.create(user=user)
+                PsychologistProfile.objects.create(user=user, gender=gender)
             case "client":
                 ClientProfile.objects.create(user=user)
 
@@ -275,7 +289,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = AppUser.EMAIL_FIELD
 
     def validate(self, attrs):
-        """Валидация данных при получении токена: проверка существования пользователя и корректности пароля."""
+        """Валидация данных при получении JWT-токенов для пользователя по email (проверка пользователя и пароля).
+        Возвращает стандартные токены SimpleJWT + дополнительную информацию о пользователе (UUID, email, роль)."""
+
         email = attrs.get("email")
         password = attrs.get("password")
 
@@ -302,7 +318,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         )
         # Добавляю еще полезные данные в ответ (опционально, это полезно для будущего функционала)
         data.update({
-            "user_uuid": user.uuid,
+            "user_uuid": str(user.uuid),  # UUID в JSON лучше передавать как строку
             "email": user.email,
             "role": user.role.role if user.role else None,
         })
