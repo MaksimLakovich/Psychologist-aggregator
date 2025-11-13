@@ -43,13 +43,14 @@
 
 ### users/constants.py:
 
-| Название константы        | Место использования | Значение                                                                      |
-|---------------------------|---------------------|-------------------------------------------------------------------------------|
-| `GENDER_CHOICES`          | models.py           | ("male", "мужской"), <br/> ("female", "женский"),                             |
-| `LANGUAGE_CHOICES`        | models.py           | ("english", "английский"), <br/> ("russian", "русский"),                      |
-| `THERAPY_FORMAT_CHOICES`  | models.py           | ("online", "удаленно"), <br/> ("offline", "встреча"), <br/> ("any", "любая"), |
-| `WORK_STATUS_CHOICES`     | models.py           | ("working", "работает"), <br/> ("not_working", "не работает"),                |
-| `MAX_AVAILABLE_FILE_SIZE` | validators.py | 5                                                                             |
+| Название константы       | Место использования | Значение                                                                     |
+|--------------------------|--------------------|------------------------------------------------------------------------------|
+| `GENDER_CHOICES`         | models.py          | ("male", "мужской"), <br/> ("female", "женский"),                            |
+| `LANGUAGE_CHOICES`       | models.py          | ("english", "английский"), <br/> ("russian", "русский"),                     |
+| `THERAPY_FORMAT_CHOICES` | models.py          | ("online", "удаленно"), <br/> ("offline", "встреча"), <br/> ("any", "любая"), |
+| `WORK_STATUS_CHOICES`    | models.py          | ("working", "работает"), <br/> ("not_working", "не работает"),               |
+| `MAX_AVAILABLE_FILE_SIZE` | validators.py      | 5                                                                            |
+| `ALLOWED_REGISTER_ROLES` | views.py           | ["psychologist", "client"]                                                   |
 
 ---
 
@@ -257,8 +258,6 @@
 
 | №  | Эндпоинт                           | HTTP-методы             | Описание функционала                                                                                                                | Используемые модели                               | Используемые сериализаторы                                                     | Примечания                                                 |
 |----|------------------------------------|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------| ------------------------------------------------- |--------------------------------------------------------------------------------|------------------------------------------------------------|
-| 3  | `/api/users/login/`                | `POST`                  | JWT-аутентификация по email и паролю. Возвращает `access` и `refresh` токены.                                                       | `AppUser`                                         | `CustomTokenObtainPairSerializer`                                              | Использует SimpleJWT, кастомизированный под вход по email. |
-| 4  | `/api/users/token/refresh/`        | `POST`                  | Обновление `access`-токена по `refresh`-токену.                                                                                     | —                                                 | `TokenRefreshSerializer` (из SimpleJWT)                                        | Стандартный эндпоинт JWT.                                  |
 | 5  | `/api/users/me/`                   | `GET`, `PATCH`          | Получение и частичное обновление профиля текущего пользователя (по токену).                                                         | `AppUser`, `PsychologistProfile`, `ClientProfile` | `AppUserSerializer`, `PsychologistProfileSerializer`, `ClientProfileSerializer` | Используется `request.user`. Возвращает профиль по роли.   |
 | 6  | `/api/users/psychologists/`        | `GET`                   | Список всех психологов.                                                                                                             | `PsychologistProfile`                             | `PsychologistProfileSerializer`                                                | Публичный эндпоинт для получения списка психологов.        |
 | 7  | `/api/users/psychologists/<id>/`   | `GET`                   | Детальная информация о конкретном психологе.                                                                                        | `PsychologistProfile`                             | `PsychologistProfileSerializer`                                                | Только просмотр (read-only).                               |
