@@ -17,7 +17,7 @@ class TopicSerializer(CreatorMixin, serializers.ModelSerializer):
 
     class Meta:
         model = Topic
-        fields = ["id", "creator", "type", "group_name", "name", "slug"]
+        fields = ["id", "creator", "type", "group_name", "name", "slug", "created_at", "updated_at"]
         read_only_fields = ["id", "creator", "created_at", "updated_at"]
 
 
@@ -29,7 +29,7 @@ class SpecialisationSerializer(CreatorMixin, serializers.ModelSerializer):
 
     class Meta:
         model = Specialisation
-        fields = ["id", "creator", "name", "description", "slug"]
+        fields = ["id", "creator", "name", "description", "slug", "created_at", "updated_at"]
         read_only_fields = ["id", "creator", "created_at", "updated_at"]
 
 
@@ -41,7 +41,7 @@ class MethodSerializer(CreatorMixin, serializers.ModelSerializer):
 
     class Meta:
         model = Method
-        fields = ["id", "creator", "name", "description", "slug"]
+        fields = ["id", "creator", "name", "description", "slug", "created_at", "updated_at"]
         read_only_fields = ["id", "creator", "created_at", "updated_at"]
 
 
@@ -64,6 +64,8 @@ class EducationSerializer(CreatorMixin, serializers.ModelSerializer):
             "year_end",
             "document",
             "is_verified",
+            "created_at",
+            "updated_at",
         ]
         read_only_fields = ["id", "creator", "created_at", "updated_at", "is_verified"]
 
@@ -89,15 +91,33 @@ class AppUserSerializer(serializers.ModelSerializer):
     """Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
     основе модели AppUser. Описывает, какие поля из AppUser будут участвовать в сериализации/десериализации."""
 
+    # SlugRelatedField(read_only=True) не создает и не меняет ничего, а просто берет существующее значение
+    # поля role из связанного объекта UserRole, чтоб вывести роль в ответе как человекочитаемую строку.
+    role = serializers.SlugRelatedField(read_only=True, slug_field="role")
+
     class Meta:
         model = AppUser
         # Лучше не использовать fields = "__all__" потому что с "__all__" наш API отдаст все поля,
         # включая is_staff, is_superuser и т.п. Это опасно, потому что через API можно будет
         # назначить себе суперправа.
-        fields = ["uuid", "email", "first_name", "last_name", "age", "phone_number", "role", "timezone", "password"]
-        read_only_fields = ["uuid", "is_staff", "is_superuser", "is_active", "last_login", "created_at", "updated_at"]
+        fields = [
+            "uuid",
+            "email",
+            "first_name",
+            "last_name",
+            "age",
+            "phone_number",
+            "role",
+            "timezone",
+            "password",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "uuid", "role", "is_staff", "is_superuser", "is_active", "last_login", "created_at", "updated_at"
+        ]
         # extra_kwargs - это зарезервированное имя в Meta-классе ModelSerializer для настройки конкретных полей,
-        # например, ниже указываю что пароль только на ЗАПИСЬ. Т.е. его можно отправить через POST/PUT/PATCH,
+        # например, ниже указываю что пароль только на ЗАПИСЬ. Т.е., его можно отправить через POST/PUT/PATCH,
         # но оно не будет отображаться в ответе API (GET, LIST и т.п.).
         extra_kwargs = {
             "password": {"write_only": True},
@@ -112,7 +132,7 @@ class AppUserSerializer(serializers.ModelSerializer):
 
         return user
 
-    def update(self, obj, validated_data):
+    def update(self, instance, validated_data):
         """Метод полностью блокирует password при выполнении update, чтоб пароль менялся только через
          отдельный дополнительный эндпоинт с хешированием пароля."""
         if "password" in validated_data:
@@ -120,7 +140,7 @@ class AppUserSerializer(serializers.ModelSerializer):
                 {"password": "Пароль нельзя изменять через update. Используйте существующий метод смены пароля."}
             )
 
-        return super().update(obj, validated_data)
+        return super().update(instance, validated_data)
 
 
 class PsychologistProfileSerializer(serializers.ModelSerializer):
@@ -128,7 +148,6 @@ class PsychologistProfileSerializer(serializers.ModelSerializer):
     основе модели PsychologistProfile. Описывает, какие поля из PsychologistProfile будут участвовать в
     сериализации/десериализации."""
 
-    user = AppUserSerializer(read_only=True)
     specialisations = SpecialisationSerializer(read_only=True, many=True)
     methods = MethodSerializer(read_only=True, many=True)
     topics = TopicSerializer(read_only=True, many=True)
@@ -138,7 +157,6 @@ class PsychologistProfileSerializer(serializers.ModelSerializer):
         model = PsychologistProfile
         fields = [
             "id",
-            "user",
             "gender",
             "specialisations",
             "methods",
@@ -153,9 +171,13 @@ class PsychologistProfileSerializer(serializers.ModelSerializer):
             "price_individual",
             "price_couples",
             "work_status",
+            "is_verified",
+            "is_all_education_verified",
+            "created_at",
+            "updated_at",
         ]
         read_only_fields = [
-            "id", "user", "is_verified", "is_all_education_verified", "rating", "created_at", "updated_at"
+            "id", "is_verified", "is_all_education_verified", "rating", "created_at", "updated_at"
         ]
 
 
@@ -163,23 +185,42 @@ class ClientProfileSerializer(serializers.ModelSerializer):
     """Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
     основе ClientProfile. Описывает, какие поля из ClientProfile будут участвовать в сериализации/десериализации."""
 
-    user = AppUserSerializer(read_only=True)
     preferred_methods = MethodSerializer(read_only=True, many=True)
     requested_topics = TopicSerializer(read_only=True, many=True)
 
     class Meta:
         model = ClientProfile
-        fields = ["id", "user", "therapy_experience", "preferred_methods", "requested_topics"]
-        read_only_fields = ["id", "user", "created_at", "updated_at"]
+        fields = ["id", "therapy_experience", "preferred_methods", "requested_topics", "created_at", "updated_at"]
+        read_only_fields = ["id", "created_at", "updated_at"]
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     """Сериализатор-"оркестр" (он соединяет разные сериализаторы) для регистрации нового пользователя в системе.
     В зависимости от выбранной роли создает связанный профиль: PsychologistProfile или ClientProfile."""
 
+    # Для всех профилей:
     password = serializers.CharField(write_only=True, required=True, min_length=8)
     confirm_password = serializers.CharField(write_only=True, required=True)
-    gender = serializers.ChoiceField(choices=GENDER_CHOICES, required=False, allow_blank=True)
+    gender = serializers.ChoiceField(choices=GENDER_CHOICES, required=False, allow_null=True)
+
+    # Доп для профиля психолога:
+    specialisations = serializers.PrimaryKeyRelatedField(
+        queryset=Specialisation.objects.all(), many=True, required=False
+    )
+    methods = serializers.PrimaryKeyRelatedField(
+        queryset=Method.objects.all(), many=True, required=False
+    )
+    topics = serializers.PrimaryKeyRelatedField(
+        queryset=Topic.objects.all(), many=True, required=False
+    )
+
+    # Доп для профиля клиента:
+    preferred_methods = serializers.PrimaryKeyRelatedField(
+        queryset=Method.objects.all(), many=True, required=False
+    )
+    requested_topics = serializers.PrimaryKeyRelatedField(
+        queryset=Topic.objects.all(), many=True, required=False
+    )
 
     class Meta:
         model = AppUser
@@ -194,6 +235,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             "gender",
             "password",
             "confirm_password",
+            "specialisations",
+            "methods",
+            "topics",
+            "preferred_methods",
+            "requested_topics",
         ]
         read_only_fields = ["role",]
 
@@ -227,6 +273,16 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         return attrs
 
+    def validate_email(self, value):
+        """Метод для проверки наличия пользователя с уже существующим email в БД.
+        1) У нас в модели указано unique=True и лучше это проверять в сериализаторе заранее, чтоб
+        не получать потом IntegrityError на уровне БД при регистрации.
+        2) Можно добавить в validate(), а можно так и через отдельный validate_email()."""
+        if AppUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Пользователь с таким email уже зарегистрирован.")
+
+        return value
+
     # @transaction.atomic - это декоратор, который оборачивает блок кода в одну транзакцию базы данных.
     # Т.е., если внутри create() произойдет любая ошибка (например, не удалось создать профиль), то:
     # 1) Django откатит все изменения;
@@ -237,6 +293,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         password = validated_data.pop("password")
         gender = validated_data.pop("gender", "")
         role = self.context.get("role")
+        specialisations = validated_data.pop("specialisations", [])
+        methods = validated_data.pop("methods", [])
+        topics = validated_data.pop("topics", [])
+        preferred_methods = validated_data.pop("preferred_methods", [])
+        requested_topics = validated_data.pop("requested_topics", [])
 
         # Создание пользователя
         # user = AppUser.objects.create(**validated_data, role=role)
@@ -252,9 +313,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         #     ClientProfile.objects.create(user=user)
         match role.role.strip().lower():
             case "psychologist":
-                PsychologistProfile.objects.create(user=user, gender=gender)
+                ps_profile = PsychologistProfile.objects.create(user=user, gender=gender)
+                ps_profile.specialisations.set(specialisations)
+                ps_profile.methods.set(methods)
+                ps_profile.topics.set(topics)
             case "client":
-                ClientProfile.objects.create(user=user)
+                cl_profile = ClientProfile.objects.create(user=user)
+                cl_profile.preferred_methods.set(preferred_methods)
+                cl_profile.requested_topics.set(requested_topics)
 
         return user
 
@@ -279,7 +345,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """Кастомный класс-сериализатор JWT-токенов, позволяющий вход по email.
-    Используется вместо стандартного TokenObtainPairSerializer из SimpleJWT (потому что вход по enail)."""
+    Используется вместо стандартного TokenObtainPairSerializer из SimpleJWT (потому что вход по email)."""
 
     # ВАЖНО! Необходимо указать, что username_field - это будет email.
     # До этого мы указывали в модели это "USERNAME_FIELD = "email"" но это настройка Django, например, в админке,
