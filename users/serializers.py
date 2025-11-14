@@ -243,6 +243,12 @@ class RegisterSerializer(serializers.ModelSerializer):
             "requested_topics",
         ]
         read_only_fields = ["role",]
+        # Важно отключить в сериализаторе DRF UniqueValidator для поля email (unique=True).
+        # Иначе DRF перехватит ошибку первым из модели (unique=True) и метод validate_email() не сработает
+        # при проверке наличия пользователя с таким email, но без подтверждения регистрации.
+        extra_kwargs: dict = {
+            "email": {"validators": []}
+        }
 
     def validate(self, attrs):
         """Метод для проверки совпадения паролей и базовой корректности данных регистрации."""
@@ -276,11 +282,21 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate_email(self, value):
         """Метод для проверки наличия пользователя с уже существующим email в БД.
-        1) У нас в модели указано unique=True и лучше это проверять в сериализаторе заранее, чтоб
-        не получать потом IntegrityError на уровне БД при регистрации.
-        2) Можно добавить в validate(), а можно так и через отдельный validate_email()."""
-        if AppUser.objects.filter(email=value).exists():
-            raise serializers.ValidationError("Пользователь с таким email уже зарегистрирован.")
+            1) У нас в модели указано unique=True и лучше это проверять в сериализаторе заранее, чтоб не
+            получать потом IntegrityError на уровне БД при регистрации.
+            2) Можно добавить в validate(), а можно так и через отдельный validate_email().
+        Когда email уже есть:
+        - если активный пользователь - то ошибка.
+        - если НЕ активный - то разрешаем, но помечаем, что надо отправить письмо подтверждение активации повторно."""
+        user = AppUser.objects.filter(email=value).first()
+
+        if user:
+            # Если is_active=True
+            if user.is_active:
+                raise serializers.ValidationError("Пользователь с таким email уже зарегистрирован.")
+
+            # А если is_active=False, то помечаю в контекст сериализатора, что это повторная регистрация без ошибок
+            self.context["existing_inactive_user"] = user
 
         return value
 
@@ -291,6 +307,17 @@ class RegisterSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         """Метод для создания пользователя и автоматического профиля для него в зависимости от роли."""
+        # Проверяю, есть ли пользователь, для которого требуется resend письма с подтверждением/активацией
+        existing_user = self.context.get("existing_inactive_user")
+
+        if existing_user:
+            # Только повторная отправка письма без каких-либо обновлений пароля, профиля и т.д.
+            send_verification_email(existing_user)
+            # А также фиксирую в контексте новый флаг, что это существующий пользователь без подтверждения регистрации
+            self.context["inactive_user_resend"] = True
+
+            return existing_user
+
         password = validated_data.pop("password")
         gender = validated_data.pop("gender", "")
         role = self.context.get("role")
@@ -301,18 +328,12 @@ class RegisterSerializer(serializers.ModelSerializer):
         requested_topics = validated_data.pop("requested_topics", [])
 
         # Создание пользователя
-        # user = AppUser.objects.create(**validated_data, role=role)
-        # лучше так, чтоб не вызывать 2 запроса к БД при создании, а делать все 1 запросом
         user = AppUser(**validated_data, role=role)
         user.set_password(password)
         user.save()
         send_verification_email(user)  # Отправка email с подтверждением регистрации для изменения is_active на True
 
         # И сразу автоматическое создание профиля для данного пользователя:
-        # if role.role.lower() == "psychologist":
-        #     PsychologistProfile.objects.create(user=user)
-        # elif role.role.lower() == "client":
-        #     ClientProfile.objects.create(user=user)
         match role.role.strip().lower():
             case "psychologist":
                 ps_profile = PsychologistProfile.objects.create(user=user, gender=gender)
