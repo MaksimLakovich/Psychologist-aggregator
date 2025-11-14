@@ -53,6 +53,18 @@ class RegisterView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)  # иначе данные не будут валидироваться
         serializer.save()  # должен вызываться, иначе пользователь не создастся
 
+        # Эта часть проверяет - существует ли флаг "inactive_user_resend = True" и если существует, то значит
+        # это повторная отправка письма, а поэтому, вместо обычного json-ответа с данными пользователя, будем
+        # возвращать красивый ответ "verification_resent"
+        if serializer.context.get("inactive_user_resend"):
+            return Response(
+                {
+                    "status": "verification_resent",
+                    "message": "Пользователь уже существует, но не активен. Отправили новое письмо для подтверждения."
+                },
+                status=status.HTTP_200_OK
+            )
+
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
 
