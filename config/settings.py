@@ -164,7 +164,15 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated'
-    ]
+    ],
+    # Добавляем throttle (anti-spam) для отправки email для подтверждения регистрации
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/hour',  # 5 писем в час (для регистрации)
+        'resend': '1/min',  # 1 запрос в минуту (для resend)
+    },
 }
 
 SIMPLE_JWT = {

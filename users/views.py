@@ -4,6 +4,7 @@ from django.utils.http import urlsafe_base64_decode
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -21,6 +22,21 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     permission_classes = [AllowAny]  # type: ignore[assignment]
 
 
+class ResendThrottle(AnonRateThrottle):
+    """Throttle класс для защиты эндпоинта повторной отправки письма с подтверждением email.
+    1) Этот throttle ограничивает количество запросов на повторную отправку verification email от одного
+    анонимного пользователя (определяется по IP-адресу).
+    2) Сейчас throttle включен глобально для всех анонимных запросов (из-за DEFAULT_THROTTLE_CLASSES в settings.py),
+    если нужно будет, то можно убрать там и навешивать ResendThrottle только на нужные контроллеры.
+
+    Для чего нужен ResendThrottle:
+    - предотвращает спам отправки писем на один email;
+    - защищает SMTP-сервер от перегрузки;
+    - снижает риск злоумышленного массового перебора email;
+    - повышает общую безопасность регистрации."""
+    scope = "resend"
+
+
 class RegisterView(generics.GenericAPIView):
     """Класс-контроллер на основе базового GenericAPIView для регистрации:
      1) Нового пользователя с профилем 'Психолог', если параметр role = psychologist.
@@ -28,6 +44,7 @@ class RegisterView(generics.GenericAPIView):
 
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]  # type: ignore[assignment]
+    throttle_classes = [ResendThrottle]  # Добавляю throttle (anti-spam) для отправки email на подтверждение активации
 
     def post(self, request, *args, **kwargs):
         """Метод для создания нового пользователя и связанного профиля
@@ -75,10 +92,7 @@ class EmailVerificationView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
-        """Метод для:
-            1) Генерация ссылки с токеном после успешной регистрации;
-            2) Отправка письма с этой ссылкой;
-            3) Прием токена, его валидация и активация пользователя."""
+        """Подтверждает email по uid и token, активирует пользователя."""
         uidb64 = request.query_params.get("uid")
         token = request.query_params.get("token")
 
@@ -119,12 +133,11 @@ class ResendEmailVerificationView(APIView):
     после регистрации (если предыдущее не было использовано)."""
 
     permission_classes = [AllowAny]
+    throttle_classes = [ResendThrottle]  # Добавляю throttle (anti-spam) для отправки email на подтверждение активации
 
     def post(self, request, *args, **kwargs):
-        """Метод для:
-            1) Генерация ссылки с токеном после успешной регистрации;
-            2) Отправка письма с этой ссылкой;
-            3) Прием токена, его валидация и активация пользователя."""
+        """Метод для повторной отправки письма с подтверждением email, если пользователь уже существует в БД,
+        но еще не активирован."""
         email = request.data.get("email")
 
         if not email:
