@@ -153,7 +153,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.AppUser'
 
 # Для локальной валидации по умолчанию, после добавления phonenumber_field в INSTALLED_APPS
-PHONENUMBER_DEFAULT_REGION = "RU"
+PHONENUMBER_DEFAULT_REGION = 'RU'
 
 REST_FRAMEWORK = {
     # 'DEFAULT_FILTER_BACKENDS': (
@@ -198,21 +198,24 @@ CORS_ALLOWED_ORIGINS = [
 # данных, поэтому если не хардкодить тут и выносить в .ENV , то нужно писать код для создания списка без пустых
 # значений в конце.
 CSRF_TRUSTED_ORIGINS = [
-    origin for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if origin
+    origin for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if origin
 ]
 
 # Запрещаем доступ для всех подряд (оставляем только из списка выше)
 CORS_ALLOW_ALL_ORIGINS = False
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.yandex.ru'
-# EMAIL_PORT = 465
-# EMAIL_USE_TLS = False
-# EMAIL_USE_SSL = True
-# EMAIL_HOST_USER = os.getenv('YANDEX_EMAIL_HOST_USER')
-# EMAIL_HOST_PASSWORD = os.getenv('YANDEX_EMAIL_HOST_PASSWORD')
-# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-#
+# FRONT_BASE_URL должен указывать туда, где будет обрабатываться подтверждение, даже если это API
+FRONT_BASE_URL = os.getenv('FRONT_BASE_URL', 'http://127.0.0.1:8000/api')
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = os.getenv('YANDEX_EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('YANDEX_EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
 # LOGOUT_REDIRECT_URL = 'users:start_page'
 #
 # LOGIN_URL = 'users:start_page'

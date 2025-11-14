@@ -7,6 +7,7 @@ from users.constants import GENDER_CHOICES
 from users.mixins.creator_mixin import CreatorMixin
 from users.models import (AppUser, ClientProfile, Education, Method,
                           PsychologistProfile, Specialisation, Topic)
+from users.services.send_verification_email import send_verification_email
 
 
 class TopicSerializer(CreatorMixin, serializers.ModelSerializer):
@@ -305,8 +306,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = AppUser(**validated_data, role=role)
         user.set_password(password)
         user.save()
+        send_verification_email(user)  # Отправка email с подтверждением регистрации для изменения is_active на True
 
-        # И сразу автоматическое создание профиля для данного пользователя
+        # И сразу автоматическое создание профиля для данного пользователя:
         # if role.role.lower() == "psychologist":
         #     PsychologistProfile.objects.create(user=user)
         # elif role.role.lower() == "client":
