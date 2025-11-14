@@ -11,6 +11,7 @@ from users.constants import ALLOWED_REGISTER_ROLES
 from users.models import AppUser, UserRole
 from users.serializers import (CustomTokenObtainPairSerializer,
                                RegisterSerializer)
+from users.services.send_verification_email import send_verification_email
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -110,4 +111,42 @@ class EmailVerificationView(APIView):
 
         return Response(
             {"detail": "Email успешно подтвержден!"}, status=status.HTTP_200_OK
+        )
+
+
+class ResendEmailVerificationView(APIView):
+    """Класс-контроллер на основе APIView для запроса на повторное подтверждения email и активации пользователя
+    после регистрации (если предыдущее не было использовано)."""
+
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        """Метод для:
+            1) Генерация ссылки с токеном после успешной регистрации;
+            2) Отправка письма с этой ссылкой;
+            3) Прием токена, его валидация и активация пользователя."""
+        email = request.data.get("email")
+
+        if not email:
+            return Response(
+                {"detail": "Email обязателен."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = AppUser.objects.filter(email=email).first()
+
+        if not user:
+            return Response(
+                {"detail": "Пользователь с таким email не найден."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if user.is_active:
+            return Response(
+                {"detail": "Email уже подтвержден."}, status=status.HTTP_200_OK
+            )
+
+        # Повторная отправка email с подтверждением регистрации
+        send_verification_email(user)
+
+        return Response(
+            {"detail": "Письмо повторно отправлено."}, status=status.HTTP_200_OK
         )
