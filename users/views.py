@@ -23,7 +23,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 class ResendThrottle(AnonRateThrottle):
-    """Throttle класс для защиты эндпоинта повторной отправки письма с подтверждением email.
+    """Throttle-класс для защиты эндпоинта повторной отправки письма с подтверждением email.
     1) Этот throttle ограничивает количество запросов на повторную отправку verification email от одного
     анонимного пользователя (определяется по IP-адресу).
     2) Сейчас throttle включен глобально для всех анонимных запросов (из-за DEFAULT_THROTTLE_CLASSES в settings.py),
