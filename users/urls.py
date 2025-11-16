@@ -3,7 +3,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from users.apps import UsersConfig
 from users.views import (CustomTokenObtainPairView, EmailVerificationView,
-                         RegisterView, ResendEmailVerificationView)
+                         RegisterView, ResendEmailVerificationView, LogoutAPIView)
 
 app_name = UsersConfig.name
 
@@ -14,4 +14,5 @@ urlpatterns = [
     path("resend-verify-email/", ResendEmailVerificationView.as_view(), name="resend-verify-email"),
     path("login/", CustomTokenObtainPairView.as_view(), name="login"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
+    path("logout/", LogoutAPIView.as_view(), name="logout"),
 ]

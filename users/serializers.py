@@ -2,6 +2,7 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 from users.constants import GENDER_CHOICES
 from users.mixins.creator_mixin import CreatorMixin
@@ -413,3 +414,24 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         })
 
         return data
+
+
+class LogoutSerializer(serializers.Serializer):
+    """Кастомный класс-сериализатор для логаута. Принимает refresh токен и заносит его в blacklist."""
+
+    refresh = serializers.CharField()
+
+    def validate(self, attrs):
+        """Метод для валидации входных данных. Этот метод просто извлекает refresh-токен из запроса и сохраняет
+        его в self.token - это нужно, чтобы потом метод save() мог вызвать blacklist() для этого токена.
+        Возвращает словарь attrs без изменений."""
+        self.token = attrs["refresh"]
+        return attrs
+
+    def save(self, **kwargs):
+        """Метод для занесения указанного refresh-токен в blacklist."""
+        try:
+            token = RefreshToken(self.token)
+            token.blacklist()
+        except TokenError:
+            raise serializers.ValidationError({"refresh": "Токен невалидный или истек срок действия."})

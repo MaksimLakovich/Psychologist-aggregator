@@ -43,8 +43,10 @@ INSTALLED_APPS = [
     # После установки "poetry add django-countries" для использования CountryField (список стран)
     'django_countries',
 
-    # Если будем использовать Localizations/translations, то нужно добавить REST_FRAMEWORD_SIMPLEJWT в INSTALLED_APPS
+    # 1) Если будем использовать Localizations/translations - нужно добавить REST_FRAMEWORK_SIMPLEJWT в INSTALLED_APPS
+    # 2) Подключаем приложение для blacklist - это включает модель хранения заблокированных refresh токенов
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 
     # Для использования расширенной фильтрации с помощью пакета django-filter, после его установки
     # 'django_filters',
@@ -178,6 +180,8 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=180),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'BLACKLIST_AFTER_ROTATION': True,  # старые refresh остаются в черном списке и не работают
+    'ROTATE_REFRESH_TOKENS': True,  # каждый раз при обновлении refresh создается новый
     'USER_ID_FIELD': 'uuid',  # Указывает SimpleJWT, по какому полю в модели пользователя искать идентификатор.
     # rest_framework_simplejwt по умолчанию ожидает, что у модели пользователя есть поле id, но мы для повышения
     # безопасности в AppUser используем кастомный uuid, вместо id
