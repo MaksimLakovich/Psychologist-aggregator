@@ -11,7 +11,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from users.constants import ALLOWED_REGISTER_ROLES
 from users.models import AppUser, UserRole
 from users.serializers import (CustomTokenObtainPairSerializer,
-                               RegisterSerializer)
+                               RegisterSerializer, LogoutSerializer)
 from users.services.send_verification_email import send_verification_email
 
 
@@ -20,6 +20,25 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
     serializer_class = CustomTokenObtainPairSerializer
     permission_classes = [AllowAny]  # type: ignore[assignment]
+
+
+class LogoutAPIView(APIView):
+    """Класс-контроллер на основе APIView для реального выхода пользователя из системы.
+    Добавляет его refresh токен в blacklist, делая невозможным дальнейшее обновление access токена."""
+
+    def post(self, request, *args, **kwargs):
+        """Метод POST на эндпоинте /logout/ для выполнения реального выхода из системы:
+            1. Принимает refresh-токен от клиента.
+            2. Валидирует его с помощью LogoutSerializer.
+            3. Заносит токен в blacklist.
+            4. Возвращает код 205 (Reset Content), чтобы фронтенд сбросил состояние.
+        После этого refresh-токен становится полностью недействительным."""
+        serializer = LogoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        # 205 - это стандартный HTTP-код, который браузеры используют для "сбросить состояние клиента".
+        return Response({"detail": "Успешный выход."}, status=status.HTTP_205_RESET_CONTENT)
 
 
 class ResendThrottle(AnonRateThrottle):
@@ -47,7 +66,7 @@ class RegisterView(generics.GenericAPIView):
     throttle_classes = [ResendThrottle]  # Добавляю throttle (anti-spam) для отправки email на подтверждение активации
 
     def post(self, request, *args, **kwargs):
-        """Метод для создания нового пользователя и связанного профиля
+        """Метод POST на эндпоинте /register/ для создания нового пользователя и связанного профиля
         в зависимости от указанной роли (psychologist / client)."""
         role_value = request.data.get("role")
 
@@ -92,7 +111,7 @@ class EmailVerificationView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
-        """Подтверждает email по uid и token, активирует пользователя."""
+        """Метод GET на эндпоинте /verify-email/ для подтверждения email по uid и token, активирует пользователя."""
         uidb64 = request.query_params.get("uid")
         token = request.query_params.get("token")
 
@@ -136,8 +155,8 @@ class ResendEmailVerificationView(APIView):
     throttle_classes = [ResendThrottle]  # Добавляю throttle (anti-spam) для отправки email на подтверждение активации
 
     def post(self, request, *args, **kwargs):
-        """Метод для повторной отправки письма с подтверждением email, если пользователь уже существует в БД,
-        но еще не активирован."""
+        """Метод POST на эндпоинте /resend-verify-email/ для повторной отправки письма с подтверждением email,
+        если пользователь уже существует в БД, но еще не активирован."""
         email = request.data.get("email")
 
         if not email:
