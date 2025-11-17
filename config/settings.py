@@ -174,6 +174,7 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '5/hour',  # 5 писем в час (для регистрации)
         'resend': '1/min',  # 1 запрос в минуту (для resend)
+        'change_password': '5/mim',  # для эндпоинта изменения пароля устанавливаем лимит: 5 запросов в минуту
     },
 }
 
