@@ -1,3 +1,4 @@
+from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from rest_framework import serializers
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
@@ -435,3 +436,41 @@ class LogoutSerializer(serializers.Serializer):
             token.blacklist()
         except TokenError:
             raise serializers.ValidationError({"refresh": "Токен невалидный или истек срок действия."})
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """Кастомный класс-сериализатор для изменения пароля авторизованным пользователем."""
+
+    old_password = serializers.CharField(required=True, write_only=True)
+    new_password = serializers.CharField(required=True, write_only=True)
+    new_password_confirm = serializers.CharField(required=True, write_only=True)
+
+    def validate_old_password(self, value):
+        """Метод для проверки корректности введенного старого пароля."""
+        user = self.context["request"].user
+
+        if not user.check_password(value):
+            raise serializers.ValidationError("Неверный текущий пароль.")
+
+        return value
+
+    def validate(self, attrs):
+        """Метод для проверки совпадения паролей."""
+        new_password = attrs.get("new_password")
+        new_password_confirm = attrs.get("new_password_confirm")
+
+        if new_password != new_password_confirm:
+            raise serializers.ValidationError({"new_password_confirm": "Пароли не совпадают."})
+
+        # validate_password() - это стандартная проверка Django validators (min_length, CommonPasswordValidator и т.д.)
+        validate_password(new_password)
+
+        return attrs
+
+    def save(self, **kwargs):
+        """Метод для сохранения нового пароля."""
+        user = self.context["request"].user
+        user.set_password(self.validated_data["new_password"])
+        user.save()
+
+        return user

@@ -2,17 +2,18 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.constants import ALLOWED_REGISTER_ROLES
 from users.models import AppUser, UserRole
-from users.serializers import (CustomTokenObtainPairSerializer,
-                               RegisterSerializer, LogoutSerializer)
+from users.serializers import (ChangePasswordSerializer,
+                               CustomTokenObtainPairSerializer,
+                               LogoutSerializer, RegisterSerializer)
 from users.services.send_verification_email import send_verification_email
+from users.services.throttles import ChangePasswordThrottle, ResendThrottle, RegisterThrottle
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -25,6 +26,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class LogoutAPIView(APIView):
     """Класс-контроллер на основе APIView для реального выхода пользователя из системы.
     Добавляет его refresh токен в blacklist, делая невозможным дальнейшее обновление access токена."""
+
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         """Метод POST на эндпоинте /logout/ для выполнения реального выхода из системы:
@@ -41,29 +44,14 @@ class LogoutAPIView(APIView):
         return Response({"detail": "Успешный выход."}, status=status.HTTP_205_RESET_CONTENT)
 
 
-class ResendThrottle(AnonRateThrottle):
-    """Throttle-класс для защиты эндпоинта повторной отправки письма с подтверждением email.
-    1) Этот throttle ограничивает количество запросов на повторную отправку verification email от одного
-    анонимного пользователя (определяется по IP-адресу).
-    2) Сейчас throttle включен глобально для всех анонимных запросов (из-за DEFAULT_THROTTLE_CLASSES в settings.py),
-    если нужно будет, то можно убрать там и навешивать ResendThrottle только на нужные контроллеры.
-
-    Для чего нужен ResendThrottle:
-    - предотвращает спам отправки писем на один email;
-    - защищает SMTP-сервер от перегрузки;
-    - снижает риск злоумышленного массового перебора email;
-    - повышает общую безопасность регистрации."""
-    scope = "resend"
-
-
 class RegisterView(generics.GenericAPIView):
     """Класс-контроллер на основе базового GenericAPIView для регистрации:
      1) Нового пользователя с профилем 'Психолог', если параметр role = psychologist.
      2) Нового пользователя с профилем 'Клиент', если параметр role = client."""
 
     serializer_class = RegisterSerializer
-    permission_classes = [AllowAny]  # type: ignore[assignment]
-    throttle_classes = [ResendThrottle]  # Добавляю throttle (anti-spam) для отправки email на подтверждение активации
+    permission_classes = [AllowAny]
+    throttle_classes = [RegisterThrottle]  # Добавляю throttle (anti-spam) для email на подтверждение активации
 
     def post(self, request, *args, **kwargs):
         """Метод POST на эндпоинте /register/ для создания нового пользователя и связанного профиля
@@ -152,7 +140,7 @@ class ResendEmailVerificationView(APIView):
     после регистрации (если предыдущее не было использовано)."""
 
     permission_classes = [AllowAny]
-    throttle_classes = [ResendThrottle]  # Добавляю throttle (anti-spam) для отправки email на подтверждение активации
+    throttle_classes = [ResendThrottle]  # Добавляю throttle (anti-spam) для запроса повторной отправки email
 
     def post(self, request, *args, **kwargs):
         """Метод POST на эндпоинте /resend-verify-email/ для повторной отправки письма с подтверждением email,
@@ -181,4 +169,25 @@ class ResendEmailVerificationView(APIView):
 
         return Response(
             {"detail": "Письмо повторно отправлено."}, status=status.HTTP_200_OK
+        )
+
+
+class ChangePasswordView(APIView):
+    """Класс-контроллер на основе APIView для изменения пароля авторизованным пользователем."""
+
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [ChangePasswordThrottle]
+
+    def post(self, request, *args, **kwargs):
+        """Метод POST на эндпоинте /change-password/ для изменения пароля авторизованным пользователем."""
+        serializer = ChangePasswordSerializer(
+            data=request.data,
+            context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            {"detail": "Пароль успешно изменен."},
+            status=status.HTTP_200_OK
         )
