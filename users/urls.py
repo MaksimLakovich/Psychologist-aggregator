@@ -3,8 +3,9 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from users.apps import UsersConfig
 from users.views import (ChangePasswordView, CustomTokenObtainPairView,
-                         EmailVerificationView, LogoutAPIView, RegisterView,
-                         ResendEmailVerificationView)
+                         EmailVerificationView, LogoutAPIView,
+                         PasswordResetConfirmView, PasswordResetView,
+                         RegisterView, ResendEmailVerificationView)
 
 app_name = UsersConfig.name
 
@@ -17,4 +18,6 @@ urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
     path("logout/", LogoutAPIView.as_view(), name="logout"),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
+    path("password-reset/", PasswordResetView.as_view(), name="password-reset"),
+    path("password-reset-confirm/", PasswordResetConfirmView.as_view(), name="password-reset-confirm"),
 ]
