@@ -8,13 +8,13 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.constants import ALLOWED_REGISTER_ROLES
-from users.models import AppUser, Topic, UserRole
+from users.models import AppUser, Specialisation, Topic, UserRole
 from users.serializers import (ChangePasswordSerializer,
                                CustomTokenObtainPairSerializer,
                                LogoutSerializer,
                                PasswordResetConfirmSerializer,
                                PasswordResetSerializer, RegisterSerializer,
-                               TopicSerializer)
+                               SpecialisationSerializer, TopicSerializer)
 from users.services.send_password_reset_email import send_password_reset_email
 from users.services.send_verification_email import send_verification_email
 from users.services.throttles import (ChangePasswordThrottle,
@@ -262,4 +262,23 @@ class TopicDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = TopicSerializer
     queryset = Topic.objects.all()
+    lookup_field = "slug"  # использую это потому что у модели есть поле slug и это удобно для человекочитаемых URL
+
+
+class SpecialisationListView(generics.ListAPIView):
+    """Класс-контроллер на основе Generic для получения списка всех Specialisations.
+    Используется, например, при выборе специализации (методологичесая школа) в профиле психолога."""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = SpecialisationSerializer
+    queryset = Specialisation.objects.all().order_by("name")
+
+
+class SpecialisationDetailView(generics.RetrieveAPIView):
+    """Класс-контроллер на основе Generic для получения подробной информации о Specialisation (методологическая школа).
+    Поиск записи выполняется по полю slug (человекочитаемый URL)."""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = SpecialisationSerializer
+    queryset = Specialisation.objects.all()
     lookup_field = "slug"  # использую это потому что у модели есть поле slug и это удобно для человекочитаемых URL
