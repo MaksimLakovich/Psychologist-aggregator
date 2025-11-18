@@ -37,3 +37,15 @@ class ChangePasswordThrottle(UserRateThrottle):
         - ограничивает частоту запросов одним авторизованным пользователем;
         - защищает API от DoS-нагрузки на эндпоинт смены пароля."""
     scope = "change_password"
+
+
+class PasswordResetThrottle(AnonRateThrottle):
+    """Throttle-класс для защиты эндпоинта запроса на сброс пароля (ввод email).
+    Настройка предназначена для предотвращения спама рассылок."""
+    scope = "password_reset"
+
+
+class PasswordResetConfirmThrottle(AnonRateThrottle):
+    """Throttle-класс для защиты эндпоинта подтверждения сброса пароля (подстановка нового пароля).
+    Более агрессивный лимит, т.к. здесь проверяются токены."""
+    scope = "password_reset_confirm"

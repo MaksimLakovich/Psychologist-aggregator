@@ -11,9 +11,15 @@ from users.constants import ALLOWED_REGISTER_ROLES
 from users.models import AppUser, UserRole
 from users.serializers import (ChangePasswordSerializer,
                                CustomTokenObtainPairSerializer,
-                               LogoutSerializer, RegisterSerializer)
+                               LogoutSerializer,
+                               PasswordResetConfirmSerializer,
+                               PasswordResetSerializer, RegisterSerializer)
+from users.services.send_password_reset_email import send_password_reset_email
 from users.services.send_verification_email import send_verification_email
-from users.services.throttles import ChangePasswordThrottle, ResendThrottle, RegisterThrottle
+from users.services.throttles import (ChangePasswordThrottle,
+                                      PasswordResetConfirmThrottle,
+                                      PasswordResetThrottle, RegisterThrottle,
+                                      ResendThrottle)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -190,4 +196,50 @@ class ChangePasswordView(APIView):
         return Response(
             {"detail": "Пароль успешно изменен."},
             status=status.HTTP_200_OK
+        )
+
+
+class PasswordResetView(APIView):
+    """Класс-контроллер на основе APIView для сброса пароля неавторизованного пользователя."""
+
+    permission_classes = [AllowAny]
+    throttle_classes = [PasswordResetThrottle]
+
+    def post(self, request, *args, **kwargs):
+        """Метод POST на эндпоинте /password-reset/ для сброса пароля неавторизованного пользователя.
+        Принимает email, и если пользователь найден и не заблокирован - отправляет письмо для сброса пароля.
+        По соображениям безопасности всегда возвращает одинаковый ответ (чтобы не сливать инфо о наличии аккаунта)."""
+        serializer = PasswordResetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+        user = AppUser.objects.filter(email=email).first()
+
+        # Если пользователь найден - отправляем письмо.
+        if user:
+            send_password_reset_email(user)
+
+        # Всегда нужно отвечать нейтрально, не раскрывая, найден пользователь или нет.
+        return Response(
+            data={"detail": "Если аккаунт с таким email существует, то мы отправили на него инструкцию."},
+            status=status.HTTP_200_OK
+        )
+
+
+class PasswordResetConfirmView(APIView):
+    """Класс-контроллер на основе APIView для подтверждения сброса пароля неавторизованного пользователя."""
+
+    permission_classes = [AllowAny]
+    throttle_classes = [PasswordResetConfirmThrottle]
+
+    def post(self, request, *args, **kwargs):
+        """Метод POST на эндпоинте /password-reset-confirm/ для подтверждения сброса пароля пользователя.
+        Принимает uid, token, new_password, new_password_confirm.
+        Меняет пароль при валидном токене."""
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            data={"detail": "Пароль успешно изменен."}, status=status.HTTP_200_OK
         )
