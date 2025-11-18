@@ -8,12 +8,13 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.constants import ALLOWED_REGISTER_ROLES
-from users.models import AppUser, UserRole
+from users.models import AppUser, Topic, UserRole
 from users.serializers import (ChangePasswordSerializer,
                                CustomTokenObtainPairSerializer,
                                LogoutSerializer,
                                PasswordResetConfirmSerializer,
-                               PasswordResetSerializer, RegisterSerializer)
+                               PasswordResetSerializer, RegisterSerializer,
+                               TopicSerializer)
 from users.services.send_password_reset_email import send_password_reset_email
 from users.services.send_verification_email import send_verification_email
 from users.services.throttles import (ChangePasswordThrottle,
@@ -243,3 +244,22 @@ class PasswordResetConfirmView(APIView):
         return Response(
             data={"detail": "Пароль успешно изменен."}, status=status.HTTP_200_OK
         )
+
+
+class TopicListView(generics.ListAPIView):
+    """Класс-контроллер на основе Generic для получения списка всех Topics.
+    Используется, например, при выборе темы в профиле клиента/психолога."""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = TopicSerializer
+    queryset = Topic.objects.all().order_by("type", "group_name", "name")
+
+
+class TopicDetailView(generics.RetrieveAPIView):
+    """Класс-контроллер на основе Generic для получения подробной информации по Topic.
+    Поиск записи выполняется по полю slug (человекочитаемый URL)."""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = TopicSerializer
+    queryset = Topic.objects.all()
+    lookup_field = "slug"  # использую это потому что у модели есть поле slug и это удобно для человекочитаемых URL
