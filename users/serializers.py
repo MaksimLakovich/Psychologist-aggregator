@@ -1,5 +1,8 @@
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.tokens import default_token_generator
 from django.db import transaction
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
 from rest_framework import serializers
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -471,6 +474,74 @@ class ChangePasswordSerializer(serializers.Serializer):
         """Метод для сохранения нового пароля."""
         user = self.context["request"].user
         user.set_password(self.validated_data["new_password"])
+        user.save()
+
+        return user
+
+
+class PasswordResetSerializer(serializers.Serializer):
+    """Кастомный класс-сериализатор для запроса на сброс пароля (ввод email)."""
+
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        """Метод для проверки наличия пользователя с уже существующим email в БД.
+        Не выдаем ошибку, если пользователя нет. Просто возвращаемся дальше (против утечки данных, что такой
+        пользователь есть у нас в БД)."""
+        return value
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Кастомный класс-сериализатор для подтверждения сброса пароля"""
+
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(required=True, write_only=True)
+    new_password_confirm = serializers.CharField(required=True, write_only=True)
+
+    def validate(self, attrs):
+        """Метод для валидации данных:
+        1) Проверяет совпадение паролей.
+        2) Проверяет uid.
+        3) Проверяет token."""
+        new_password = attrs.get("new_password")
+        new_password_confirm = attrs.get("new_password_confirm")
+
+        if new_password != new_password_confirm:
+            raise serializers.ValidationError({"new_password_confirm": "Пароли не совпадают."})
+
+        # Раскодируем uid и ищем пользователя
+        uidb64 = attrs.get("uid")
+
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+        except Exception:
+            raise serializers.ValidationError({"uid": "Некорректный uid."})
+
+        try:
+            user = AppUser.objects.get(pk=uid)
+        except AppUser.DoesNotExist:
+            raise serializers.ValidationError({"uid": "Пользователь не найден."})
+
+        # Сохраняю пользователя в контексте для save()
+        attrs["user_obj"] = user
+
+        # Проверяю токен
+        token = attrs.get("token")
+
+        if not default_token_generator.check_token(user, token):
+            raise serializers.ValidationError({"token": "Недействительный или просроченный токен."})
+
+        # validate_password() - это стандартная проверка Django validators (min_length, CommonPasswordValidator и т.д.)
+        validate_password(new_password)
+
+        return attrs
+
+    def save(self, **kwargs):
+        """Метод для сохранения нового пароля у пользователя."""
+        user = self.validated_data["user_obj"]
+        new_password = self.validated_data["new_password"]
+        user.set_password(new_password)
         user.save()
 
         return user
