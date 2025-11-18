@@ -1,12 +1,22 @@
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 
 
+class RegisterThrottle(AnonRateThrottle):
+    """Throttle-класс для защиты эндпоинта по регистрации и отправки письма с подтверждением email.
+    Этот throttle ограничивает количество запросов на отправку verification email от одного анонимного
+    пользователя (определяется по IP-адресу).
+        Для чего нужен RegisterThrottle:
+        - предотвращает спам отправки писем на один email;
+        - защищает SMTP-сервер от перегрузки;
+        - снижает риск злоумышленного массового перебора email;
+        - повышает общую безопасность регистрации."""
+    scope = "register"
+
+
 class ResendThrottle(AnonRateThrottle):
     """Throttle-класс для защиты эндпоинта повторной отправки письма с подтверждением email.
-    1) Этот throttle ограничивает количество запросов на повторную отправку verification email от одного
+    Этот throttle ограничивает количество запросов на повторную отправку verification email от одного
     анонимного пользователя (определяется по IP-адресу).
-    2) Сейчас throttle включен глобально для всех анонимных запросов (из-за DEFAULT_THROTTLE_CLASSES в settings.py),
-    если нужно будет, то можно убрать там и навешивать ResendThrottle только на нужные контроллеры.
         Для чего нужен ResendThrottle:
         - предотвращает спам отправки писем на один email;
         - защищает SMTP-сервер от перегрузки;

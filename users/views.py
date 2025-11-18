@@ -2,7 +2,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -13,7 +13,7 @@ from users.serializers import (ChangePasswordSerializer,
                                CustomTokenObtainPairSerializer,
                                LogoutSerializer, RegisterSerializer)
 from users.services.send_verification_email import send_verification_email
-from users.services.throttles import ChangePasswordThrottle, ResendThrottle
+from users.services.throttles import ChangePasswordThrottle, ResendThrottle, RegisterThrottle
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -26,6 +26,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class LogoutAPIView(APIView):
     """Класс-контроллер на основе APIView для реального выхода пользователя из системы.
     Добавляет его refresh токен в blacklist, делая невозможным дальнейшее обновление access токена."""
+
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         """Метод POST на эндпоинте /logout/ для выполнения реального выхода из системы:
@@ -48,8 +50,8 @@ class RegisterView(generics.GenericAPIView):
      2) Нового пользователя с профилем 'Клиент', если параметр role = client."""
 
     serializer_class = RegisterSerializer
-    permission_classes = [AllowAny]  # type: ignore[assignment]
-    throttle_classes = [ResendThrottle]  # Добавляю throttle (anti-spam) для отправки email на подтверждение активации
+    permission_classes = [AllowAny]
+    throttle_classes = [RegisterThrottle]  # Добавляю throttle (anti-spam) для email на подтверждение активации
 
     def post(self, request, *args, **kwargs):
         """Метод POST на эндпоинте /register/ для создания нового пользователя и связанного профиля
@@ -138,7 +140,7 @@ class ResendEmailVerificationView(APIView):
     после регистрации (если предыдущее не было использовано)."""
 
     permission_classes = [AllowAny]
-    throttle_classes = [ResendThrottle]  # Добавляю throttle (anti-spam) для отправки email на подтверждение активации
+    throttle_classes = [ResendThrottle]  # Добавляю throttle (anti-spam) для запроса повторной отправки email
 
     def post(self, request, *args, **kwargs):
         """Метод POST на эндпоинте /resend-verify-email/ для повторной отправки письма с подтверждением email,
@@ -173,6 +175,7 @@ class ResendEmailVerificationView(APIView):
 class ChangePasswordView(APIView):
     """Класс-контроллер на основе APIView для изменения пароля авторизованным пользователем."""
 
+    permission_classes = [IsAuthenticated]
     throttle_classes = [ChangePasswordThrottle]
 
     def post(self, request, *args, **kwargs):
