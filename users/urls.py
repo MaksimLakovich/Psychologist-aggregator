@@ -6,6 +6,7 @@ from users.views import (ChangePasswordView, CustomTokenObtainPairView,
                          EmailVerificationView, LogoutAPIView,
                          PasswordResetConfirmView, PasswordResetView,
                          RegisterView, ResendEmailVerificationView,
+                         SpecialisationDetailView, SpecialisationListView,
                          TopicDetailView, TopicListView)
 
 app_name = UsersConfig.name
@@ -30,4 +31,8 @@ urlpatterns = [
     # Topic (справочник)
     path("topics/", TopicListView.as_view(), name="topic-list"),
     path("topics/<slug:slug>/", TopicDetailView.as_view(), name="topic-detail"),
+
+    # Specialisation (справочник)
+    path("specialisations/", SpecialisationListView.as_view(), name="specialisation-list"),
+    path("specialisations/<slug:slug>/", SpecialisationDetailView.as_view(), name="specialisation-detail"),
 ]
