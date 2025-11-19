@@ -8,16 +8,19 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.constants import ALLOWED_REGISTER_ROLES
-from users.models import AppUser, Specialisation, Topic, UserRole
+from users.models import (AppUser, Education, Method, Specialisation, Topic,
+                          UserRole)
+from users.permissions import IsOwnerOrAdmin
 from users.serializers import (ChangePasswordSerializer,
                                CustomTokenObtainPairSerializer,
-                               LogoutSerializer,
+                               EducationSerializer, LogoutSerializer,
+                               MethodSerializer,
                                PasswordResetConfirmSerializer,
                                PasswordResetSerializer, RegisterSerializer,
                                SpecialisationSerializer, TopicSerializer)
 from users.services.send_password_reset_email import send_password_reset_email
 from users.services.send_verification_email import send_verification_email
-from users.services.throttles import (ChangePasswordThrottle,
+from users.services.throttles import (ChangePasswordThrottle, LoginThrottle,
                                       PasswordResetConfirmThrottle,
                                       PasswordResetThrottle, RegisterThrottle,
                                       ResendThrottle)
@@ -28,6 +31,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
     serializer_class = CustomTokenObtainPairSerializer
     permission_classes = [AllowAny]  # type: ignore[assignment]
+    throttle_classes = [LoginThrottle]  # Добавляю throttle для безопасности системы (сейчас у нас по IP, а не email)
 
 
 class LogoutAPIView(APIView):
@@ -250,7 +254,7 @@ class TopicListView(generics.ListAPIView):
     """Класс-контроллер на основе Generic для получения списка всех Topics.
     Используется, например, при выборе темы в профиле клиента/психолога."""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = TopicSerializer
     queryset = Topic.objects.all().order_by("type", "group_name", "name")
 
@@ -259,7 +263,7 @@ class TopicDetailView(generics.RetrieveAPIView):
     """Класс-контроллер на основе Generic для получения подробной информации по Topic.
     Поиск записи выполняется по полю slug (человекочитаемый URL)."""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = TopicSerializer
     queryset = Topic.objects.all()
     lookup_field = "slug"  # использую это потому что у модели есть поле slug и это удобно для человекочитаемых URL
@@ -269,7 +273,7 @@ class SpecialisationListView(generics.ListAPIView):
     """Класс-контроллер на основе Generic для получения списка всех Specialisations.
     Используется, например, при выборе специализации (методологичесая школа) в профиле психолога."""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = SpecialisationSerializer
     queryset = Specialisation.objects.all().order_by("name")
 
@@ -278,7 +282,62 @@ class SpecialisationDetailView(generics.RetrieveAPIView):
     """Класс-контроллер на основе Generic для получения подробной информации о Specialisation (методологическая школа).
     Поиск записи выполняется по полю slug (человекочитаемый URL)."""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = SpecialisationSerializer
     queryset = Specialisation.objects.all()
     lookup_field = "slug"  # использую это потому что у модели есть поле slug и это удобно для человекочитаемых URL
+
+
+class MethodListView(generics.ListAPIView):
+    """Класс-контроллер на основе Generic для получения списка всех Methods (инструмент/подход).
+    Используется, например, при выборе метода в профиле клиента/психолога."""
+
+    permission_classes = [AllowAny]
+    serializer_class = MethodSerializer
+    queryset = Method.objects.all().order_by("name")
+
+
+class MethodDetailView(generics.RetrieveAPIView):
+    """Класс-контроллер на основе Generic для получения подробной информации о Method.
+    Поиск записи выполняется по полю slug (человекочитаемый URL)."""
+
+    permission_classes = [AllowAny]
+    serializer_class = MethodSerializer
+    queryset = Method.objects.all()
+    lookup_field = "slug"  # использую это потому что у модели есть поле slug и это удобно для человекочитаемых URL
+
+
+class EducationListCreateView(generics.ListCreateAPIView):
+    """Класс-контроллер на основе Generic для:
+        - создания новой записи в Education;
+        - получения списка всех Educations."""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = EducationSerializer
+
+    def get_queryset(self):
+        """Пользователь может видеть только свои образования.
+        Исключение: Администраторы могут видеть все записи в БД."""
+        user = self.request.user
+
+        if user.is_staff:
+            return Education.objects.all().order_by("creator__email", "-year_start")
+        return Education.objects.filter(creator=user).order_by("-year_start")
+
+
+class EducationRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    """Класс-контроллер на основе Generic для работы с одним конкретным Education:
+        - получение подробной информации;
+        - редактирование;
+        - удаление."""
+
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+    serializer_class = EducationSerializer
+
+    def get_queryset(self):
+        """Администратор может работать со всеми записями. Обычный пользователь - только со своими."""
+        user = self.request.user
+
+        if user.is_staff:
+            return Education.objects.all()
+        return Education.objects.filter(creator=user)
