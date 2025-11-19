@@ -8,13 +8,13 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.constants import ALLOWED_REGISTER_ROLES
-from users.models import AppUser, Specialisation, Topic, UserRole
+from users.models import AppUser, Specialisation, Topic, UserRole, Method
 from users.serializers import (ChangePasswordSerializer,
                                CustomTokenObtainPairSerializer,
                                LogoutSerializer,
                                PasswordResetConfirmSerializer,
                                PasswordResetSerializer, RegisterSerializer,
-                               SpecialisationSerializer, TopicSerializer)
+                               SpecialisationSerializer, TopicSerializer, MethodSerializer)
 from users.services.send_password_reset_email import send_password_reset_email
 from users.services.send_verification_email import send_verification_email
 from users.services.throttles import (ChangePasswordThrottle,
@@ -281,4 +281,23 @@ class SpecialisationDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = SpecialisationSerializer
     queryset = Specialisation.objects.all()
+    lookup_field = "slug"  # использую это потому что у модели есть поле slug и это удобно для человекочитаемых URL
+
+
+class MethodListView(generics.ListAPIView):
+    """Класс-контроллер на основе Generic для получения списка всех Methods (инструмент/подход).
+    Используется, например, при выборе метода в профиле клиента/психолога."""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = MethodSerializer
+    queryset = Method.objects.all().order_by("name")
+
+
+class MethodDetailView(generics.RetrieveAPIView):
+    """Класс-контроллер на основе Generic для получения подробной информации о Method.
+    Поиск записи выполняется по полю slug (человекочитаемый URL)."""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = MethodSerializer
+    queryset = Method.objects.all()
     lookup_field = "slug"  # использую это потому что у модели есть поле slug и это удобно для человекочитаемых URL
