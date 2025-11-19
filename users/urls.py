@@ -3,11 +3,14 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from users.apps import UsersConfig
 from users.views import (ChangePasswordView, CustomTokenObtainPairView,
+                         EducationListCreateView,
+                         EducationRetrieveUpdateDestroyView,
                          EmailVerificationView, LogoutAPIView,
+                         MethodDetailView, MethodListView,
                          PasswordResetConfirmView, PasswordResetView,
                          RegisterView, ResendEmailVerificationView,
                          SpecialisationDetailView, SpecialisationListView,
-                         TopicDetailView, TopicListView, MethodListView, MethodDetailView)
+                         TopicDetailView, TopicListView)
 
 app_name = UsersConfig.name
 
@@ -39,4 +42,8 @@ urlpatterns = [
     # Method (справочник)
     path("methods/", MethodListView.as_view(), name="method-list"),
     path("methods/<slug:slug>/", MethodDetailView.as_view(), name="method-detail"),
+
+    # Education (CRUD психолога)
+    path("educations/", EducationListCreateView.as_view(), name="education-list-create"),
+    path("educations/<int:pk>/", EducationRetrieveUpdateDestroyView.as_view(), name="education-detail"),
 ]
