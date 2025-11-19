@@ -13,6 +13,11 @@ class RegisterThrottle(AnonRateThrottle):
     scope = "register"
 
 
+class LoginThrottle(AnonRateThrottle):
+    """Throttle-класс для защиты эндпоинта по авторизации (вход в систему)."""
+    scope = "login"
+
+
 class ResendThrottle(AnonRateThrottle):
     """Throttle-класс для защиты эндпоинта повторной отправки письма с подтверждением email.
     Этот throttle ограничивает количество запросов на повторную отправку verification email от одного
