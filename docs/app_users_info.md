@@ -53,6 +53,12 @@
 
 5. `send_password_reset_email.py / send_password_reset_email()` - сервисная функция отправки пользователю письма со ссылкой для восстановления пароля.
 
+
+### users/mixins/:
+
+1. `creator_mixin.py / CreatorMixin()` - миксин, который автоматически заполняет поле creator текущим пользователем при создании объекта.  
+Данный миксин используется/работает только внутри сериализаторов DRF.
+
 ---
 
 ## <a id="title4"> 🗃️ Статические справочники и переменные </a>
@@ -209,10 +215,10 @@
 ### users/serializers.py:
 
 1. Для **API-эндпоинтов** созданы следующие базовые сериализаторы:  
-   - `TopicSerializer`
-   - `SpecialisationSerializer`
-   - `MethodSerializer`
-   - `EducationSerializer`
+   - `TopicSerializer(CreatorMixin)`
+   - `SpecialisationSerializer(CreatorMixin)`
+   - `MethodSerializer(CreatorMixin)`
+   - `EducationSerializer(CreatorMixin)`
    - `AppUserSerializer`
    - `PsychologistProfileSerializer`
    - `ClientProfileSerializer`
