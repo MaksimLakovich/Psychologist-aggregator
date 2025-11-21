@@ -150,7 +150,8 @@ class AppUserSerializer(serializers.ModelSerializer):
 
 
 class PsychologistProfileSerializer(serializers.ModelSerializer):
-    """Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
+    """Read-сериализатор (используется для GET - создавать/редактировать вложенные объекты через него нельзя)
+    с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
     основе модели PsychologistProfile. Описывает, какие поля из PsychologistProfile будут участвовать в
     сериализации/десериализации."""
 
@@ -185,6 +186,60 @@ class PsychologistProfileSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id", "is_verified", "is_all_education_verified", "rating", "created_at", "updated_at"
         ]
+
+
+class PsychologistProfileWriteSerializer(serializers.ModelSerializer):
+    """Write-сериализатор (используется для PATCH/PUT - разрешает модифицировать только связи через список PK)
+    с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
+    основе модели PsychologistProfile. Описывает, какие поля из PsychologistProfile будут участвовать в
+    сериализации/десериализации."""
+
+    specialisations = serializers.PrimaryKeyRelatedField(
+        queryset=Specialisation.objects.all(),
+        many=True,
+        required=False
+    )
+    methods = serializers.PrimaryKeyRelatedField(
+        queryset=Method.objects.all(),
+        many=True,
+        required=False
+    )
+    topics = serializers.PrimaryKeyRelatedField(
+        queryset=Topic.objects.all(),
+        many=True,
+        required=False
+    )
+
+    class Meta:
+        model = PsychologistProfile
+        fields = [
+            "gender",
+            "specialisations",
+            "methods",
+            "topics",
+            "biography",
+            "photo",
+            "work_experience",
+            "languages",
+            "therapy_format",
+            "price_individual",
+            "price_couples",
+            "work_status",
+        ]
+
+    def update(self, instance, validated_data):
+        """Метод для обновления M2M через set(), а остальные поля через super()."""
+
+        m2m_fields = ["specialisations", "methods", "topics"]
+
+        # Обрабатываем M2M поля
+        for field in m2m_fields:
+            if field in validated_data:
+                values = validated_data.pop(field)
+                getattr(instance, field).set(values)
+
+        # Обновляем обычные поля
+        return super().update(instance, validated_data)
 
 
 class ClientProfileSerializer(serializers.ModelSerializer):

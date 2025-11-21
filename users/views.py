@@ -2,6 +2,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import generics, status
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,16 +11,20 @@ from rest_framework_simplejwt.token_blacklist.models import (BlacklistedToken,
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.constants import ALLOWED_REGISTER_ROLES
-from users.models import (AppUser, Education, Method, Specialisation, Topic,
-                          UserRole)
-from users.permissions import IsOwnerOrAdmin, IsSelfOrAdmin
+from users.models import (AppUser, Education, Method, PsychologistProfile,
+                          Specialisation, Topic, UserRole)
+from users.permissions import (IsOwnerOrAdmin, IsProfileOwnerOrAdmin,
+                               IsSelfOrAdmin)
 from users.serializers import (AppUserSerializer, ChangePasswordSerializer,
                                CustomTokenObtainPairSerializer,
                                EducationSerializer, LogoutSerializer,
                                MethodSerializer,
                                PasswordResetConfirmSerializer,
-                               PasswordResetSerializer, RegisterSerializer,
-                               SpecialisationSerializer, TopicSerializer)
+                               PasswordResetSerializer,
+                               PsychologistProfileSerializer,
+                               PsychologistProfileWriteSerializer,
+                               RegisterSerializer, SpecialisationSerializer,
+                               TopicSerializer)
 from users.services.send_password_reset_email import send_password_reset_email
 from users.services.send_verification_email import send_verification_email
 from users.services.throttles import (ChangePasswordThrottle, LoginThrottle,
@@ -298,6 +303,35 @@ class AppUserRetrieveUpdateView(generics.RetrieveUpdateAPIView):
             pass
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PsychologistProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
+    """Класс-контроллер на основе Generic для работы с профилем психолога текущего пользователя:
+        - получение данных профиля психолога для текущего пользователя;
+        - редактирование данных."""
+
+    permission_classes = [IsAuthenticated, IsProfileOwnerOrAdmin]
+
+    def get_serializer_class(self):
+        """Метод для определения сериализатора в зависимости от запроса:
+            - GET: read-сериализатор;
+            - PUT/PATCH : write-сериализатор."""
+        if self.request.method in ("PUT", "PATCH"):
+            return PsychologistProfileWriteSerializer
+        return PsychologistProfileSerializer
+
+    def get_object(self):
+        """Не указываем queryset для PsychologistProfile на уровне класса (DRF best practice),
+        напрямую возвращаем объект (всегда работаем с профилем текущего пользователя)."""
+        user = self.request.user
+
+        if user.role.role != "psychologist":
+            raise PermissionDenied("Доступно только психологам.")
+
+        try:
+            return user.psychologist_profile
+        except PsychologistProfile.DoesNotExist:
+            raise NotFound("У текущего пользователя нет профиля психолога.")
 
 
 class TopicListView(generics.ListAPIView):
