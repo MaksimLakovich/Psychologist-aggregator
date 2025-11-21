@@ -2,8 +2,8 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from users.apps import UsersConfig
-from users.views import (ChangePasswordView, CustomTokenObtainPairView,
-                         EducationListCreateView,
+from users.views import (AppUserRetrieveUpdateView, ChangePasswordView,
+                         CustomTokenObtainPairView, EducationListCreateView,
                          EducationRetrieveUpdateDestroyView,
                          EmailVerificationView, LogoutAPIView,
                          MethodDetailView, MethodListView,
@@ -15,11 +15,12 @@ from users.views import (ChangePasswordView, CustomTokenObtainPairView,
 app_name = UsersConfig.name
 
 urlpatterns = [
-    # Регистрация / подтверждения
+    # Регистрация / подтверждения / редактирование
     path("register/psychologist/", RegisterView.as_view(), name="register-psychologist"),
     path("register/client/", RegisterView.as_view(), name="register-client"),
     path("verify-email/", EmailVerificationView.as_view(), name="verify-email"),
     path("resend-verify-email/", ResendEmailVerificationView.as_view(), name="resend-verify-email"),
+    path("my-account/", AppUserRetrieveUpdateView.as_view(), name="my-account"),
 
     # Auth
     path("login/", CustomTokenObtainPairView.as_view(), name="login"),

@@ -2,8 +2,10 @@ from rest_framework.permissions import BasePermission
 
 
 class IsOwnerOrAdmin(BasePermission):
-    """Кастомный permission-класс, который разрешает доступ если 'пользователь является владельцем объекта'
-    ИЛИ 'пользователь является действующим админом'."""
+    """Кастомный permission-класс, который разрешает доступ если:
+        - пользователь является владельцем объекта;
+        - пользователь является действующим админом.
+    Используется для Education-эндпоинтов."""
 
     message = "У вас нет прав на действия с данной записью."
 
@@ -11,24 +13,38 @@ class IsOwnerOrAdmin(BasePermission):
         """Возвращает True, если пользователь является владельцем объекта ИЛИ действующим админом."""
         user = request.user
 
+        if not user or not user.is_authenticated:
+            return False
+
         # Булево выражение (в виде логической цепочки). Оно возвращает True, только если все условия истинны
         return (
             obj.creator == user
-            or (user.is_authenticated and user.is_staff and user.is_active)
+            or (user.is_staff and user.is_active)
         )
 
 
-# class IsOwner(BasePermission):
-#     """Кастомный permission-класс, который разрешает доступ только владельцу объекта."""
-#
-#     message = "У вас нет прав на действия с данной записью."
-#
-#     def has_object_permission(self, request, view, obj):
-#         """Возвращает True, если пользователь является владельцем объекта.
-#         Используется во views для ограничения доступа к операциям с чужими объектами."""
-#         return obj.creator == request.user  # Булево выражение
-#
-#
+class IsSelfOrAdmin(BasePermission):
+    """Кастомный permission-класс, который разрешает доступ если:
+        - объект AppUser равен request.user (владение);
+        - пользователь является действующим админом.
+    Используется для AppUser-эндпоинтов (там нет поля Creator поэтому работаем с "obj == user")."""
+
+    message = "У вас нет прав на доступ к этому аккаунту."
+
+    def has_object_permission(self, request, view, obj):
+        """Возвращает True, если пользователь является владельцем объекта ИЛИ действующим админом."""
+
+        user = request.user
+
+        if not user or not user.is_authenticated:
+            return False
+
+        return (
+            obj == user
+            or (user.is_staff and user.is_active)
+        )
+
+
 # class IsActiveAdmin(BasePermission):
 #     """Кастомный permission-класс, который разрешает доступ только действующим админам (is_active + is_staff)."""
 #
