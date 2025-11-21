@@ -5,13 +5,15 @@ from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.token_blacklist.models import (BlacklistedToken,
+                                                             OutstandingToken)
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.constants import ALLOWED_REGISTER_ROLES
 from users.models import (AppUser, Education, Method, Specialisation, Topic,
                           UserRole)
-from users.permissions import IsOwnerOrAdmin
-from users.serializers import (ChangePasswordSerializer,
+from users.permissions import IsOwnerOrAdmin, IsSelfOrAdmin
+from users.serializers import (AppUserSerializer, ChangePasswordSerializer,
                                CustomTokenObtainPairSerializer,
                                EducationSerializer, LogoutSerializer,
                                MethodSerializer,
@@ -24,35 +26,6 @@ from users.services.throttles import (ChangePasswordThrottle, LoginThrottle,
                                       PasswordResetConfirmThrottle,
                                       PasswordResetThrottle, RegisterThrottle,
                                       ResendThrottle)
-
-
-class CustomTokenObtainPairView(TokenObtainPairView):
-    """Класс-контроллер на основе TokenObtainPairView для авторизации по email."""
-
-    serializer_class = CustomTokenObtainPairSerializer
-    permission_classes = [AllowAny]  # type: ignore[assignment]
-    throttle_classes = [LoginThrottle]  # Добавляю throttle для безопасности системы (сейчас у нас по IP, а не email)
-
-
-class LogoutAPIView(APIView):
-    """Класс-контроллер на основе APIView для реального выхода пользователя из системы.
-    Добавляет его refresh токен в blacklist, делая невозможным дальнейшее обновление access токена."""
-
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
-        """Метод POST на эндпоинте /logout/ для выполнения реального выхода из системы:
-            1. Принимает refresh-токен от клиента.
-            2. Валидирует его с помощью LogoutSerializer.
-            3. Заносит токен в blacklist.
-            4. Возвращает код 205 (Reset Content), чтобы фронтенд сбросил состояние.
-        После этого refresh-токен становится полностью недействительным."""
-        serializer = LogoutSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        # 205 - это стандартный HTTP-код, который браузеры используют для "сбросить состояние клиента".
-        return Response({"detail": "Успешный выход."}, status=status.HTTP_205_RESET_CONTENT)
 
 
 class RegisterView(generics.GenericAPIView):
@@ -144,6 +117,35 @@ class EmailVerificationView(APIView):
         return Response(
             {"detail": "Email успешно подтвержден!"}, status=status.HTTP_200_OK
         )
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    """Класс-контроллер на основе TokenObtainPairView для авторизации по email."""
+
+    serializer_class = CustomTokenObtainPairSerializer
+    permission_classes = [AllowAny]  # type: ignore[assignment]
+    throttle_classes = [LoginThrottle]  # Добавляю throttle для безопасности системы (сейчас у нас по IP, а не email)
+
+
+class LogoutAPIView(APIView):
+    """Класс-контроллер на основе APIView для реального выхода пользователя из системы.
+    Добавляет его refresh токен в blacklist, делая невозможным дальнейшее обновление access токена."""
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        """Метод POST на эндпоинте /logout/ для выполнения реального выхода из системы:
+            1. Принимает refresh-токен от клиента.
+            2. Валидирует его с помощью LogoutSerializer.
+            3. Заносит токен в blacklist.
+            4. Возвращает код 205 (Reset Content), чтобы фронтенд сбросил состояние.
+        После этого refresh-токен становится полностью недействительным."""
+        serializer = LogoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        # 205 - это стандартный HTTP-код, который браузеры используют для "сбросить состояние клиента".
+        return Response({"detail": "Успешный выход."}, status=status.HTTP_205_RESET_CONTENT)
 
 
 class ResendEmailVerificationView(APIView):
@@ -248,6 +250,54 @@ class PasswordResetConfirmView(APIView):
         return Response(
             data={"detail": "Пароль успешно изменен."}, status=status.HTTP_200_OK
         )
+
+
+class AppUserRetrieveUpdateView(generics.RetrieveUpdateAPIView):
+    """Класс-контроллер на основе Generic для работы с одним конкретным AppUser (аккаунт):
+        - получение данных текущего пользователя;
+        - редактирование данных;
+        - soft-delete: вместо DESTROY-запроса (устанавливаем is_active=False и блокируем токены)."""
+
+    permission_classes = [IsAuthenticated, IsSelfOrAdmin]
+    serializer_class = AppUserSerializer
+
+    def get_object(self):
+        """Не указываем queryset для AppUser на уровне класса (DRF best practice),
+        напрямую возвращаем объект (всегда работаем с текущим пользователем)."""
+        return self.request.user
+
+    def perform_update(self, serializer):
+        """Если пользователь меняет email - требуем повторную верификацию/активацию:
+            - если email изменился, помечаем user.is_active=False и отправляем письмо для новой активации.
+            - если меняются остальные данные, то без повторной активации аккаунта."""
+        user = self.get_object()
+        old_email = user.email
+        user = serializer.save()
+
+        # При смене email - требуем повторную верификацию
+        if old_email != user.email:
+            user.is_active = False
+            user.save()
+            send_verification_email(user)
+
+    def delete(self, request, *args, **kwargs):
+        """Soft-delete: помечаем is_active=False.
+        Дополнительно: заносим все outstanding tokens в blacklist, чтобы никто не мог рефрешить токен."""
+        user = self.get_object()
+        user.is_active = False
+        user.save()
+
+        # Blacklist все outstanding-tokens для этого пользователя
+        try:
+            outstanding_tokens = OutstandingToken.objects.filter(user=user)
+            for token in outstanding_tokens:
+                # Безопасно: создаем BlacklistedToken, если его еще нет
+                BlacklistedToken.objects.get_or_create(token=token)
+        except Exception:
+            # не фатально - логируем при продакшн-логах
+            pass
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TopicListView(generics.ListAPIView):

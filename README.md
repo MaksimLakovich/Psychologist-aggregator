@@ -290,7 +290,7 @@
 
 ### 1. Разработано приложение `users`:
    - ✅ Модели данных, миксины, админки, константы, валидаторы, сервисные функции
-   - ✅ *Права доступов / permissions.py*: IsOwnerOrAdmin
+   - ✅ *Права доступов / permissions.py*: IsOwnerOrAdmin, IsSelfOrAdmin
    - ✅ *Сериализаторы для API / serializers.py*:
      - ✅ *Основа* - все базовые сериализаторы (AppUser, PsychologistProfile, ClientProfile, Topic, Method, Specialisation, Education)
      - ✅ *Сериализатор-оркестр* - соединяет разные сериализаторы (пользователь + профиль) при регистрации нового пользователя в системе
