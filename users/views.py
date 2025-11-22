@@ -328,6 +328,10 @@ class PsychologistProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
         if user.role.role != "psychologist":
             raise PermissionDenied("Доступно только психологам.")
 
+        # это related_name="psychologist_profile" в модели PsychologistProfile и поэтому получаю связанный
+        # профиль (один-к-одному) из AppUser.
+        # Это удобнее и короче, чем PsychologistProfile.objects.get(user=user) -  по смыслу одно и то же,
+        # но user.psychologist_profile читается проще и отражает "у пользователя есть свой профиль".
         try:
             return user.psychologist_profile
         except PsychologistProfile.DoesNotExist:
