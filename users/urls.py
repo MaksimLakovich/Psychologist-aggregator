@@ -11,7 +11,7 @@ from users.views import (AppUserRetrieveUpdateView, ChangePasswordView,
                          PsychologistProfileRetrieveUpdateView, RegisterView,
                          ResendEmailVerificationView, SpecialisationDetailView,
                          SpecialisationListView, TopicDetailView,
-                         TopicListView)
+                         TopicListView, ClientProfileRetrieveUpdateView)
 
 app_name = UsersConfig.name
 
@@ -22,7 +22,12 @@ urlpatterns = [
     path("verify-email/", EmailVerificationView.as_view(), name="verify-email"),
     path("resend-verify-email/", ResendEmailVerificationView.as_view(), name="resend-verify-email"),
     path("my-account/", AppUserRetrieveUpdateView.as_view(), name="my-account"),
-    path("my-psychologist-profile/", PsychologistProfileRetrieveUpdateView.as_view(), name="my-psychologist-profile"),
+    path(
+        "my-psychologist-profile/",
+        PsychologistProfileRetrieveUpdateView.as_view(),
+        name="my-psychologist-profile"
+    ),
+    path("my-client-profile/", ClientProfileRetrieveUpdateView.as_view(), name="my-client-profile"),
 
     # Auth
     path("login/", CustomTokenObtainPairView.as_view(), name="login"),

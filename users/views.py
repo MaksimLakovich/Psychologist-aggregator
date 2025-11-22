@@ -12,7 +12,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.constants import ALLOWED_REGISTER_ROLES
 from users.models import (AppUser, Education, Method, PsychologistProfile,
-                          Specialisation, Topic, UserRole)
+                          Specialisation, Topic, UserRole, ClientProfile)
 from users.permissions import (IsOwnerOrAdmin, IsProfileOwnerOrAdmin,
                                IsSelfOrAdmin)
 from users.serializers import (AppUserSerializer, ChangePasswordSerializer,
@@ -21,10 +21,10 @@ from users.serializers import (AppUserSerializer, ChangePasswordSerializer,
                                MethodSerializer,
                                PasswordResetConfirmSerializer,
                                PasswordResetSerializer,
-                               PsychologistProfileSerializer,
+                               PsychologistProfileReadSerializer,
                                PsychologistProfileWriteSerializer,
                                RegisterSerializer, SpecialisationSerializer,
-                               TopicSerializer)
+                               TopicSerializer, ClientProfileWriteSerializer, ClientProfileReadSerializer)
 from users.services.send_password_reset_email import send_password_reset_email
 from users.services.send_verification_email import send_verification_email
 from users.services.throttles import (ChangePasswordThrottle, LoginThrottle,
@@ -318,7 +318,7 @@ class PsychologistProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
             - PUT/PATCH : write-сериализатор."""
         if self.request.method in ("PUT", "PATCH"):
             return PsychologistProfileWriteSerializer
-        return PsychologistProfileSerializer
+        return PsychologistProfileReadSerializer
 
     def get_object(self):
         """Не указываем queryset для PsychologistProfile на уровне класса (DRF best practice),
@@ -336,6 +336,39 @@ class PsychologistProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
             return user.psychologist_profile
         except PsychologistProfile.DoesNotExist:
             raise NotFound("У текущего пользователя нет профиля психолога.")
+
+
+class ClientProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
+    """Класс-контроллер на основе Generic для работы с профилем клиента текущего пользователя:
+        - получение данных профиля клиента для текущего пользователя;
+        - редактирование данных."""
+
+    permission_classes = [IsAuthenticated, IsProfileOwnerOrAdmin]
+
+    def get_serializer_class(self):
+        """Метод для определения сериализатора в зависимости от запроса:
+            - GET: read-сериализатор;
+            - PUT/PATCH : write-сериализатор."""
+        if self.request.method in ("PUT", "PATCH"):
+            return ClientProfileWriteSerializer
+        return ClientProfileReadSerializer
+
+    def get_object(self):
+        """Не указываем queryset для ClientProfile на уровне класса (DRF best practice),
+        напрямую возвращаем объект (всегда работаем с профилем текущего пользователя)."""
+        user = self.request.user
+
+        if user.role.role != "client":
+            raise PermissionDenied("Доступно только клиентам.")
+
+        # это related_name="client_profile" в модели ClientProfile и поэтому получаю связанный
+        # профиль (один-к-одному) из AppUser.
+        # Это удобнее и короче, чем ClientProfile.objects.get(user=user) -  по смыслу одно и то же,
+        # но user.client_profile читается проще и отражает "у пользователя есть свой профиль".
+        try:
+            return user.client_profile
+        except ClientProfile.DoesNotExist:
+            raise NotFound("У текущего пользователя нет профиля клиента.")
 
 
 class TopicListView(generics.ListAPIView):
