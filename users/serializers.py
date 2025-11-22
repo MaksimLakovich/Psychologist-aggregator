@@ -158,7 +158,7 @@ class PsychologistProfileSerializer(serializers.ModelSerializer):
     specialisations = SpecialisationSerializer(read_only=True, many=True)
     methods = MethodSerializer(read_only=True, many=True)
     topics = TopicSerializer(read_only=True, many=True)
-    educations = EducationSerializer(read_only=True, many=True)
+    educations = serializers.SerializerMethodField()  # забираем записи из модели Education по creator (AppUser)
 
     class Meta:
         model = PsychologistProfile
@@ -186,6 +186,14 @@ class PsychologistProfileSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id", "is_verified", "is_all_education_verified", "rating", "created_at", "updated_at"
         ]
+
+    def get_educations(self, obj):
+        """Получаем из модели Education записи текущего психолога."""
+        user = obj.user
+        return EducationSerializer(
+            Education.objects.filter(creator=user).order_by("-year_start"),
+            many=True
+        ).data
 
 
 class PsychologistProfileWriteSerializer(serializers.ModelSerializer):

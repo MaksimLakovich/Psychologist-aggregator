@@ -183,7 +183,6 @@
     | `specialisations`           | ManyToMany → `Specialisation` | Список специализаций (методологических школ)                   |
     | `methods`                   | ManyToMany → `Method`         | Методы или подходы, используемые психологом                    |
     | `topics`                    | ManyToMany → `Topic`          | Темы или запросы, с которыми работает психолог                 |
-    | `educations`                | ManyToMany → `Education`      | Сведения об образовании психолога                              |
     | `is_all_education_verified` | BooleanField                  | Проверено ли все образование                                   |
     | `biography`                 | TextField                     | Описание, биография психолога                                  |
     | `photo`                     | ImageField                    | Фотография профиля (.jpg, .jpeg, .png)                         |
