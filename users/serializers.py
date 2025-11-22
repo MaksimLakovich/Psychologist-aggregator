@@ -149,7 +149,7 @@ class AppUserSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class PsychologistProfileSerializer(serializers.ModelSerializer):
+class PsychologistProfileReadSerializer(serializers.ModelSerializer):
     """Read-сериализатор (используется для GET - создавать/редактировать вложенные объекты через него нельзя)
     с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
     основе модели PsychologistProfile. Описывает, какие поля из PsychologistProfile будут участвовать в
@@ -158,7 +158,7 @@ class PsychologistProfileSerializer(serializers.ModelSerializer):
     specialisations = SpecialisationSerializer(read_only=True, many=True)
     methods = MethodSerializer(read_only=True, many=True)
     topics = TopicSerializer(read_only=True, many=True)
-    educations = EducationSerializer(read_only=True, many=True)
+    educations = serializers.SerializerMethodField()  # забираем записи из модели Education по creator (AppUser)
 
     class Meta:
         model = PsychologistProfile
@@ -186,6 +186,14 @@ class PsychologistProfileSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id", "is_verified", "is_all_education_verified", "rating", "created_at", "updated_at"
         ]
+
+    def get_educations(self, obj):
+        """Получаем из модели Education записи текущего психолога."""
+        user = obj.user
+        return EducationSerializer(
+            Education.objects.filter(creator=user).order_by("-year_start"),
+            many=True
+        ).data
 
 
 class PsychologistProfileWriteSerializer(serializers.ModelSerializer):
@@ -242,8 +250,9 @@ class PsychologistProfileWriteSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class ClientProfileSerializer(serializers.ModelSerializer):
-    """Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
+class ClientProfileReadSerializer(serializers.ModelSerializer):
+    """Read-сериализатор (используется для GET - создавать/редактировать вложенные объекты через него нельзя)
+     с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
     основе ClientProfile. Описывает, какие поля из ClientProfile будут участвовать в сериализации/десериализации."""
 
     preferred_methods = MethodSerializer(read_only=True, many=True)
@@ -253,6 +262,41 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         model = ClientProfile
         fields = ["id", "therapy_experience", "preferred_methods", "requested_topics", "created_at", "updated_at"]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class ClientProfileWriteSerializer(serializers.ModelSerializer):
+    """Write-сериализатор (используется для PATCH/PUT - разрешает модифицировать только связи через список PK)
+     с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
+    основе ClientProfile. Описывает, какие поля из ClientProfile будут участвовать в сериализации/десериализации."""
+
+    preferred_methods = serializers.PrimaryKeyRelatedField(
+        queryset=Method.objects.all(),
+        many=True,
+        required=False
+    )
+    requested_topics = serializers.PrimaryKeyRelatedField(
+        queryset=Topic.objects.all(),
+        many=True,
+        required=False
+    )
+
+    class Meta:
+        model = ClientProfile
+        fields = ["therapy_experience", "preferred_methods", "requested_topics"]
+
+    def update(self, instance, validated_data):
+        """Метод для обновления M2M через set(), а остальные поля через super()."""
+
+        m2m_fields = ["preferred_methods", "requested_topics"]
+
+        # Обрабатываем M2M поля
+        for field in m2m_fields:
+            if field in validated_data:
+                values = validated_data.pop(field)
+                getattr(instance, field).set(values)
+
+        # Обновляем обычные поля
+        return super().update(instance, validated_data)
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -416,10 +460,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         try:
             if obj.role.role.lower() == "psychologist":
                 profile = PsychologistProfile.objects.get(user=obj)
-                data["profile"] = PsychologistProfileSerializer(profile).data
+                data["profile"] = PsychologistProfileReadSerializer(profile).data
             elif obj.role.role.lower() == "client":
                 profile = ClientProfile.objects.get(user=obj)
-                data["profile"] = ClientProfileSerializer(profile).data
+                data["profile"] = ClientProfileReadSerializer(profile).data
         except (PsychologistProfile.DoesNotExist, ClientProfile.DoesNotExist):
             data["profile"] = None
 

@@ -453,13 +453,6 @@ class PsychologistProfile(TimeStampedModel):
         verbose_name="Запрос",
         help_text="Добавьте тему/вопрос (запрос на терапию)",
     )
-    educations = models.ManyToManyField(
-        to=Education,
-        blank=True,
-        related_name="education_psychologists",
-        verbose_name="Образование",
-        help_text="Добавьте образование",
-    )
     is_all_education_verified = models.BooleanField(
         default=False,
         verbose_name="Верификация образования",
