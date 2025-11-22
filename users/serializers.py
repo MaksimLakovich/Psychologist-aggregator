@@ -460,10 +460,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         try:
             if obj.role.role.lower() == "psychologist":
                 profile = PsychologistProfile.objects.get(user=obj)
-                data["profile"] = PsychologistProfileSerializer(profile).data
+                data["profile"] = PsychologistProfileReadSerializer(profile).data
             elif obj.role.role.lower() == "client":
                 profile = ClientProfile.objects.get(user=obj)
-                data["profile"] = ClientProfileSerializer(profile).data
+                data["profile"] = ClientProfileReadSerializer(profile).data
         except (PsychologistProfile.DoesNotExist, ClientProfile.DoesNotExist):
             data["profile"] = None
 

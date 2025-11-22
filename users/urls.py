@@ -3,6 +3,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from users.apps import UsersConfig
 from users.views import (AppUserRetrieveUpdateView, ChangePasswordView,
+                         ClientProfileRetrieveUpdateView,
                          CustomTokenObtainPairView, EducationListCreateView,
                          EducationRetrieveUpdateDestroyView,
                          EmailVerificationView, LogoutAPIView,
@@ -11,7 +12,7 @@ from users.views import (AppUserRetrieveUpdateView, ChangePasswordView,
                          PsychologistProfileRetrieveUpdateView, RegisterView,
                          ResendEmailVerificationView, SpecialisationDetailView,
                          SpecialisationListView, TopicDetailView,
-                         TopicListView, ClientProfileRetrieveUpdateView)
+                         TopicListView)
 
 app_name = UsersConfig.name
 
