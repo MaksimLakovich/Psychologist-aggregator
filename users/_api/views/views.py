@@ -10,23 +10,18 @@ from rest_framework_simplejwt.token_blacklist.models import (BlacklistedToken,
                                                              OutstandingToken)
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from users._api.serializers.serializers import (
+    AppUserSerializer, ChangePasswordSerializer, ClientProfileReadSerializer,
+    ClientProfileWriteSerializer, CustomTokenObtainPairSerializer,
+    EducationSerializer, LogoutSerializer, MethodSerializer,
+    PasswordResetConfirmSerializer, PasswordResetSerializer,
+    PsychologistProfileReadSerializer, PsychologistProfileWriteSerializer,
+    RegisterSerializer, SpecialisationSerializer, TopicSerializer)
 from users.constants import ALLOWED_REGISTER_ROLES
 from users.models import (AppUser, ClientProfile, Education, Method,
                           PsychologistProfile, Specialisation, Topic, UserRole)
 from users.permissions import (IsOwnerOrAdmin, IsProfileOwnerOrAdmin,
                                IsSelfOrAdmin)
-from users._api.serializers.serializers import (AppUserSerializer, ChangePasswordSerializer,
-                                                ClientProfileReadSerializer,
-                                                ClientProfileWriteSerializer,
-                                                CustomTokenObtainPairSerializer,
-                                                EducationSerializer, LogoutSerializer,
-                                                MethodSerializer,
-                                                PasswordResetConfirmSerializer,
-                                                PasswordResetSerializer,
-                                                PsychologistProfileReadSerializer,
-                                                PsychologistProfileWriteSerializer,
-                                                RegisterSerializer, SpecialisationSerializer,
-                                                TopicSerializer)
 from users.services.send_password_reset_email import send_password_reset_email
 from users.services.send_verification_email import send_verification_email
 from users.services.throttles import (ChangePasswordThrottle, LoginThrottle,
