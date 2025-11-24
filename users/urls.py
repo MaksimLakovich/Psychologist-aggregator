@@ -1,4 +1,5 @@
-from django.urls import path, include
+from django.urls import include, path
+
 from users.apps import UsersConfig
 
 app_name = UsersConfig.name

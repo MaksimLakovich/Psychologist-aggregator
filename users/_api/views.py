@@ -10,23 +10,25 @@ from rest_framework_simplejwt.token_blacklist.models import (BlacklistedToken,
                                                              OutstandingToken)
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from users._api.serializers import (AppUserSerializer,
+                                    ChangePasswordSerializer,
+                                    ClientProfileReadSerializer,
+                                    ClientProfileWriteSerializer,
+                                    CustomTokenObtainPairSerializer,
+                                    EducationSerializer, LogoutSerializer,
+                                    MethodSerializer,
+                                    PasswordResetConfirmSerializer,
+                                    PasswordResetSerializer,
+                                    PsychologistProfileReadSerializer,
+                                    PsychologistProfileWriteSerializer,
+                                    PublicPsychologistProfileSerializer,
+                                    RegisterSerializer,
+                                    SpecialisationSerializer, TopicSerializer)
 from users.constants import ALLOWED_REGISTER_ROLES
 from users.models import (AppUser, ClientProfile, Education, Method,
                           PsychologistProfile, Specialisation, Topic, UserRole)
 from users.permissions import (IsOwnerOrAdmin, IsProfileOwnerOrAdmin,
                                IsSelfOrAdmin)
-from users._api.serializers.serializers import (AppUserSerializer, ChangePasswordSerializer,
-                                                ClientProfileReadSerializer,
-                                                ClientProfileWriteSerializer,
-                                                CustomTokenObtainPairSerializer,
-                                                EducationSerializer, LogoutSerializer,
-                                                MethodSerializer,
-                                                PasswordResetConfirmSerializer,
-                                                PasswordResetSerializer,
-                                                PsychologistProfileReadSerializer,
-                                                PsychologistProfileWriteSerializer,
-                                                RegisterSerializer, SpecialisationSerializer,
-                                                TopicSerializer)
 from users.services.send_password_reset_email import send_password_reset_email
 from users.services.send_verification_email import send_verification_email
 from users.services.throttles import (ChangePasswordThrottle, LoginThrottle,
@@ -338,6 +340,18 @@ class PsychologistProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
             return user.psychologist_profile
         except PsychologistProfile.DoesNotExist:
             raise NotFound("У текущего пользователя нет профиля психолога.")
+
+
+class PublicPsychologistProfileRetrieveView(generics.RetrieveAPIView):
+    """Класс-контроллер на основе Generic для получения данных *Публичного профиля психолога* любым
+    авторизованным пользователем системы (скрыты персональные секретные данные - телефон, email и так далее)."""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = PublicPsychologistProfileSerializer
+    queryset = PsychologistProfile.objects.select_related("user").all()
+
+    lookup_field = "user__uuid"  # поле в модели
+    lookup_url_kwarg = "uuid"  # имя аргумента, которое будем использоать в URL
 
 
 class ClientProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):

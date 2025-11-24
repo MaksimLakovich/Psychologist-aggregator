@@ -115,7 +115,7 @@
 ### 2. Структура проекта:
 
 <details>
-  <summary>Детальная структура проекта (нажми чтобы развернуть)</summary>
+  <summary><strong>❗ Детальная структура проекта (нажми чтобы развернуть)</strong></summary>
 
 ```bash
 .
@@ -137,33 +137,22 @@
 │
 ├── users/                      # ⭐️ Приложение django-проекта ("Пользователи") + справочники системы (UserRole, Topic, Specialisation, Method, Education, Experience)
 │    ├── _api/                        # ℹ️ API-часть (DRF)
-│    │    ├── serializers/
-│    │    │    ├── auth.py                    # JWT / регистрация / email confirm
-│    │    │    ├── user.py                    # AppUser сериализаторы
-│    │    │    ├── psychologist_profile.py    # Психолог
-│    │    │    ├── client_profile.py          # Клиент
-│    │    │    └── education.py               # Образование
-│    │    ├── views/
-│    │    │    ├── auth.py                    # Регистрация, логин, refresh, logout
-│    │    │    ├── account.py                 # Свой аккаунт AppUser
-│    │    │    ├── profile_psychologist.py    # Профили психологов
-│    │    │    ├── public_profiles.py         # Публичная карточка психолога
-│    │    │    ├── profile_client.py          # Профили клиентов
-│    │    │    └── education.py               # CRUD образования
+│    │    ├── serializers.py                  # JWT-auth / регистрация / email confirm / пароли (reset/change) / аккаунт / профили (психолог/клиент) / системные справочники
+│    │    ├── views.py                        # Регистрация, логин, refresh, logout / Email / Пароли / Свой аккаунт AppUser / Профили (психолог/клиент) / Публичная карточка психолога / CRUD образования
 │    │    └──  urls.py                        # Все API-роуты
 │    ├── _web/                        # ℹ️ WEB-часть (формы + HTML)
-│    │    ├── views/
-│    │    │    ├── auth.py                    # Login / Logout / Register
-│    │    │    ├── account.py                 # Редактирование своего профиля
-│    │    │    ├── profile_psychologist.py    # Web-редактирование психолога
-│    │    │    ├── public_profiles.py         # Публичные страницы психологов
-│    │    │    ├── profile_client.py          # Web-редактирование клиента
-│    │    │    └── education.py               # Образование
-│    │    ├── forms/
-│    │    │    ├── user.py                    # Формы для аккаунта AppUser
-│    │    │    ├── psychologist_profile.py    # Формы для профиля психолога
-│    │    │    ├── client_profile.py          # Формы для профиля клиента
-│    │    │    └── education.py               # Формы для образования
+│    │    ├── views.py
+│    │    │    ├── auth                              # Login / Logout / Register
+│    │    │    ├── account                           # Редактирование своего профиля
+│    │    │    ├── profile_psychologist              # Web-редактирование психолога
+│    │    │    ├── public_profiles                   # Публичные страницы психологов
+│    │    │    ├── profile_client                    # Web-редактирование клиента
+│    │    │    └── education                         # Образование
+│    │    ├── forms.py
+│    │    │    ├── user                              # Формы для аккаунта AppUser
+│    │    │    ├── psychologist_profile              # Формы для профиля психолога
+│    │    │    ├── client_profile                    # Формы для профиля клиента
+│    │    │    └── education                         # Формы для образования
 │    │    ├── templates/                      # HTML-шаблоны
 │    │    │    └── users/
 │    │    │          ├── auth/
@@ -172,17 +161,17 @@
 │    │    │          └── education/
 │    │    └── urls.py                         # Роуты для web-страниц
 │    ├── migrations/
-│    ├── services/                      # Сервисные вспомогательные функции
+│    ├── services/                    # Сервисные вспомогательные функции
 │    │    ├── slug.py
 │    │    ├── defaults.py
 │    │    ├── send_verification_email.py
 │    │    ├── send_password_reset_email.py
 │    │    ├── throttles.py
 │    │    └── ...
-│    ├── mixins/                        # Миксины
-│    │    ├── creator_mixin.py          # Автоматически заполняет поле creator текущим пользователем при создании объекта модели
+│    ├── mixins/                      # Миксины
+│    │    ├── creator_mixin.py        # Автоматически заполняет поле creator текущим пользователем при создании объекта модели
 │    │    └── ...
-│    ├── tests/                         # Тесты
+│    ├── tests/                       # Тесты
 │    │    ├── api/
 │    │    │    ├── test_auth.py
 │    │    │    ├── test_account.py
@@ -191,34 +180,34 @@
 │    │    │    └── ...
 │    │    └── ...
 │    ├── apps.py
-│    ├── validators.py                  # Кастомные валидаторы для различных полей и данных
-│    ├── constants.py                   # Статические справочники и переменные
-│    ├── models.py                      # Модели данных
-│    ├── admin.py                       # Админки для моделей данных
-│    ├── managers.py                    # Кастомные команды для создания пользователей
-│    ├── permissions.py                 # Кастомные права доступов ("владелец?", "админ?" и прочее)
-│    └── urls.py                        # Корневой маршрутизатор users/
+│    ├── validators.py                # Кастомные валидаторы для различных полей и данных
+│    ├── constants.py                 # Статические справочники и переменные
+│    ├── models.py                    # Модели данных
+│    ├── admin.py                     # Админки для моделей данных
+│    ├── managers.py                  # Кастомные команды для создания пользователей
+│    ├── permissions.py               # Кастомные права доступов ("владелец?", "админ?" и прочее)
+│    └── urls.py                      # Корневой маршрутизатор users/
 │
 ├── aggregator/                 # ⭐️ Приложение django-проекта ("Подбор психолога")
-│    ├── templates/                     # шаблоны страниц
+│    ├── templates/                   # шаблоны страниц
 │    ├── services/
-│    │    └── search_service.py         # поиск, фильтрация и подбор психолога по параметрам
+│    │    └── search_service.py       # поиск, фильтрация и подбор психолога по параметрам
 │    ├── apps.py
-│    ├── models.py                      # модели данных
-│    ├── admin.py                       # админки для моделей данных
+│    ├── models.py                    # модели данных
+│    ├── admin.py                     # админки для моделей данных
 │    ├── serializers.py
-│    ├── views.py                       # вьюхи
-│    └── urls.py                        # маршруты
+│    ├── views.py                     # вьюхи
+│    └── urls.py                      # маршруты
 │
 ├── calendar/                   # ⭐️ Приложение django-проекта ("Календарь")
 │    ├── services/
-│    │    └── calendar_service.py       # управление расписаниями и записями: создание, перенос, отмена, проверка пересечений, генерация доступных слотов
+│    │    └── calendar_service.py     # управление расписаниями и записями: создание, перенос, отмена, проверка пересечений, генерация доступных слотов
 │    ├── apps.py
-│    ├── models.py                      # модели данных
-│    ├── admin.py                       # админки для моделей данных
+│    ├── models.py                    # модели данных
+│    ├── admin.py                     # админки для моделей данных
 │    ├── serializers.py
-│    ├── views.py                       # вьюхи
-│    └── urls.py                        # маршруты
+│    ├── views.py                     # вьюхи
+│    └── urls.py                      # маршруты
 │
 ├── legislation/                # Приложение django-проекта ("Законодательство")
 │    ├── ... в плане этапа 2
@@ -340,24 +329,24 @@
 
 ### 1. Разработано приложение `users`:
    - ✅ Модели данных, миксины, админки, константы, валидаторы, сервисные функции
-   - ✅ *Права доступов / permissions.py*: IsOwnerOrAdmin, IsSelfOrAdmin, IsProfileOwnerOrAdmin
-   - ✅ *Сериализаторы для API / serializers.py*:
+   - ✅ *Права доступов*: IsOwnerOrAdmin, IsSelfOrAdmin, IsProfileOwnerOrAdmin
+   - ✅ *Сериализаторы для API*:
      - ✅ *Основа* - все базовые сериализаторы (AppUser, PsychologistProfile, ClientProfile, Topic, Method, Specialisation, Education)
      - ✅ *Сериализатор-оркестр* - соединяет разные сериализаторы (пользователь + профиль) при регистрации нового пользователя в системе
      - ✅ *Auth-сериализаторы* - вход, выход, сброс пароля для неавторизованного пользователя (забыл пароль), изменение пароля авторизованным пользователем 
-   - ✅ *API-вью / views.py*:
+   - ✅ *API-вью*:
      - ✅ *AppUser, PsychologistProfile, ClientProfile* - эндпоинты регистрации, активации пользователя с подтверждением email и добавлением throttle (anti-spam), авторизации (JWT) + logout, получения/редактирования профилей, восстановление и сброса пароля
      - ✅ *Topic* - эндпоинты для просмотра/получения тем
      - ✅ *Method* - эндпоинты для просмотра/получения методов
      - ✅ *Specialisation* - эндпоинты для просмотра/получения специализации
      - ✅ *Education* - эндпоинты для добавления/просмотра/выбора/редактирования/подтверждения образования
-   - ✅ *API-маршруты / urls.py*:
+   - ✅ *API-роуты*:
      - ✅ *AppUser, PsychologistProfile, ClientProfile* - маршрутизация API (api/users/...)
      - ✅ *Topic* - маршрутизация API (api/topics/...)
      - ✅ *Method* - маршрутизация API (api/methods/...)
      - ✅ *Specialisation* - маршрутизация API (api/specialisations/...)
      - ✅ *Education* - маршрутизация API (api/educations/...)
-   - 🟨 *API-тестирование / tests.py*:
+   - 🟨 *API-тестирование*:
      - ⬜ *AppUser, PsychologistProfile, ClientProfile* - базовые unit-тесты на регистрацию и CRUD
      - ⬜ *Topic* - базовые unit-тесты для тем
      - ⬜ *Method* - базовые unit-тесты для методов
@@ -368,7 +357,7 @@
      - ⬜ Формы (автоматизация рендеринга HTML-кода, обработка пользовательского ввода и валидация данных)
      - ⬜ *AppUser, PsychologistProfile, ClientProfile, Topic, Method, Specialisation / views.py* - эндпоинты регистрации, активации пользователя с подтверждением email и добавлением throttle (anti-spam), входа/выхода, получения/редактирования профилей, восстановление пароля
      - ⬜ *Education / views.py* - эндпоинты для добавления/просмотра/выбора/редактирования/подтверждения образования
-   - 🟨 *Web-маршруты*:
+   - 🟨 *Web-роуты*:
      - ⬜ *AppUser, PsychologistProfile, ClientProfile, Topic, Method, Specialisation / urls.py* - маршрутизация для web (users/...)
      - ⬜ *Education / urls.py* - маршрутизация для web (users/education/...)
    - 🟨 *Web-тестирование*:
@@ -391,7 +380,7 @@
 - ⬜ Разработать приложения: `legislation`, `payments`, `subscription`, `reviews`, `notifications`, `analytics`
 - ⬜ В приложении `Users` добавить новую модель **Experience** - профессиональный опыт (аналог подтверждения опыта, как сделано для Education + на основе верификации записей в Experience рассчитывать в профиле психолога автоматически поле "work_experience" + добавить **is_all_experiences_verified** в модели PsychologistProfile):
   - Примеры полей:
-    - места работы ("Психотерапевт в частной практике", "Клиника…")
+    - места работы ("Психотерапевт в частной практике", "Клиника")
     - роли ("Психотерапевт", "Клинический психолог")
     - количество лет практики 
     - описание подхода / компетенций 
