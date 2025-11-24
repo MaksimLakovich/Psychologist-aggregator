@@ -10,6 +10,7 @@ from users._api.views import (AppUserRetrieveUpdateView, ChangePasswordView,
                               MethodDetailView, MethodListView,
                               PasswordResetConfirmView, PasswordResetView,
                               PsychologistProfileRetrieveUpdateView,
+                              PublicPsychologistProfileRetrieveView,
                               RegisterView, ResendEmailVerificationView,
                               SpecialisationDetailView, SpecialisationListView,
                               TopicDetailView, TopicListView)
@@ -30,6 +31,9 @@ urlpatterns = [
         name="my-psychologist-profile"
     ),
     path("my-client-profile/", ClientProfileRetrieveUpdateView.as_view(), name="my-client-profile"),
+    path(
+        "psychologists/<uuid:uuid>/", PublicPsychologistProfileRetrieveView.as_view(), name="psychologist-detail"
+    ),
 
     # Auth
     path("login/", CustomTokenObtainPairView.as_view(), name="login"),

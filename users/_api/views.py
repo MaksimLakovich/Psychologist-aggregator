@@ -21,6 +21,7 @@ from users._api.serializers import (AppUserSerializer,
                                     PasswordResetSerializer,
                                     PsychologistProfileReadSerializer,
                                     PsychologistProfileWriteSerializer,
+                                    PublicPsychologistProfileSerializer,
                                     RegisterSerializer,
                                     SpecialisationSerializer, TopicSerializer)
 from users.constants import ALLOWED_REGISTER_ROLES
@@ -339,6 +340,18 @@ class PsychologistProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
             return user.psychologist_profile
         except PsychologistProfile.DoesNotExist:
             raise NotFound("У текущего пользователя нет профиля психолога.")
+
+
+class PublicPsychologistProfileRetrieveView(generics.RetrieveAPIView):
+    """Класс-контроллер на основе Generic для получения данных *Публичного профиля психолога* любым
+    авторизованным пользователем системы (скрыты персональные секретные данные - телефон, email и так далее)."""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = PublicPsychologistProfileSerializer
+    queryset = PsychologistProfile.objects.select_related("user").all()
+
+    lookup_field = "user__uuid"  # поле в модели
+    lookup_url_kwarg = "uuid"  # имя аргумента, которое будем использоать в URL
 
 
 class ClientProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
