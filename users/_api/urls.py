@@ -1,18 +1,20 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
+from users._api.views import (AppUserRetrieveUpdateView, ChangePasswordView,
+                              ClientProfileRetrieveUpdateView,
+                              CustomTokenObtainPairView,
+                              EducationListCreateView,
+                              EducationRetrieveUpdateDestroyView,
+                              EmailVerificationView, LogoutAPIView,
+                              MethodDetailView, MethodListView,
+                              PasswordResetConfirmView, PasswordResetView,
+                              PsychologistProfileRetrieveUpdateView,
+                              PublicPsychologistProfileRetrieveView,
+                              RegisterView, ResendEmailVerificationView,
+                              SpecialisationDetailView, SpecialisationListView,
+                              TopicDetailView, TopicListView)
 from users.apps import UsersConfig
-from users._api.views.views import (AppUserRetrieveUpdateView, ChangePasswordView,
-                                    ClientProfileRetrieveUpdateView,
-                                    CustomTokenObtainPairView, EducationListCreateView,
-                                    EducationRetrieveUpdateDestroyView,
-                                    EmailVerificationView, LogoutAPIView,
-                                    MethodDetailView, MethodListView,
-                                    PasswordResetConfirmView, PasswordResetView,
-                                    PsychologistProfileRetrieveUpdateView, RegisterView,
-                                    ResendEmailVerificationView, SpecialisationDetailView,
-                                    SpecialisationListView, TopicDetailView,
-                                    TopicListView)
 
 app_name = UsersConfig.name
 
@@ -29,6 +31,9 @@ urlpatterns = [
         name="my-psychologist-profile"
     ),
     path("my-client-profile/", ClientProfileRetrieveUpdateView.as_view(), name="my-client-profile"),
+    path(
+        "psychologists/<uuid:uuid>/", PublicPsychologistProfileRetrieveView.as_view(), name="psychologist-detail"
+    ),
 
     # Auth
     path("login/", CustomTokenObtainPairView.as_view(), name="login"),
