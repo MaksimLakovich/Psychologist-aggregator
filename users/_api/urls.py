@@ -1,21 +1,18 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from users._api.views.views import (AppUserRetrieveUpdateView,
-                                    ChangePasswordView,
-                                    ClientProfileRetrieveUpdateView,
-                                    CustomTokenObtainPairView,
-                                    EducationListCreateView,
-                                    EducationRetrieveUpdateDestroyView,
-                                    EmailVerificationView, LogoutAPIView,
-                                    MethodDetailView, MethodListView,
-                                    PasswordResetConfirmView,
-                                    PasswordResetView,
-                                    PsychologistProfileRetrieveUpdateView,
-                                    RegisterView, ResendEmailVerificationView,
-                                    SpecialisationDetailView,
-                                    SpecialisationListView, TopicDetailView,
-                                    TopicListView)
+from users._api.views import (AppUserRetrieveUpdateView, ChangePasswordView,
+                              ClientProfileRetrieveUpdateView,
+                              CustomTokenObtainPairView,
+                              EducationListCreateView,
+                              EducationRetrieveUpdateDestroyView,
+                              EmailVerificationView, LogoutAPIView,
+                              MethodDetailView, MethodListView,
+                              PasswordResetConfirmView, PasswordResetView,
+                              PsychologistProfileRetrieveUpdateView,
+                              RegisterView, ResendEmailVerificationView,
+                              SpecialisationDetailView, SpecialisationListView,
+                              TopicDetailView, TopicListView)
 from users.apps import UsersConfig
 
 app_name = UsersConfig.name
