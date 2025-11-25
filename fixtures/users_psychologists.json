@@ -1,0 +1,1761 @@
+[
+  {
+    "model": "users.appuser",
+    "pk": "11111111-1111-4111-8111-111111111111",
+    "fields": {
+      "first_name": "Ирина",
+      "last_name": "Иванова",
+      "age": 31,
+      "email": "ps_test_1@example.com",
+      "phone_number": "+375291234567",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 1,
+    "fields": {
+      "user": "11111111-1111-4111-8111-111111111111",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [2],
+      "methods": [13, 3],
+      "topics": [1, 3, 6],
+      "biography": "Работаю с тревожностью и самооценкой, использую КПТ и психодраму. Веду терапию для тех, кто устал от постоянного стресса и хочет вернуть контроль над эмоциями. Практический подход + проработка сценариев в безопасном пространстве. Помогаю наладить границы и ресурсы.",
+      "photo": null,
+      "work_experience": 7,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "22222222-2222-4222-8222-222222222222",
+    "fields": {
+      "first_name": "Ольга",
+      "last_name": "Петрова",
+      "age": 27,
+      "email": "ps_test_2@example.com",
+      "phone_number": "+375331234568",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 2,
+    "fields": {
+      "user": "22222222-2222-4222-8222-222222222222",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [3,1],
+      "methods": [1,5],
+      "topics": [3,13],
+      "biography": "Специализируюсь на работе с самооценкой и тревожными расстройствами. Применяю гештальт и КПТ: помогаю распутать внутренние установки, укрепить границы и выстроить конструктивные реакции на стресс. Практические техники и поддержка в процессе изменений.",
+      "photo": null,
+      "work_experience": 4,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "2500.00",
+      "price_couples": "2500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "33333333-3333-4333-8333-333333333333",
+    "fields": {
+      "first_name": "Елена",
+      "last_name": "Смирнова",
+      "age": 29,
+      "email": "ps_test_3@example.com",
+      "phone_number": "+375251234569",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 3,
+    "fields": {
+      "user": "33333333-3333-4333-8333-333333333333",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [1],
+      "methods": [10],
+      "topics": [12,3],
+      "biography": "Клиент-центрированный подход — основа моей практики. Специализируюсь на нарушениях сна и нестабильной самооценке. Работаю мягко и последовательно: помогаю клиенту вернуть ресурс, повысить самоэффективность и наладить режим сна.",
+      "photo": null,
+      "work_experience": 6,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "44444444-4444-4444-8444-444444444444",
+    "fields": {
+      "first_name": "Анна",
+      "last_name": "Кузнецова",
+      "age": 33,
+      "email": "ps_test_4@example.com",
+      "phone_number": "+749512345679",
+      "role": 1,
+      "timezone": "Europe/Moscow",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 4,
+    "fields": {
+      "user": "44444444-4444-4444-8444-444444444444",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [7,2],
+      "methods": [1,4,8],
+      "topics": [5,12,3],
+      "biography": "Работаю с детско-родительскими отношениями и выгоранием. Комбинирую гештальт, телесно-ориентированные практики и транзактный анализ. Помогаю наладить отношения в семье, восстановить ресурс и вернуть ясность ценностей.",
+      "photo": null,
+      "work_experience": 11,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "55555555-5555-4555-8555-555555555555",
+    "fields": {
+      "first_name": "Мария",
+      "last_name": "Попова",
+      "age": 26,
+      "email": "ps_test_5@example.com",
+      "phone_number": "+375291234111",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 5,
+    "fields": {
+      "user": "55555555-5555-4555-8555-555555555555",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [5],
+      "methods": [9,3],
+      "topics": [1,3,13],
+      "biography": "Работаю с психосоматикой и проблемами сна, применяю эмпатический подход и психодраму. Поддерживаю в поиске причин симптомов и восстановлении физико-эмоционального ресурса. Поддерживающая терапия и техника саморегуляции.",
+      "photo": null,
+      "work_experience": 3,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "2500.00",
+      "price_couples": "2500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "66666666-6666-4666-8666-666666666666",
+    "fields": {
+      "first_name": "Наталья",
+      "last_name": "Васильева",
+      "age": 47,
+      "email": "ps_test_6@example.com",
+      "phone_number": "+781212345680",
+      "role": 1,
+      "timezone": "Europe/Moscow",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 6,
+    "fields": {
+      "user": "66666666-6666-4666-8666-666666666666",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [4,2],
+      "methods": [5,1],
+      "topics": [3,5,12],
+      "biography": "Опытная практик с фокусом на профессиональные трудности и выгорание. Работаю в интегративном ключе: КПТ + гештальт. Помогаю вернуть смысл, ресурсы и выстроить границы между работой и жизнью.",
+      "photo": null,
+      "work_experience": 19,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "5500.00",
+      "price_couples": "5500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "77777777-7777-4777-8777-777777777777",
+    "fields": {
+      "first_name": "Татьяна",
+      "last_name": "Павлова",
+      "age": 52,
+      "email": "ps_test_7@example.com",
+      "phone_number": "+375331111222",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 7,
+    "fields": {
+      "user": "77777777-7777-4777-8777-777777777777",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [3,9],
+      "methods": [3],
+      "topics": [1,13,12],
+      "biography": "Психолог с опытом работы в вопросах самоопределения и поиска смысла. Применяю психодраму и эмпатический подход, помогая клиентам ориентироваться в кризисах и находить свои ценности и ориентиры.",
+      "photo": null,
+      "work_experience": 20,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "88888888-8888-4888-8888-888888888888",
+    "fields": {
+      "first_name": "Светлана",
+      "last_name": "Соколова",
+      "age": 28,
+      "email": "ps_test_8@example.com",
+      "phone_number": "+375291234999",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 8,
+    "fields": {
+      "user": "88888888-8888-4888-8888-888888888888",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [8],
+      "methods": [2,12],
+      "topics": [5,4],
+      "biography": "Поддерживаю клиентов в вопросах профессиональной жизни и прокрастинации. Работаю практично: транзактный анализ + клиент-центрированный подход. Помогаю вернуть мотивацию и найти рабочие стратегии.",
+      "photo": null,
+      "work_experience": 5,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "2500.00",
+      "price_couples": "2500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "99999999-9999-4999-8999-999999999999",
+    "fields": {
+      "first_name": "Юлия",
+      "last_name": "Морозова",
+      "age": 39,
+      "email": "ps_test_9@example.com",
+      "phone_number": "+375331234000",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 9,
+    "fields": {
+      "user": "99999999-9999-4999-8999-999999999999",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [10],
+      "methods": [13,1],
+      "topics": [3,6],
+      "biography": "Сочетаю позитивную психотерапию и гештальт-подход для работы с эмоциональной зависимостью и хронической тревогой. Работаю с рамками и ресурсами, чтобы клиент мог принимать решения осознанно и с опорой на ценности.",
+      "photo": null,
+      "work_experience": 15,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "fields": {
+      "first_name": "Оксана",
+      "last_name": "Новикова",
+      "age": 58,
+      "email": "ps_test_10@example.com",
+      "phone_number": "+73431234567",
+      "role": 1,
+      "timezone": "Asia/Yekaterinburg",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 10,
+    "fields": {
+      "user": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [1,5],
+      "methods": [2],
+      "topics": [22,1],
+      "biography": "Работаю с клиентами, пережившими жизненные изменения и утраты. Помогаю прожить горе, найти новые смыслы и восстановить устойчивость. Использую клиент-центрированный и телесно-ориентированный подходы.",
+      "photo": null,
+      "work_experience": 20,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "2500.00",
+      "price_couples": "2500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "fields": {
+      "first_name": "Алексей",
+      "last_name": "Сидоров",
+      "age": 45,
+      "email": "ps_test_11@example.com",
+      "phone_number": "+375331222333",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 11,
+    "fields": {
+      "user": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      "is_verified": true,
+      "gender": "male",
+      "specialisations": [3],
+      "methods": [1,9],
+      "topics": [6,3],
+      "biography": "Практикующий психолог, работаю с самооценкой и тревожностью, использую КПТ и понимающий подход. Помогаю клиентам искать внутренние ресурсы и менять поведенческие стратегии.",
+      "photo": null,
+      "work_experience": 13,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "fields": {
+      "first_name": "Игорь",
+      "last_name": "Мельников",
+      "age": 50,
+      "email": "ps_test_12@example.com",
+      "phone_number": "+375291000111",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 12,
+    "fields": {
+      "user": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+      "is_verified": true,
+      "gender": "male",
+      "specialisations": [2,4],
+      "methods": [4,8],
+      "topics": [22,5],
+      "biography": "Долгие годы работаю с профессиональным выгоранием и кризисами в карьере. Интегрирую телесные техники и системный семейный подход, чтобы восстановить баланс между жизнью и работой.",
+      "photo": null,
+      "work_experience": 18,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "5500.00",
+      "price_couples": "5500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+    "fields": {
+      "first_name": "Виктория",
+      "last_name": "Климова",
+      "age": 34,
+      "email": "ps_test_13@example.com",
+      "phone_number": "+375331000222",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 13,
+    "fields": {
+      "user": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [9],
+      "methods": [3,11],
+      "topics": [1,3],
+      "biography": "Помогаю тем, кто потерял смысл и хочет переосмыслить жизнь. Работаю через понимающий подход и символдраму. Поддерживаю в переходах и поиске новых ориентиров.",
+      "photo": null,
+      "work_experience": 8,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+    "fields": {
+      "first_name": "Дмитрий",
+      "last_name": "Горбунов",
+      "age": 41,
+      "email": "ps_test_14@example.com",
+      "phone_number": "+375291777888",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 14,
+    "fields": {
+      "user": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+      "is_verified": true,
+      "gender": "male",
+      "specialisations": [1,3],
+      "methods": [6,1],
+      "topics": [1,6,3],
+      "biography": "Работаю с тревожностью, паническими атаками и перепадами настроения. Комбинирую психоаналитические техники и КПТ для глубокого и практического результата.",
+      "photo": null,
+      "work_experience": 12,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+    "fields": {
+      "first_name": "Галина",
+      "last_name": "Морская",
+      "age": 44,
+      "email": "ps_test_15@example.com",
+      "phone_number": "+375292222333",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 15,
+    "fields": {
+      "user": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [5,1],
+      "methods": [13,4],
+      "topics": [3,1],
+      "biography": "Специализируюсь на психосоматике и эмоциональной регуляции. Работаю с клиентами, у которых тело отвечает на стресс. Использую сочетание позитивной психотерапии и телесных техник.",
+      "photo": null,
+      "work_experience": 14,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "12121212-1212-4121-8121-121212121212",
+    "fields": {
+      "first_name": "Ксения",
+      "last_name": "Фролова",
+      "age": 37,
+      "email": "ps_test_16@example.com",
+      "phone_number": "+375332222444",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 16,
+    "fields": {
+      "user": "12121212-1212-4121-8121-121212121212",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [3,2],
+      "methods": [7,1],
+      "topics": [1,3,22],
+      "biography": "Комбинирую психодраму и Гештальт в работе с самооценкой и профессиональными трудностями. Помогаю клиентам находить баланс между личной жизнью и карьерой.",
+      "photo": null,
+      "work_experience": 10,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "2500.00",
+      "price_couples": "2500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "34343434-3434-4343-8434-343434343434",
+    "fields": {
+      "first_name": "Николай",
+      "last_name": "Белов",
+      "age": 49,
+      "email": "ps_test_17@example.com",
+      "phone_number": "+749512345680",
+      "role": 1,
+      "timezone": "Europe/Moscow",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 17,
+    "fields": {
+      "user": "34343434-3434-4343-8434-343434343434",
+      "is_verified": true,
+      "gender": "male",
+      "specialisations": [6],
+      "methods": [3,2],
+      "topics": [6,1],
+      "biography": "Работаю с зависимостями и личностными трудностями. Применяю психодраму и клиент-центрированный подход для глубокого проживания и изменения привычных реакций.",
+      "photo": null,
+      "work_experience": 20,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "5500.00",
+      "price_couples": "5500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "56565656-5656-4565-8656-565656565656",
+    "fields": {
+      "first_name": "Людмила",
+      "last_name": "Гусева",
+      "age": 60,
+      "email": "ps_test_18@example.com",
+      "phone_number": "+73431234568",
+      "role": 1,
+      "timezone": "Asia/Yekaterinburg",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 18,
+    "fields": {
+      "user": "56565656-5656-4565-8656-565656565656",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [1,5],
+      "methods": [8,4],
+      "topics": [32,1],
+      "biography": "Опытная психотерапевтка в работе с травмой и физическими проявлениями стресса. Помогаю восстанавливать ощущение безопасности и телесный ресурс.",
+      "photo": null,
+      "work_experience": 30,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "5500.00",
+      "price_couples": "5500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "67676767-6767-4767-8767-676767676767",
+    "fields": {
+      "first_name": "Валерия",
+      "last_name": "Егорова",
+      "age": 38,
+      "email": "ps_test_19@example.com",
+      "phone_number": "+375331777888",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 19,
+    "fields": {
+      "user": "67676767-6767-4767-8767-676767676767",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [8,3],
+      "methods": [10,1],
+      "topics": [1,24,3],
+      "biography": "Помогаю в вопросах прокрастинации и мотивации, использую клиент-центрированный и КПТ подход. Практическая работа по планированию и развитию навыков саморегуляции.",
+      "photo": null,
+      "work_experience": 9,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "2500.00",
+      "price_couples": "2500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "78787878-7878-4878-8878-787878787878",
+    "fields": {
+      "first_name": "Владимир",
+      "last_name": "Федоров",
+      "age": 55,
+      "email": "ps_test_20@example.com",
+      "phone_number": "+73439998877",
+      "role": 1,
+      "timezone": "Asia/Yekaterinburg",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 20,
+    "fields": {
+      "user": "78787878-7878-4878-8878-787878787878",
+      "is_verified": true,
+      "gender": "male",
+      "specialisations": [6,4],
+      "methods": [2,7],
+      "topics": [33,1],
+      "biography": "Глубокая работа с травмой и системными семейными проблемами. Использую системный и телесный подходы, помогаю возвращать ресурс и выстраивать отношения.",
+      "photo": null,
+      "work_experience": 28,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "5500.00",
+      "price_couples": "5500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "89898989-8989-4989-8989-898989898989",
+    "fields": {
+      "first_name": "Марина",
+      "last_name": "Лебедева",
+      "age": 30,
+      "email": "ps_test_21@example.com",
+      "phone_number": "+375291234222",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 21,
+    "fields": {
+      "user": "89898989-8989-4989-8989-898989898989",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [3,1],
+      "methods": [1,12],
+      "topics": [1,3,6],
+      "biography": "Работаю с тревогой и самооценкой у взрослых. Сочетание КПТ и символдрамы помогает быстро получать понимание и практические навыки для жизни.",
+      "photo": null,
+      "work_experience": 8,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "90909090-9090-4909-9090-909090909090",
+    "fields": {
+      "first_name": "Евгения",
+      "last_name": "Котова",
+      "age": 43,
+      "email": "ps_test_22@example.com",
+      "phone_number": "+375331234333",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 22,
+    "fields": {
+      "user": "90909090-9090-4909-9090-909090909090",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [2,9],
+      "methods": [1,13],
+      "topics": [3,1,5],
+      "biography": "Специалист в работе с выгоранием и утратами. Использую КПТ и позитивную психотерапию, фокусируясь на восстановлении ресурсов и формировании устойчивых навыков самопомощи.",
+      "photo": null,
+      "work_experience": 16,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "10101010-1010-4101-8101-101010101010",
+    "fields": {
+      "first_name": "Сергей",
+      "last_name": "Крылов",
+      "age": 29,
+      "email": "ps_test_23@example.com",
+      "phone_number": "+375291234444",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 23,
+    "fields": {
+      "user": "10101010-1010-4101-8101-101010101010",
+      "is_verified": true,
+      "gender": "male",
+      "specialisations": [1],
+      "methods": [3,7],
+      "topics": [1,6],
+      "biography": "Работаю с молодыми людьми, испытывающими тревогу и проблемы с концентрацией. Практическая и структурированная терапия: психодрама + транзактный анализ.",
+      "photo": null,
+      "work_experience": 6,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "2500.00",
+      "price_couples": "2500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "12121212-2121-4212-8212-121212121221",
+    "fields": {
+      "first_name": "Анастасия",
+      "last_name": "Зайцева",
+      "age": 36,
+      "email": "ps_test_24@example.com",
+      "phone_number": "+375331234555",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 24,
+    "fields": {
+      "user": "12121212-2121-4212-8212-121212121221",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [3,7],
+      "methods": [1,5],
+      "topics": [1,3,22],
+      "biography": "Помогаю в вопросах самооценки и семейных отношений. Работаю в гештальт-подходе и системно, чтобы помочь клиентам выстраивать устойчивые модели взаимодействия.",
+      "photo": null,
+      "work_experience": 12,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "13131313-1313-4131-8131-131313131313",
+    "fields": {
+      "first_name": "Олег",
+      "last_name": "Борисов",
+      "age": 61,
+      "email": "ps_test_25@example.com",
+      "phone_number": "+73435556677",
+      "role": 1,
+      "timezone": "Asia/Yekaterinburg",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 25,
+    "fields": {
+      "user": "13131313-1313-4131-8131-131313131313",
+      "is_verified": true,
+      "gender": "male",
+      "specialisations": [6],
+      "methods": [2,4],
+      "topics": [33,32],
+      "biography": "Практикующий врач-психотерапевт, большой опыт работы с травмой и семейными кризисами. Фокус на восстановлении и устойчивости жизненных сценариев.",
+      "photo": null,
+      "work_experience": 30,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "5500.00",
+      "price_couples": "5500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "14141414-1414-4141-8141-141414141414",
+    "fields": {
+      "first_name": "Нина",
+      "last_name": "Калинина",
+      "age": 54,
+      "email": "ps_test_26@example.com",
+      "phone_number": "+375291234666",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 26,
+    "fields": {
+      "user": "14141414-1414-4141-8141-141414141414",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [5],
+      "methods": [9,13],
+      "topics": [5,1],
+      "biography": "Работа с утратой и кризисами, специализируюсь на восстановлении ресурсного состояния после потерь. Применяю интегративный подход для бережной работы с эмоциями.",
+      "photo": null,
+      "work_experience": 22,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "15151515-1515-4151-8151-151515151515",
+    "fields": {
+      "first_name": "Роман",
+      "last_name": "Кочетов",
+      "age": 26,
+      "email": "ps_test_27@example.com",
+      "phone_number": "+375291234777",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 27,
+    "fields": {
+      "user": "15151515-1515-4151-8151-151515151515",
+      "is_verified": true,
+      "gender": "male",
+      "specialisations": [3],
+      "methods": [1,7],
+      "topics": [1,8],
+      "biography": "Работаю с молодыми взрослыми, помогая выстраивать границы и управлять тревогой. Фокус на практических навыках и телесном присутствии.",
+      "photo": null,
+      "work_experience": 4,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "2500.00",
+      "price_couples": "2500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "16161616-1616-4161-8161-161616161616",
+    "fields": {
+      "first_name": "Дарья",
+      "last_name": "Шмелева",
+      "age": 35,
+      "email": "ps_test_28@example.com",
+      "phone_number": "+375331234888",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 28,
+    "fields": {
+      "user": "16161616-1616-4161-8161-161616161616",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [8,3],
+      "methods": [10,1],
+      "topics": [21,1,3],
+      "biography": "Специалист по вопросам мотивации и профессионального выбора. Работаю клиент-центрированно и через КПТ для выстраивания ясного плана действий.",
+      "photo": null,
+      "work_experience": 9,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "2500.00",
+      "price_couples": "2500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "17171717-1717-4171-8171-171717171717",
+    "fields": {
+      "first_name": "Наталья",
+      "last_name": "Козлова",
+      "age": 48,
+      "email": "ps_test_29@example.com",
+      "phone_number": "+749512345681",
+      "role": 1,
+      "timezone": "Europe/Moscow",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 29,
+    "fields": {
+      "user": "17171717-1717-4171-8171-171717171717",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [4],
+      "methods": [5,1],
+      "topics": [3,22,1],
+      "biography": "Работаю с профессиональными кризисами и восстановлением после выгорания. Практический подход, КПТ и системная работа с окружением.",
+      "photo": null,
+      "work_experience": 20,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "18181818-1818-4181-8181-181818181818",
+    "fields": {
+      "first_name": "Ольга",
+      "last_name": "Кузьмина",
+      "age": 42,
+      "email": "ps_test_30@example.com",
+      "phone_number": "+375291234999",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 30,
+    "fields": {
+      "user": "18181818-1818-4181-8181-181818181818",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [3],
+      "methods": [1,13,9],
+      "topics": [1,3,6],
+      "biography": "Фокус на восстановлении эмоциональной стабильности и навыков саморегуляции. Работаю с КПТ и позитивной психотерапией, даю практические инструменты и сопровождение.",
+      "photo": null,
+      "work_experience": 15,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "19191919-1919-4191-8191-191919191919",
+    "fields": {
+      "first_name": "Алёна",
+      "last_name": "Романова",
+      "age": 46,
+      "email": "ps_test_31@example.com",
+      "phone_number": "+375331234111",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 31,
+    "fields": {
+      "user": "19191919-1919-4191-8191-191919191919",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [5,3],
+      "methods": [13,10],
+      "topics": [5,1],
+      "biography": "Опытная терапевтка в вопросах утрат и кризисов. Работая в позитивной и гештальт-подходах, помогаю восстановить опору и смысл.",
+      "photo": null,
+      "work_experience": 21,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "20202020-2020-4202-8202-202020202020",
+    "fields": {
+      "first_name": "Илья",
+      "last_name": "Захаров",
+      "age": 63,
+      "email": "ps_test_32@example.com",
+      "phone_number": "+73431230000",
+      "role": 1,
+      "timezone": "Asia/Yekaterinburg",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 32,
+    "fields": {
+      "user": "20202020-2020-4202-8202-202020202020",
+      "is_verified": true,
+      "gender": "male",
+      "specialisations": [2,6],
+      "methods": [4,6],
+      "topics": [33,32],
+      "biography": "Длительная практика в работе с зависимостями и семейными системами. Интегрирую системный подход и телесные практики для глубокой работы.",
+      "photo": null,
+      "work_experience": 35,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "5500.00",
+      "price_couples": "5500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "21212121-2121-4212-8121-212121212121",
+    "fields": {
+      "first_name": "Андрей",
+      "last_name": "Михайлов",
+      "age": 40,
+      "email": "ps_test_33@example.com",
+      "phone_number": "+375291222444",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 33,
+    "fields": {
+      "user": "21212121-2121-4212-8121-212121212121",
+      "is_verified": true,
+      "gender": "male",
+      "specialisations": [3],
+      "methods": [1,2],
+      "topics": [1,3,6],
+      "biography": "Работаю с тревожностью у взрослых и подростков, использую КПТ и клиент-центрированный подход. Помогаю быстро нащупать практические шаги и вернуть чувство контроля.",
+      "photo": null,
+      "work_experience": 11,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "22222222-1212-4224-8224-222222222224",
+    "fields": {
+      "first_name": "Лев",
+      "last_name": "Семенов",
+      "age": 28,
+      "email": "ps_test_34@example.com",
+      "phone_number": "+375331234666",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 34,
+    "fields": {
+      "user": "22222222-1212-4224-8224-222222222224",
+      "is_verified": true,
+      "gender": "male",
+      "specialisations": [1],
+      "methods": [7,3],
+      "topics": [1,8],
+      "biography": "Молодой специалист, работаю с тревогой и концентрацией. В работе использую психодраму и транзактный анализ для развития навыков саморегуляции.",
+      "photo": null,
+      "work_experience": 3,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "2500.00",
+      "price_couples": "2500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "23232323-2323-4232-8232-232323232323",
+    "fields": {
+      "first_name": "Георгий",
+      "last_name": "Лукин",
+      "age": 58,
+      "email": "ps_test_35@example.com",
+      "phone_number": "+73431239999",
+      "role": 1,
+      "timezone": "Asia/Yekaterinburg",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 35,
+    "fields": {
+      "user": "23232323-2323-4232-8232-232323232323",
+      "is_verified": true,
+      "gender": "male",
+      "specialisations": [6],
+      "methods": [4,2],
+      "topics": [33,32],
+      "biography": "Практикующий терапевт с фокусом на зависимости и семейные системы. Работаю глубоко и структурно, опираясь на многолетний клинический опыт.",
+      "photo": null,
+      "work_experience": 29,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "5500.00",
+      "price_couples": "5500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "24242424-2424-4242-8242-242424242424",
+    "fields": {
+      "first_name": "Ирина",
+      "last_name": "Орлова",
+      "age": 27,
+      "email": "ps_test_36@example.com",
+      "phone_number": "+375291234555",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 36,
+    "fields": {
+      "user": "24242424-2424-4242-8242-242424242424",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [3,1],
+      "methods": [1,9],
+      "topics": [3,1,6],
+      "biography": "Помогаю с тревогой и самооценкой, использую КПТ и понимающие техники. Работаю на восстановление уверенности и навыков взаимодействия.",
+      "photo": null,
+      "work_experience": 5,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "2500.00",
+      "price_couples": "2500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "25252525-2525-4252-8252-252525252525",
+    "fields": {
+      "first_name": "Полина",
+      "last_name": "Данилова",
+      "age": 31,
+      "email": "ps_test_37@example.com",
+      "phone_number": "+375331234222",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 37,
+    "fields": {
+      "user": "25252525-2525-4252-8252-252525252525",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [9,3],
+      "methods": [11,1],
+      "topics": [1,3],
+      "biography": "Работаю с клиентами в поиске смысла и самоопределения. Применяю символдраму и понимающий подход, помогаю находить внутренние ресурсы.",
+      "photo": null,
+      "work_experience": 8,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "26262626-2626-4262-8262-262626262626",
+    "fields": {
+      "first_name": "Екатерина",
+      "last_name": "Мартынова",
+      "age": 45,
+      "email": "ps_test_38@example.com",
+      "phone_number": "+749512345682",
+      "role": 1,
+      "timezone": "Europe/Moscow",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 38,
+    "fields": {
+      "user": "26262626-2626-4262-8262-262626262626",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [4,2],
+      "methods": [5,1],
+      "topics": [3,22],
+      "biography": "Помогаю восстанавливаться после выгорания и выстраивать новые стратегии баланса. КПТ + гештальт для практической и глубинной работы.",
+      "photo": null,
+      "work_experience": 20,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "27272727-2727-4272-8272-272727272727",
+    "fields": {
+      "first_name": "Вадим",
+      "last_name": "Кириллов",
+      "age": 53,
+      "email": "ps_test_39@example.com",
+      "phone_number": "+73431235678",
+      "role": 1,
+      "timezone": "Asia/Yekaterinburg",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 39,
+    "fields": {
+      "user": "27272727-2727-4272-8272-272727272727",
+      "is_verified": true,
+      "gender": "male",
+      "specialisations": [6],
+      "methods": [2,4],
+      "topics": [33,37],
+      "biography": "Практик в работе с зависимостями и семейными травмами. Интегрирую системный и телесный подходы, ориентирован на длительную терапию.",
+      "photo": null,
+      "work_experience": 24,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "5500.00",
+      "price_couples": "5500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+
+  {
+    "model": "users.appuser",
+    "pk": "28282828-2828-4282-8282-282828282828",
+    "fields": {
+      "first_name": "Лидия",
+      "last_name": "Громова",
+      "age": 32,
+      "email": "ps_test_40@example.com",
+      "phone_number": "+375291111222",
+      "role": 1,
+      "timezone": "Europe/Minsk",
+      "is_staff": false,
+      "is_active": true,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$1000000$3P22RzgDOnRY2MTm5HWrE2$VhaGsqiUVK+ijrya/tG3ouLDR8tARYvTPCkRpfizGII=",
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  },
+  {
+    "model": "users.psychologistprofile",
+    "pk": 40,
+    "fields": {
+      "user": "28282828-2828-4282-8282-282828282828",
+      "is_verified": true,
+      "gender": "female",
+      "specialisations": [3,1],
+      "methods": [1,9,13],
+      "topics": [1,3,6],
+      "biography": "Работаю с тревогой, самооценкой и семейными проблемами. Комбинирую КПТ и позитивную психотерапию, даю практические техники для поддержки изменений в жизни.",
+      "photo": null,
+      "work_experience": 10,
+      "languages": ["russian"],
+      "therapy_format": "online",
+      "price_individual": "3500.00",
+      "price_couples": "3500.00",
+      "work_status": "working",
+      "rating": "0.0",
+      "is_all_education_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  }
+]

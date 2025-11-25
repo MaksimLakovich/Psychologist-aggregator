@@ -133,6 +133,7 @@
 │    ├── topics.json
 │    ├── methods.json
 │    ├── specialisations.json
+│    ├── users_psychologists.json
 │    └── ...
 │
 ├── users/                      # ⭐️ Приложение django-проекта ("Пользователи") + справочники системы (UserRole, Topic, Specialisation, Method, Education, Experience)

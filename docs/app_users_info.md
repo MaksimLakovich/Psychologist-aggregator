@@ -368,3 +368,7 @@ docker exec -it <container_name_web> python manage.py createsuperuser
 ```
 
 ---
+
+## <a id="title11"> 👥 Создание тестовых психологов в БД </a>
+
+**Описание файла с тестовыми психологами для проверки работы агрегатора/публичного каталога/фильтрации: [fixture_users_psychologists_info.md](docs/fixture_users_psychologists_info.md).**
