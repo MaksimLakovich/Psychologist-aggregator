@@ -85,4 +85,4 @@ python manage.py loaddata fixtures/users_psychologists.json
 
 ## <a> 3. JSON-файл </a>
 
-Расположение JSON-файла в структуре проекта: [fixtures/users_psychologists.json](fixtures/users_psychologists.json)
+Расположение JSON-файла в структуре проекта: [fixtures/users_psychologists.json](/Users/maksym/PycharmProjects/Psychologist-aggregator/fixtures/users_psychologists.json)
