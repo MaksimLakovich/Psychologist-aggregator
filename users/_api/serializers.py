@@ -7,6 +7,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from timezone_field.rest_framework import TimeZoneSerializerField
 
 from users.constants import GENDER_CHOICES
 from users.mixins.creator_mixin import CreatorMixin
@@ -120,6 +121,10 @@ class AppUserSerializer(serializers.ModelSerializer):
     # SlugRelatedField(read_only=True) не создает и не меняет ничего, а просто берет существующее значение
     # поля role из связанного объекта UserRole, чтоб вывести роль в ответе как человекочитаемую строку.
     role = serializers.SlugRelatedField(read_only=True, slug_field="role")
+    # Кастомное поле в сериализаторе TimeZoneSerializerField, которое входит в пакет django-timezone-field и
+    # он автоматически: принимает/возвращает строку, приводит в ZoneInfo внутри модели, сериализует обратно в строку.
+    # Это нужно чтоб не было такой ошибки: TypeError: Object of type ZoneInfo is not JSON serializable
+    timezone = TimeZoneSerializerField()
 
     class Meta:
         model = AppUser
@@ -281,6 +286,7 @@ class PublicPsychologistProfileSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(source="user.first_name", read_only=True)
     last_name = serializers.CharField(source="user.last_name", read_only=True)
     age = serializers.IntegerField(source="user.age", read_only=True)
+    # Хотя более профессион способ для timezone как сделал в AppUserSerializer с помощью TimeZoneSerializerField()
     timezone = serializers.SerializerMethodField()
 
     # Подтянем данные из справочников:
