@@ -8,7 +8,7 @@ from django.urls import URLResolver, include, path
 urlpatterns = [
     path("admin/", admin.site.urls),
     # namespace="users" - это заданное пространство имен, которое есть в users/urls.py с помощью UsersConfig.name
-    path("api/users/", include("users.urls", namespace="users")),
+    path("users/", include("users.urls", namespace="users")),
 ]
 
 if settings.DEBUG:
