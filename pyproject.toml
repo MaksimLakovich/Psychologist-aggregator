@@ -18,7 +18,8 @@ dependencies = [
     "phonenumbers (>=9.0.17,<10.0.0)",
     "django-timezone-field (>=7.1,<8.0)",
     "django-countries (>=7.6.1,<8.0.0)",
-    "djangorestframework-simplejwt (>=5.5.1,<6.0.0)"
+    "djangorestframework-simplejwt (>=5.5.1,<6.0.0)",
+    "django-filter (>=25.2,<26.0)"
 ]
 
 

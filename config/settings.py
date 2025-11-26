@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
 
     # Для использования расширенной фильтрации с помощью пакета django-filter, после его установки
-    # 'django_filters',
+    'django_filters',
 
     # Добавление пакета celery-beat для работы с периодическими задачами
     # 'django_celery_beat',
@@ -158,12 +158,12 @@ AUTH_USER_MODEL = 'users.AppUser'
 PHONENUMBER_DEFAULT_REGION = 'RU'
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_FILTER_BACKENDS': (
-    #     'django_filters.rest_framework.DjangoFilterBackend',
-    # ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated'
     ],
