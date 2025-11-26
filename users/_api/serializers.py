@@ -286,7 +286,6 @@ class PublicPsychologistProfileSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(source="user.first_name", read_only=True)
     last_name = serializers.CharField(source="user.last_name", read_only=True)
     age = serializers.IntegerField(source="user.age", read_only=True)
-    # Хотя более профессион способ для timezone как сделал в AppUserSerializer с помощью TimeZoneSerializerField()
     timezone = serializers.SerializerMethodField()
 
     # Подтянем данные из справочников:
