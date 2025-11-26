@@ -9,6 +9,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # namespace="users" - это заданное пространство имен, которое есть в users/urls.py с помощью UsersConfig.name
     path("users/", include("users.urls", namespace="users")),
+    path("catalog/", include("aggregator.urls", namespace="aggregator")),
 ]
 
 if settings.DEBUG:
