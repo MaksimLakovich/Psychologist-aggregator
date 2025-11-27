@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     # 'django_celery_beat',
 
     # API-документация
-    # 'drf_yasg',
+    'drf_yasg',
 
     # CORS
     # 'corsheaders',
