@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     'drf_yasg',
 
     # CORS
-    # 'corsheaders',
+    'corsheaders',
 
     # Приложения проекта
     'users',
@@ -66,13 +66,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # должно быть выше CommonMiddleware, в идеале сразу за SecurityMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',  # важно для того чтоб на русском были справочники (например, страны)
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'corsheaders.middleware.CorsMiddleware',  # должно быть выше CommonMiddleware
     'django.middleware.common.CommonMiddleware',
 ]
 
@@ -208,8 +208,8 @@ CORS_ALLOWED_ORIGINS = [
 
 # Для работы CSRF с кросс-доменными запросами (POST, PUT, DELETE)
 # 1) ЧТО ЭТО?
-# Если используется нестандартный порт (например, http://127.0.0.1:8081/admin/ вместо http://127.0.0.1:8000/admin/),
-# то Django будет не доверять адресу http://127.0.0.1:8081/admin/, так как источник будет не совпадать с
+# Если используется нестандартный порт (например, http://127.0.0.1:8084/admin/ вместо http://127.0.0.1:8000/admin/),
+# то Django будет не доверять адресу http://127.0.0.1:8084/admin/, так как источник будет не совпадать с
 # доверенным доменом из ALLOWED_HOSTS или CSRF_TRUSTED_ORIGINS и выдаст 403 CSRF verification failed.
 # Чтоб исключить ошибку нужно добавить параметр CSRF_TRUSTED_ORIGINS в settings.py и указывать в нем список
 # доверенных доменов с портами
