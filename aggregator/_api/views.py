@@ -13,8 +13,9 @@ class PublicPsychologistListView(generics.ListAPIView):
     """Класс-контроллер на основе Generic для взаимодействия авторизованных пользователей системы
      с *Публичным каталогом психологов*:
         - отображение карточек психологов (только верифицированные и активные);
-        - фильтрация результатов поиска;
-        - пагинация страницы с результатами."""
+        - фильтрация результатов поиска (topics/methods/gender);
+        - пагинация страницы с результатами;
+        - prefetch Education без N+1."""
 
     permission_classes = [IsAuthenticated]
     serializer_class = PublicPsychologistListSerializer
@@ -26,11 +27,11 @@ class PublicPsychologistListView(generics.ListAPIView):
     filterset_class = PsychologistFilter  # Набор полей для фильтрации указан в кастомном FilterSet
 
     def get_queryset(self):
-        """Получение набора данных, который будет использоваться во View.
+        """Получение набора данных, который будет использоваться во View (оптимизирован под нагруженные каталоги).
         1) Выводим только активных и верифицированных психологов.
         2) Для того, чтоб избежать проблемы N+1 используем: select_related + prefetch_related, иначе выдача
         будет очень медленной из-за того, что API без этого будет дергать: отдельно user, methods и topics.
-        3) Для того, чтоб избежать проблемы N+1 с Education используем: Prefetch() и для этого мы по особенному
+        3) Для того, чтоб избежать проблемы N+1 с Education используем: Prefetch() и для этого мы по-особенному
         определили метод get_educations() в сериализаторе PublicPsychologistListSerializer."""
         return (
             PsychologistProfile.objects
@@ -39,11 +40,11 @@ class PublicPsychologistListView(generics.ListAPIView):
             .prefetch_related(
                 "methods", "topics",
                 Prefetch(
-                    "user__created_educations",
+                    lookup="user__created_educations",
                     queryset=Education.objects.order_by("-year_start"),
                     to_attr="prefetched_educations",
                 )
             )
-            # Специально указал "?" чтоб получить сейчас полный random-first выдачи (но можно указать нужные поля)
-            .order_by("?")
+            # Временно сортируем по id (позже можно добавить любое другой ранжирование, которое реализуем)
+            .order_by("id")
         )

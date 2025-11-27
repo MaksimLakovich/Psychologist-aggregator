@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from users._api.serializers import (MethodSerializer,
                                     PublicEducationSerializer, TopicSerializer)
-from users.models import Education, PsychologistProfile
+from users.models import PsychologistProfile
 
 
 class PublicPsychologistListSerializer(serializers.ModelSerializer):
@@ -46,10 +46,7 @@ class PublicPsychologistListSerializer(serializers.ModelSerializer):
 
     def get_educations(self, obj):
         """Получаем из модели Education записи текущего психолога."""
-        educations = getattr(obj.user, "prefetched_educations", None)
-
-        if educations is None:
-            educations = Education.objects.filter(creator=obj.user).order_by("-year_start")
+        educations = getattr(obj.user, "prefetched_educations", [])
 
         return PublicEducationSerializer(educations, many=True).data
 
