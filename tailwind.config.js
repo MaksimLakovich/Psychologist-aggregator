@@ -1,14 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./templates/**/*.html",
-    "./**/templates/**/*.html",
-    "./users/_web/templates/**/*.html",
-    "./aggregator/_web/templates/**/*.html",
-    "./users/_web/**/*.js",
-    "./aggregator/_web/**/*.js",
-    "./static/**/*.js",
-    "./static/**/*.css",
+    // Django app templates
+    "./users/templates/**/*.html",
+    "./aggregator/templates/**/*.html",
+
+    // JS (если используешь динамические классы)
+    "./assets/js/**/*.js",
+    "./static/js/**/*.js",
   ],
   theme: {
     extend: {},

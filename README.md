@@ -178,13 +178,13 @@
 │    │    │    ├── psychologist_profile              # Формы для профиля психолога
 │    │    │    ├── client_profile                    # Формы для профиля клиента
 │    │    │    └── education                         # Формы для образования
-│    │    ├── templates/                      # HTML-шаблоны
-│    │    │    └── users/
-│    │    │          ├── auth/
-│    │    │          ├── account/
-│    │    │          ├── profiles/
-│    │    │          └── education/
 │    │    └── urls.py                         # Роуты для web-страниц
+│    ├── templates/                      # HTML-шаблоны
+│    │    └── users/
+│    │          ├── auth/
+│    │          ├── account/
+│    │          ├── profiles/
+│    │          └── education/
 │    ├── migrations/
 │    ├── services/                    # Сервисные вспомогательные функции
 │    │    ├── slug.py
@@ -224,10 +224,10 @@
 │    │    │    └── ...
 │    │    ├── forms.py
 │    │    │    └── ...
-│    │    ├── templates/                      # HTML-шаблоны
-│    │    │    └── aggregator/
-│    │    │          └── ...
 │    │    └── urls.py                         # Роуты для web-страниц
+│    ├── templates/                      # HTML-шаблоны
+│    │    └── aggregator/
+│    │          └── ...
 │    ├── migrations/
 │    ├── services/
 │    │    └── ...
