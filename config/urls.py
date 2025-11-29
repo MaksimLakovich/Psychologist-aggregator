@@ -25,6 +25,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # ПРИЛОЖЕНИЯ
     # 1) namespace="users" - это заданное пространство имен, которое есть в users/urls.py с помощью UsersConfig.name
+    path("", include("core.urls", namespace="core")),
     path("users/", include("users.urls", namespace="users")),
     path("catalog/", include("aggregator.urls", namespace="aggregator")),
     # API-ДОКУМЕНТАЦИЯ
