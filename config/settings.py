@@ -61,7 +61,9 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # Приложения проекта
+    'core',
     'users',
+    'aggregator',
 ]
 
 MIDDLEWARE = [

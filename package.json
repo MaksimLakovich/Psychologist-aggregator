@@ -1,0 +1,28 @@
+{
+  "name": "psychologist-aggregator",
+  "version": "1.0.0",
+  "description": "# Web-приложение для поиска, подбора и записи к психологу",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tailwindcss -i ./assets/css/main.css -o ./static/css/main.css --minify",
+    "watch": "tailwindcss -i ./assets/css/main.css -o ./static/css/main.css --watch",
+    "build-js": "cp assets/js/main.js static/js/main.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.10",
+    "autoprefixer": "^10.4.22",
+    "daisyui": "^5.5.5",
+    "flowbite": "^2.5.2",
+    "flowbite-datepicker": "^2.0.0",
+    "flowbite-typography": "^1.0.5",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.18"
+  }
+}
