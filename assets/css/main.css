@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Flowbite */
+@import "flowbite";
+/* Flowbite Typography */
+@import "flowbite-typography";
+/* Form Styles */
+@import "@tailwindcss/forms";
