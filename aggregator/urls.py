@@ -6,7 +6,7 @@ app_name = AggregatorConfig.name
 
 urlpatterns = [
     # API (DRF)
-    path("api/", include("aggregator._api.urls", namespace="api")),
+    path("catalog/api/", include("aggregator._api.urls", namespace="api")),
 
     # WEB (обычные Django views + шаблоны)
     # path("", include("aggregator._web.urls", namespace="web")),
