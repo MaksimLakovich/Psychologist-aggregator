@@ -1,0 +1,52 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru" class="h-full bg-gray-50">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Психологи онлайн на Опора{% endblock %}</title>
+
+    <!-- Tailwind (скомпилированный) -->
+    <link href="{% static 'css/main.css' %}" rel="stylesheet">
+    <!-- Flowbite + Tailwind JS -->
+    <script src="{% static 'js/main.js' %}" defer></script>
+    <!-- Flowbite JS -->
+    <!-- Нужен ли flowbite.min.js в проекте прямо сейчас?-->
+    <!-- CDN достаточно. Позже мы добавим его в /static/js/flowbite.min.js.-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.js" defer></script>
+    <!-- HTMX (через CDN — нормальная практика) -->
+    <script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="min-h-full flex flex-col">
+    <!-- Навигация (позже можно вынести в отдельный include) -->
+    <header class="bg-white shadow">
+        <div class="mx-auto max-w-7xl px-4 py-7 flex justify-between items-center">
+            <a href="/" class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</a>
+
+            <nav class="flex items-center gap-6 text-gray-600">
+                <a href="#" class="hover:text-gray-900">Войти</a>
+                <a href="#" class="hover:text-gray-900">Регистрация</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Контент -->
+    <main class="flex-1">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Футер -->
+    <footer class="bg-gray-100 py-6 mt-12">
+        <div class="mx-auto max-w-7xl px-4 text-center text-gray-500 text-sm">
+            © Психологический агрегатор. Все права защищены.
+        </div>
+    </footer>
+</body>
+
+</html>
