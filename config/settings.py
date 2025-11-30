@@ -238,10 +238,10 @@ EMAIL_HOST_USER = os.getenv('YANDEX_EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('YANDEX_EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-# LOGOUT_REDIRECT_URL = 'users:start_page'
-#
-# LOGIN_URL = 'users:start_page'
-#
+LOGOUT_REDIRECT_URL = 'core:start_page'
+
+LOGIN_URL = 'core:home_page'
+
 # REDIS_URL = os.getenv('REDIS_URL')
 # CACHE_ENABLED = True
 # if CACHE_ENABLED:

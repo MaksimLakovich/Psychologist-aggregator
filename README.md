@@ -173,10 +173,12 @@
 │    ├── templates/                   # HTML-шаблоны
 │    │    └── core/
 │    │          ├── base.html
-│    │          ├── home.html
+│    │          ├── menu.html
+│    │          ├── start_page.html           # Стартовая страница приложения (неавторизованный пользователь)
+│    │          ├── home_page.html            # Домашняя страница приложения (авторизованный пользователь)
 │    │          └── ...
-│    ├── views/                       # Вьюхи для страниц в core
-│    │    ├── home_page.py
+│    ├── views/
+│    │    ├── start_view.py            # Вью для стартовой страницы
 │    │    └── ...
 │    ├── apps.py
 │    └── urls.py                      # Роуты для web-страниц
@@ -187,21 +189,16 @@
 │    │    ├── views.py                        # Регистрация, логин, refresh, logout / Email / Пароли / Свой аккаунт AppUser / Профили (психолог/клиент) / Публичная карточка психолога / CRUD образования
 │    │    └── urls.py                         # Все API-роуты
 │    ├── _web/                        # ℹ️ WEB-часть (формы + HTML)
-│    │    ├── views.py
-│    │    │    ├── auth                              # Login / Logout / Register
-│    │    │    ├── account                           # Редактирование своего профиля
-│    │    │    ├── profile_psychologist              # Web-редактирование психолога
-│    │    │    ├── public_profiles                   # Публичные страницы психологов
-│    │    │    ├── profile_client                    # Web-редактирование клиента
-│    │    │    └── education                         # Образование
-│    │    ├── forms.py
-│    │    │    ├── user                              # Формы для аккаунта AppUser
-│    │    │    ├── psychologist_profile              # Формы для профиля психолога
-│    │    │    ├── client_profile                    # Формы для профиля клиента
-│    │    │    └── education                         # Формы для образования
+│    │    ├── forms/
+│    │    │    ├── auth_form.py                      # Формы Входа / Регистрации клиента / Регистрации психолога
+│    │    │    └── ...
+│    │    ├── views/
+│    │    │    ├── auth_view.py                      # Login / Logout / Register
+│    │    │    └── ...
 │    │    └── urls.py                         # Роуты для web-страниц
 │    ├── templates/                   # HTML-шаблоны
 │    │    └── users/
+│    │          ├── login_page.html    # Страница входа
 │    │          └── ...
 │    ├── migrations/
 │    ├── services/                    # Сервисные вспомогательные функции
