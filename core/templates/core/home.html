@@ -13,7 +13,7 @@
 
         <!-- Текст -->
         <div class="lg:col-span-6 flex flex-col justify-center">
-            <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
+            <h1 class="text-5xl font-extrabold tracking-tight text-grey-900 sm:text-5xl">
                 {{ header_home_page_view }}
             </h1>
 
@@ -75,8 +75,110 @@
     </div>
 </section>
 
+
 <!-- Горизонтальная полоска (разделитель) -->
 <hr class="h-0.5 bg-indigo-200 border-0 dark:bg-indigo-100" />
+
+
+<!-- Блок приветствия "С чем поможет психолог?" -->
+<section class="bg-white py-16">
+
+    <div>
+        <h1 class="text-center text-4xl font-extrabold tracking-tight text-grey-900 sm:text-5xl">
+            С чем <span class="uppercase text-indigo-700">поможет</span> психолог?
+        </h1>
+    </div>
+
+    <!-- СЕТКА 3 КОЛОНКИ -->
+    <div class="mx-auto max-w-screen-xl px-4 py-16 grid grid-cols-1 md:grid-cols-3 gap-10">
+
+        <!-- ЭЛЕМЕНТ 1 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/couple-dancing-music-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm]">
+                Наладить гармоничные отношения с близкими людьми
+            </h3>
+        </div>
+
+        <!-- ЭЛЕМЕНТ 2 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/woman-earth-hugging-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm]">
+                Справиться со стрессом, тревогой и страхом
+            </h3>
+        </div>
+
+        <!-- ЭЛЕМЕНТ 3 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/man-review-stars-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm]">
+                Принять себя и повысить самооценку
+            </h3>
+        </div>
+
+    </div>
+
+        <!-- СЕТКА 3 КОЛОНКИ -->
+    <div class="mx-auto max-w-screen-xl px-4 py-16 grid grid-cols-1 md:grid-cols-3 gap-10">
+
+        <!-- ЭЛЕМЕНТ 4 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/woman-mindfulness-yoga-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm]">
+                Научиться говорить «нет» и отстаивать личные границы
+            </h3>
+        </div>
+
+        <!-- ЭЛЕМЕНТ 5 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/woman-rocket-flying-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm]">
+                Пережить перемены: переезд, расставание, потеря работы
+            </h3>
+        </div>
+
+        <!-- ЭЛЕМЕНТ 6 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/man-question-marks-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm]">
+                Понять, почему на работе проблемы и нет мотивации
+            </h3>
+        </div>
+
+    </div>
+
+    <div class="justify-center mt-10 flex flex-col gap-4 sm:flex-row">
+        <a href="#"
+           class="inline-flex items-center justify-center rounded-lg bg-indigo-700 px-6 py-3 text-white font-medium hover:bg-indigo-900 transition">
+            Хочу обсудить свою ситуацию
+        </a>
+    </div>
+
+</section>
 
 
 
