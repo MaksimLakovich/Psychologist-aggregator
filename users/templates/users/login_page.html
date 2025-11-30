@@ -2,35 +2,103 @@
 
 {% load static %}
 
-{% block title %} ??? {% endblock %}
+{% block title %}{{ title_login_page_view|default:"Вход" }}{% endblock %}
 
 {% block content %}
 
+<section class="bg-indigo-100 dark:bg-gray-900">
+    <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
 
-<!--Блок с базовым описанием сути страницы-->
-<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-    <h1 class="display-4 mb-5">Вход в магазин Skystore</h1>
-</div>
+        <div class="w-full bg-white rounded-lg shadow dark:border sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+            <div class="p-6 space-y-6 sm:p-8">
 
-<div class="container">
-    <div class="row text-start">
-        <div class="col-lg-12 col-md-12 col-sm-12">
-            <div class="card-body">
-                <form method="post">
+                <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+                    Введите email и пароль
+                </h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Для тех, у кого уже есть аккаунт
+                </p>
 
+                <!-- Общие ошибки -->
+                {% if form.non_field_errors %}
+                <div class="p-3 text-sm text-red-700 bg-red-50 rounded-md">
+                    {% for err in form.non_field_errors %}
+                    {{ err }}{% if not forloop.last %}<br>{% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+
+                <form class="space-y-4 md:space-y-6" method="post">
                     {% csrf_token %}
-                    {{ form.as_p }}
 
-                    <!-- Кнопки -->
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-lg btn-primary mt-4">Войти</button>
-                        <a href="{% url 'core:start_page' %}" class="btn btn-lg btn-outline-primary mt-4">Вернуться на главную страницу</a>
+                    <!-- Username -->
+                    <div>
+                        <label for="{{ form.username.id_for_label }}"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ form.username.label }}
+                        </label>
+                        {{ form.username }}
+
+                        {% if form.username.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                            {{ form.username.errors.0 }}
+                        </p>
+                        {% endif %}
                     </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label for="{{ form.password.id_for_label }}"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ form.password.label }}
+                        </label>
+                        {{ form.password }}
+
+                        {% if form.password.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                            {{ form.password.errors.0 }}
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Remember + Forgot -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="remember" name="remember" type="checkbox"
+                                       class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3
+                              focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600">
+                            </div>
+                            <label for="remember" class="ml-3 text-sm text-gray-500 dark:text-gray-300">
+                                Запомнить меня
+                            </label>
+                        </div>
+                        <a href="#"
+                           class="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500">
+                            Забыли пароль?
+                        </a>
+                    </div>
+
+                    <button type="submit"
+                            class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none
+                         focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center
+                         dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                        Войти
+                    </button>
+
+                    <p class="text-sm font-light text-gray-500 dark:text-gray-400">
+                        Нет аккаунта?
+                        <a href="#" class="font-medium text-primary-600 hover:underline dark:text-primary-500">
+                            Создать аккаунт
+                        </a>
+                    </p>
                 </form>
+
             </div>
         </div>
-    </div>
-</div>
 
+    </div>
+</section>
 
 {% endblock %}

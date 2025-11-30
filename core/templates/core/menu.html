@@ -1,6 +1,20 @@
 {% load static %}
 
-{% if user.is_authenticated %}
+{% if menu_variant == "login" %}
+<header class="bg-white shadow">
+    <div class="mx-auto max-w-7xl px-4 py-7 flex justify-between items-center">
+        <a href="{% url 'core:start_page' %}" class="flex mr-4">
+            <img src="{% static 'images/opora_logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo"/>
+            <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
+        </a>
+        <nav class="flex items-center gap-6 text-gray-600">
+            <a href="{% url 'core:start_page' %}" class="hover:text-gray-900">Назад</a>
+            <a href="#" class="hover:text-gray-900">Вход для психолога</a>
+        </nav>
+    </div>
+</header>
+
+{% elif user.is_authenticated %}
 <header class="bg-white shadow">
     <div class="mx-auto max-w-7xl px-4 py-7">
         <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800">
@@ -403,7 +417,6 @@
     </div>
 </header>
 
-
 {% else %}
 <header class="bg-white shadow">
     <div class="mx-auto max-w-7xl px-4 py-7 flex justify-between items-center">
@@ -415,9 +428,7 @@
             <a href="{% url 'users:web:login_page' %}" class="hover:text-gray-900">Войти</a>
             <a href="#" class="hover:text-gray-900">Регистрация</a>
         </nav>
-
     </div>
 </header>
-
 
 {% endif %}
