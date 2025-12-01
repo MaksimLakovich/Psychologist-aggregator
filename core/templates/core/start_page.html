@@ -2,13 +2,24 @@
 
 {% load static %}
 
-{% block title %} {{ title_start_page_view }} {% endblock %}
+{% block title %} {{ title_start_page_view|default:"ОПОРА" }} {% endblock %}
 
 {% block content %}
 
+{% block extra_style %}
+<style>
+    body {
+        background-image: url('{% static "images/background/background-start.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed; /* красиво фиксирует фон */
+    }
+</style>
+{% endblock %}
 
 <!-- Блок приветствия с основной информацией -->
-<section class="bg-indigo-100">
+<section class="bg-transparent">
     <div class="mx-auto max-w-screen-xl px-4 py-16 lg:grid lg:grid-cols-12 lg:gap-8 lg:py-32">
 
         <!-- Текст -->
@@ -36,7 +47,7 @@
 
         <!-- Иллюстрация -->
         <div class="hidden lg:col-span-6 lg:block relative">
-            <img src="{% static 'images/woman-laptop-sitting-indigo.svg' %}"
+            <img src="{% static 'images/start_page/woman-laptop-sitting-indigo.svg' %}"
                  alt="Психологи"
                  class="w-full h-auto">
         </div>
@@ -96,7 +107,7 @@
         <!-- ЭЛЕМЕНТ 1 -->
         <div class="flex flex-col items-center justify-start text-center">
             <img
-                src="{% static 'images/couple-dancing-music-dark.png' %}"
+                src="{% static 'images/start_page/couple-dancing-music-dark.png' %}"
                 alt="Психологи"
                 class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
             >
@@ -108,7 +119,7 @@
         <!-- ЭЛЕМЕНТ 2 -->
         <div class="flex flex-col items-center justify-start text-center">
             <img
-                src="{% static 'images/woman-earth-hugging-dark.png' %}"
+                src="{% static 'images/start_page/woman-earth-hugging-dark.png' %}"
                 alt="Психологи"
                 class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
             >
@@ -120,7 +131,7 @@
         <!-- ЭЛЕМЕНТ 3 -->
         <div class="flex flex-col items-center justify-start text-center">
             <img
-                src="{% static 'images/man-review-stars-dark.png' %}"
+                src="{% static 'images/start_page/man-review-stars-dark.png' %}"
                 alt="Психологи"
                 class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
             >
@@ -137,7 +148,7 @@
         <!-- ЭЛЕМЕНТ 4 -->
         <div class="flex flex-col items-center justify-start text-center">
             <img
-                src="{% static 'images/woman-mindfulness-yoga-dark.png' %}"
+                src="{% static 'images/start_page/woman-mindfulness-yoga-dark.png' %}"
                 alt="Психологи"
                 class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
             >
@@ -149,7 +160,7 @@
         <!-- ЭЛЕМЕНТ 5 -->
         <div class="flex flex-col items-center justify-start text-center">
             <img
-                src="{% static 'images/woman-rocket-flying-dark.png' %}"
+                src="{% static 'images/start_page/woman-rocket-flying-dark.png' %}"
                 alt="Психологи"
                 class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
             >
@@ -161,7 +172,7 @@
         <!-- ЭЛЕМЕНТ 6 -->
         <div class="flex flex-col items-center justify-start text-center">
             <img
-                src="{% static 'images/man-question-marks-dark.png' %}"
+                src="{% static 'images/start_page/man-question-marks-dark.png' %}"
                 alt="Психологи"
                 class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
             >

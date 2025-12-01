@@ -2297,6 +2297,14 @@ input:checked + .toggle-bg {
   gap: 1.5rem;
 }
 
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-1 {
+  gap: 0.25rem;
+}
+
 .gap-x-20 {
   -moz-column-gap: 5rem;
        column-gap: 5rem;
@@ -2439,6 +2447,16 @@ input:checked + .toggle-bg {
   border-color: rgb(255 255 255 / var(--tw-border-opacity, 1));
 }
 
+.border-gray-900 {
+  --tw-border-opacity: 1;
+  border-color: rgb(17 24 39 / var(--tw-border-opacity, 1));
+}
+
+.border-red-900 {
+  --tw-border-opacity: 1;
+  border-color: rgb(119 29 29 / var(--tw-border-opacity, 1));
+}
+
 .\!bg-gray-50 {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1)) !important;
@@ -2548,6 +2566,11 @@ input:checked + .toggle-bg {
 .bg-red-50 {
   --tw-bg-opacity: 1;
   background-color: rgb(253 242 242 / var(--tw-bg-opacity, 1));
+}
+
+.bg-indigo-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(240 245 255 / var(--tw-bg-opacity, 1));
 }
 
 .object-contain {
@@ -2666,6 +2689,18 @@ input:checked + .toggle-bg {
   padding-top: 0.5rem;
 }
 
+.pb-8 {
+  padding-bottom: 2rem;
+}
+
+.pt-16 {
+  padding-top: 4rem;
+}
+
+.pt-6 {
+  padding-top: 1.5rem;
+}
+
 .text-center {
   text-align: center;
 }
@@ -2712,6 +2747,16 @@ input:checked + .toggle-bg {
 .text-2xl {
   font-size: 1.5rem;
   line-height: 2rem;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+.text-7xl {
+  font-size: 4.5rem;
+  line-height: 1;
 }
 
 .font-extrabold {
@@ -2825,6 +2870,16 @@ input:checked + .toggle-bg {
 .text-red-700 {
   --tw-text-opacity: 1;
   color: rgb(200 30 30 / var(--tw-text-opacity, 1));
+}
+
+.text-indigo-900 {
+  --tw-text-opacity: 1;
+  color: rgb(54 47 120 / var(--tw-text-opacity, 1));
+}
+
+.text-indigo-600 {
+  --tw-text-opacity: 1;
+  color: rgb(88 80 236 / var(--tw-text-opacity, 1));
 }
 
 .opacity-0 {
@@ -2956,6 +3011,26 @@ input:checked + .toggle-bg {
 .hover\:text-gray-900:hover {
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity, 1));
+}
+
+.hover\:text-indigo-900:hover {
+  --tw-text-opacity: 1;
+  color: rgb(54 47 120 / var(--tw-text-opacity, 1));
+}
+
+.hover\:text-indigo-300:hover {
+  --tw-text-opacity: 1;
+  color: rgb(180 198 252 / var(--tw-text-opacity, 1));
+}
+
+.hover\:text-indigo-400:hover {
+  --tw-text-opacity: 1;
+  color: rgb(141 162 251 / var(--tw-text-opacity, 1));
+}
+
+.hover\:text-indigo-500:hover {
+  --tw-text-opacity: 1;
+  color: rgb(104 117 245 / var(--tw-text-opacity, 1));
 }
 
 .hover\:underline:hover {
@@ -3402,6 +3477,14 @@ input:checked + .toggle-bg {
 
   .lg\:pl-2 {
     padding-left: 0.5rem;
+  }
+
+  .lg\:pb-10 {
+    padding-bottom: 2.5rem;
+  }
+
+  .lg\:pt-20 {
+    padding-top: 5rem;
   }
 }
 

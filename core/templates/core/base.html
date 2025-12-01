@@ -28,6 +28,10 @@
 
 <body class="min-h-full flex flex-col">
 
+    <!-- Подключение extra_style чтоб можно было применять фон на разных страницах именно через <body>, а не на секцию
+    Это дает лучший результат, если страница длиннее экрана. -->
+    {% block extra_style %}{% endblock %}
+
     <!-- Подключение подшаблона с меню (верхняя часть с навигацией) -->
     {% include 'core/menu.html' %}
 
@@ -38,7 +42,7 @@
     </main>
 
     <!-- Футер -->
-    <footer class="bg-gray-100 py-6 mt-12">
+    <footer class="bg-gray-100 py-6">
         <div class="mx-auto max-w-7xl px-4 text-center text-gray-500 text-sm">
             © ОПОРА. Все права защищены.
         </div>
