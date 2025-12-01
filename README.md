@@ -20,7 +20,7 @@
 [2. Технологии](#title2)  
 [3. Приложения проекта](#title3)  
 [4. Структура проекта](#title4)  
-[5. Структура данных](#title5)  
+[5. Структура приложений](#title5)  
 [6. Документация по функционалу и API ](#title6)  
 [7. Roadmap](#title7)  
 [8. Автор](#title8)  
@@ -168,15 +168,19 @@
 │    ├── users_psychologists.json
 │    └── ...
 │
-├── core/                       # ⭐️ Приложение django-проекта ("UI-ядро") - общие HTML-шаблоны, макеты, UI 
+├── core/                       # ⭐️ Приложение django-проекта ("UI-ядро") - общие HTML-шаблоны, макеты, UI
+│    ├── migrations/
 │    ├── templates/                   # HTML-шаблоны
 │    │    └── core/
 │    │          ├── base.html
-│    │          ├── home.html
+│    │          ├── menu.html
+│    │          ├── start_page.html           # Стартовая страница приложения (неавторизованный пользователь)
+│    │          ├── home_page.html            # Домашняя страница приложения (авторизованный пользователь)
 │    │          └── ...
-│    ├── migrations/
+│    ├── views/
+│    │    ├── start_view.py            # Вью для стартовой страницы
+│    │    └── ...
 │    ├── apps.py
-│    ├── views.py                     # Вьюхи для страниц в core
 │    └── urls.py                      # Роуты для web-страниц
 │
 ├── users/                      # ⭐️ Приложение django-проекта ("Пользователи") + справочники системы (UserRole, Topic, Specialisation, Method, Education, Experience)
@@ -185,21 +189,16 @@
 │    │    ├── views.py                        # Регистрация, логин, refresh, logout / Email / Пароли / Свой аккаунт AppUser / Профили (психолог/клиент) / Публичная карточка психолога / CRUD образования
 │    │    └── urls.py                         # Все API-роуты
 │    ├── _web/                        # ℹ️ WEB-часть (формы + HTML)
-│    │    ├── views.py
-│    │    │    ├── auth                              # Login / Logout / Register
-│    │    │    ├── account                           # Редактирование своего профиля
-│    │    │    ├── profile_psychologist              # Web-редактирование психолога
-│    │    │    ├── public_profiles                   # Публичные страницы психологов
-│    │    │    ├── profile_client                    # Web-редактирование клиента
-│    │    │    └── education                         # Образование
-│    │    ├── forms.py
-│    │    │    ├── user                              # Формы для аккаунта AppUser
-│    │    │    ├── psychologist_profile              # Формы для профиля психолога
-│    │    │    ├── client_profile                    # Формы для профиля клиента
-│    │    │    └── education                         # Формы для образования
+│    │    ├── forms/
+│    │    │    ├── auth_form.py                      # Формы Входа / Регистрации клиента / Регистрации психолога
+│    │    │    └── ...
+│    │    ├── views/
+│    │    │    ├── auth_view.py                      # Login / Logout / Register
+│    │    │    └── ...
 │    │    └── urls.py                         # Роуты для web-страниц
 │    ├── templates/                   # HTML-шаблоны
 │    │    └── users/
+│    │          ├── login_page.html    # Страница входа
 │    │          └── ...
 │    ├── migrations/
 │    ├── services/                    # Сервисные вспомогательные функции
@@ -296,9 +295,15 @@
 
 ---
 
-## <a id="title5"> 🗄️ Структура данных </a>
+## <a id="title5"> 🗄️ Структура приложений </a>
 
-### 2.1. Основные сущности приложения `users`:
+### 2.1. Приложение `core`:
+
+- нет отдельных моделей (сущностей), используются модели приложений `users` и `calendar`.
+- ℹ️ **Детальная информация о приложении *"Core"*: [Core (app_core_info.md)](docs/app_core_info.md).**
+
+
+### 2.2. Приложение `users`:
 
 - ℹ️ **Детальная информация о приложении *"Users"*: [Users (app_users_info.md)](docs/app_users_info.md).**
 - ⚠ **Описание значений в справочнике `Topic`: [fixture_topics_info.md](docs/fixture_topics_info.md).**
@@ -332,13 +337,13 @@
     ```
 
 
-### 2.2. Основные сущности приложения `aggregator`:
+### 2.3. Приложение `aggregator`:
 
 - нет отдельных моделей (сущностей), используются модели приложений `users` и `calendar`.
 - ℹ️ **Детальная информация о приложении *"Aggregator"*: [Aggregator (app_aggregator_info.md)](docs/app_aggregator_info.md).**
 
 
-### 2.3. Основные сущности приложения `calendar`:
+### 2.4. Приложение `calendar`:
 
 - `TimeSlot`:
   - **psychologist** (по ID, связь с моделью `PsychologistProfile`)
@@ -352,7 +357,7 @@
   - **is_recurring**, **weekdays**, **price**, **status** (например, "Requested", "Confirmed", "Started", "Completed", "Canceled" (возможно: canceled_by (choices: client / psychologist / system), "Rescheduled" (возможно: rescheduled_by (choices: client / psychologist / system)), **meeting_url** (видеосвязь, этап 2), **is_paid** (оплата, этап 2), **notes** (комментарии), **rate** (оценка, этап 2)
 
 
-### 2.4. Черновой набросок ключевых сущностей (2-3 этапы):
+### 2.5. Черновой набросок остальных приложений (2-3 этапы):
 - ConsentRecord (согласия на обработку ПДн, договор на услуги, отдельно отзыв соглашения и удаление профиля)
 - SubscriptionPlan (тип подписки, лимиты)
 - Payment / Transaction (связанный с Appointment или SubscriptionPlan)

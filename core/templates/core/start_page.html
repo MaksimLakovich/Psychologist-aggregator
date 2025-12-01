@@ -1,0 +1,195 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %} {{ title_start_page_view|default:"ОПОРА" }} {% endblock %}
+
+{% block content %}
+
+{% block extra_style %}
+<style>
+    body {
+        background-image: url('{% static "images/background/background-start.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed; /* красиво фиксирует фон */
+    }
+</style>
+{% endblock %}
+
+<!-- Блок приветствия с основной информацией -->
+<section class="bg-transparent">
+    <div class="mx-auto max-w-screen-xl px-4 py-16 lg:grid lg:grid-cols-12 lg:gap-8 lg:py-32">
+
+        <!-- Текст -->
+        <div class="lg:col-span-6 flex flex-col justify-center">
+            <h1 class="text-5xl font-extrabold tracking-tight text-grey-900 sm:text-5xl">
+                {{ header_start_page_view }}
+            </h1>
+
+            <p class="mt-6 text-lg text-gray-600 leading-relaxed">
+                {{ description_start_page_view }}
+            </p>
+
+            <div class="mt-10 flex flex-col gap-4 sm:flex-row">
+                <a href="#"
+                   class="inline-flex items-center justify-center rounded-lg bg-indigo-700 px-6 py-3 text-white font-medium hover:bg-indigo-900 transition">
+                    Подобрать психолога
+                </a>
+
+                <a href="#"
+                   class="inline-flex items-center justify-center rounded-lg border border-gray-400 px-6 py-3 text-gray-800 font-medium hover:bg-indigo-300 transition">
+                    Зарегистрироваться
+                </a>
+            </div>
+        </div>
+
+        <!-- Иллюстрация -->
+        <div class="hidden lg:col-span-6 lg:block relative">
+            <img src="{% static 'images/start_page/woman-laptop-sitting-indigo.svg' %}"
+                 alt="Психологи"
+                 class="w-full h-auto">
+        </div>
+
+    </div>
+</section>
+
+
+<!-- Блок преимуществ -->
+<section class="bg-white py-6">
+    <div class="mx-auto max-w-screen-xl px-4">
+        <div class="grid grid-cols-1 gap-10 sm:grid-cols-3">
+
+            <div class="text-center">
+                <h3 class="text-xl font-semibold text-gray-900">Проверенные специалисты</h3>
+                <p class="mt-2 text-gray-600 text-sm">
+                    Все психологи проходят модерацию и подтверждают квалификацию.
+                </p>
+            </div>
+
+            <div class="text-center">
+                <h3 class="text-xl font-semibold text-gray-900">Разные подходы терапии</h3>
+                <p class="mt-2 text-gray-600 text-sm">
+                    КПТ, психоанализ, гештальт, EMDR и другие — выбирайте подходящий метод.
+                </p>
+            </div>
+
+            <div class="text-center">
+                <h3 class="text-xl font-semibold text-gray-900">Удобная онлайн-запись</h3>
+                <p class="mt-2 text-gray-600 text-sm">
+                    Находите специалиста, изучайте профиль и бронируйте сессию.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- Горизонтальная полоска (разделитель) -->
+<hr class="h-0.5 bg-indigo-200 border-0 dark:bg-indigo-100" />
+
+
+<!-- Блок приветствия "С чем поможет психолог?" -->
+<section class="bg-white py-16">
+
+    <div>
+        <h1 class="text-center text-4xl font-extrabold tracking-tight text-grey-900 sm:text-5xl">
+            С чем <span class="uppercase text-indigo-700">поможет</span> психолог?
+        </h1>
+    </div>
+
+    <!-- СЕТКА 3 КОЛОНКИ -->
+    <div class="mx-auto max-w-screen-xl px-4 py-16 grid grid-cols-1 md:grid-cols-3 gap-x-20 gap-y-10">
+
+
+        <!-- ЭЛЕМЕНТ 1 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/start_page/couple-dancing-music-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm] max-w-sm">
+                Наладить гармоничные отношения с близкими людьми
+            </h3>
+        </div>
+
+        <!-- ЭЛЕМЕНТ 2 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/start_page/woman-earth-hugging-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm] max-w-sm">
+                Справиться со стрессом, тревогой и страхом
+            </h3>
+        </div>
+
+        <!-- ЭЛЕМЕНТ 3 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/start_page/man-review-stars-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm] max-w-sm">
+                Принять себя и повысить самооценку
+            </h3>
+        </div>
+
+    </div>
+
+        <!-- СЕТКА 3 КОЛОНКИ -->
+    <div class="mx-auto max-w-screen-xl px-4 py-16 grid grid-cols-1 md:grid-cols-3 gap-x-20 gap-y-10">
+
+        <!-- ЭЛЕМЕНТ 4 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/start_page/woman-mindfulness-yoga-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm]">
+                Научиться говорить «нет» и отстаивать личные границы
+            </h3>
+        </div>
+
+        <!-- ЭЛЕМЕНТ 5 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/start_page/woman-rocket-flying-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm]">
+                Пережить перемены: переезд, расставание, потеря работы
+            </h3>
+        </div>
+
+        <!-- ЭЛЕМЕНТ 6 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/start_page/man-question-marks-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm]">
+                Понять, почему на работе проблемы и нет мотивации
+            </h3>
+        </div>
+
+    </div>
+
+    <div class="justify-center mt-10 flex flex-col gap-4 sm:flex-row">
+        <a href="#"
+           class="inline-flex items-center justify-center rounded-lg bg-indigo-700 px-6 py-3 text-white font-medium hover:bg-indigo-900 transition">
+            Хочу обсудить свою ситуацию
+        </a>
+    </div>
+
+</section>
+
+{% endblock %}
