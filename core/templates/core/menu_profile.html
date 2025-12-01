@@ -23,11 +23,15 @@
     <ul class="py-1 text-gray-500 dark:text-gray-400" aria-labelledby="dropdown">
         <li>
             <a href="#"
-               class="block py-2 px-4 text-sm hover:bg-blue-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">Мой профиль</a>
+               class="block py-2 px-4 text-sm hover:bg-blue-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">
+                Мой профиль
+            </a>
         </li>
         <li>
             <a href="#"
-               class="block py-2 px-4 text-sm hover:bg-blue-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">Изменить пароль</a>
+               class="block py-2 px-4 text-sm hover:bg-blue-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">
+                Изменить пароль
+            </a>
         </li>
     </ul>
 
@@ -55,10 +59,13 @@
             </a>
         </li>
     </ul>
+
     <ul class="py-1 text-gray-500 dark:text-gray-400" aria-labelledby="dropdown">
         <li>
-            <a href="#"
-               class="block py-2 px-4 text-sm hover:bg-indigo-300 dark:hover:bg-gray-600 dark:hover:text-white">Выйти</a>
+            <form method="post" action="{% url 'users:web:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="w-full flex items-center block py-2 px-4 text-sm hover:bg-indigo-300 dark:hover:bg-gray-600 dark:hover:text-white">Выйти</button>
+            </form>
         </li>
     </ul>
 </div>
