@@ -10,14 +10,18 @@
             <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
         </a>
         <nav class="flex items-center gap-6 text-gray-700">
-            <a href="{% url 'core:start_page' %}" class="flex items-center gap-1 hover:text-gray-900">
+            <a href="{% url 'core:start_page' %}"
+               class="flex items-center gap-1 text-gray-800 dark:text-white hover:bg-gray-50 focus:ring-4 focus:ring-gray-300
+               font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:hover:bg-gray-700
+               focus:outline-none dark:focus:ring-gray-800">
                 <img src="{% static 'images/menu/back-icon.svg' %}" class="hover:text-gray-900" alt="Back_icon"/>
                 <span>Назад</span>
             </a>
-            <a href="#" class="flex items-center gap-1 hover:text-gray-900">
-                <img src="{% static 'images/menu/users-group-icon.svg' %}" class="hover:text-gray-900"
-                     alt="Users_icon"/>
-                <span>Вход для психолога</span>
+            <a href="#"
+               class="flex items-center gap-1.5 text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4 focus:ring-primary-300
+               font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:bg-primary-600
+               dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">
+               Вход для психолога
             </a>
         </nav>
     </div>
@@ -68,8 +72,18 @@
             <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
         </a>
         <nav class="flex items-center gap-6 text-gray-600">
-            <a href="{% url 'users:web:login_page' %}" class="hover:text-gray-900">Войти</a>
-            <a href="#" class="hover:text-gray-900">Регистрация</a>
+                <a href="{% url 'users:web:login_page' %}"
+                   class="text-gray-800 dark:text-white hover:bg-gray-50 focus:ring-4 focus:ring-gray-300
+                   font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:hover:bg-gray-700
+                   focus:outline-none dark:focus:ring-gray-800">
+                    Войти
+                </a>
+                <a href="#"
+                   class="text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4 focus:ring-primary-300
+                   font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:bg-primary-600
+                   dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">
+                    Регистрация
+                </a>
         </nav>
     </div>
 

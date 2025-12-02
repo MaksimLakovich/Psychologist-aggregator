@@ -33,14 +33,9 @@
             </p>
 
             <div class="mt-10 flex flex-col gap-4 sm:flex-row">
-                <a href="#"
+                <a href="{% url 'users:web:login_page' %}"
                    class="inline-flex items-center justify-center rounded-lg bg-indigo-700 px-6 py-3 text-white font-medium hover:bg-indigo-900 transition">
                     Подобрать психолога
-                </a>
-
-                <a href="#"
-                   class="inline-flex items-center justify-center rounded-lg border border-gray-400 px-6 py-3 text-gray-800 font-medium hover:bg-indigo-300 transition">
-                    Зарегистрироваться
                 </a>
             </div>
         </div>
@@ -184,7 +179,7 @@
     </div>
 
     <div class="justify-center mt-10 flex flex-col gap-4 sm:flex-row">
-        <a href="#"
+        <a href="{% url 'users:web:login_page' %}"
            class="inline-flex items-center justify-center rounded-lg bg-indigo-700 px-6 py-3 text-white font-medium hover:bg-indigo-900 transition">
             Хочу обсудить свою ситуацию
         </a>

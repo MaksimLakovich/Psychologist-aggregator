@@ -10,11 +10,7 @@
     <span class="sr-only">Open user menu</span>
 
     <img class="w-7 h-7 rounded-full object-cover object-center"
-         src="{% if request.user.psychologist_profile.photo %}
-                 {{ request.user.psychologist_profile.photo.url }}
-              {% else %}
-                 {% static 'images/menu/default_ava.svg' %}
-              {% endif %}"
+         src="{{ request.user.avatar_url }}"
          alt="user photo">
 </button>
 
