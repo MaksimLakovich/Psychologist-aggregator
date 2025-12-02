@@ -1,0 +1,187 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %} {{ title_home_page_view|default:"ОПОРА" }} {% endblock %}
+
+{% block content %}
+
+
+<section class="bg-white py-8 antialiased dark:bg-gray-900 md:py-1">
+    <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
+
+        <div class="gap-8 lg:flex">
+
+            <!-- ФОРМА -->
+            <form action="#" class="w-full space-y-6 lg:space-y-8">
+
+                <!-- ШАГИ / ЭТАПЫ -->
+                <div class="space-y-6 sm:space-y-8">
+                    <ol class="flex flex-col gap-4 rounded-lg border border-gray-200 bg-indigo-100 p-4
+                    dark:border-gray-700 dark:bg-gray-800 sm:justify-center md:flex-row md:items-center lg:gap-6">
+
+                        <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                            <svg class="h-8 w-8 text-indigo-700 dark:text-primary-500" aria-hidden="true"
+                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                 viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                      stroke-width="2.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                            </svg>
+                            <p class="text-base font-medium leading-tight text-indigo-700 dark:text-primary-500">
+                                <strong>Общие вопросы</strong>
+                            </p>
+                        </li>
+
+                        <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+
+                        <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                            <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                 viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                      stroke-width="1.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                            </svg>
+                            <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
+                                Личные вопросы
+                            </p>
+                        </li>
+
+                        <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+
+                        <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                            <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                 viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                      stroke-width="1.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                            </svg>
+                            <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
+                                Выбор психолога
+                            </p>
+                        </li>
+
+                        <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+
+                        <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                            <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                 viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                      stroke-width="1.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                            </svg>
+                            <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
+                                Запись и оплата
+                            </p>
+                        </li>
+
+                    </ol>
+                </div>
+
+                <!-- Аватары -->
+                <div class="flex justify-end min-h-[50px] w-full overflow-x-scroll rounded-lg lg:overflow-visible">
+                    {% include 'core/avatar_group_with_counter.html' %}
+                </div>
+
+                <!-- ========== Блок 1 ========== -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    <!-- Левая колонка -->
+                    <div class="md:col-span-3 pt-2">
+                        <h2 class="text-lg font-semibold text-gray-900">Общие вопросы</h2>
+                    </div>
+
+                    <!-- Правая колонка -->
+                    <div class="md:col-span-9 space-y-6">
+
+                        <!-- Имя -->
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-gray-700" for="first_name">
+                                Имя или псевдоним будет доступен психологу
+                            </label>
+                            <input type="text" id="first_name" placeholder="Ваше имя"
+                                   class="block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3
+                                      text-sm text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"/>
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-gray-700" for="email_name">
+                                Для важных уведомлений от психолога и сервиса
+                            </label>
+                            <input type="email" id="email_name" placeholder="Ваш email"
+                                   class="block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3
+                                      text-sm text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"/>
+                        </div>
+
+                        <!-- Возраст -->
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-gray-700" for="timezone">
+                                Ваш возраст
+                            </label>
+                            <input type="number" id="age" placeholder="Ваш возраст"
+                                   class="block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3
+                                      text-sm text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"/>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ========== Блок 2 ========== -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    <!-- Левая колонка -->
+                    <div class="md:col-span-3 pt-2">
+                        <h2 class="text-lg font-semibold text-gray-900">Был ли у вас опыт терапии?</h2>
+                    </div>
+
+                    <!-- Правая колонка -->
+                    <div class="md:col-span-9">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer">
+                            <div class="relative w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-indigo-600
+                                    transition-all after:absolute after:h-5 after:w-5 after:bg-white after:rounded-full
+                                    after:top-0.5 after:left-0.5 after:transition-all peer-checked:after:translate-x-5">
+                            </div>
+                            <span class="ml-3 text-sm text-gray-700">Да, у меня был опыт</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- ========== Блок 3 ========== -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    <!-- Левая колонка -->
+                    <div class="md:col-span-3 pt-2">
+                        <h2 class="text-lg font-semibold text-gray-900">Часовой пояс</h2>
+                    </div>
+
+                    <!-- Правая колонка -->
+                    <div class="md:col-span-9">
+                        <label class="block mb-2 text-sm font-medium text-gray-700" for="timezone">
+                            Для корректного отображения расписания сессий
+                        </label>
+
+                        <select id="timezone"
+                                class="block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3
+                                   text-sm text-gray-900 shadow-sm
+                                   focus:border-indigo-600 focus:ring-indigo-600">
+                            <option value="">Ваш часовой пояс</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Кнопка -->
+                <div class="pt-6 flex justify-center">
+                    <button class="px-10 py-3.5 rounded-xl bg-indigo-700 text-white font-medium
+                               hover:bg-indigo-900 transition shadow">
+                        Далее
+                    </button>
+                </div>
+
+
+            </form>
+
+        </div>
+
+    </div>
+</section>
+
+
+{% endblock %}
