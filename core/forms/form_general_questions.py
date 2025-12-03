@@ -16,26 +16,37 @@ class ClientGeneralQuestionsForm(forms.Form):
     first_name = forms.CharField(
         max_length=150,
         required=True,
-        help_text="Введите имя",
+        widget=forms.TextInput(attrs={
+            "class": "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm",
+            "placeholder": "Ваше имя",
+        })
     )
     email = forms.EmailField(
-        required=False,
-        disabled=True,  # поле только для чтения
-        help_text="Email отображается только для чтения",
+        required=True,
+        widget=forms.EmailInput(attrs={
+            "readonly": "readonly",
+            "class": "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm cursor-not-allowed",
+        })
     )
     age = forms.IntegerField(
         required=True,
-        help_text="Введите возраст",
         validators=[MinValueValidator(18), MaxValueValidator(120)],
-    )
-    timezone = TimeZoneFormField(
-        required=True,
-        help_text="Для корректного отображения расписаний сессий",
+        widget=forms.NumberInput(attrs={
+            "class": "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm",
+            "placeholder": "Ваш возраст",
+        })
     )
     therapy_experience = forms.BooleanField(
         required=False,
-        initial=False,
-        help_text="Был ли у вас опыт терапии?",
+        widget=forms.CheckboxInput(attrs={
+            "class": "sr-only peer",
+        })
+    )
+    timezone = TimeZoneFormField(
+        required=True,
+        widget=forms.Select(attrs={
+            "class": "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm",
+        })
     )
 
     def save(self, user):

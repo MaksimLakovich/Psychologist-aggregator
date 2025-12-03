@@ -13,7 +13,9 @@
         <div class="gap-8 lg:flex">
 
             <!-- ФОРМА -->
-            <form action="#" class="w-full space-y-6 lg:space-y-8">
+            <form method="post" action="" class="w-full space-y-6 lg:space-y-8">
+
+                {% csrf_token %}
 
                 <!-- ШАГИ / ЭТАПЫ -->
                 <div class="space-y-6 sm:space-y-8">
@@ -94,32 +96,26 @@
 
                         <!-- Имя -->
                         <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-400" for="first_name">
+                            <label class="block mb-2 text-sm font-medium text-gray-400">
                                 Имя или псевдоним будет доступен психологу
                             </label>
-                            <input type="text" id="first_name" placeholder="Ваше имя"
-                                   class="block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3
-                                      text-sm text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"/>
+                            {{ form.first_name }}
                         </div>
 
                         <!-- Email -->
                         <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-400" for="email_name">
+                            <label class="block mb-2 text-sm font-medium text-gray-400">
                                 Для важных уведомлений от психолога и сервиса
                             </label>
-                            <input type="email" id="email_name" placeholder="Ваш email"
-                                   class="block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3
-                                      text-sm text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"/>
+                            {{ form.email }}
                         </div>
 
                         <!-- Возраст -->
                         <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-400" for="timezone">
+                            <label class="block mb-2 text-sm font-medium text-gray-400">
                                 Ваш возраст
                             </label>
-                            <input type="number" id="age" placeholder="Ваш возраст"
-                                   class="block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3
-                                      text-sm text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"/>
+                            {{ form.age }}
                         </div>
 
                     </div>
@@ -135,7 +131,7 @@
                     <!-- Правая колонка -->
                     <div class="md:col-span-9">
                         <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" class="sr-only peer">
+                            {{ form.therapy_experience }}
                             <div class="relative w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-indigo-600
                                     transition-all after:absolute after:h-5 after:w-5 after:bg-white after:rounded-full
                                     after:top-0.5 after:left-0.5 after:transition-all peer-checked:after:translate-x-5">
@@ -154,26 +150,20 @@
 
                     <!-- Правая колонка -->
                     <div class="md:col-span-9">
-                        <label class="block mb-2 text-sm font-medium text-gray-400" for="timezone">
+                        <label class="block mb-2 text-sm font-medium text-gray-400">
                             Для корректного отображения расписания сессий
                         </label>
-                        <select id="timezone"
-                                class="block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3
-                                   text-sm text-gray-900 shadow-sm
-                                   focus:border-indigo-600 focus:ring-indigo-600">
-                            <option value="">Ваш часовой пояс</option>
-                        </select>
+                        {{ form.timezone }}
                     </div>
                 </div>
 
                 <!-- Кнопка -->
                 <div class="pt-6 flex justify-center">
-                    <button class="px-10 py-3.5 rounded-xl bg-indigo-700 text-white font-medium
+                    <button type="submit" class="px-10 py-3.5 rounded-xl bg-indigo-700 text-white font-medium
                                hover:bg-indigo-900 transition shadow">
                         Далее
                     </button>
                 </div>
-
 
             </form>
 
