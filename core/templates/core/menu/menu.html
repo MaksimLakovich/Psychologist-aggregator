@@ -1,6 +1,7 @@
 {% load static %}
 
 
+<!--МЕНЮ НА СТРАНИЦЕ "ВОЙТИ" ДЛЯ НЕАВТОРИЗОВАННОГО ПОЛЬЗОВАТЕЛЯ-->
 {% if menu_variant == "login" %}
 <header class="bg-white shadow">
 
@@ -29,6 +30,42 @@
 </header>
 
 
+<!--МЕНЮ ДЛЯ АВТОРИЗОВАННОГО КЛИЕНТА-->
+{% elif user.is_authenticated and user.role_id == 2 %}
+<header class="bg-white shadow">
+
+    <div class="mx-auto max-w-7xl px-4 py-7">
+        <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800">
+            <div class="flex flex-wrap justify-between items-center">
+
+                <div class="flex justify-start items-center">
+                    <a href="{% url 'core:client_general_questions_page' %}" class="flex mr-4">
+                        <img src="{% static 'images/logo/opora-logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo"/>
+                        <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
+                    </a>
+                </div>
+
+                <div class="flex items-center lg:order-2">
+
+                    <!-- Подключаем кнопку УВЕДОМЛЕНИЯ в меню -->
+                    {% include 'core/menu/menu_notification.html' %}
+
+                    <!-- Подключаем кнопку НАСТРОЙКИ в меню -->
+                    {% include 'core/menu/menu_cl_settings.html' %}
+
+                    <!-- Подключаем кнопку МОЙ ПРОФИЛЬ в меню -->
+                    {% include 'core/menu/menu_cl_profile.html' %}
+
+                </div>
+
+            </div>
+        </nav>
+    </div>
+
+</header>
+
+
+<!--МЕНЮ ДЛЯ АВТОРИЗОВАННОГО ПСИХОЛОГА / АДМИНА-->
 {% elif user.is_authenticated %}
 <header class="bg-white shadow">
 
@@ -46,13 +83,13 @@
                 <div class="flex items-center lg:order-2">
 
                     <!-- Подключаем кнопку УВЕДОМЛЕНИЯ в меню -->
-                    {% include 'core/menu_notification.html' %}
+                    {% include 'core/menu/menu_notification.html' %}
 
-                    <!-- Подключаем кнопку НАСТРОЙКИ ПСИХОЛОГА в меню -->
-                    {% include 'core/menu_pshycologist_settings.html' %}
+                    <!-- Подключаем кнопку НАСТРОЙКИ в меню -->
+                    {% include 'core/menu/menu_ps_settings.html' %}
 
                     <!-- Подключаем кнопку МОЙ ПРОФИЛЬ в меню -->
-                    {% include 'core/menu_profile.html' %}
+                    {% include 'core/menu/menu_ps_profile.html' %}
 
                 </div>
 
@@ -63,6 +100,7 @@
 </header>
 
 
+<!--МЕНЮ НА СТРАНИЦЕ "СТАРТОВАЯ" ДЛЯ НЕАВТОРИЗОВАННОГО ПОЛЬЗОВАТЕЛЯ-->
 {% else %}
 <header class="bg-white shadow">
 
