@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import (FileExtensionValidator, MaxValueValidator,
                                     MinValueValidator)
 from django.db import models
+from django.templatetags.static import static
 from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from timezone_field import TimeZoneField
@@ -401,6 +402,20 @@ class AppUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
         return f"{self.email}"
+
+    @property
+    def avatar_url(self):
+        """Метод для HTML-страниц, который безопасно возвращает:
+            1) Для психолога: фото психолога из БД или иконку user-circle.svg, если психолог не добавил еще свое фото.
+            2) Для клиента/админа: возвращает иконку user-circle.svg так как в профиле клиента/админа пока не
+            предусмотрено добавление своих фото на аву."""
+        try:
+            profile = self.psychologist_profile
+            if profile.photo:
+                return profile.photo.url
+        except Exception:
+            pass
+        return static('images/menu/user-circle.svg')
 
     class Meta:
         verbose_name = "Пользователь"
