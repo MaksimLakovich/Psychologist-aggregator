@@ -133,7 +133,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
 # TIME_ZONE = 'UTC'
 TIME_ZONE = 'Europe/Moscow'

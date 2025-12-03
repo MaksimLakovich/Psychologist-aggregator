@@ -1,0 +1,131 @@
+{% load static %}
+
+
+<!--МЕНЮ НА СТРАНИЦЕ "ВОЙТИ" ДЛЯ НЕАВТОРИЗОВАННОГО ПОЛЬЗОВАТЕЛЯ-->
+{% if menu_variant == "login" %}
+<header class="bg-white shadow">
+
+    <div class="mx-auto max-w-7xl px-4 py-7 flex justify-between items-center">
+        <a href="{% url 'core:start_page' %}" class="flex mr-4">
+            <img src="{% static 'images/logo/opora-logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo_icon"/>
+            <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
+        </a>
+        <nav class="flex items-center gap-6 text-gray-700">
+            <a href="{% url 'core:start_page' %}"
+               class="flex items-center gap-1 text-gray-800 dark:text-white hover:bg-gray-50 focus:ring-4 focus:ring-gray-300
+               font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:hover:bg-gray-700
+               focus:outline-none dark:focus:ring-gray-800">
+                <img src="{% static 'images/menu/back-icon.svg' %}" class="hover:text-gray-900" alt="Back_icon"/>
+                <span>Назад</span>
+            </a>
+            <a href="#"
+               class="flex items-center gap-1.5 text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4 focus:ring-primary-300
+               font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:bg-primary-600
+               dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">
+               Вход для психолога
+            </a>
+        </nav>
+    </div>
+
+</header>
+
+
+<!--МЕНЮ ДЛЯ АВТОРИЗОВАННОГО КЛИЕНТА-->
+{% elif user.is_authenticated and user.role_id == 2 %}
+<header class="bg-white shadow">
+
+    <div class="mx-auto max-w-7xl px-4 py-7">
+        <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800">
+            <div class="flex flex-wrap justify-between items-center">
+
+                <div class="flex justify-start items-center">
+                    <a href="{% url 'core:client_general_questions_page' %}" class="flex mr-4">
+                        <img src="{% static 'images/logo/opora-logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo"/>
+                        <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
+                    </a>
+                </div>
+
+                <div class="flex items-center lg:order-2">
+
+                    <!-- Подключаем кнопку УВЕДОМЛЕНИЯ в меню -->
+                    {% include 'core/menu/menu_notification.html' %}
+
+                    <!-- Подключаем кнопку НАСТРОЙКИ в меню -->
+                    {% include 'core/menu/menu_cl_settings.html' %}
+
+                    <!-- Подключаем кнопку МОЙ ПРОФИЛЬ в меню -->
+                    {% include 'core/menu/menu_cl_profile.html' %}
+
+                </div>
+
+            </div>
+        </nav>
+    </div>
+
+</header>
+
+
+<!--МЕНЮ ДЛЯ АВТОРИЗОВАННОГО ПСИХОЛОГА / АДМИНА-->
+{% elif user.is_authenticated %}
+<header class="bg-white shadow">
+
+    <div class="mx-auto max-w-7xl px-4 py-7">
+        <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800">
+            <div class="flex flex-wrap justify-between items-center">
+
+                <div class="flex justify-start items-center">
+                    <a href="{% url 'core:client_general_questions_page' %}" class="flex mr-4">
+                        <img src="{% static 'images/logo/opora-logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo"/>
+                        <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
+                    </a>
+                </div>
+
+                <div class="flex items-center lg:order-2">
+
+                    <!-- Подключаем кнопку УВЕДОМЛЕНИЯ в меню -->
+                    {% include 'core/menu/menu_notification.html' %}
+
+                    <!-- Подключаем кнопку НАСТРОЙКИ в меню -->
+                    {% include 'core/menu/menu_ps_settings.html' %}
+
+                    <!-- Подключаем кнопку МОЙ ПРОФИЛЬ в меню -->
+                    {% include 'core/menu/menu_ps_profile.html' %}
+
+                </div>
+
+            </div>
+        </nav>
+    </div>
+
+</header>
+
+
+<!--МЕНЮ НА СТРАНИЦЕ "СТАРТОВАЯ" ДЛЯ НЕАВТОРИЗОВАННОГО ПОЛЬЗОВАТЕЛЯ-->
+{% else %}
+<header class="bg-white shadow">
+
+    <div class="mx-auto max-w-7xl px-4 py-7 flex justify-between items-center">
+        <a href="{% url 'core:start_page' %}" class="flex mr-4">
+            <img src="{% static 'images/logo/opora-logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo"/>
+            <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
+        </a>
+        <nav class="flex items-center gap-6 text-gray-600">
+                <a href="{% url 'users:web:login_page' %}"
+                   class="text-gray-800 dark:text-white hover:bg-gray-50 focus:ring-4 focus:ring-gray-300
+                   font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:hover:bg-gray-700
+                   focus:outline-none dark:focus:ring-gray-800">
+                    Войти
+                </a>
+                <a href="#"
+                   class="text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4 focus:ring-primary-300
+                   font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:bg-primary-600
+                   dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">
+                    Регистрация
+                </a>
+        </nav>
+    </div>
+
+</header>
+
+
+{% endif %}

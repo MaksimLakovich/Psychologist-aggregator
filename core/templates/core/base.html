@@ -1,7 +1,7 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="ru" class="h-full bg-gray-50">
+<html lang="ru" class="h-full">
 
 
 <head>
@@ -33,7 +33,7 @@
     {% block extra_style %}{% endblock %}
 
     <!-- Подключение подшаблона с меню (верхняя часть с навигацией) -->
-    {% include 'core/menu.html' %}
+    {% include 'core/menu/menu.html' %}
 
     <!-- Подключение основного контента страницы -->
     <main class="flex-1">
