@@ -12,8 +12,9 @@ from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from timezone_field import TimeZoneField
 
-from users.constants import (GENDER_CHOICES, LANGUAGE_CHOICES,
-                             THERAPY_FORMAT_CHOICES, WORK_STATUS_CHOICES)
+from users.constants import (AGE_BUCKET_CHOICES, GENDER_CHOICES,
+                             LANGUAGE_CHOICES, THERAPY_FORMAT_CHOICES,
+                             WORK_STATUS_CHOICES)
 from users.managers import AppUserManager
 from users.services.defaults import default_languages
 from users.services.slug import generate_unique_slug
@@ -415,9 +416,12 @@ class AppUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
                 return profile.photo.url
         except Exception:
             pass
-        return static('images/menu/user-circle.svg')
+        return static("images/menu/user-circle.svg")
 
     class Meta:
+        indexes = [
+            models.Index(fields=["age"], name="idx_user_age"),
+        ]
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
         ordering = ["email"]
@@ -544,6 +548,9 @@ class PsychologistProfile(TimeStampedModel):
         return f"{self.user.email}"
 
     class Meta:
+        indexes = [
+            models.Index(fields=["gender"], name="idx_ps_gender"),
+        ]
         verbose_name = "Психолог"
         verbose_name_plural = "Психологи"
         ordering = ["user__email"]
@@ -562,6 +569,27 @@ class ClientProfile(TimeStampedModel):
         default=False,
         verbose_name="Опыт терапии",
         help_text="Был ли у вас опыт терапии?",
+    )
+    has_preference = models.BooleanField(
+        default=False,
+        verbose_name="Наличие предпочтений",
+        help_text="Есть ли личные предпочтения",
+    )
+    preferred_ps_gender = ArrayField(
+        models.CharField(max_length=10, choices=GENDER_CHOICES),
+        null=False,  # False потому что в default и так передаем пустой список. Можно null=False вообще удалить
+        blank = True,
+        default = list,
+        verbose_name="Предпочитаемый пол психолога",
+        help_text="Укажите предпочитаемый пол психолога",
+    )
+    preferred_ps_age = ArrayField(
+        models.CharField(max_length=10, choices=AGE_BUCKET_CHOICES),
+        null=False,  # False потому что в default и так передаем пустой список. Можно null=False вообще удалить
+        blank = True,
+        default = list,
+        verbose_name="Предпочитаемый возраст психолога",
+        help_text="Укажите предпочитаемый возраст психолога",
     )
     # methods: "Схематерапия", "НЛП" и т.д.
     preferred_methods = models.ManyToManyField(
