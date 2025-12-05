@@ -1,8 +1,8 @@
 from django.urls import path
 
 from core.apps import CoreConfig
-from core.views.view_general_questions import ClientGeneralQuestionsPageView
 from core.views.start_view import StartPageView
+from core.views.view_general_questions import ClientGeneralQuestionsPageView
 from core.views.view_personal_questions import ClientPersonalQuestionsPageView
 
 app_name = CoreConfig.name
