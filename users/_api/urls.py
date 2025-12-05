@@ -12,6 +12,7 @@ from users._api.views import (AppUserRetrieveUpdateView, ChangePasswordView,
                               PsychologistProfileRetrieveUpdateView,
                               PublicPsychologistProfileRetrieveView,
                               RegisterView, ResendEmailVerificationView,
+                              SavePreferredMethodsAjaxView,
                               SpecialisationDetailView, SpecialisationListView,
                               TopicDetailView, TopicListView)
 from users.apps import UsersConfig
@@ -56,6 +57,8 @@ urlpatterns = [
     # Method (справочник)
     path("methods/", MethodListView.as_view(), name="method-list"),
     path("methods/<slug:slug>/", MethodDetailView.as_view(), name="method-detail"),
+    # AJAX-запрос (fetch) на моментальное сохранение выбранных клиентом методов в preferred_methods на html-страницах
+    path("save-preferred-methods/", SavePreferredMethodsAjaxView.as_view(), name="save-methods"),
 
     # Education (CRUD психолога)
     path("educations/", EducationListCreateView.as_view(), name="education-list-create"),
