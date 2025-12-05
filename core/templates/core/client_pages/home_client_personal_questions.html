@@ -223,7 +223,7 @@
     });
 
 
-    // СКРИПТ 2 - ЕСТЬ ПРЕДПОЛЧТЕНИЯ ИЛИ НЕТ
+    // СКРИПТ 2 - ЕСТЬ ПРЕДПОЧТЕНИЯ ИЛИ НЕТ
 
     document.addEventListener("DOMContentLoaded", () => {
         const btnAny = document.getElementById("btn-any");
@@ -264,6 +264,42 @@
         // по умолчанию
         activateAny();
     });
+
+
+    // СКРИПТ 3 - МОМЕНТАЛЬНОЕ АВТОСОХРАНЕНИЕ ВЫБРАННЫХ МЕТОДОВ (клиент выбирает в preferred_methods)
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const checkboxes = document.querySelectorAll("input[name='preferred_methods']");
+
+        function autosave() {
+            const params = new URLSearchParams();
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    params.append("methods[]", cb.value);
+                }
+            });
+
+            fetch("{% url 'users:api:save-methods' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+                body: params,
+            })
+            .then(r => r.json())
+            .then(data => console.log("Автосохранение:", data))
+            .catch(err => console.error("Ошибка:", err));
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener("change", autosave);
+        });
+
+    });
+
 
 </script>
 

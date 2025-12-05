@@ -1,6 +1,8 @@
 from django.contrib.auth.tokens import default_token_generator
+from django.http import JsonResponse
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
+from django.views import View
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -385,6 +387,30 @@ class ClientProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
             return user.client_profile
         except ClientProfile.DoesNotExist:
             raise NotFound("У текущего пользователя нет профиля клиента.")
+
+
+class SavePreferredMethodsAjaxView(View):
+    """Класс-контроллер на основе View для автосохранения чекбоксов без кнопки "Сохранить", как это делают
+    профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint.
+
+    Моментальное сохранение выбранных клиентом методов в preferred_methods на html-страницах:
+        - когда пользователь ставит или убирает галочку;
+        - чтобы при переходе по навигации (со страницы на страницу) данные не терялись;
+        - чтобы страница подгружалась уже с сохранившимися значениями."""
+
+    permission_classes = [IsAuthenticated, IsProfileOwnerOrAdmin]
+
+    def post(self, request, *args, **kwargs):
+        """Сохранение выбранных методов в preferred_methods."""
+        client_profile = request.user.client_profile
+        ids = request.POST.getlist("methods[]")  # получаем список ID
+
+        client_profile.preferred_methods.set(ids)
+        client_profile.save()
+
+        return JsonResponse(
+            {"status": "ok", "saved": ids}
+        )
 
 
 class TopicListView(generics.ListAPIView):
