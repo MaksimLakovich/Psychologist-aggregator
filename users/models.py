@@ -578,16 +578,16 @@ class ClientProfile(TimeStampedModel):
     preferred_ps_gender = ArrayField(
         models.CharField(max_length=10, choices=GENDER_CHOICES),
         null=False,  # False потому что в default и так передаем пустой список. Можно null=False вообще удалить
-        blank = True,
-        default = list,
+        blank=True,
+        default=list,
         verbose_name="Предпочитаемый пол психолога",
         help_text="Укажите предпочитаемый пол психолога",
     )
     preferred_ps_age = ArrayField(
         models.CharField(max_length=10, choices=AGE_BUCKET_CHOICES),
         null=False,  # False потому что в default и так передаем пустой список. Можно null=False вообще удалить
-        blank = True,
-        default = list,
+        blank=True,
+        default=list,
         verbose_name="Предпочитаемый возраст психолога",
         help_text="Укажите предпочитаемый возраст психолога",
     )

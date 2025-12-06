@@ -114,8 +114,38 @@
                         <!-- Обернем чекбоксы в контейнер и спрячем по умолчанию-->
                         <div id="methods-wrapper" class="mt-4 hidden">
 
-                            <!-- МЕТОДЫ: используем grid для 2-3 колонок, responsive -->
+                            <!-- ========== ПОЛ ПСИХОЛОГА ========== -->
+                            <div id="ps-gender-block"
+                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-gray-100 shadow-sm p-4">
+                                <label class="block mb-2 text-base font-medium text-indigo-900">
+                                    <strong>Пол психолога</strong>
+                                </label>
+
+                                <div class="inline-flex gap-3" role="group" aria-label="Пол психолога">
+                                    <button type="button"
+                                            data-value="male"
+                                            class="ps-gender-btn px-4 py-2 rounded-full border text-sm font-medium hover:bg-blue-50">
+                                        Мужчина
+                                    </button>
+
+                                    <button type="button"
+                                            data-value="female"
+                                            class="ps-gender-btn px-4 py-2 rounded-full border text-sm font-medium hover:bg-blue-50">
+                                        Женщина
+                                    </button>
+                                </div>
+
+                                <!-- Скрытые поля, которые будут отправлены на сервер при submit -->
+                                <!-- (имя — список, Django получит request.POST.getlist('preferred_ps_gender')) -->
+                                <div id="ps-gender-hidden-inputs" class="hidden">
+                                    <!-- JS будет добавлять/удалять input type="hidden" name="preferred_ps_gender" value="male|female" -->
+                                </div>
+                            </div>
+
+                            <!-- ========== МЕТОДЫ: используем grid для 2-3 колонок, responsive ========== -->
                             <div id="methods-container"
+                                 data-save-url="{% url 'users:api:save-methods' %}"
+                                 data-csrf-token="{{ csrf_token }}"
                                  class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-gray-100 shadow-sm p-4">
 
                                 <label class="block mb-2 text-base font-medium text-indigo-900">
@@ -176,132 +206,7 @@
 </section>
 
 
-<script>
-
-    // СКРИПТ 1 - СВЕРНУТЬ И РАЗВЕРНУТЬ
-
-    document.addEventListener("DOMContentLoaded", () => {
-        const items = document.querySelectorAll("#methods-grid .method-item");
-        const showMoreBtn = document.getElementById("show-more-methods");
-
-        const VISIBLE_COUNT = 6; // Показываем первые 6 элементов
-        const totalCount = items.length; // Считаем, сколько всего
-        const hiddenCount = totalCount - VISIBLE_COUNT; // Считаем, сколько скрыто
-
-        let expanded = false; // состояние: false = свернуто, true = развернуто
-
-        // Инициализация: скрываем лишние элементы
-        function applyState() {
-            if (!expanded) {
-                // свернуто
-                items.forEach((item, idx) => {
-                    if (idx >= VISIBLE_COUNT) item.classList.add("hidden");
-                    else item.classList.remove("hidden");
-                });
-                if (hiddenCount > 0) {
-                    showMoreBtn.textContent = `Ещё ${hiddenCount}`;
-                    showMoreBtn.classList.remove("hidden");
-                }
-            } else {
-                // развернуто
-                items.forEach(item => item.classList.remove("hidden"));
-                showMoreBtn.textContent = "Скрыть";
-            }
-        }
-
-        // Первичная настройка
-        if (hiddenCount > 0) {
-            showMoreBtn.classList.remove("hidden");
-            applyState();
-        }
-
-        // Обработчик кнопки
-        showMoreBtn.addEventListener("click", () => {
-            expanded = !expanded; // переключаем состояние
-            applyState();
-        });
-    });
-
-
-    // СКРИПТ 2 - ЕСТЬ ПРЕДПОЧТЕНИЯ ИЛИ НЕТ
-
-    document.addEventListener("DOMContentLoaded", () => {
-        const btnAny = document.getElementById("btn-any");
-        const btnPrefs = document.getElementById("btn-has-prefs");
-        const methodsBlock = document.getElementById("methods-wrapper");
-
-        function setActive(activeBtn, inactiveBtn) {
-            // Активная кнопка
-            activeBtn.classList.add(
-                "bg-indigo-600", "text-white", "border-indigo-600"
-            );
-            activeBtn.classList.remove(
-                "bg-white", "text-gray-700", "border-gray-300", "hover:bg-blue-50"
-            );
-
-            // Неактивная кнопка
-            inactiveBtn.classList.remove(
-                "bg-indigo-600", "text-white", "border-indigo-600"
-            );
-            inactiveBtn.classList.add(
-                "bg-white", "text-gray-700", "border-gray-300", "hover:bg-blue-50"
-            );
-        }
-
-        function activateAny() {
-            setActive(btnAny, btnPrefs);
-            methodsBlock.classList.add("hidden");
-        }
-
-        function activatePrefs() {
-            setActive(btnPrefs, btnAny);
-            methodsBlock.classList.remove("hidden");
-        }
-
-        btnAny.addEventListener("click", activateAny);
-        btnPrefs.addEventListener("click", activatePrefs);
-
-        // по умолчанию
-        activateAny();
-    });
-
-
-    // СКРИПТ 3 - МОМЕНТАЛЬНОЕ АВТОСОХРАНЕНИЕ ВЫБРАННЫХ МЕТОДОВ (клиент выбирает в preferred_methods)
-
-    document.addEventListener("DOMContentLoaded", () => {
-
-        const checkboxes = document.querySelectorAll("input[name='preferred_methods']");
-
-        function autosave() {
-            const params = new URLSearchParams();
-
-            checkboxes.forEach(cb => {
-                if (cb.checked) {
-                    params.append("methods[]", cb.value);
-                }
-            });
-
-            fetch("{% url 'users:api:save-methods' %}", {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}",
-                    "X-Requested-With": "XMLHttpRequest",
-                },
-                body: params,
-            })
-            .then(r => r.json())
-            .then(data => console.log("Автосохранение:", data))
-            .catch(err => console.error("Ошибка:", err));
-        }
-
-        checkboxes.forEach(cb => {
-            cb.addEventListener("change", autosave);
-        });
-
-    });
-
-
-</script>
+<script type="module" src="{% static 'js/pages/personal_questions.js' %}"></script>
 
 
 {% endblock %}
