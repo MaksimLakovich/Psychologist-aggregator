@@ -9,17 +9,17 @@ export function initToggleGroup({ anyBtn, prefsBtn, blockSelector, initialValue 
     function setActive(activeBtn, inactiveBtn) {
         // Активная кнопка
         activeBtn.classList.add(
-            "bg-indigo-500", "text-white", "border-indigo-900"
+            "bg-indigo-500", "text-white", "border-indigo-900", "hover:bg-indigo-900"
         );
         activeBtn.classList.remove(
-            "bg-white", "text-gray-700", "border-gray-300", "hover:bg-blue-50"
+            "bg-white", "text-gray-700", "border-gray-300", "hover:bg-gray-50"
         );
         // Неактивная кнопка
         inactiveBtn.classList.remove(
-            "bg-indigo-500", "text-white", "border-indigo-900"
+            "bg-indigo-500", "text-white", "border-indigo-900", "hover:bg-indigo-900"
         );
         inactiveBtn.classList.add(
-            "bg-white", "text-gray-700", "border-gray-300", "hover:bg-blue-50"
+            "bg-white", "text-gray-700", "border-gray-300", "hover:bg-gray-50"
         );
     }
 
