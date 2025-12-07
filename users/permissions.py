@@ -1,8 +1,13 @@
+from django.core.exceptions import PermissionDenied
 from rest_framework.permissions import BasePermission
+
+# ------
+# Permission-классы для DRF:
+# ------
 
 
 class IsOwnerOrAdmin(BasePermission):
-    """Кастомный permission-класс, который разрешает доступ если:
+    """Кастомный DRF permission-класс, который разрешает доступ если:
         - пользователь является владельцем объекта;
         - пользователь является действующим админом.
     Используется для Education-эндпоинтов, где есть поле creator и необходимо использовать 'obj.creator == user'."""
@@ -24,7 +29,7 @@ class IsOwnerOrAdmin(BasePermission):
 
 
 class IsSelfOrAdmin(BasePermission):
-    """Кастомный permission-класс, который разрешает доступ если:
+    """Кастомный DRF permission-класс, который разрешает доступ если:
         - объект AppUser равен request.user (владение);
         - пользователь является действующим админом.
     Используется для AppUser-эндпоинтов (там нет поля creator поэтому работаем с 'obj == user')."""
@@ -45,7 +50,7 @@ class IsSelfOrAdmin(BasePermission):
 
 
 class IsProfileOwnerOrAdmin(BasePermission):
-    """Кастомный permission-класс, который разрешает доступ если:
+    """Кастомный DRF permission-класс, который разрешает доступ если:
         - профиль (объект PsychologistProfile) принадлежит текущему пользователю;
         - пользователь является действующим админом.
     Используется для PsychologistProfile-эндпоинтов (там нет поля creator поэтому работаем с 'obj.user == user')."""
@@ -63,6 +68,35 @@ class IsProfileOwnerOrAdmin(BasePermission):
             obj.user == user
             or (user.is_staff and user.is_active)
         )
+
+
+# ------
+# Permission-классы для CBV:
+# ------
+
+
+class IsProfileOwnerOrAdminMixin:
+    """Кастомный DRF permission-класс (mixin для Django CBV). Проверяет, что:
+        - пользователь это владелец ClientProfile;
+        - пользователь является действующим админом."""
+
+    def dispatch(self, request, *args, **kwargs):
+        """Метод для проверки прав или выполнения общих проверок перед выполнением GET/POST."""
+        user = request.user
+
+        if not user.is_authenticated:
+            raise PermissionDenied("Вы не авторизованы.")
+
+        profile = getattr(user, "client_profile", None)
+
+        if profile is None:
+            raise PermissionDenied("У вас нет клиентского профиля.")
+
+        # Проверка: владелец или админ
+        if profile.user != user and not (user.is_staff and user.is_active):
+            raise PermissionDenied("У вас нет прав на доступ к этому профилю.")
+
+        return super().dispatch(request, *args, **kwargs)
 
 
 # class IsModerator(BasePermission):

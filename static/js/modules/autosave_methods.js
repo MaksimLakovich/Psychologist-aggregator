@@ -35,12 +35,12 @@ export function initAutosaveMethods({ checkboxSelector, saveUrl, csrfToken, debo
             return r.json();
         })
         .then(data => {
-            // TODO: вместо console.log — показать маленький UI-тултип/иконку "Сохранено"
+            // TODO: вместо console.log - показать маленький UI-тултип/иконку "Сохранено"
             console.log("Автосохранение:", data);
         })
         .catch(err => {
+            // TODO: показать пользователю notification об ошибке (UI-ошибка "Не удалось сохранить")
             console.error("Ошибка автосохранения:", err);
-            // TODO: показать пользователю notification об ошибке
         });
     };
 
