@@ -1,6 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
-from django.http import HttpResponseBadRequest, JsonResponse
+from django.http import JsonResponse
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.views import View
@@ -400,7 +400,9 @@ class SaveHasPreferencesAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
         value = request.POST.get("has_preferences")  # получаем значение в has_preferences с html-страницы
 
         if value not in ("0", "1"):  # проверяем что это bool
-            return HttpResponseBadRequest("Некорректное значение в has_preferences.")
+            return JsonResponse(
+                data={"status": "error", "error": "invalid_value"}, status=400
+            )
 
         # Это профессиональный Python-паттерн: "= (value == "1")" возвращает значение True или False:
         has_pref = (value == "1")
@@ -410,7 +412,7 @@ class SaveHasPreferencesAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
         client_profile.save(update_fields=["has_preferences"])
 
         return JsonResponse(
-            {"status": "ok", "saved": has_pref}
+            data={"status": "ok", "saved": has_pref}, status=200
         )
 
 
@@ -432,7 +434,7 @@ class SavePreferredMethodsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixi
         client_profile.save()
 
         return JsonResponse(
-            {"status": "ok", "saved": ids}
+            data={"status": "ok", "saved": ids}, status=200
         )
 
 

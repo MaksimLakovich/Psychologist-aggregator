@@ -52,17 +52,20 @@
 
                         <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
 
-                        <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                            <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
-                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                 viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                      stroke-width="1.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                            </svg>
-                            <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
-                                Выбор психолога
-                            </p>
-                        </li>
+                        <a href="#" class="flex mr-4">
+                            <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                                <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                     viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                </svg>
+                                <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
+                                    Выбор психолога
+                                </p>
+                            </li>
+                        </a>
 
                         <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
 
@@ -101,15 +104,23 @@
                         <div class="flex gap-3">
                             <button id="btn-any"
                                     type="button"
-                                    class="px-4 py-2 rounded-lg border text-sm font-medium">
+                                    class="px-4 py-2 rounded-lg border text-sm font-medium hover:bg-indigo-900 transition">
                                 Всё равно
                             </button>
                             <button id="btn-has-prefs"
                                     type="button"
-                                    class="px-4 py-2 rounded-lg border text-sm font-medium">
+                                    class="px-4 py-2 rounded-lg border text-sm font-medium hover:bg-indigo-900 transition">
                                 Есть пожелания
                             </button>
                         </div>
+                        <!-- ВАЖНО: скрытое поле, которое и отправляется при submit. -->
+                        <!-- Это нужно чтоб при загрузке страницы значение hidden-поля совпадало с данными из БД. -->
+                        <input
+                                id="input-has-preferences"
+                                type="hidden"
+                                name="has_preferences"
+                                value="{{ has_preferences|yesno:'true,false' }}"
+                        >
 
                         <!-- Обернем чекбоксы в контейнер и спрячем по умолчанию-->
                         <div id="methods-wrapper" class="mt-4 hidden">
@@ -124,13 +135,13 @@
                                 <div class="inline-flex gap-3" role="group" aria-label="Пол психолога">
                                     <button type="button"
                                             data-value="male"
-                                            class="ps-gender-btn px-4 py-2 rounded-full border text-sm font-medium hover:bg-blue-50">
+                                            class="ps-gender-btn px-4 py-2 rounded-full border text-sm font-medium hover:bg-indigo-900 transition">
                                         Мужчина
                                     </button>
 
                                     <button type="button"
                                             data-value="female"
-                                            class="ps-gender-btn px-4 py-2 rounded-full border text-sm font-medium hover:bg-blue-50">
+                                            class="ps-gender-btn px-4 py-2 rounded-full border text-sm font-medium hover:bg-indigo-900 transition">
                                         Женщина
                                     </button>
                                 </div>
@@ -207,6 +218,17 @@
 
 
 <script type="module" src="{% static 'js/pages/personal_questions.js' %}"></script>
+
+<!-- Передаем в JS текущее значение has_preferences пользователя -->
+<script>
+    window.HAS_PREFERENCES = {{ has_preferences|yesno:"true,false" }};
+</script>
+
+<!-- Передаем в JS URL_API и CSRF-токен для автосохранения настроек. Сохранение в БД данных со страницы о выбранных предпочитаемых методах (чекбокс) -->
+<script>
+    window.API_SAVE_HAS_PREFS = "{% url 'users:api:save-has-preferences' %}";
+    window.CSRF_TOKEN = "{{ csrf_token }}";
+</script>
 
 
 {% endblock %}
