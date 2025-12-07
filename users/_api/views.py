@@ -1,5 +1,6 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
-from django.http import JsonResponse
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.views import View
@@ -30,7 +31,7 @@ from users.constants import ALLOWED_REGISTER_ROLES
 from users.models import (AppUser, ClientProfile, Education, Method,
                           PsychologistProfile, Specialisation, Topic, UserRole)
 from users.permissions import (IsOwnerOrAdmin, IsProfileOwnerOrAdmin,
-                               IsSelfOrAdmin)
+                               IsProfileOwnerOrAdminMixin, IsSelfOrAdmin)
 from users.services.send_password_reset_email import send_password_reset_email
 from users.services.send_verification_email import send_verification_email
 from users.services.throttles import (ChangePasswordThrottle, LoginThrottle,
@@ -389,7 +390,31 @@ class ClientProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
             raise NotFound("У текущего пользователя нет профиля клиента.")
 
 
-class SavePreferredMethodsAjaxView(View):
+class SaveHasPreferencesAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
+    """Класс-контроллер на основе View для автосохранения без кнопки "Сохранить", как это делают
+    профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint.
+    Моментальное сохранение выбранного клиентом значения в has_preferences на html-страницах."""
+
+    def post(self, request, *args, **kwargs):
+        """Сохранение значения в has_preferences."""
+        value = request.POST.get("has_preferences")  # получаем значение в has_preferences с html-страницы
+
+        if value not in ("0", "1"):  # проверяем что это bool
+            return HttpResponseBadRequest("Некорректное значение в has_preferences.")
+
+        # Это профессиональный Python-паттерн: "= (value == "1")" возвращает значение True или False:
+        has_pref = (value == "1")
+
+        client_profile = request.user.client_profile
+        client_profile.has_preferences = has_pref
+        client_profile.save(update_fields=["has_preferences"])
+
+        return JsonResponse(
+            {"status": "ok", "saved": has_pref}
+        )
+
+
+class SavePreferredMethodsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
     """Класс-контроллер на основе View для автосохранения чекбоксов без кнопки "Сохранить", как это делают
     профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint.
 
@@ -397,8 +422,6 @@ class SavePreferredMethodsAjaxView(View):
         - когда пользователь ставит или убирает галочку;
         - чтобы при переходе по навигации (со страницы на страницу) данные не терялись;
         - чтобы страница подгружалась уже с сохранившимися значениями."""
-
-    permission_classes = [IsAuthenticated, IsProfileOwnerOrAdmin]
 
     def post(self, request, *args, **kwargs):
         """Сохранение выбранных методов в preferred_methods."""
