@@ -66,15 +66,16 @@
 
 ### users/constants.py:
 
-| Название константы       | Место использования | Значение                                                                                                                                    |
-|--------------------------|--------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
-| `GENDER_CHOICES`         | models.py          | ("male", "мужской"), <br/> ("female", "женский"),                                                                                           |
-| `LANGUAGE_CHOICES`       | models.py          | ("english", "английский"), <br/> ("russian", "русский"),                                                                                    |
-| `THERAPY_FORMAT_CHOICES` | models.py          | ("online", "удаленно"), <br/> ("offline", "встреча"), <br/> ("any", "любая"),                                                               |
-| `WORK_STATUS_CHOICES`    | models.py          | ("working", "работает"), <br/> ("not_working", "не работает"),                                                                              |
-| `MAX_AVAILABLE_FILE_SIZE` | validators.py      | 5                                                                                                                                           |
-| `ALLOWED_REGISTER_ROLES` | views.py           | ["psychologist", "client"]                                                                                                                  |
-| `AGE_BUCKET_CHOICES`     | models.py          | ("<25", "До 25 лет"), <br/> ("25-35", "25-35 лет"), <br/> ("35-45", "35-45 лет"), <br/> ("45-55", "45-55 лет"), <br/> (">55", "От 55 лет"), |
+| Название константы             | Место использования | Значение                                                                                                                                   |
+|--------------------------------|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| `GENDER_CHOICES`               | models.py          | ("male", "мужской"), <br/> ("female", "женский"),                                                                                          |
+| `LANGUAGE_CHOICES`             | models.py          | ("english", "английский"), <br/> ("russian", "русский"),                                                                                   |
+| `THERAPY_FORMAT_CHOICES`       | models.py          | ("online", "удаленно"), <br/> ("offline", "встреча"), <br/> ("any", "любая"),                                                              |
+| `WORK_STATUS_CHOICES`          | models.py          | ("working", "работает"), <br/> ("not_working", "не работает"),                                                                             |
+| `MAX_AVAILABLE_FILE_SIZE`      | validators.py      | 5                                                                                                                                          |
+| `ALLOWED_REGISTER_ROLES`       | views.py           | ["psychologist", "client"]                                                                                                                 |
+| `AGE_BUCKET_CHOICES`           | models.py          | ("<25", "До 25 лет"), <br/> ("25-35", "25-35 лет"), <br/> ("35-45", "35-45 лет"), <br/> ("45-55", "45-55 лет"), <br/> (">55", "От 55 лет"), |
+| `PREFERRED_TOPIC_TYPE_CHOICES` | models.py          | ("individual", "Индивидуальная"), <br/> ("couple", "Парная"),                                                                              |
 
 ---
 
@@ -199,18 +200,19 @@
 
 9. Модель `ClientProfile(TimeStampedModel)`:
 
-    | Поле                  | Тип                      | Описание                                       |
-    |-----------------------|--------------------------|------------------------------------------------|
-    | `id`                  | AutoField                | Уникальный ID профиля клиента                  |
-    | `user`                | OneToOneField → `AppUser` | Связь с пользователем                          |
-    | `therapy_experience`  | BooleanField             | Есть ли у клиента опыт психотерапии            |
-    | `has_preferences`     | BooleanField             | Есть ли у клиента предпочтения среди психологов |
-    | `preferred_methods`   | ManyToMany → `Method`    | Предпочтительные методы и подходы клиента      |
-    | `requested_topics`    | ManyToMany → `Topic`     | Запросы, с которыми клиент приходит            |
-    | `preferred_ps_age`    | CharField(choices)       | Предпочитаемый возраст психолога               |
-    | `preferred_ps_gender` | CharField(choices)       | Предпочитаемый пол психолога                   |
-    | `created_at`          | DateTimeField            | Дата и время создания                          |
-    | `updated_at`          | DateTimeField            | Дата и время последнего обновления             |
+    | Поле                   | Тип                      | Описание                                       |
+    |------------------------|--------------------------|------------------------------------------------|
+    | `id`                   | AutoField                | Уникальный ID профиля клиента                  |
+    | `user`                 | OneToOneField → `AppUser` | Связь с пользователем                          |
+    | `therapy_experience`   | BooleanField             | Есть ли у клиента опыт психотерапии            |
+    | `has_preferences`      | BooleanField             | Есть ли у клиента предпочтения среди психологов |
+    | `preferred_methods`    | ManyToMany → `Method`    | Предпочтительные методы и подходы клиента      |
+    | `preferred_topic_type` | CharField(choices)       | Вид консультации (индивидуальная/парная)       |
+    | `requested_topics`     | ManyToMany → `Topic`     | Запросы, с которыми клиент приходит            |
+    | `preferred_ps_age`     | CharField(choices)       | Предпочитаемый возраст психолога               |
+    | `preferred_ps_gender`  | CharField(choices)       | Предпочитаемый пол психолога                   |
+    | `created_at`           | DateTimeField            | Дата и время создания                          |
+    | `updated_at`           | DateTimeField            | Дата и время последнего обновления             |
 
 ---
 

@@ -28,6 +28,11 @@ AGE_BUCKET_CHOICES = [
     (">55", "От 55 лет"),
 ]
 
+PREFERRED_TOPIC_TYPE_CHOICES = [
+    ("individual", "Индивидуальная"),
+    ("couple", "Парная"),
+]
+
 # Значение для валидатора по проверке максимально допустимого размера загружаемого файла в users/validators.py
 # Размер = 5 мб
 MAX_AVAILABLE_FILE_SIZE = 5
