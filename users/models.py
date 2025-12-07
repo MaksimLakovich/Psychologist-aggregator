@@ -570,7 +570,7 @@ class ClientProfile(TimeStampedModel):
         verbose_name="Опыт терапии",
         help_text="Был ли у вас опыт терапии?",
     )
-    has_preference = models.BooleanField(
+    has_preferences = models.BooleanField(
         default=False,
         verbose_name="Наличие предпочтений",
         help_text="Есть ли личные предпочтения",

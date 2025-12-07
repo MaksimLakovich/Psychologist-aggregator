@@ -9,7 +9,13 @@ class ClientPersonalQuestionsForm(forms.Form):
     Основная логика:
         - При GET форма получает initial-значения из связанных моделей, чтобы пользователь сразу видел
          уже заполненные данные.
-        - При POST форма валидирует и сохраняет обновленные данные."""
+        - При POST форма валидирует и сохраняет обновленные данные (этот стандартный механизм дополняет AJAX
+        для автосохранения (решает вопрос fallback, если вдруг AJAX сломается). Эти два механизма не конфликтуют,
+        а дополняют друг друга, создавая надежную систему."""
+
+    has_preferences = forms.BooleanField(
+        required=False
+    )
 
     preferred_methods = forms.ModelMultipleChoiceField(
         queryset=Method.objects.all(),
