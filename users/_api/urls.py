@@ -14,6 +14,8 @@ from users._api.views import (AppUserRetrieveUpdateView, ChangePasswordView,
                               RegisterView, ResendEmailVerificationView,
                               SaveHasPreferencesAjaxView,
                               SavePreferredMethodsAjaxView,
+                              SavePreferredTopicTypeAjaxView,
+                              SaveRequestedTopicsAjaxView,
                               SpecialisationDetailView, SpecialisationListView,
                               TopicDetailView, TopicListView)
 from users.apps import UsersConfig
@@ -64,6 +66,10 @@ urlpatterns = [
     path("educations/<int:pk>/", EducationRetrieveUpdateDestroyView.as_view(), name="education-detail"),
 
     # AJAX-запрос (fetch) на моментальное сохранение указанных клиентом на html-страницах данных в БД
+    path(
+        "save-preferred-topic-type/", SavePreferredTopicTypeAjaxView.as_view(), name="save-preferred-topic-type"
+    ),
+    path("save-requested-topics/", SaveRequestedTopicsAjaxView.as_view(), name="save-requested-topics"),
     path("save-has-preferences/", SaveHasPreferencesAjaxView.as_view(), name="save-has-preferences"),
     path("save-preferred-methods/", SavePreferredMethodsAjaxView.as_view(), name="save-methods"),
 ]
