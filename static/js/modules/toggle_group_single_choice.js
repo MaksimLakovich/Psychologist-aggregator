@@ -1,50 +1,90 @@
-export function initToggleGroup({ anyBtn, prefsBtn, blockSelector, initialValue = false }) {
-    const btnAny = document.querySelector(anyBtn);
-    const btnPrefs = document.querySelector(prefsBtn);
-    const methodsBlock = document.querySelector(blockSelector);
-    const hiddenInput = document.querySelector("#input-has-preferences"); // ДОБАВЛЕНО чтоб при нажатии "Далее" не сбрасывалось значение на false в has_preferences
+// Универсальный двухкнопочный переключатель (single choice)
 
-    if (!btnAny || !btnPrefs || !methodsBlock) return;
+// Конфигурация:
+// {
+//   firstBtn: "#selectorA",         // обязательно
+//   secondBtn: "#selectorB",        // обязательно
+//   valFirst: <any>,                // значение, которое означает "первая" кнопка (строка/boolean/число)
+//   valSecond: <any>,               // значение для второй
+//   blockToToggleSelector: null,    // optional: селектор блока, который показываем при выборе second (или first, см. map)
+//   showBlockWhen: "second"|"first",// optional: при выборе какой кнопки показываем blockToToggle (по умолчанию "second")
+//   initialValue: <any>,            // optional: значение по умолчанию (подставляем из server-side)
+//   hiddenInputSelector = null,     // optional: чтоб когда пользователь нажимает "Далее" то Django получает значения только из hidden-input, и это нужно для обновления hidden-input при авотсохранении JS
+//   activeClasses: [...],           // optional: классы, добавляемые активной кнопке
+//   inactiveClasses: [...],         // optional: классы для неактивной кнопки
+// }
 
-    function setActive(activeBtn, inactiveBtn) {
-        // Активная кнопка
-        activeBtn.classList.add(
-            "bg-indigo-500", "text-white", "border-indigo-900", "hover:bg-indigo-900"
-        );
-        activeBtn.classList.remove(
-            "bg-white", "text-gray-700", "border-gray-300", "hover:bg-gray-50"
-        );
-        // Неактивная кнопка
-        inactiveBtn.classList.remove(
-            "bg-indigo-500", "text-white", "border-indigo-900", "hover:bg-indigo-900"
-        );
-        inactiveBtn.classList.add(
-            "bg-white", "text-gray-700", "border-gray-300", "hover:bg-gray-50"
-        );
+export function initToggleGroup({
+    firstBtn,
+    secondBtn,
+    valFirst = true,
+    valSecond = false,
+    blockToToggleSelector = null,
+    showBlockWhen = "second",
+    initialValue = undefined,
+    hiddenInputSelector = null,
+    activeClasses = ["bg-indigo-500", "text-white", "border-indigo-900", "hover:bg-indigo-900"],
+    inactiveClasses = ["bg-white", "text-gray-700", "border-gray-300", "hover:bg-gray-50"],
+} = {}) {
+
+    const btnA = document.querySelector(firstBtn);
+    const btnB = document.querySelector(secondBtn);
+    const block = blockToToggleSelector ? document.querySelector(blockToToggleSelector) : null;
+    const hiddenInput = hiddenInputSelector ? document.querySelector(hiddenInputSelector) : null;
+
+    if (!btnA || !btnB) return;
+
+    function applyActive(activeEl, inactiveEl) {
+        // active
+        activeClasses.forEach(c => activeEl.classList.add(c));
+        inactiveClasses.forEach(c => activeEl.classList.remove(c));
+        // inactive
+        activeClasses.forEach(c => inactiveEl.classList.remove(c));
+        inactiveClasses.forEach(c => inactiveEl.classList.add(c));
     }
 
-    function activateAny() {
-        setActive(btnAny, btnPrefs);
-        methodsBlock.classList.add("hidden");
-
-        if (hiddenInput) hiddenInput.value = "false";  // ДОБАВЛЕНО чтоб при нажатии "Далее" не сбрасывалось значение на false в has_preferences
+    function showOrHideBlock(which) {
+        if (!block) return;
+        if (showBlockWhen === "second") {
+            if (which === "second") block.classList.remove("hidden");
+            else block.classList.add("hidden");
+        } else {
+            if (which === "first") block.classList.remove("hidden");
+            else block.classList.add("hidden");
+        }
     }
 
-    function activatePrefs() {
-        setActive(btnPrefs, btnAny);
-        methodsBlock.classList.remove("hidden");
-
-        if (hiddenInput) hiddenInput.value = "true";  // ДОБАВЛЕНО чтоб при нажатии "Далее" не сбрасывалось значение на false в has_preferences
+    function setFirstActive() {
+        applyActive(btnA, btnB);
+        showOrHideBlock("first");
+        if (hiddenInput) hiddenInput.value = valFirst;
+    }
+    function setSecondActive() {
+        applyActive(btnB, btnA);
+        showOrHideBlock("second");
+        if (hiddenInput) hiddenInput.value = valSecond;
     }
 
-    btnAny.addEventListener("click", activateAny);
-    btnPrefs.addEventListener("click", activatePrefs);
+    btnA.addEventListener("click", () => {
+        setFirstActive();
+    });
+    btnB.addEventListener("click", () => {
+        setSecondActive();
+    });
 
-    // Устанавливаем состояние при загрузке страницы (данные из БД в поле has_preferences)
-    if (initialValue) {
-        activatePrefs();
+    // корректно определяем начальное значение
+    const resolvedInitial = (typeof initialValue !== "undefined") ? initialValue : undefined;
+
+    if (typeof resolvedInitial !== "undefined") {
+        // сравниваем нестрого, чтобы поддержать строковые/булевы значения
+        if (resolvedInitial == valFirst) {
+            setFirstActive();
+        } else if (resolvedInitial == valSecond) {
+            setSecondActive();
+        } else {
+            setFirstActive();
+        }
     } else {
-        activateAny();
+        setFirstActive();
     }
-
 }
