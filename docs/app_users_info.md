@@ -66,15 +66,16 @@
 
 ### users/constants.py:
 
-| Название константы       | Место использования | Значение                                                                                                                                    |
-|--------------------------|--------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
-| `GENDER_CHOICES`         | models.py          | ("male", "мужской"), <br/> ("female", "женский"),                                                                                           |
-| `LANGUAGE_CHOICES`       | models.py          | ("english", "английский"), <br/> ("russian", "русский"),                                                                                    |
-| `THERAPY_FORMAT_CHOICES` | models.py          | ("online", "удаленно"), <br/> ("offline", "встреча"), <br/> ("any", "любая"),                                                               |
-| `WORK_STATUS_CHOICES`    | models.py          | ("working", "работает"), <br/> ("not_working", "не работает"),                                                                              |
-| `MAX_AVAILABLE_FILE_SIZE` | validators.py      | 5                                                                                                                                           |
-| `ALLOWED_REGISTER_ROLES` | views.py           | ["psychologist", "client"]                                                                                                                  |
-| `AGE_BUCKET_CHOICES`     | models.py          | ("<25", "До 25 лет"), <br/> ("25-35", "25-35 лет"), <br/> ("35-45", "35-45 лет"), <br/> ("45-55", "45-55 лет"), <br/> (">55", "От 55 лет"), |
+| Название константы             | Место использования | Значение                                                                                                                                   |
+|--------------------------------|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| `GENDER_CHOICES`               | models.py          | ("male", "мужской"), <br/> ("female", "женский"),                                                                                          |
+| `LANGUAGE_CHOICES`             | models.py          | ("english", "английский"), <br/> ("russian", "русский"),                                                                                   |
+| `THERAPY_FORMAT_CHOICES`       | models.py          | ("online", "удаленно"), <br/> ("offline", "встреча"), <br/> ("any", "любая"),                                                              |
+| `WORK_STATUS_CHOICES`          | models.py          | ("working", "работает"), <br/> ("not_working", "не работает"),                                                                             |
+| `MAX_AVAILABLE_FILE_SIZE`      | validators.py      | 5                                                                                                                                          |
+| `ALLOWED_REGISTER_ROLES`       | views.py           | ["psychologist", "client"]                                                                                                                 |
+| `AGE_BUCKET_CHOICES`           | models.py          | ("<25", "До 25 лет"), <br/> ("25-35", "25-35 лет"), <br/> ("35-45", "35-45 лет"), <br/> ("45-55", "45-55 лет"), <br/> (">55", "От 55 лет"), |
+| `PREFERRED_TOPIC_TYPE_CHOICES` | models.py          | ("individual", "Индивидуальная"), <br/> ("couple", "Парная"),                                                                              |
 
 ---
 
@@ -199,18 +200,19 @@
 
 9. Модель `ClientProfile(TimeStampedModel)`:
 
-    | Поле                  | Тип                      | Описание                                       |
-    |-----------------------|--------------------------|------------------------------------------------|
-    | `id`                  | AutoField                | Уникальный ID профиля клиента                  |
-    | `user`                | OneToOneField → `AppUser` | Связь с пользователем                          |
-    | `therapy_experience`  | BooleanField             | Есть ли у клиента опыт психотерапии            |
-    | `has_preferences`     | BooleanField             | Есть ли у клиента предпочтения среди психологов |
-    | `preferred_methods`   | ManyToMany → `Method`    | Предпочтительные методы и подходы клиента      |
-    | `requested_topics`    | ManyToMany → `Topic`     | Запросы, с которыми клиент приходит            |
-    | `preferred_ps_age`    | CharField(choices)       | Предпочитаемый возраст психолога               |
-    | `preferred_ps_gender` | CharField(choices)       | Предпочитаемый пол психолога                   |
-    | `created_at`          | DateTimeField            | Дата и время создания                          |
-    | `updated_at`          | DateTimeField            | Дата и время последнего обновления             |
+    | Поле                   | Тип                      | Описание                                       |
+    |------------------------|--------------------------|------------------------------------------------|
+    | `id`                   | AutoField                | Уникальный ID профиля клиента                  |
+    | `user`                 | OneToOneField → `AppUser` | Связь с пользователем                          |
+    | `therapy_experience`   | BooleanField             | Есть ли у клиента опыт психотерапии            |
+    | `has_preferences`      | BooleanField             | Есть ли у клиента предпочтения среди психологов |
+    | `preferred_methods`    | ManyToMany → `Method`    | Предпочтительные методы и подходы клиента      |
+    | `preferred_topic_type` | CharField(choices)       | Вид консультации (индивидуальная/парная)       |
+    | `requested_topics`     | ManyToMany → `Topic`     | Запросы, с которыми клиент приходит            |
+    | `preferred_ps_age`     | CharField(choices)       | Предпочитаемый возраст психолога               |
+    | `preferred_ps_gender`  | CharField(choices)       | Предпочитаемый пол психолога                   |
+    | `created_at`           | DateTimeField            | Дата и время создания                          |
+    | `updated_at`           | DateTimeField            | Дата и время последнего обновления             |
 
 ---
 
@@ -308,10 +310,12 @@
 
 #### 2) AJAX
 
-| № | Название контроллера            | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                                                                                                            | Используемые модели           |
-|---|---------------------------------|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
-| 1 | **SaveHasPreferencesAjaxView**  | `View`                 | ЛОГИКА ДЛЯ ПОВЕДЕНИЯ HTML-СТРАНИЦ: моментальное сохранение значения has_preferences выбранного клиентом на html-странице (AJAX-запрос (fetch) на специальный API-endpoint)  | `ClientProfile` + справочники |
-| 2 | **SavePreferredMethodsAjaxView** | `View`                 | ЛОГИКА ДЛЯ ПОВЕДЕНИЯ HTML-СТРАНИЦ: моментальное сохранение выбранных клиентом методов в preferred_methods на html-странице (AJAX-запрос (fetch) на специальный API-endpoint) | `ClientProfile` + справочники |
+| № | Название контроллера              | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                                                                             | Используемые модели           |
+|---|-----------------------------------|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
+| 1 | **SaveHasPreferencesAjaxView**    | `View`                 | Моментальное сохранение значения has_preferences выбранного клиентом на html-странице (AJAX-запрос (fetch) на специальный API-endpoint)      | `ClientProfile` + справочники |
+| 2 | **SavePreferredMethodsAjaxView**  | `View`                 | Моментальное сохранение выбранных клиентом методов в preferred_methods на html-странице (AJAX-запрос (fetch) на специальный API-endpoint)    | `ClientProfile` + справочники |
+| 3 | **SavePreferredTopicTypeAjaxView** | `View`                 | Моментальное сохранение значения preferred_topic_type выбранного клиентом на html-странице (AJAX-запрос (fetch) на специальный API-endpoint) | `ClientProfile` + справочники |
+| 4 | **SaveRequestedTopicsAjaxView**   | `View`                 | Моментальное сохранение выбранных клиентом тем в requested_topics на html-странице (AJAX-запрос (fetch) на специальный API-endpoint)         | `ClientProfile` + справочники |
 
 
 ### 3. МАРШРУТЫ (РОУТЫ)
@@ -347,10 +351,12 @@
 
 #### 2) AJAX-запросы (fetch) на моментальное сохранение указанных клиентом на html-страницах данных в БД
 
-| № | Эндпоинт                            | HTTP-методы | Описание функционала                                                                    |
-|---|-------------------------------------|------------|-----------------------------------------------------------------------------------------|
-| 1 | `/users/api/save-has-preferences/`  | `POST`     | Моментальное сохранение значения has_preferences выбранного клиентом на html-страницах  |
-| 2 | `/users/api/save-preferred-methods/` | `POST`     | Моментальное сохранение выбранных клиентом методов в preferred_methods на html-страницах |
+| № | Эндпоинт                                | HTTP-методы | Описание функционала                                                                       |
+|---|-----------------------------------------|------------|--------------------------------------------------------------------------------------------|
+| 1 | `/users/api/save-has-preferences/`      | `POST`     | Моментальное сохранение значения has_preferences выбранного клиентом на html-страницах     |
+| 2 | `/users/api/save-preferred-methods/`    | `POST`     | Моментальное сохранение выбранных клиентом методов в preferred_methods на html-страницах   |
+| 3 | `/users/api/save-preferred-topic-type/` | `POST`     | Моментальное сохранение значения preferred_topic_type выбранного клиентом на html-страницах |
+| 4 | `/users/api/save-requested-topics/`     | `POST`     | Моментальное сохранение выбранных клиентом тем в requested_topics на html-страницах        |
 
 ---
 

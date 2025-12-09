@@ -4,14 +4,15 @@
 const ACTIVE_CLASSES = [
     "bg-indigo-500",
     "text-white",
-    "border-indigo-900"
+    "border-indigo-900",
+    "hover:bg-indigo-900"
 ];
 
 const INACTIVE_CLASSES = [
     "bg-white",
     "text-gray-700",
     "border-gray-300",
-    "hover:bg-blue-50"
+    "hover:bg-gray-50"
 ];
 
 function addClasses(el, classes) {

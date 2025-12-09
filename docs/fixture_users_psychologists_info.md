@@ -65,7 +65,7 @@ python manage.py loaddata fixtures/users_psychologists.json
       "methods": [13, 3],
       "topics": [1, 3, 6],
       "biography": "Работаю с тревожностью и самооценкой, использую КПТ и психодраму. Веду терапию для тех, кто устал от постоянного стресса и хочет вернуть контроль над эмоциями. Практический подход + проработка сценариев в безопасном пространстве. Помогаю наладить границы и ресурсы.",
-      "photo": null,
+      "photo": "/fake_avatars/f-1.jpeg",
       "work_experience": 7,
       "languages": ["russian"],
       "therapy_format": "online",

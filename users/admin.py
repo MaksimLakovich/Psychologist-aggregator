@@ -150,8 +150,8 @@ class PsychologistProfileAdmin(admin.ModelAdmin):
 class ClientProfileAdmin(admin.ModelAdmin):
     """Настройка отображения модели ClientProfile в админке."""
 
-    list_display = ("id", "user", "therapy_experience", "has_preferences")
-    list_filter = ("has_preferences", "requested_topics", "preferred_methods", "therapy_experience")
+    list_display = ("id", "user", "therapy_experience", "has_preferences", "preferred_topic_type")
+    list_filter = ("has_preferences", "preferred_topic_type", "preferred_methods", "therapy_experience")
     # # autocomplete_fields - улучшит производительность при большом объеме данных
     # autocomplete_fields = ("preferred_methods", "requested_topics")
     search_fields = ("user__email", "user__first_name", "user__last_name")
