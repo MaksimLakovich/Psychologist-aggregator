@@ -125,8 +125,7 @@
 
                         <!-- Левая колонка -->
                         <div class="md:col-span-3 pt-3">
-                            <h2 class="text-lg font-semibold text-gray-900">Что хотели бы обсудить в первую
-                                очередь?</h2>
+                            <h2 class="text-lg font-semibold text-gray-900">Что хотели бы обсудить в первую очередь?</h2>
                         </div>
 
                         <!-- Правая колонка -->
@@ -146,11 +145,13 @@
 
                                     <div class="mb-4">
 
-                                        <p class="text-sm font-semibold text-gray-700 mb-1">{{ group_name }}</p>
-                                        <div class="topics-group grid grid-cols-1 sm:grid-cols-2 gap-2"
+                                        <p class="block mb-2 text-base font-medium text-indigo-900">
+                                            <strong>{{ group_name }}</strong>
+                                        </p>
+                                        <div class="topics-group grid grid-cols-1 sm:grid-cols-2"
                                              data-group="{{ group_name }}">
                                             {% for topic in items %}
-                                            <label class="flex items-center gap-2 p-1 rounded-md hover:bg-gray-50 transition">
+                                            <label class="flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 transition">
                                                 <input
                                                         type="checkbox"
                                                         name="requested_topics"
@@ -185,11 +186,13 @@
 
                                     <div class="mb-4">
 
-                                        <p class="text-sm font-semibold text-gray-700 mb-1">{{ group_name }}</p>
-                                        <div class="topics-group grid grid-cols-1 sm:grid-cols-2 gap-2"
+                                        <p class="block mb-2 text-base font-medium text-indigo-900">
+                                            <strong>{{ group_name }}</strong>
+                                        </p>
+                                        <div class="topics-group grid grid-cols-1 sm:grid-cols-2"
                                              data-group="{{ group_name }}">
                                             {% for topic in items %}
-                                            <label class="flex items-center gap-2 p-1 rounded-md hover:bg-gray-50 transition">
+                                            <label class="flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 transition">
                                                 <input
                                                         type="checkbox"
                                                         name="requested_topics"
