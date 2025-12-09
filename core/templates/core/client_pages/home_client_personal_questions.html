@@ -89,6 +89,7 @@
                     {% include 'core/client_pages/home_avatar_group.html' %}
                 </div>
 
+
                 <!-- ========== Блок 1 ========== -->
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
 
@@ -100,7 +101,122 @@
                     <!-- Правая колонка -->
                     <div class="md:col-span-9 space-y-6 pt-3">
 
-                        <!-- Переключатели ВСЕ РАВНО или ЕСТЬ ПРЕДПОЧТЕНИЕ -->
+                        <!-- ========== Переключатели ИНДИВИДУАЛЬНАЯ / ПАРНАЯ ========== -->
+                        <div class="flex gap-3">
+                            <button id="btn-individual"
+                                    type="button"
+                                    class="px-4 py-2 rounded-lg border text-sm font-medium">
+                                Индивидуальная
+                            </button>
+                            <button id="btn-couple"
+                                    type="button"
+                                    class="px-4 py-2 rounded-lg border text-sm font-medium">
+                                Парная
+                            </button>
+                        </div>
+                        <!-- ВАЖНО: скрытое поле, которое и отправляется при submit. -->
+                        <!-- Это нужно чтоб при загрузке страницы значение hidden-поля совпадало с данными из БД. -->
+                        <input
+                                id="input-preferred-topic-type"
+                                type="hidden"
+                                name="preferred_topic_type"
+                                value="{{ preferred_topic_type }}"
+                        >
+
+                        <!-- Левая колонка -->
+                        <div class="md:col-span-3 pt-3">
+                            <h2 class="text-lg font-semibold text-gray-900">Что хотели бы обсудить в первую
+                                очередь?</h2>
+                        </div>
+
+                        <!-- Правая колонка -->
+                        <div class="md:col-span-9 space-y-6 pt-3">
+
+                            <!-- ========== ТЕМЫ ========== -->
+                            <div id="topics-container"
+                                 data-save-url="{% url 'users:api:save-topics' %}"
+                                 data-csrf-token="{{ csrf_token }}"
+                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-gray-100 shadow-sm p-4">
+
+                                <!-- Индивидуальные темы -->
+                                <div id="topics-individual"
+                                     class="{% if preferred_topic_type != 'individual' %}hidden{% endif %}">
+
+                                    {% for group_name, items in topics_by_type.Индивидуальная.items %}
+
+                                    <div class="mb-4">
+
+                                        <p class="text-sm font-semibold text-gray-700 mb-1">{{ group_name }}</p>
+                                        <div class="topics-group grid grid-cols-1 sm:grid-cols-2 gap-2"
+                                             data-group="{{ group_name }}">
+                                            {% for topic in items %}
+                                            <label class="flex items-center gap-2 p-1 rounded-md hover:bg-gray-50 transition">
+                                                <input
+                                                        type="checkbox"
+                                                        name="requested_topics"
+                                                        value="{{ topic.pk }}"
+                                                        class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                                        {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
+                                                >
+                                                <span class="text-sm text-gray-900">{{ topic.name }}</span>
+                                            </label>
+                                            {% empty %}
+                                            <p class="text-sm text-gray-500">Темы не найдены.</p>
+                                            {% endfor %}
+                                        </div>
+
+                                        <!-- Кнопка "Показать еще" -->
+                                        <button type="button"
+                                                class="show-more-topics hidden mt-1 text-sm font-medium text-indigo-700">
+                                            Ещё
+                                        </button>
+
+                                    </div>
+
+                                    {% endfor %}
+
+                                </div>
+
+                                <!-- Парные темы -->
+                                <div id="topics-couple"
+                                     class="{% if preferred_topic_type != 'couple' %}hidden{% endif %}">
+
+                                    {% for group_name, items in topics_by_type.Парная.items %}
+
+                                    <div class="mb-4">
+
+                                        <p class="text-sm font-semibold text-gray-700 mb-1">{{ group_name }}</p>
+                                        <div class="topics-group grid grid-cols-1 sm:grid-cols-2 gap-2"
+                                             data-group="{{ group_name }}">
+                                            {% for topic in items %}
+                                            <label class="flex items-center gap-2 p-1 rounded-md hover:bg-gray-50 transition">
+                                                <input
+                                                        type="checkbox"
+                                                        name="requested_topics"
+                                                        value="{{ topic.pk }}"
+                                                        class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                                        {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
+                                                >
+                                                <span class="text-sm text-gray-900">{{ topic.name }}</span>
+                                            </label>
+                                            {% empty %}
+                                            <p class="text-sm text-gray-500">Темы не найдены.</p>
+                                            {% endfor %}
+                                        </div>
+
+                                        <!-- Кнопка "Показать еще" -->
+                                        <button type="button"
+                                                class="show-more-topics hidden mt-1 text-sm font-medium text-indigo-700">
+                                            Ещё
+                                        </button>
+
+                                    </div>
+
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -116,7 +232,7 @@
                     <!-- Правая колонка -->
                     <div class="md:col-span-9 space-y-6 pt-3">
 
-                        <!-- Переключатели ВСЕ РАВНО или ЕСТЬ ПРЕДПОЧТЕНИЕ -->
+                        <!-- ========== Переключатели ВСЕ РАВНО / ЕСТЬ ПРЕДПОЧТЕНИЕ ========== -->
                         <div class="flex gap-3">
                             <button id="btn-any"
                                     type="button"
@@ -169,7 +285,7 @@
                                 </div>
                             </div>
 
-                            <!-- ========== МЕТОДЫ: используем grid для 2-3 колонок, responsive ========== -->
+                            <!-- ========== МЕТОДЫ: используем grid для 2-3 колонок ========== -->
                             <div id="methods-container"
                                  data-save-url="{% url 'users:api:save-methods' %}"
                                  data-csrf-token="{{ csrf_token }}"
@@ -190,10 +306,8 @@
                                                 type="checkbox"
                                                 value="{{ method.pk }}"
                                                 class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                                                {% if method.pk|stringformat:"s" in selected_methods %}
-                                        checked
-                                        {% endif %}
-                                        />
+                                                {% if method.pk|stringformat:"s" in selected_methods %}checked{% endif %}
+                                        >
                                         <label for="method-{{ method.pk }}"
                                                class="text-sm font-medium text-gray-900 dark:text-gray-200">
                                             {{ method.name }}
@@ -226,23 +340,23 @@
                 </div>
 
             </form>
-
         </div>
     </div>
-
 </section>
 
 
 <script type="module" src="{% static 'js/pages/personal_questions.js' %}"></script>
 
-<!-- Передаем в JS текущее значение has_preferences пользователя -->
+<!-- Передаем в JS текущие значения пользователя: "has_preferences" и "preferred_topic_type" -->
 <script>
     window.HAS_PREFERENCES = {{ has_preferences|yesno:"true,false" }};
+    window.PREFERRED_TOPIC_TYPE = "{{ preferred_topic_type }}";
 </script>
 
-<!-- Передаем в JS URL_API и CSRF-токен для автосохранения настроек. Сохранение в БД данных со страницы о выбранных предпочитаемых методах (чекбокс) -->
+<!-- Передаем в JS URL_API и CSRF-токен для автосохранения настроек. Сохранение в БД данных со страницы о выбранных предпочитаемых методах и тем (чекбокс) -->
 <script>
     window.API_SAVE_HAS_PREFS = "{% url 'users:api:save-has-preferences' %}";
+    window.API_SAVE_PREFERRED_TOPIC_TYPE = "{% url 'users:api:save-preferred-topic-type' %}"
     window.CSRF_TOKEN = "{{ csrf_token }}";
 </script>
 

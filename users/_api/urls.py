@@ -69,7 +69,7 @@ urlpatterns = [
     path(
         "save-preferred-topic-type/", SavePreferredTopicTypeAjaxView.as_view(), name="save-preferred-topic-type"
     ),
-    path("save-requested-topics/", SaveRequestedTopicsAjaxView.as_view(), name="save-requested-topics"),
+    path("save-requested-topics/", SaveRequestedTopicsAjaxView.as_view(), name="save-topics"),
     path("save-has-preferences/", SaveHasPreferencesAjaxView.as_view(), name="save-has-preferences"),
     path("save-preferred-methods/", SavePreferredMethodsAjaxView.as_view(), name="save-methods"),
 ]

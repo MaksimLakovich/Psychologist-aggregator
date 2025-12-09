@@ -4,6 +4,7 @@ import { initAutosaveMethods } from "../modules/autosave_methods.js";
 import { initMultiToggle } from "../modules/toggle_group_multi_choice.js"
 import { initAutosaveHasPreferences } from "../modules/autosave_has_preferences.js"
 import { initAutosavePreferredTopicType } from "../modules/autosave_topic_type.js"
+import { initAutosaveTopics } from "../modules/autosave_topics.js"
 
 document.addEventListener("DOMContentLoaded", () => {
     // получаем опции из контейнера (data-attributes) - безопасно
@@ -30,7 +31,14 @@ document.addEventListener("DOMContentLoaded", () => {
         debounceMs: 500,
     });
 
-    // 3. Логика работы переключателя ИЛИ/ИЛИ (например, "Все равно" / "Есть пожелания" где показываем набор предпочтения для выбора или нет)
+    // 3. Автосохранение выбранных чекбоксом предпочитаемых ТЕМ в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
+    initAutosaveTopics({
+        checkboxSelector: "input[name='requested_topics']",
+        saveUrl,
+        csrfToken,
+    });
+
+    // 4. Логика работы переключателя ИЛИ/ИЛИ (например, "Все равно" / "Есть пожелания" где показываем набор предпочтения для выбора или нет)
     initToggleGroup({
         firstBtn: "#btn-any",
         secondBtn: "#btn-has-prefs",
@@ -42,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
         showBlockWhen: "second",
     });
 
-    // 4. Автосохранение выбранного значения "has_preferences" в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
+    // 5. Автосохранение выбранного значения "has_preferences" в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
     initAutosaveHasPreferences({
         saveUrl: window.API_SAVE_HAS_PREFS,
         csrfToken: window.CSRF_TOKEN,
@@ -51,21 +59,21 @@ document.addEventListener("DOMContentLoaded", () => {
         debounceMs: 500,
     });
 
-    // 5. Логика отображения списка с предпочитаемыми методами - разворачивание/сворачивание справочника
+    // 6. Логика отображения списка с ЧЕКБОКСАМИ (6 по умолчанию + показать еще) - разворачивание/сворачивание справочника
     initCollapsibleList({
         containerSelector: "#methods-grid",
         buttonSelector: "#show-more-methods",
         visibleCount: 6,
     });
 
-    // 6. Автосохранение выбранных чекбоксом предпочитаемых методов в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
+    // 7. Автосохранение выбранных чекбоксом предпочитаемых МЕТОДОВ в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
     initAutosaveMethods({
         checkboxSelector: "input[name='preferred_methods']",
         saveUrl,
         csrfToken,
     });
 
-    // 7. Логика работы МНОЖЕСТВЕННОГО выбора доступных опций (например, для выбора пола: "Мужчина" / "Женщина")
+    // 8. Логика работы МНОЖЕСТВЕННОГО выбора доступных опций (например, для выбора пола: "Мужчина" / "Женщина")
     initMultiToggle({
         containerSelector: "#ps-gender-block",
         buttonSelector: ".ps-gender-btn",
