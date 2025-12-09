@@ -84,7 +84,7 @@
                     </ol>
                 </div>
 
-                <!-- Аватары -->
+                <!-- АВАТАРЫ -->
                 <div class="flex justify-end min-h-[50px] w-full overflow-x-scroll rounded-lg lg:overflow-visible">
                     {% include 'core/client_pages/home_avatar_group.html' %}
                 </div>
@@ -122,109 +122,114 @@
                                 name="preferred_topic_type"
                                 value="{{ preferred_topic_type }}"
                         >
+                    </div>
+                </div>
 
-                        <!-- Левая колонка -->
-                        <div class="md:col-span-3 pt-3">
-                            <h2 class="text-lg font-semibold text-gray-900">Что хотели бы обсудить в первую очередь?</h2>
-                        </div>
 
-                        <!-- Правая колонка -->
-                        <div class="md:col-span-9 space-y-6 pt-3">
+                <!-- ========== Блок 2 ========== -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
 
-                            <!-- ========== ТЕМЫ ========== -->
-                            <div id="topics-container"
-                                 data-save-url="{% url 'users:api:save-topics' %}"
-                                 data-csrf-token="{{ csrf_token }}"
-                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-gray-100 shadow-sm p-4">
+                    <!-- Левая колонка -->
+                    <div class="md:col-span-3 pt-3">
+                        <h2 class="text-lg font-semibold text-gray-900">Что хотели бы обсудить в первую очередь?</h2>
+                    </div>
 
-                                <!-- Индивидуальные темы -->
-                                <div id="topics-individual"
-                                     class="{% if preferred_topic_type != 'individual' %}hidden{% endif %}">
+                    <!-- Правая колонка -->
+                    <div class="md:col-span-9 space-y-6 pt-0">
 
-                                    {% for group_name, items in topics_by_type.Индивидуальная.items %}
+                        <!-- ========== ТЕМЫ ========== -->
+                        <div id="topics-container"
+                             data-save-url="{% url 'users:api:save-topics' %}"
+                             data-csrf-token="{{ csrf_token }}"
+                             class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-gray-100 shadow-sm p-4">
 
-                                    <div class="mb-4">
+                            <!-- Индивидуальные темы -->
+                            <div id="topics-individual"
+                                 class="{% if preferred_topic_type != 'individual' %}hidden{% endif %}">
 
-                                        <p class="block mb-2 text-base font-medium text-indigo-900">
-                                            <strong>{{ group_name }}</strong>
-                                        </p>
-                                        <div class="topics-group grid grid-cols-1 sm:grid-cols-2"
-                                             data-group="{{ group_name }}">
-                                            {% for topic in items %}
-                                            <label class="flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 transition">
-                                                <input
-                                                        type="checkbox"
-                                                        name="requested_topics"
-                                                        value="{{ topic.pk }}"
-                                                        class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                                                        {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
-                                                >
-                                                <span class="text-sm text-gray-900">{{ topic.name }}</span>
-                                            </label>
-                                            {% empty %}
-                                            <p class="text-sm text-gray-500">Темы не найдены.</p>
-                                            {% endfor %}
-                                        </div>
+                                {% for group_name, items in topics_by_type.Индивидуальная.items %}
 
-                                        <!-- Кнопка "Показать еще" -->
-                                        <button type="button"
-                                                class="show-more-topics hidden mt-1 text-sm font-medium text-indigo-700">
-                                            Ещё
-                                        </button>
+                                <div class="mb-4">
 
+                                    <p class="block mb-2 text-base font-medium text-indigo-900">
+                                        <strong>{{ group_name }}</strong>
+                                    </p>
+                                    <div class="topics-group grid grid-cols-1 sm:grid-cols-2"
+                                         data-group="{{ group_name }}">
+                                        {% for topic in items %}
+                                        <label class="flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 transition">
+                                            <input
+                                                    type="checkbox"
+                                                    name="requested_topics"
+                                                    value="{{ topic.pk }}"
+                                                    class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                                    {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
+                                            >
+                                            <span class="text-sm text-gray-900">{{ topic.name }}</span>
+                                        </label>
+                                        {% empty %}
+                                        <p class="text-sm text-gray-500">Темы не найдены.</p>
+                                        {% endfor %}
                                     </div>
 
-                                    {% endfor %}
+                                    <!-- Кнопка "Показать еще" -->
+                                    <button type="button"
+                                            class="show-more-topics hidden mt-1 text-sm font-medium text-indigo-700">
+                                        Ещё
+                                    </button>
 
                                 </div>
 
-                                <!-- Парные темы -->
-                                <div id="topics-couple"
-                                     class="{% if preferred_topic_type != 'couple' %}hidden{% endif %}">
+                                {% endfor %}
 
-                                    {% for group_name, items in topics_by_type.Парная.items %}
+                            </div>
 
-                                    <div class="mb-4">
+                            <!-- Парные темы -->
+                            <div id="topics-couple"
+                                 class="{% if preferred_topic_type != 'couple' %}hidden{% endif %}">
 
-                                        <p class="block mb-2 text-base font-medium text-indigo-900">
-                                            <strong>{{ group_name }}</strong>
-                                        </p>
-                                        <div class="topics-group grid grid-cols-1 sm:grid-cols-2"
-                                             data-group="{{ group_name }}">
-                                            {% for topic in items %}
-                                            <label class="flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 transition">
-                                                <input
-                                                        type="checkbox"
-                                                        name="requested_topics"
-                                                        value="{{ topic.pk }}"
-                                                        class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                                                        {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
-                                                >
-                                                <span class="text-sm text-gray-900">{{ topic.name }}</span>
-                                            </label>
-                                            {% empty %}
-                                            <p class="text-sm text-gray-500">Темы не найдены.</p>
-                                            {% endfor %}
-                                        </div>
+                                {% for group_name, items in topics_by_type.Парная.items %}
 
-                                        <!-- Кнопка "Показать еще" -->
-                                        <button type="button"
-                                                class="show-more-topics hidden mt-1 text-sm font-medium text-indigo-700">
-                                            Ещё
-                                        </button>
+                                <div class="mb-4">
 
+                                    <p class="block mb-2 text-base font-medium text-indigo-900">
+                                        <strong>{{ group_name }}</strong>
+                                    </p>
+                                    <div class="topics-group grid grid-cols-1 sm:grid-cols-2"
+                                         data-group="{{ group_name }}">
+                                        {% for topic in items %}
+                                        <label class="flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 transition">
+                                            <input
+                                                    type="checkbox"
+                                                    name="requested_topics"
+                                                    value="{{ topic.pk }}"
+                                                    class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                                    {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
+                                            >
+                                            <span class="text-sm text-gray-900">{{ topic.name }}</span>
+                                        </label>
+                                        {% empty %}
+                                        <p class="text-sm text-gray-500">Темы не найдены.</p>
+                                        {% endfor %}
                                     </div>
 
-                                    {% endfor %}
+                                    <!-- Кнопка "Показать еще" -->
+                                    <button type="button"
+                                            class="show-more-topics hidden mt-1 text-sm font-medium text-indigo-700">
+                                        Ещё
+                                    </button>
 
                                 </div>
+
+                                {% endfor %}
+
                             </div>
                         </div>
                     </div>
                 </div>
 
 
-                <!-- ========== Блок 2 ========== -->
+                <!-- ========== Блок 3 ========== -->
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
 
                     <!-- Левая колонка -->
@@ -341,7 +346,6 @@
                         Далее
                     </button>
                 </div>
-
             </form>
         </div>
     </div>
