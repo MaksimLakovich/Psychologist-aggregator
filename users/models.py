@@ -13,8 +13,8 @@ from phonenumber_field.modelfields import PhoneNumberField
 from timezone_field import TimeZoneField
 
 from users.constants import (AGE_BUCKET_CHOICES, GENDER_CHOICES,
-                             LANGUAGE_CHOICES, THERAPY_FORMAT_CHOICES,
-                             WORK_STATUS_CHOICES)
+                             LANGUAGE_CHOICES, PREFERRED_TOPIC_TYPE_CHOICES,
+                             THERAPY_FORMAT_CHOICES, WORK_STATUS_CHOICES)
 from users.managers import AppUserManager
 from users.services.defaults import default_languages
 from users.services.slug import generate_unique_slug
@@ -606,6 +606,13 @@ class ClientProfile(TimeStampedModel):
         related_name="topic_clients",
         verbose_name="Запросы",
         help_text="Темы, с которыми вы хотите работать",
+    )
+    preferred_topic_type = models.CharField(
+        max_length=20,
+        choices=PREFERRED_TOPIC_TYPE_CHOICES,
+        default="individual",
+        verbose_name="Вид консультации",
+        help_text="Укажите интересующий вид консультации",
     )
 
     def __str__(self):
