@@ -39,16 +39,18 @@
 
                         <div class="hidden h-1 w-8 shrink-0 rounded-full bg-indigo-700 md:block xl:w-16"></div>
 
-                        <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                            <svg class="h-8 w-8 text-indigo-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                 width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                      stroke-width="2.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                            </svg>
-                            <p class="text-base font-medium leading-tight text-indigo-700">
-                                <strong>Личные вопросы</strong>
-                            </p>
-                        </li>
+                        <a href="{% url 'core:client_personal_questions_page' %}" class="flex mr-4">
+                            <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                                <svg class="h-8 w-8 text-indigo-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                     width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                          stroke-width="2.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                </svg>
+                                <p class="text-base font-medium leading-tight text-indigo-700">
+                                    <strong>Личные вопросы</strong>
+                                </p>
+                            </li>
+                        </a>
 
                         <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
 
@@ -84,7 +86,7 @@
                     </ol>
                 </div>
 
-                <!-- Аватары -->
+                <!-- АВАТАРЫ -->
                 <div class="flex justify-end min-h-[50px] w-full overflow-x-scroll rounded-lg lg:overflow-visible">
                     {% include 'core/client_pages/home_avatar_group.html' %}
                 </div>
@@ -122,106 +124,115 @@
                                 name="preferred_topic_type"
                                 value="{{ preferred_topic_type }}"
                         >
+                    </div>
+                </div>
 
-                        <!-- Левая колонка -->
-                        <div class="md:col-span-3 pt-3">
-                            <h2 class="text-lg font-semibold text-gray-900">Что хотели бы обсудить в первую
-                                очередь?</h2>
-                        </div>
 
-                        <!-- Правая колонка -->
-                        <div class="md:col-span-9 space-y-6 pt-3">
+                <!-- ========== Блок 2 ========== -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
 
-                            <!-- ========== ТЕМЫ ========== -->
-                            <div id="topics-container"
-                                 data-save-url="{% url 'users:api:save-topics' %}"
-                                 data-csrf-token="{{ csrf_token }}"
-                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-gray-100 shadow-sm p-4">
+                    <!-- Левая колонка -->
+                    <div class="md:col-span-3 pt-3">
+                        <h2 class="text-lg font-semibold text-gray-900">Что хотели бы обсудить в первую очередь?</h2>
+                    </div>
 
-                                <!-- Индивидуальные темы -->
-                                <div id="topics-individual"
-                                     class="{% if preferred_topic_type != 'individual' %}hidden{% endif %}">
+                    <!-- Правая колонка -->
+                    <div class="md:col-span-9 space-y-6 pt-0">
 
-                                    {% for group_name, items in topics_by_type.Индивидуальная.items %}
+                        <!-- ========== ТЕМЫ ========== -->
+                        <div id="topics-container"
+                             data-save-url="{% url 'users:api:save-topics' %}"
+                             data-csrf-token="{{ csrf_token }}"
+                             class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
 
-                                    <div class="mb-4">
+                            <!-- Индивидуальные темы -->
+                            <div id="topics-individual"
+                                 class="{% if preferred_topic_type != 'individual' %}hidden{% endif %}">
 
-                                        <p class="text-sm font-semibold text-gray-700 mb-1">{{ group_name }}</p>
-                                        <div class="topics-group grid grid-cols-1 sm:grid-cols-2 gap-2"
-                                             data-group="{{ group_name }}">
-                                            {% for topic in items %}
-                                            <label class="flex items-center gap-2 p-1 rounded-md hover:bg-gray-50 transition">
-                                                <input
-                                                        type="checkbox"
-                                                        name="requested_topics"
-                                                        value="{{ topic.pk }}"
-                                                        class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                                                        {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
-                                                >
-                                                <span class="text-sm text-gray-900">{{ topic.name }}</span>
-                                            </label>
-                                            {% empty %}
-                                            <p class="text-sm text-gray-500">Темы не найдены.</p>
-                                            {% endfor %}
-                                        </div>
+                                {% for group_name, items in topics_by_type.Индивидуальная.items %}
 
-                                        <!-- Кнопка "Показать еще" -->
-                                        <button type="button"
-                                                class="show-more-topics hidden mt-1 text-sm font-medium text-indigo-700">
-                                            Ещё
-                                        </button>
+                                <div class="topic-group mb-4">
 
+                                    <p class="block mb-2 text-base font-medium text-indigo-900">
+                                        <strong>{{ group_name }}</strong>
+                                    </p>
+
+                                    <div class="topics-group grid grid-cols-1 sm:grid-cols-2">
+                                        {% for topic in items %}
+                                        <label class="topic-item flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 transition">
+                                            <input
+                                                    type="checkbox"
+                                                    name="requested_topics"
+                                                    value="{{ topic.pk }}"
+                                                    class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                                    {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
+                                            >
+                                            <span class="text-sm text-gray-900">{{ topic.name }}</span>
+                                        </label>
+                                        {% empty %}
+                                        <p class="text-sm text-gray-500">Темы не найдены.</p>
+                                        {% endfor %}
                                     </div>
 
-                                    {% endfor %}
+                                    <button
+                                            type="button"
+                                            class="show-more-topics hidden mt-2 text-sm font-medium text-indigo-500 hover:text-indigo-900">
+                                        Ещё
+                                    </button>
 
                                 </div>
 
-                                <!-- Парные темы -->
-                                <div id="topics-couple"
-                                     class="{% if preferred_topic_type != 'couple' %}hidden{% endif %}">
 
-                                    {% for group_name, items in topics_by_type.Парная.items %}
+                                {% endfor %}
 
-                                    <div class="mb-4">
+                            </div>
 
-                                        <p class="text-sm font-semibold text-gray-700 mb-1">{{ group_name }}</p>
-                                        <div class="topics-group grid grid-cols-1 sm:grid-cols-2 gap-2"
-                                             data-group="{{ group_name }}">
-                                            {% for topic in items %}
-                                            <label class="flex items-center gap-2 p-1 rounded-md hover:bg-gray-50 transition">
-                                                <input
-                                                        type="checkbox"
-                                                        name="requested_topics"
-                                                        value="{{ topic.pk }}"
-                                                        class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                                                        {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
-                                                >
-                                                <span class="text-sm text-gray-900">{{ topic.name }}</span>
-                                            </label>
-                                            {% empty %}
-                                            <p class="text-sm text-gray-500">Темы не найдены.</p>
-                                            {% endfor %}
-                                        </div>
+                            <!-- Парные темы -->
+                            <div id="topics-couple"
+                                 class="{% if preferred_topic_type != 'couple' %}hidden{% endif %}">
 
-                                        <!-- Кнопка "Показать еще" -->
-                                        <button type="button"
-                                                class="show-more-topics hidden mt-1 text-sm font-medium text-indigo-700">
-                                            Ещё
-                                        </button>
+                                {% for group_name, items in topics_by_type.Парная.items %}
 
+                                <div class="topic-group mb-4">
+
+                                    <p class="block mb-2 text-base font-medium text-indigo-900">
+                                        <strong>{{ group_name }}</strong>
+                                    </p>
+
+                                    <div class="topics-group grid grid-cols-1 sm:grid-cols-2">
+                                        {% for topic in items %}
+                                        <label class="topic-item flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 transition">
+                                            <input
+                                                    type="checkbox"
+                                                    name="requested_topics"
+                                                    value="{{ topic.pk }}"
+                                                    class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                                    {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
+                                            >
+                                            <span class="text-sm text-gray-900">{{ topic.name }}</span>
+                                        </label>
+                                        {% empty %}
+                                        <p class="text-sm text-gray-500">Темы не найдены.</p>
+                                        {% endfor %}
                                     </div>
 
-                                    {% endfor %}
+                                    <!-- Кнопка "Показать еще" -->
+                                    <button type="button"
+                                            class="show-more-topics hidden mt-2 text-sm font-medium text-indigo-500 hover:text-indigo-900">
+                                        Ещё
+                                    </button>
 
                                 </div>
+
+                                {% endfor %}
+
                             </div>
                         </div>
                     </div>
                 </div>
 
 
-                <!-- ========== Блок 2 ========== -->
+                <!-- ========== Блок 3 ========== -->
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
 
                     <!-- Левая колонка -->
@@ -259,7 +270,7 @@
 
                             <!-- ========== ПОЛ ПСИХОЛОГА ========== -->
                             <div id="ps-gender-block"
-                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-gray-100 shadow-sm p-4">
+                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
                                 <label class="block mb-2 text-base font-medium text-indigo-900">
                                     <strong>Пол психолога</strong>
                                 </label>
@@ -270,7 +281,6 @@
                                             class="ps-gender-btn px-4 py-2 rounded-full border text-sm font-medium">
                                         Мужчина
                                     </button>
-
                                     <button type="button"
                                             data-value="female"
                                             class="ps-gender-btn px-4 py-2 rounded-full border text-sm font-medium">
@@ -285,11 +295,53 @@
                                 </div>
                             </div>
 
+                            <!-- ========== ВОЗРАСТ ПСИХОЛОГА ========== -->
+                            <div id="ps-age-block"
+                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
+                                <label class="block mb-2 text-base font-medium text-indigo-900">
+                                    <strong>Возраст психолога</strong>
+                                </label>
+
+                                <div class="inline-flex gap-3" role="group" aria-label="Возраст психолога">
+                                    <button type="button"
+                                            data-value="<25"
+                                            class="ps-age-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                        До 25 лет
+                                    </button>
+                                    <button type="button"
+                                            data-value="25-35"
+                                            class="ps-age-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                        25-35 лет
+                                    </button>
+                                    <button type="button"
+                                            data-value="35-45"
+                                            class="ps-age-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                        35-45 лет
+                                    </button>
+                                    <button type="button"
+                                            data-value="45-55"
+                                            class="ps-age-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                        45-55 лет
+                                    </button>
+                                    <button type="button"
+                                            data-value=">55"
+                                            class="ps-age-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                        От 55 лет
+                                    </button>
+                                </div>
+
+                                <!-- Скрытые поля, которые будут отправлены на сервер при submit -->
+                                <!-- (имя - список, Django получит request.POST.getlist('preferred_ps_age')) -->
+                                <div id="ps-age-hidden-inputs" class="hidden">
+                                    <!-- JS будет добавлять/удалять input type="hidden" name="preferred_ps_age" value="<25|25-35|35-45|45-55|>55" -->
+                                </div>
+                            </div>
+
                             <!-- ========== МЕТОДЫ: используем grid для 2-3 колонок ========== -->
                             <div id="methods-container"
                                  data-save-url="{% url 'users:api:save-methods' %}"
                                  data-csrf-token="{{ csrf_token }}"
-                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-gray-100 shadow-sm p-4">
+                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
 
                                 <label class="block mb-2 text-base font-medium text-indigo-900">
                                     <strong>Психотерапевтический подход</strong>
@@ -322,7 +374,7 @@
                                 <button
                                         id="show-more-methods"
                                         type="button"
-                                        class="hidden mt-4 text-sm font-medium text-indigo-700 hover:text-indigo-900">
+                                        class="hidden mt-2 text-sm font-medium text-indigo-500 hover:text-indigo-900">
                                     Ещё
                                 </button>
 
@@ -338,7 +390,6 @@
                         Далее
                     </button>
                 </div>
-
             </form>
         </div>
     </div>
@@ -351,12 +402,16 @@
 <script>
     window.HAS_PREFERENCES = {{ has_preferences|yesno:"true,false" }};
     window.PREFERRED_TOPIC_TYPE = "{{ preferred_topic_type }}";
+    window.PREFERRED_GENDER = {{ preferred_ps_gender|safe }};
+    window.PREFERRED_AGE = {{ preferred_ps_age|safe }};
 </script>
 
-<!-- Передаем в JS URL_API и CSRF-токен для автосохранения настроек. Сохранение в БД данных со страницы о выбранных предпочитаемых методах и тем (чекбокс) -->
+<!-- Передаем в JS URL_API и CSRF-токен для автосохранения настроек -->
 <script>
     window.API_SAVE_HAS_PREFS = "{% url 'users:api:save-has-preferences' %}";
     window.API_SAVE_PREFERRED_TOPIC_TYPE = "{% url 'users:api:save-preferred-topic-type' %}"
+    window.API_SAVE_PREFERRED_GENDER = "{% url 'users:api:save-preferred-gender' %}"
+    window.API_SAVE_PREFERRED_AGE = "{% url 'users:api:save-preferred-age' %}"
     window.CSRF_TOKEN = "{{ csrf_token }}";
 </script>
 
