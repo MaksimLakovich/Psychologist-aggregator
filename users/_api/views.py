@@ -27,7 +27,7 @@ from users._api.serializers import (AppUserSerializer,
                                     PublicPsychologistProfileSerializer,
                                     RegisterSerializer,
                                     SpecialisationSerializer, TopicSerializer)
-from users.constants import (ALLOWED_REGISTER_ROLES,
+from users.constants import (ALLOWED_REGISTER_ROLES, GENDER_CHOICES,
                              PREFERRED_TOPIC_TYPE_CHOICES)
 from users.models import (AppUser, ClientProfile, Education, Method,
                           PsychologistProfile, Specialisation, Topic, UserRole)
@@ -552,6 +552,32 @@ class SaveHasPreferencesAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
 
         return JsonResponse(
             data={"status": "ok", "saved": has_pref}, status=200
+        )
+
+
+class SavePreferredGenderAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
+    """Класс-контроллер на основе View для автосохранения без кнопки "Сохранить", как это делают
+    профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint.
+    Моментальное сохранение выбранного клиентом значения в preferred_ps_gender на html-страницах."""
+
+    def post(self, request, *args, **kwargs):
+        """Сохранение значения в preferred_ps_gender."""
+        # получаем список в preferred_ps_gender со страницы (нормализация values=[... if v] - страхует от пустых строк)
+        values = [v for v in request.POST.getlist("preferred_ps_gender") if v]
+
+        # валидация (issubset - идеален для валидации списков)
+        valid_values = set(dict(GENDER_CHOICES))
+        if any(value not in valid_values for value in values):
+            return JsonResponse(
+                data={"status": "error", "error": "invalid_value"}, status=400
+            )
+
+        profile = request.user.client_profile
+        profile.preferred_ps_gender = values
+        profile.save(update_fields=["preferred_ps_gender"])
+
+        return JsonResponse(
+            data={"status": "ok", "saved": values}, status=200
         )
 
 

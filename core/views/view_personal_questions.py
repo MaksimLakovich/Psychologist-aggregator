@@ -19,6 +19,7 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
             - preferred_topic_type;
             - requested_topics;
             - has_preferences;
+            - preferred_ps_gender;
             - preferred_methods.
         Вызывается автоматически FormView при создании формы."""
         initial = super().get_initial()
@@ -38,7 +39,10 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
         # 3) has_preferences
         initial["has_preferences"] = profile.has_preferences
 
-        # 4) preferred_methods
+        # 4) preferred_ps_gender
+        initial["preferred_ps_gender"] = profile.preferred_ps_gender
+
+        # 5) preferred_methods
         try:
             selected = profile.preferred_methods.values_list("id", flat=True)
             initial["preferred_methods"] = list(selected)
@@ -96,7 +100,10 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
         # 3) has_preferences
         context["has_preferences"] = form.initial.get("has_preferences", False)
 
-        # 4) preferred_methods (для шаблона превращаем PK методов в строки, чтобы удобнее работать в JS)
+        # 4) preferred_ps_gender
+        context["preferred_ps_gender"] = form.initial.get("preferred_ps_gender", [])
+
+        # 5) preferred_methods (для шаблона превращаем PK методов в строки, чтобы удобнее работать в JS)
         context["methods"] = Method.objects.all().order_by("name")
         context["selected_methods"] = [
             str(pk) for pk in form.initial.get("preferred_methods", [])
@@ -117,10 +124,13 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
         selected_topics = form.cleaned_data["requested_topics"]
         profile.requested_topics.set(selected_topics)
 
-        # 2) has_preferences
+        # 3) has_preferences
         profile.has_preferences = form.cleaned_data.get("has_preferences", False)
 
-        # 3) preferred_methods
+        # 4) preferred_ps_gender
+        profile.preferred_ps_gender = form.cleaned_data.get("preferred_ps_gender") or []
+
+        # 5) preferred_methods
         selected_methods = form.cleaned_data["preferred_methods"]
         profile.preferred_methods.set(selected_methods)
 
