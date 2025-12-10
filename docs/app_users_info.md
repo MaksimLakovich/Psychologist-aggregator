@@ -310,13 +310,14 @@
 
 #### 2) AJAX-запрос (fetch) на специальный API-endpoint
 
-| № | Название контроллера              | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                           | Используемые модели           |
-|---|-----------------------------------|------------------------|--------------------------------------------------------------------------------------------|-------------------------------|
-| 1 | **SaveHasPreferencesAjaxView**    | `View`                 | Моментальное сохранение значения has_preferences выбранного клиентом на html-странице      | `ClientProfile` + справочники |
-| 2 | **SavePreferredMethodsAjaxView**  | `View`                 | Моментальное сохранение выбранных клиентом методов в preferred_methods на html-странице    | `ClientProfile` + справочники |
-| 3 | **SavePreferredTopicTypeAjaxView** | `View`                 | Моментальное сохранение значения preferred_topic_type выбранного клиентом на html-странице | `ClientProfile` + справочники |
-| 4 | **SaveRequestedTopicsAjaxView**   | `View`                 | Моментальное сохранение выбранных клиентом тем в requested_topics на html-странице         | `ClientProfile` + справочники |
+| № | Название контроллера              | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                            | Используемые модели           |
+|---|-----------------------------------|------------------------|---------------------------------------------------------------------------------------------|-------------------------------|
+| 1 | **SaveHasPreferencesAjaxView**    | `View`                 | Моментальное сохранение значения has_preferences выбранного клиентом на html-странице       | `ClientProfile` + справочники |
+| 2 | **SavePreferredMethodsAjaxView**  | `View`                 | Моментальное сохранение выбранных клиентом методов в preferred_methods на html-странице     | `ClientProfile` + справочники |
+| 3 | **SavePreferredTopicTypeAjaxView** | `View`                 | Моментальное сохранение значения preferred_topic_type выбранного клиентом на html-странице  | `ClientProfile` + справочники |
+| 4 | **SaveRequestedTopicsAjaxView**   | `View`                 | Моментальное сохранение выбранных клиентом тем в requested_topics на html-странице          | `ClientProfile` + справочники |
 | 5 | **SavePreferredGenderAjaxView**   | `View`                 | Моментальное сохранение выбранных клиентом значений в preferred_ps_gender на html-страницах | `ClientProfile` + справочники |
+| 6 | **SavePreferredAgeAjaxView**      | `View`                 | Моментальное сохранение выбранных клиентом значений в preferred_ps_age на html-страницах   | `ClientProfile` + справочники |
 
 
 ### 3. МАРШРУТЫ (РОУТЫ)
@@ -352,13 +353,14 @@
 
 #### 2) AJAX-запросы (fetch) на моментальное сохранение указанных клиентом на html-страницах данных в БД
 
-| № | Эндпоинт                               | HTTP-методы | Описание функционала                                                                        |
-|---|----------------------------------------|------------|---------------------------------------------------------------------------------------------|
-| 1 | `/users/api/save-has-preferences/`     | `POST`     | Моментальное сохранение значения has_preferences выбранного клиентом на html-страницах      |
-| 2 | `/users/api/save-preferred-methods/`   | `POST`     | Моментальное сохранение выбранных клиентом методов в preferred_methods на html-страницах    |
+| № | Эндпоинт                               | HTTP-методы | Описание функционала                                                                       |
+|---|----------------------------------------|------------|--------------------------------------------------------------------------------------------|
+| 1 | `/users/api/save-has-preferences/`     | `POST`     | Моментальное сохранение значения has_preferences выбранного клиентом на html-страницах     |
+| 2 | `/users/api/save-preferred-methods/`   | `POST`     | Моментальное сохранение выбранных клиентом методов в preferred_methods на html-страницах   |
 | 3 | `/users/api/save-preferred-topic-type/` | `POST`     | Моментальное сохранение значения preferred_topic_type выбранного клиентом на html-страницах |
-| 4 | `/users/api/save-requested-topics/`    | `POST`     | Моментальное сохранение выбранных клиентом тем в requested_topics на html-страницах         |
+| 4 | `/users/api/save-requested-topics/`    | `POST`     | Моментальное сохранение выбранных клиентом тем в requested_topics на html-страницах        |
 | 5 | `/users/api/save-preferred-gender/`    | `POST`     | Моментальное сохранение выбранных клиентом значений в preferred_ps_gender на html-страницах |
+| 6 | `/users/api/save-preferred-age/`       | `POST`     | Моментальное сохранение выбранных клиентом значений в preferred_ps_age на html-страницах   |
 
 ---
 

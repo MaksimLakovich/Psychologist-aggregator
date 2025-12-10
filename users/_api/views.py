@@ -27,8 +27,8 @@ from users._api.serializers import (AppUserSerializer,
                                     PublicPsychologistProfileSerializer,
                                     RegisterSerializer,
                                     SpecialisationSerializer, TopicSerializer)
-from users.constants import (ALLOWED_REGISTER_ROLES, GENDER_CHOICES,
-                             PREFERRED_TOPIC_TYPE_CHOICES)
+from users.constants import (AGE_BUCKET_CHOICES, ALLOWED_REGISTER_ROLES,
+                             GENDER_CHOICES, PREFERRED_TOPIC_TYPE_CHOICES)
 from users.models import (AppUser, ClientProfile, Education, Method,
                           PsychologistProfile, Specialisation, Topic, UserRole)
 from users.permissions import (IsOwnerOrAdmin, IsProfileOwnerOrAdmin,
@@ -575,6 +575,32 @@ class SavePreferredGenderAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin
         profile = request.user.client_profile
         profile.preferred_ps_gender = values
         profile.save(update_fields=["preferred_ps_gender"])
+
+        return JsonResponse(
+            data={"status": "ok", "saved": values}, status=200
+        )
+
+
+class SavePreferredAgeAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
+    """Класс-контроллер на основе View для автосохранения без кнопки "Сохранить", как это делают
+    профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint.
+    Моментальное сохранение выбранного клиентом значения в preferred_ps_age на html-страницах."""
+
+    def post(self, request, *args, **kwargs):
+        """Сохранение значения в preferred_ps_age."""
+        # получаем список в preferred_ps_age со страницы (нормализация values=[... if v] - страхует от пустых строк)
+        values = [v for v in request.POST.getlist("preferred_ps_age") if v]
+
+        # валидация (issubset - идеален для валидации списков)
+        valid_values = set(dict(AGE_BUCKET_CHOICES))
+        if any(value not in valid_values for value in values):
+            return JsonResponse(
+                data={"status": "error", "error": "invalid_value"}, status=400
+            )
+
+        profile = request.user.client_profile
+        profile.preferred_ps_age = values
+        profile.save(update_fields=["preferred_ps_age"])
 
         return JsonResponse(
             data={"status": "ok", "saved": values}, status=200

@@ -143,7 +143,7 @@
                         <div id="topics-container"
                              data-save-url="{% url 'users:api:save-topics' %}"
                              data-csrf-token="{{ csrf_token }}"
-                             class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-gray-100 shadow-sm p-4">
+                             class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
 
                             <!-- Индивидуальные темы -->
                             <div id="topics-individual"
@@ -270,7 +270,7 @@
 
                             <!-- ========== ПОЛ ПСИХОЛОГА ========== -->
                             <div id="ps-gender-block"
-                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-gray-100 shadow-sm p-4">
+                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
                                 <label class="block mb-2 text-base font-medium text-indigo-900">
                                     <strong>Пол психолога</strong>
                                 </label>
@@ -281,7 +281,6 @@
                                             class="ps-gender-btn px-4 py-2 rounded-full border text-sm font-medium">
                                         Мужчина
                                     </button>
-
                                     <button type="button"
                                             data-value="female"
                                             class="ps-gender-btn px-4 py-2 rounded-full border text-sm font-medium">
@@ -296,11 +295,53 @@
                                 </div>
                             </div>
 
+                            <!-- ========== ВОЗРАСТ ПСИХОЛОГА ========== -->
+                            <div id="ps-age-block"
+                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
+                                <label class="block mb-2 text-base font-medium text-indigo-900">
+                                    <strong>Возраст психолога</strong>
+                                </label>
+
+                                <div class="inline-flex gap-3" role="group" aria-label="Возраст психолога">
+                                    <button type="button"
+                                            data-value="<25"
+                                            class="ps-age-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                        До 25 лет
+                                    </button>
+                                    <button type="button"
+                                            data-value="25-35"
+                                            class="ps-age-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                        25-35 лет
+                                    </button>
+                                    <button type="button"
+                                            data-value="35-45"
+                                            class="ps-age-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                        35-45 лет
+                                    </button>
+                                    <button type="button"
+                                            data-value="45-55"
+                                            class="ps-age-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                        45-55 лет
+                                    </button>
+                                    <button type="button"
+                                            data-value=">55"
+                                            class="ps-age-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                        От 55 лет
+                                    </button>
+                                </div>
+
+                                <!-- Скрытые поля, которые будут отправлены на сервер при submit -->
+                                <!-- (имя - список, Django получит request.POST.getlist('preferred_ps_age')) -->
+                                <div id="ps-age-hidden-inputs" class="hidden">
+                                    <!-- JS будет добавлять/удалять input type="hidden" name="preferred_ps_age" value="<25|25-35|35-45|45-55|>55" -->
+                                </div>
+                            </div>
+
                             <!-- ========== МЕТОДЫ: используем grid для 2-3 колонок ========== -->
                             <div id="methods-container"
                                  data-save-url="{% url 'users:api:save-methods' %}"
                                  data-csrf-token="{{ csrf_token }}"
-                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-gray-100 shadow-sm p-4">
+                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
 
                                 <label class="block mb-2 text-base font-medium text-indigo-900">
                                     <strong>Психотерапевтический подход</strong>
@@ -362,6 +403,7 @@
     window.HAS_PREFERENCES = {{ has_preferences|yesno:"true,false" }};
     window.PREFERRED_TOPIC_TYPE = "{{ preferred_topic_type }}";
     window.PREFERRED_GENDER = {{ preferred_ps_gender|safe }};
+    window.PREFERRED_AGE = {{ preferred_ps_age|safe }};
 </script>
 
 <!-- Передаем в JS URL_API и CSRF-токен для автосохранения настроек -->
@@ -369,6 +411,7 @@
     window.API_SAVE_HAS_PREFS = "{% url 'users:api:save-has-preferences' %}";
     window.API_SAVE_PREFERRED_TOPIC_TYPE = "{% url 'users:api:save-preferred-topic-type' %}"
     window.API_SAVE_PREFERRED_GENDER = "{% url 'users:api:save-preferred-gender' %}"
+    window.API_SAVE_PREFERRED_AGE = "{% url 'users:api:save-preferred-age' %}"
     window.CSRF_TOKEN = "{{ csrf_token }}";
 </script>
 

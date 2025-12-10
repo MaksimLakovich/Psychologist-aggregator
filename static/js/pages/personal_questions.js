@@ -8,6 +8,7 @@ import { initAutosavePreferredTopicType } from "../modules/autosave_topic_type.j
 import { initAutosaveTopics } from "../modules/autosave_topics.js"
 import { initToggleTopicBlocks } from "../modules/toggle_topic_blocks.js";
 import { initAutosavePreferredGender } from "../modules/autosave_gender.js"
+import { initAutosavePreferredAge } from "../modules/autosave_age.js"
 
 document.addEventListener("DOMContentLoaded", () => {
     // безопасно получаем опции из контейнера (data-attributes) - для METHOD
@@ -97,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
         csrfToken: methodsCsrfToken || window.CSRF_TOKEN,
     });
 
-    // 10. Логика работы МНОЖЕСТВЕННОГО выбора доступных опций (например, для выбора пола: "Мужчина" / "Женщина")
+    // 10. Логика работы МНОЖЕСТВЕННОГО выбора доступных опций для выбора ПОЛА: "Мужчина" / "Женщина"
     initMultiToggle({
         containerSelector: "#ps-gender-block",
         buttonSelector: ".ps-gender-btn",
@@ -111,6 +112,24 @@ document.addEventListener("DOMContentLoaded", () => {
         containerSelector: "#ps-gender-block",
         hiddenInputsSelector: "#ps-gender-hidden-inputs input",
         saveUrl: window.API_SAVE_PREFERRED_GENDER,
+        csrfToken: window.CSRF_TOKEN,
+        debounceMs: 500,
+    })
+
+    // 12. Логика работы МНОЖЕСТВЕННОГО выбора доступных опций для выбора ВОЗРАСТА: "От 25 до 35" / "От 55" / и так далее
+    initMultiToggle({
+        containerSelector: "#ps-age-block",
+        buttonSelector: ".ps-age-btn",
+        hiddenInputsContainerSelector: "#ps-age-hidden-inputs",
+        inputName: "preferred_ps_age",
+        initialValues: window.PREFERRED_AGE || []
+    });
+
+    // 13. Автосохранение выбранных значений "preferred_ps_age" в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
+    initAutosavePreferredAge({
+        containerSelector: "#ps-age-block",
+        hiddenInputsSelector: "#ps-age-hidden-inputs input",
+        saveUrl: window.API_SAVE_PREFERRED_AGE,
         csrfToken: window.CSRF_TOKEN,
         debounceMs: 500,
     })

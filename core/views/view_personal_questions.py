@@ -20,6 +20,7 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
             - requested_topics;
             - has_preferences;
             - preferred_ps_gender;
+            - preferred_ps_age;
             - preferred_methods.
         Вызывается автоматически FormView при создании формы."""
         initial = super().get_initial()
@@ -42,7 +43,10 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
         # 4) preferred_ps_gender
         initial["preferred_ps_gender"] = profile.preferred_ps_gender
 
-        # 5) preferred_methods
+        # 5) preferred_ps_age
+        initial["preferred_ps_age"] = profile.preferred_ps_age
+
+        # 6) preferred_methods
         try:
             selected = profile.preferred_methods.values_list("id", flat=True)
             initial["preferred_methods"] = list(selected)
@@ -103,7 +107,10 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
         # 4) preferred_ps_gender
         context["preferred_ps_gender"] = form.initial.get("preferred_ps_gender", [])
 
-        # 5) preferred_methods (для шаблона превращаем PK методов в строки, чтобы удобнее работать в JS)
+        # 5) preferred_ps_age
+        context["preferred_ps_age"] = form.initial.get("preferred_ps_age", [])
+
+        # 6) preferred_methods (для шаблона превращаем PK методов в строки, чтобы удобнее работать в JS)
         context["methods"] = Method.objects.all().order_by("name")
         context["selected_methods"] = [
             str(pk) for pk in form.initial.get("preferred_methods", [])
@@ -130,7 +137,10 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
         # 4) preferred_ps_gender
         profile.preferred_ps_gender = form.cleaned_data.get("preferred_ps_gender") or []
 
-        # 5) preferred_methods
+        # 5) preferred_ps_age
+        profile.preferred_ps_age = form.cleaned_data.get("preferred_ps_age") or []
+
+        # 6) preferred_methods
         selected_methods = form.cleaned_data["preferred_methods"]
         profile.preferred_methods.set(selected_methods)
 
