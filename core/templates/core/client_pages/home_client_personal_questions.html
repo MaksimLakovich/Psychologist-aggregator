@@ -39,16 +39,18 @@
 
                         <div class="hidden h-1 w-8 shrink-0 rounded-full bg-indigo-700 md:block xl:w-16"></div>
 
-                        <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                            <svg class="h-8 w-8 text-indigo-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                 width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                      stroke-width="2.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                            </svg>
-                            <p class="text-base font-medium leading-tight text-indigo-700">
-                                <strong>Личные вопросы</strong>
-                            </p>
-                        </li>
+                        <a href="{% url 'core:client_personal_questions_page' %}" class="flex mr-4">
+                            <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                                <svg class="h-8 w-8 text-indigo-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                     width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                          stroke-width="2.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                </svg>
+                                <p class="text-base font-medium leading-tight text-indigo-700">
+                                    <strong>Личные вопросы</strong>
+                                </p>
+                            </li>
+                        </a>
 
                         <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
 
@@ -149,15 +151,15 @@
 
                                 {% for group_name, items in topics_by_type.Индивидуальная.items %}
 
-                                <div class="mb-4">
+                                <div class="topic-group mb-4">
 
                                     <p class="block mb-2 text-base font-medium text-indigo-900">
                                         <strong>{{ group_name }}</strong>
                                     </p>
-                                    <div class="topics-group grid grid-cols-1 sm:grid-cols-2"
-                                         data-group="{{ group_name }}">
+
+                                    <div class="topics-group grid grid-cols-1 sm:grid-cols-2">
                                         {% for topic in items %}
-                                        <label class="flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 transition">
+                                        <label class="topic-item flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 transition">
                                             <input
                                                     type="checkbox"
                                                     name="requested_topics"
@@ -172,13 +174,14 @@
                                         {% endfor %}
                                     </div>
 
-                                    <!-- Кнопка "Показать еще" -->
-                                    <button type="button"
+                                    <button
+                                            type="button"
                                             class="show-more-topics hidden mt-1 text-sm font-medium text-indigo-700">
                                         Ещё
                                     </button>
 
                                 </div>
+
 
                                 {% endfor %}
 
@@ -190,15 +193,15 @@
 
                                 {% for group_name, items in topics_by_type.Парная.items %}
 
-                                <div class="mb-4">
+                                <div class="topic-group mb-4">
 
                                     <p class="block mb-2 text-base font-medium text-indigo-900">
                                         <strong>{{ group_name }}</strong>
                                     </p>
-                                    <div class="topics-group grid grid-cols-1 sm:grid-cols-2"
-                                         data-group="{{ group_name }}">
+
+                                    <div class="topics-group grid grid-cols-1 sm:grid-cols-2">
                                         {% for topic in items %}
-                                        <label class="flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 transition">
+                                        <label class="topic-item flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 transition">
                                             <input
                                                     type="checkbox"
                                                     name="requested_topics"
