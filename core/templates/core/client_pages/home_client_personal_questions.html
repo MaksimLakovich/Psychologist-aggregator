@@ -176,7 +176,7 @@
 
                                     <button
                                             type="button"
-                                            class="show-more-topics hidden mt-1 text-sm font-medium text-indigo-700">
+                                            class="show-more-topics hidden mt-2 text-sm font-medium text-indigo-500 hover:text-indigo-900">
                                         Ещё
                                     </button>
 
@@ -218,7 +218,7 @@
 
                                     <!-- Кнопка "Показать еще" -->
                                     <button type="button"
-                                            class="show-more-topics hidden mt-1 text-sm font-medium text-indigo-700">
+                                            class="show-more-topics hidden mt-2 text-sm font-medium text-indigo-500 hover:text-indigo-900">
                                         Ещё
                                     </button>
 
@@ -333,7 +333,7 @@
                                 <button
                                         id="show-more-methods"
                                         type="button"
-                                        class="hidden mt-4 text-sm font-medium text-indigo-700 hover:text-indigo-900">
+                                        class="hidden mt-2 text-sm font-medium text-indigo-500 hover:text-indigo-900">
                                     Ещё
                                 </button>
 
@@ -361,12 +361,14 @@
 <script>
     window.HAS_PREFERENCES = {{ has_preferences|yesno:"true,false" }};
     window.PREFERRED_TOPIC_TYPE = "{{ preferred_topic_type }}";
+    window.PREFERRED_GENDER = {{ preferred_ps_gender|safe }};
 </script>
 
-<!-- Передаем в JS URL_API и CSRF-токен для автосохранения настроек. Сохранение в БД данных со страницы о выбранных предпочитаемых методах и тем (чекбокс) -->
+<!-- Передаем в JS URL_API и CSRF-токен для автосохранения настроек -->
 <script>
     window.API_SAVE_HAS_PREFS = "{% url 'users:api:save-has-preferences' %}";
     window.API_SAVE_PREFERRED_TOPIC_TYPE = "{% url 'users:api:save-preferred-topic-type' %}"
+    window.API_SAVE_PREFERRED_GENDER = "{% url 'users:api:save-preferred-gender' %}"
     window.CSRF_TOKEN = "{{ csrf_token }}";
 </script>
 

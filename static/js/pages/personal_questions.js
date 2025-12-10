@@ -7,6 +7,7 @@ import { initAutosaveHasPreferences } from "../modules/autosave_has_preferences.
 import { initAutosavePreferredTopicType } from "../modules/autosave_topic_type.js"
 import { initAutosaveTopics } from "../modules/autosave_topics.js"
 import { initToggleTopicBlocks } from "../modules/toggle_topic_blocks.js";
+import { initAutosavePreferredGender } from "../modules/autosave_gender.js"
 
 document.addEventListener("DOMContentLoaded", () => {
     // безопасно получаем опции из контейнера (data-attributes) - для METHOD
@@ -102,6 +103,16 @@ document.addEventListener("DOMContentLoaded", () => {
         buttonSelector: ".ps-gender-btn",
         hiddenInputsContainerSelector: "#ps-gender-hidden-inputs",
         inputName: "preferred_ps_gender",
+        initialValues: window.PREFERRED_GENDER || []
+    })
+
+    // 11. Автосохранение выбранных значений "preferred_ps_gender" в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
+    initAutosavePreferredGender({
+        containerSelector: "#ps-gender-block",
+        hiddenInputsSelector: "#ps-gender-hidden-inputs input",
+        saveUrl: window.API_SAVE_PREFERRED_GENDER,
+        csrfToken: window.CSRF_TOKEN,
+        debounceMs: 500,
     })
 
 });

@@ -31,6 +31,7 @@ export function initMultiToggle({
     buttonSelector,
     hiddenInputsContainerSelector,
     inputName,
+    initialValues = []
 }) {
     const container = document.querySelector(containerSelector);
     if (!container) return;
@@ -67,18 +68,27 @@ export function initMultiToggle({
         syncHiddenInputs();
     }
 
-    // apply inactive style initially
+    // Сначала: делаем все кнопки неактивными
     buttons.forEach(btn => {
         removeClasses(btn, ACTIVE_CLASSES);
         addClasses(btn, INACTIVE_CLASSES);
     });
 
-    // attach handler
+    // Затем: восстанавливаем состояние из initialValues
+    buttons.forEach(btn => {
+        if (initialValues.includes(btn.dataset.value)) {
+            addClasses(btn, ACTIVE_CLASSES);
+            removeClasses(btn, INACTIVE_CLASSES);
+        }
+    });
+
+    // Назначаем обработчики
     buttons.forEach(btn => {
         btn.addEventListener("click", () => {
             toggleBtn(btn);
         });
     });
 
+    // Синхронизируем скрытые input'ы с начальными значениями
     syncHiddenInputs();
 }
