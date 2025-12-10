@@ -1,6 +1,7 @@
 from django import forms
 
-from users.constants import PREFERRED_TOPIC_TYPE_CHOICES
+from users.constants import (AGE_BUCKET_CHOICES, GENDER_CHOICES,
+                             PREFERRED_TOPIC_TYPE_CHOICES)
 from users.models import Method, Topic
 
 
@@ -25,6 +26,16 @@ class ClientPersonalQuestionsForm(forms.Form):
     )
     has_preferences = forms.BooleanField(
         required=False
+    )
+    preferred_ps_gender = forms.MultipleChoiceField(
+        choices=GENDER_CHOICES,
+        required=False,
+        widget=forms.MultipleHiddenInput  # в html-шаблоне мы рендерим руками, так что widget не обязателен тут
+    )
+    preferred_ps_age = forms.MultipleChoiceField(
+        choices=AGE_BUCKET_CHOICES,
+        required=False,
+        widget=forms.MultipleHiddenInput  # в html-шаблоне мы рендерим руками, так что widget не обязателен тут
     )
     preferred_methods = forms.ModelMultipleChoiceField(
         queryset=Method.objects.all(),

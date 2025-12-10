@@ -1,4 +1,5 @@
-import { initCollapsibleList } from "../modules/collapsible_list.js";
+import { initCollapsibleList } from "../modules/collapsible_methods_list.js";
+import { initCollapsibleTopicGroups } from "../modules/collapsible_topics_list.js";
 import { initToggleGroup } from "../modules/toggle_group_single_choice.js";
 import { initAutosaveMethods } from "../modules/autosave_methods.js";
 import { initMultiToggle } from "../modules/toggle_group_multi_choice.js"
@@ -6,6 +7,8 @@ import { initAutosaveHasPreferences } from "../modules/autosave_has_preferences.
 import { initAutosavePreferredTopicType } from "../modules/autosave_topic_type.js"
 import { initAutosaveTopics } from "../modules/autosave_topics.js"
 import { initToggleTopicBlocks } from "../modules/toggle_topic_blocks.js";
+import { initAutosavePreferredGender } from "../modules/autosave_gender.js"
+import { initAutosavePreferredAge } from "../modules/autosave_age.js"
 
 document.addEventListener("DOMContentLoaded", () => {
     // безопасно получаем опции из контейнера (data-attributes) - для METHOD
@@ -48,7 +51,10 @@ document.addEventListener("DOMContentLoaded", () => {
         initialValue: window.PREFERRED_TOPIC_TYPE, // берём с сервера
     });
 
-    // 4. Автосохранение выбранных чекбоксом предпочитаемых ТЕМ в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
+    // 4. Логика отображения сгруппированного списка тем с ЧЕКБОКСАМИ (6 по умолчанию + показать еще) - разворачивание/сворачивание справочника
+    initCollapsibleTopicGroups();
+
+    // 5. Автосохранение выбранных чекбоксом предпочитаемых ТЕМ в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
     // инициализация topics - используем topicsSaveUrl
     initAutosaveTopics({
         checkboxSelector: "input[name='requested_topics']",
@@ -56,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
         csrfToken: topicsCsrfToken || window.CSRF_TOKEN,
     });
 
-    // 5. Логика работы переключателя ИЛИ/ИЛИ (например, "Все равно" / "Есть пожелания" где показываем набор предпочтения для выбора или нет)
+    // 6. Логика работы переключателя ИЛИ/ИЛИ (например, "Все равно" / "Есть пожелания" где показываем набор предпочтения для выбора или нет)
     initToggleGroup({
         firstBtn: "#btn-any",
         secondBtn: "#btn-has-prefs",
@@ -68,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
         showBlockWhen: "second",
     });
 
-    // 6. Автосохранение выбранного значения "has_preferences" в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
+    // 7. Автосохранение выбранного значения "has_preferences" в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
     initAutosaveHasPreferences({
         saveUrl: window.API_SAVE_HAS_PREFS,
         csrfToken: window.CSRF_TOKEN,
@@ -77,14 +83,14 @@ document.addEventListener("DOMContentLoaded", () => {
         debounceMs: 500,
     });
 
-    // 7. Логика отображения списка с ЧЕКБОКСАМИ (6 по умолчанию + показать еще) - разворачивание/сворачивание справочника
+    // 8. Логика отображения списка методов с ЧЕКБОКСАМИ (6 по умолчанию + показать еще) - разворачивание/сворачивание справочника
     initCollapsibleList({
         containerSelector: "#methods-grid",
         buttonSelector: "#show-more-methods",
         visibleCount: 6,
     });
 
-    // 8. Автосохранение выбранных чекбоксом предпочитаемых МЕТОДОВ в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
+    // 9. Автосохранение выбранных чекбоксом предпочитаемых МЕТОДОВ в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
     // инициализация methods - используем methodsSaveUrl
     initAutosaveMethods({
         checkboxSelector: "input[name='preferred_methods']",
@@ -92,12 +98,40 @@ document.addEventListener("DOMContentLoaded", () => {
         csrfToken: methodsCsrfToken || window.CSRF_TOKEN,
     });
 
-    // 9. Логика работы МНОЖЕСТВЕННОГО выбора доступных опций (например, для выбора пола: "Мужчина" / "Женщина")
+    // 10. Логика работы МНОЖЕСТВЕННОГО выбора доступных опций для выбора ПОЛА: "Мужчина" / "Женщина"
     initMultiToggle({
         containerSelector: "#ps-gender-block",
         buttonSelector: ".ps-gender-btn",
         hiddenInputsContainerSelector: "#ps-gender-hidden-inputs",
         inputName: "preferred_ps_gender",
+        initialValues: window.PREFERRED_GENDER || []
+    })
+
+    // 11. Автосохранение выбранных значений "preferred_ps_gender" в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
+    initAutosavePreferredGender({
+        containerSelector: "#ps-gender-block",
+        hiddenInputsSelector: "#ps-gender-hidden-inputs input",
+        saveUrl: window.API_SAVE_PREFERRED_GENDER,
+        csrfToken: window.CSRF_TOKEN,
+        debounceMs: 500,
+    })
+
+    // 12. Логика работы МНОЖЕСТВЕННОГО выбора доступных опций для выбора ВОЗРАСТА: "От 25 до 35" / "От 55" / и так далее
+    initMultiToggle({
+        containerSelector: "#ps-age-block",
+        buttonSelector: ".ps-age-btn",
+        hiddenInputsContainerSelector: "#ps-age-hidden-inputs",
+        inputName: "preferred_ps_age",
+        initialValues: window.PREFERRED_AGE || []
+    });
+
+    // 13. Автосохранение выбранных значений "preferred_ps_age" в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
+    initAutosavePreferredAge({
+        containerSelector: "#ps-age-block",
+        hiddenInputsSelector: "#ps-age-hidden-inputs input",
+        saveUrl: window.API_SAVE_PREFERRED_AGE,
+        csrfToken: window.CSRF_TOKEN,
+        debounceMs: 500,
     })
 
 });
