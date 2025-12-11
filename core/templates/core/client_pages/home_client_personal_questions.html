@@ -383,6 +383,41 @@
                     </div>
                 </div>
 
+                <!-- ========== Блок 4 ========== -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+                    <!-- Левая колонка -->
+                    <div class="md:col-span-3 pt-3">
+                        <h2 class="text-lg font-semibold text-gray-900">Предпочтение по времени сессии</h2>
+                    </div>
+
+                    <!-- Правая колонка -->
+                    <div class="md:col-span-9 space-y-6 pt-3">
+
+                        <!-- ========== Переключатели ЛЮБОЕ / КОНКРЕТНОЕ ========== -->
+                        <div class="flex gap-3">
+                            <button id="btn-any-time"
+                                    type="button"
+                                    class="px-4 py-2 rounded-lg border text-sm font-medium">
+                                Любое
+                            </button>
+                            <button id="btn-certain-time"
+                                    type="button"
+                                    class="px-4 py-2 rounded-lg border text-sm font-medium">
+                                Конкретное
+                            </button>
+                        </div>
+                        <!-- ВАЖНО: скрытое поле, которое и отправляется при submit. -->
+                        <!-- Это нужно чтоб при загрузке страницы значение hidden-поля совпадало с данными из БД. -->
+                        <input
+                                id="input-preferred-time"
+                                type="hidden"
+                                name="preferred_time"
+                                value="{{ preferred_ttime }}"
+                        >
+                    </div>
+                </div>
+
                 <!-- Кнопка -->
                 <div class="pt-6 pb-24 flex justify-center">
                     <button type="submit" class="px-10 py-3.5 rounded-xl bg-indigo-700 text-white font-medium
