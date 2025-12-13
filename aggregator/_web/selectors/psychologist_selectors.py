@@ -1,16 +1,17 @@
-# def filter_by_topic_type(...)
-# def filter_by_requested_topics(...)
-# def filter_by_preferences(...)
-# def calculate_match_score(...) ← коэффициент совпадений (методы + темы)
-# def build_queryset(...)
-# def match_psychologists(client_profile) ← единая входная функция
-
-# preferred_topic_type = forms.ChoiceField(choices=PREFERRED_TOPIC_TYPE_CHOICES,)
-# requested_topics = forms.ModelMultipleChoiceField(queryset=Topic.objects.all(),)
 # has_preferences = forms.BooleanField(required=False)
 # preferred_ps_gender = forms.MultipleChoiceField(choices=GENDER_CHOICES,)
 # preferred_ps_age = forms.MultipleChoiceField(choices=AGE_BUCKET_CHOICES,)
 # preferred_methods = forms.ModelMultipleChoiceField(queryset=Method.objects.all(),)
+
+
+# base_queryset()
+# get_topic_ids_by_type(topic_type) — вернуть ID тем нужного типа
+# filter_by_topic_type(qs, topic_type)
+# annotate_topic_matches(qs, topic_ids)
+# annotate_method_matches(qs, method_ids)
+# apply_gender_filter(qs, genders)
+# apply_age_filter(qs, age_buckets)
+# finalize_with_score(qs, requested_count, method_count, weights) — аннотирует combined_score и сортирует.
 
 
 from django.db.models import Count, IntegerField, Q, Value
@@ -63,6 +64,33 @@ def filter_by_topic_type(qs, topic_type):
     return qs.filter(topics__type=mapped_topic_type).distinct()
 
 
+def annotate_type_topic_count(qs, topic_type):
+    """Метод аннотирует поле type_topics_count. Данные о том сколько у каждого психолога указано в его профиле тем
+    из указанного клиентом *Вида консультации*: individual / couple (полезно когда requested_topics пуст).
+
+    Для инфо:
+        1) annotate() добавляет к каждому объекту из QuerySet дополнительное вычисляемое поле (type_topics_count),
+        полученное с помощью агрегации/выражения.
+        2) filter=Q(topics__type=topic_type) - это фильтр прямо внутри Count (новая, удобная возможность Django).
+        Он говорит: считай только те связанные Topic, у которых type == topic_type.
+        Это позволяет посчитать, например, сколько у психолога "Индивидуальных" тем, не выполняя отдельный
+        фильтр перед всем QuerySet.
+        3) distinct=True - необходим, чтобы исключить дубли при джойнах (иногда при сложных связях одна и та же
+        тема может попасть в подсчет несколько раз из-за дополнительных джойнов). distinct гарантирует,
+        что считаем уникальные связанные темы."""
+
+    if not topic_type:
+        return qs.annotate(
+            type_topics_count=Value(0, output_field=IntegerField())
+        )
+    return qs.annotate(
+        type_topics_count=Coalesce(
+            Count("topics", filter=Q(topics__type=topic_type), distinct=True),
+            Value(0),
+        )
+    )
+
+
 def annotate_topic_matches(qs, requested_topic_ids):
     """Метод аннотирует поле matched_topics_count, где подсчитывает количество совпадающих тем из
     профиля психолога (topics) с темами из профиля клиента (requested_topics).
@@ -87,32 +115,5 @@ def annotate_topic_matches(qs, requested_topic_ids):
         matched_topics_count=Coalesce(
             Count("topics", filter=Q(topics__in=requested_topic_ids), distinct=True),
             Value(0)
-        )
-    )
-
-
-def annotate_type_topic_count(qs, topic_type):
-    """Метод аннотирует поле type_topics_count. Данные о том сколько у каждого психолога указано в его профиле тем
-    из указанного клиентом *Вида консультации*: individual / couple (полезно когда requested_topics пуст).
-
-    Для инфо:
-        1) annotate() добавляет к каждому объекту из QuerySet дополнительное вычисляемое поле (type_topics_count),
-        полученное с помощью агрегации/выражения.
-        2) filter=Q(topics__type=topic_type) - это фильтр прямо внутри Count (новая, удобная возможность Django).
-        Он говорит: считай только те связанные Topic, у которых type == topic_type.
-        Это позволяет посчитать, например, сколько у психолога "Индивидуальных" тем, не выполняя отдельный
-        фильтр перед всем QuerySet.
-        3) distinct=True - необходим, чтобы исключить дубли при джойнах (иногда при сложных связях одна и та же
-        тема может попасть в подсчет несколько раз из-за дополнительных джойнов). distinct гарантирует,
-        что считаем уникальные связанные темы."""
-
-    if not topic_type:
-        return qs.annotate(
-            type_topics_count=Value(0, output_field=IntegerField())
-        )
-    return qs.annotate(
-        type_topics_count=Coalesce(
-            Count("topics", filter=Q(topics__type=topic_type), distinct=True),
-            Value(0),
         )
     )
