@@ -1,3 +1,10 @@
+// ШАГ 1: Используем helper в autosave-файлах чтоб при срабатывании данного автосохранения срабатывал и
+// client_profile_events.js, который отвечает за запуск фильтрации психологов
+
+import { dispatchClientProfileUpdated } from "../events/client_profile_events.js";
+
+// Шаг 2: Автосохранение значений предпочитаемых тем.
+
 function debounce(fn, wait = 500) {
     let t;
     return (...args) => {
@@ -30,9 +37,10 @@ export function initAutosaveTopics({ checkboxSelector, saveUrl, csrfToken, debou
             },
             body: params.toString(),
         })
-        .then(r => {
-            if (!r.ok) throw new Error(`HTTP ${r.status}`);
-            return r.json();
+        .then(response => {
+            if (!response.ok) throw new Error("Save failed");
+            dispatchClientProfileUpdated();
+            return response.json().catch(() => ({}));
         })
         .then(data => {
             // TODO: вместо console.log - показать маленький UI-тултип/иконку "Сохранено"

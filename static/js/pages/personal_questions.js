@@ -9,6 +9,7 @@ import { initAutosaveTopics } from "../modules/autosave_topics.js"
 import { initToggleTopicBlocks } from "../modules/toggle_topic_blocks.js";
 import { initAutosavePreferredGender } from "../modules/autosave_gender.js"
 import { initAutosavePreferredAge } from "../modules/autosave_age.js"
+import { initMatchPsychologists } from "../modules/match_psychologists.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     // безопасно получаем опции из контейнера (data-attributes) - для METHOD
@@ -133,5 +134,8 @@ document.addEventListener("DOMContentLoaded", () => {
         csrfToken: window.CSRF_TOKEN,
         debounceMs: 500,
     })
+
+    // 14. Слушаем изменения на странице и, при их наличии, автоматически сразу запускаем процесс фильтрации психолога по указанным клиентом параметрам
+    initMatchPsychologists();
 
 });
