@@ -1,4 +1,9 @@
-// Автосохранение выбора пола психолога.
+// ШАГ 1: Используем helper в autosave-файлах чтоб при срабатывании данного автосохранения срабатывал и
+// client_profile_events.js, который отвечает за запуск фильтрации психологов
+
+import { dispatchClientProfileUpdated } from "../events/client_profile_events.js";
+
+// Шаг 2: Автосохранение выбора пола психолога.
 
 function debounce(fn, wait = 500) {
     let t = null;
@@ -49,9 +54,10 @@ export function initAutosavePreferredGender({
             },
             body: params.toString(),
         })
-            .then((r) => {
-                if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                return r.json().catch(() => ({}));
+            .then(response => {
+                if (!response.ok) throw new Error("Save failed");
+                dispatchClientProfileUpdated();
+                return response.json().catch(() => ({}));
             })
             .then((data) => {
                 console.log("Автосохранение preferred_ps_gender:", data);
