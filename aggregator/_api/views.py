@@ -1,12 +1,18 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Prefetch
+from django.http import JsonResponse
+from django.views import View
 from django_filters import rest_framework as filters
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
 from aggregator._api.filters import PsychologistFilter
 from aggregator._api.serializers import PublicPsychologistListSerializer
+from aggregator._web.services.filter_service import \
+    match_psychologists_by_topics
 from aggregator.paginators import PsychologistCatalogPagination
 from users.models import Education, PsychologistProfile
+from users.permissions import IsProfileOwnerOrAdminMixin
 
 
 class PublicPsychologistListView(generics.ListAPIView):
@@ -48,3 +54,33 @@ class PublicPsychologistListView(generics.ListAPIView):
             # Временно сортируем по id (позже можно добавить любое другой ранжирование, которое реализуем)
             .order_by("id")
         )
+
+
+class MatchPsychologistsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
+    """Класс-контроллер на основе View для автоматического запуска фильтрации психологов без кнопки "Далее"
+    по указанным клиентом интересующих его параметрам (темы, методы, возраст, пол), как это делают
+    профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint."""
+
+    def get(self, request, *args, **kwargs):
+        """Метод для запуска процесса фильтрации."""
+        user = request.user
+
+        try:
+            client_profile = user.client_profile
+        except Exception:
+            return JsonResponse({"error": "no_client_profile"}, status=400)
+
+        qs = match_psychologists_by_topics(client_profile)
+        # JsonResponse не умеет сериализовать QuerySet, поэтому нужно из QuerySet сделать подходящий
+        # список словарей, который сами сформируем, например:
+        data = [
+            {
+                "photo": ps.photo.url if ps.photo else "/static/images/menu/user-circle.svg",
+                "email": ps.user.email,
+                "topic_score": ps.topic_score,
+                "matched_topics_count": ps.matched_topics_count,
+            }
+            for ps in qs
+        ]
+
+        return JsonResponse({"items": data})

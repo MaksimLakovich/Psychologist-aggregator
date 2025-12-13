@@ -1,3 +1,8 @@
+// ШАГ 1: Используем helper в autosave-файлах чтоб при срабатывании данного автосохранения срабатывал и
+// client_profile_events.js, который отвечает за запуск фильтрации психологов
+
+import { dispatchClientProfileUpdated } from "../events/client_profile_events.js";
+
 /**
  * Простая утилита debounce - откладывает выполнение fn до тех пор,
  * пока пользователь не прекратит действие (например, быстро нажимать кнопки).
@@ -11,7 +16,7 @@ function debounce(fn, wait = 500) {
 }
 
 /**
- * Автосохранение значения переключателя "has_preferences".
+ * Шаг 2: Автосохранение значения переключателя "has_preferences".
  *
  * Ожидает конфигурацию:
  * {
@@ -62,11 +67,10 @@ export function initAutosaveHasPreferences({
             },
             body: params.toString(),
         })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                return response.json();
+            .then(response => {
+                if (!response.ok) throw new Error("Save failed");
+                dispatchClientProfileUpdated();
+                return response.json().catch(() => ({}));
             })
             .then((data) => {
                 // TODO: вместо console.log - показать маленький UI-тултип/иконку "Сохранено"
