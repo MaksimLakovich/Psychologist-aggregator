@@ -47,3 +47,14 @@ def method_score(qs, requested_count: int):
         )
 
     return qs
+
+
+def apply_final_ordering(qs):
+    """Финальная сортировка психологов. Логика:
+        1) topic_score - главный критерий;
+        2) method_score - вторичный критерий (внутри одинакового topic_score)."""
+
+    return qs.order_by(
+        F("topic_score").desc(nulls_last=True),
+        F("method_score").desc(nulls_last=True),
+    )
