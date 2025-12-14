@@ -1,22 +1,7 @@
-# has_preferences = forms.BooleanField(required=False)
-# preferred_ps_gender = forms.MultipleChoiceField(choices=GENDER_CHOICES,)
-# preferred_ps_age = forms.MultipleChoiceField(choices=AGE_BUCKET_CHOICES,)
-# preferred_methods = forms.ModelMultipleChoiceField(queryset=Method.objects.all(),)
-
-
-# base_queryset()
-# get_topic_ids_by_type(topic_type) — вернуть ID тем нужного типа
-# filter_by_topic_type(qs, topic_type)
-# annotate_topic_matches(qs, topic_ids)
-# annotate_method_matches(qs, method_ids)
-# apply_gender_filter(qs, genders)
-# apply_age_filter(qs, age_buckets)
-# finalize_with_score(qs, requested_count, method_count, weights) — аннотирует combined_score и сортирует.
-
-
 from django.db.models import Count, IntegerField, Q, Value
 from django.db.models.functions import Coalesce
 
+from aggregator._web.services.age_bucket_mapping import AGE_BUCKET_FILTERS
 from aggregator._web.services.topic_type_mapping import \
     CLIENT_TO_TOPIC_TYPE_MAP
 from users.models import PsychologistProfile
@@ -117,3 +102,76 @@ def annotate_topic_matches(qs, requested_topic_ids):
             Value(0)
         )
     )
+
+
+def filter_by_gender(qs, client_profile):
+    """Метод с жесткой фильтрацией по полу психолога (мужчина/женщина)."""
+
+    if not client_profile.preferred_ps_gender:
+        return qs
+
+    qs = qs.filter(gender__in=client_profile.preferred_ps_gender)
+
+    return qs
+
+
+def filter_by_age(qs, client_profile):
+    """Метод с жесткой фильтрацией по возрасту психолога.
+    Используется AGE_BUCKET_FILTERS - явный mapping-слой (адаптер) между полем BUCKET и тем,
+    какие значения (числа) в него входят. Например, в "25-35" значения от >=25, но меньше 35.
+
+    Пояснение финальной строки "age_q = age_q | bucket_q" шаг за шагом:
+
+    1) Представим, что первый bucket который выбрал клиент - ("25-35"), тогда:
+        bucket_q = Q(age__gte=25, age__lt=35)
+        age_q = Q() | bucket_q
+            то есть:
+                берем пустой изначальный Q() и добавляем "условие OR (или)" - получаем результат с ОДНИМ условием:
+                    age_q == Q(age__gte=25, age__lt=35)
+
+    2) Представим, что второй bucket который выбрал клиент - ("45-55"), тогда:
+        bucket_q = Q(age__gte=45, age__lt=55)
+        age_q = (
+            Q(age__gte=25, age__lt=35)
+            |
+            Q(age__gte=45, age__lt=55)
+        )
+            то есть:
+                берем наш Q() с первым условием и добавляем "условие OR (или)" - получаем результат с ДВУМЯ условиями.
+
+    3) Получаем SQL-логику:
+        (age >= 25 AND age < 35)
+        OR
+        (age >= 45 AND age < 55)"""
+
+    selected_buckets = client_profile.preferred_ps_age
+
+    if not selected_buckets:
+        return qs
+
+    # Q() - это объект Django для построения сложных условий WHERE. Пустой Q() = “ничего не фильтруем”, то есть
+    # создаю пустое условие, в которое буду постепенно добавлять правила потом.
+    age_q = Q()
+
+    for bucket in selected_buckets:
+        rule = AGE_BUCKET_FILTERS.get(bucket)  # Берем описание диапазона для каждого bucket-а.
+        if not rule:
+            continue
+
+        # Создаем условие для ОДНОГО bucket:
+        # 1) bucket_q - условия внутри одного диапазона
+        # 2) age_q - объединяет все диапазоны
+
+        bucket_q = Q()
+        if "gte" in rule:  # gte - больше и равно
+            bucket_q &= Q(user__age__gte=rule["gte"])
+        if "lt" in rule:  # lt - меньше
+            bucket_q &= Q(user__age__lt=rule["lt"])
+
+        age_q = age_q | bucket_q  # Детальное пояснение в docstrings
+
+    return qs.filter(age_q)
+
+
+# annotate_method_matches(qs, method_ids)
+# finalize_with_score(qs, requested_count, method_count, weights) — аннотирует combined_score и сортирует.

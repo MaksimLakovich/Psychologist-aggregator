@@ -2,7 +2,7 @@ from django.db.models import F
 
 from aggregator._web.selectors.psychologist_selectors import (
     annotate_topic_matches, annotate_type_topic_count, base_queryset,
-    filter_by_topic_type)
+    filter_by_age, filter_by_gender, filter_by_topic_type)
 from aggregator._web.services.scoring import topic_score
 from aggregator._web.services.topic_type_mapping import \
     CLIENT_TO_TOPIC_TYPE_MAP
@@ -25,7 +25,7 @@ def match_psychologists_by_topics(client_profile):
 
     requested_ids = list(requested_topics_qs.values_list("id", flat=True))
 
-    # Шаг 1: если клиент указал хотя бы одну конкретную тему, то:
+    # Шаг 1: Если клиент указал хотя бы одну конкретную тему, то:
     if requested_ids:
         # 1) сначала ограничим психологов, у которых есть хотя бы одна тема из указанного типа (individual"/"couple)
         qs = filter_by_topic_type(qs, preferred_type)
@@ -38,7 +38,7 @@ def match_psychologists_by_topics(client_profile):
         # 5) сортируем по score desc (дальше можно расширять когда реализуем reviews с рейтингами или subscription)
         qs = qs.order_by(F("topic_score").desc(nulls_last=True))
 
-    # Шаг 2: если клиент не указал ни одной темы, то берем всех психологов, у которых есть любые темы из этого типа
+    # Шаг 2: Если клиент не указал ни одной темы, то берем всех психологов, у которых есть любые темы из этого типа
     else:
         qs = filter_by_topic_type(qs, preferred_type)
         # аннотируем сколько у них тем этого типа - для сортировки/информации
@@ -54,6 +54,14 @@ def match_psychologists_by_topics(client_profile):
     print("requested_ids:", requested_ids)
     print("base qs count:", base_queryset().count())
     print("final qs count:", qs.count())
+
+    # Шаг 3: Если клиент указал, что нет дополнительных предпочтений/пожеланий
+    if not client_profile.has_preferences:
+        return qs
+
+    # Шаг 4: Если клиент указал, что есть доп пожелания - фильтруем по полу, возраста и методам
+    qs = filter_by_gender(qs, client_profile)
+    qs = filter_by_age(qs, client_profile)
 
     return qs
 
@@ -132,3 +140,33 @@ def match_psychologists_by_topics(client_profile):
 #     # 6. Убираем дубликаты, т.к. было M2M фильтрование
 #     # --------------------------------------
 #     return qs.distinct()
+
+
+# def match_psychologists(client_profile, page=1, per_page=20):
+#     qs = selectors.base_queryset()
+#     topic_ids = selectors.get_topic_ids_by_type(client_profile.preferred_topic_type)
+#     # всегда фильтруем по type
+#     qs = selectors.filter_by_topic_type(qs, client_profile.preferred_topic_type)
+#
+#     if client_profile.requested_topics.exists():
+#         requested_ids = list(client_profile.requested_topics.values_list('id', flat=True))
+#         qs = selectors.annotate_topic_matches(qs, requested_ids)
+#         qs = qs.filter(matched_topics_count__gt=0)
+#     else:
+#         requested_ids = []
+#
+#     method_ids = list(client_profile.preferred_methods.values_list('id', flat=True))
+#     if method_ids:
+#         qs = selectors.annotate_method_matches(qs, method_ids)
+#
+#     if client_profile.has_preferences:
+#         if client_profile.preferred_ps_gender:
+#             qs = selectors.apply_gender_filter(qs, client_profile.preferred_ps_gender)
+#         if client_profile.preferred_ps_age:
+#             qs = selectors.apply_age_filter(qs, client_profile.preferred_ps_age)
+#
+#     # finalize: annotate combined_score (either in DB or get counts and compute in Python)
+#     qs = selectors.finalize_with_score(
+#         qs, requested_count=len(requested_ids), method_count=len(method_ids), weights=...)
+#     # paginate and return
+#     return paginate_and_serialize(qs, page, per_page)
