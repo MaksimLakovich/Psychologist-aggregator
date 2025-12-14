@@ -173,5 +173,29 @@ def filter_by_age(qs, client_profile):
     return qs.filter(age_q)
 
 
-# annotate_method_matches(qs, method_ids)
-# finalize_with_score(qs, requested_count, method_count, weights) — аннотирует combined_score и сортирует.
+def annotate_method_matches(qs, preferred_method_ids):
+    """Метод аннотирует поле matched_methods_count, где подсчитывает количество совпадающих методов из
+    профиля психолога (methods) с методами из профиля клиента (preferred_methods).
+
+    Для инфо:
+        1) annotate() добавляет к каждому объекту из QuerySet дополнительное вычисляемое поле (matched_methods_count),
+        полученное с помощью агрегации/выражения.
+        2) filter=Q(methods__in=preferred_method_ids) - это фильтр прямо внутри Count (удобная возможность Django).
+        Он говорит: считай только те связанные Methods, которые есть в preferred_methods.
+        Это позволяет посчитать, сколько у психолога есть интересующих клиента методов, не выполняя отдельный
+        фильтр перед всем QuerySet.
+        3) distinct=True - необходим, чтобы исключить дубли при джойнах (иногда при сложных связях один и тот же
+        метод может попасть в подсчет несколько раз из-за дополнительных джойнов). distinct гарантирует,
+        что считаем уникальные связанные методы."""
+
+    if not preferred_method_ids:
+        # гарантируем наличие поля, равного 0 (если у психолога нет методов то вернется null, а мы его заменим на 0)
+        return qs.annotate(
+            matched_methods_count=Value(0, output_field=IntegerField())
+        )
+    return qs.annotate(
+        matched_methods_count=Coalesce(
+            Count("methods", filter=Q(methods__in=preferred_method_ids), distinct=True),
+            Value(0)
+        )
+    )

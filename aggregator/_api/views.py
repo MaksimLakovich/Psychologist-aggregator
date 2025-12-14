@@ -8,8 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from aggregator._api.filters import PsychologistFilter
 from aggregator._api.serializers import PublicPsychologistListSerializer
-from aggregator._web.services.filter_service import \
-    match_psychologists_by_topics
+from aggregator._web.services.filter_service import match_psychologists
 from aggregator.paginators import PsychologistCatalogPagination
 from users.models import Education, PsychologistProfile
 from users.permissions import IsProfileOwnerOrAdminMixin
@@ -70,7 +69,7 @@ class MatchPsychologistsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
         except Exception:
             return JsonResponse({"error": "no_client_profile"}, status=400)
 
-        qs = match_psychologists_by_topics(client_profile)
+        qs = match_psychologists(client_profile)
         # JsonResponse не умеет сериализовать QuerySet, поэтому нужно из QuerySet сделать подходящий
         # список словарей, который сами сформируем, например:
         data = [
@@ -79,6 +78,8 @@ class MatchPsychologistsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
                 "email": ps.user.email,
                 "topic_score": ps.topic_score,
                 "matched_topics_count": ps.matched_topics_count,
+                "method_score": ps.method_score,
+                "matched_methods_count": ps.matched_methods_count
             }
             for ps in qs
         ]
