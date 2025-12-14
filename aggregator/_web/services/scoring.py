@@ -23,3 +23,27 @@ def topic_score(qs, requested_count: int):
         )
 
     return qs
+
+
+def method_score(qs, requested_count: int):
+    """Метод аннотирует поле method_score (коэффициент совпадения методов).
+
+    :param qs: Входящие данные с количеством совпадений в методах (matched_methods_count).
+    :param requested_count: Количество выбранных клиентом методов.
+    :return: Исходящие данные с рассчитанными коэффициентом совпадений на основе количества совпадений."""
+
+    if requested_count and requested_count > 0:
+        # Рассчитываем method_score = matched_methods_count / requested_count
+        method_score_expr = ExpressionWrapper(
+            F("matched_methods_count") * 1.0 / Value(requested_count), output_field=FloatField()
+        )
+        # Аннотируем method_score в qs для каждого психолога
+        qs = qs.annotate(
+            method_score=Coalesce(method_score_expr, Value(0.0, output_field=FloatField()))
+        )
+    else:
+        qs = qs.annotate(
+            method_score=Value(0.0, output_field=FloatField())
+        )
+
+    return qs
