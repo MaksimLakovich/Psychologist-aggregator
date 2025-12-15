@@ -90,7 +90,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                     <!-- Левая колонка -->
                     <div class="md:col-span-3">
-                        <h2 class="text-lg font-semibold text-gray-900">Общие вопросы</h2>
+                        <h2 class="text-xl font-semibold text-gray-900">Общие вопросы</h2>
                     </div>
 
                     <!-- Правая колонка -->
@@ -98,26 +98,26 @@
 
                         <!-- Имя -->
                         <div>
+                            {{ form.first_name }}
                             <label class="block mb-2 text-sm font-medium text-gray-400">
                                 Имя или псевдоним будет доступен психологу
                             </label>
-                            {{ form.first_name }}
                         </div>
 
                         <!-- Email -->
                         <div>
+                            {{ form.email }}
                             <label class="block mb-2 text-sm font-medium text-gray-400">
                                 Для важных уведомлений от психолога и сервиса
                             </label>
-                            {{ form.email }}
                         </div>
 
                         <!-- Возраст -->
                         <div>
+                            {{ form.age }}
                             <label class="block mb-2 text-sm font-medium text-gray-400">
                                 Ваш возраст
                             </label>
-                            {{ form.age }}
 
                             {% if form.age.errors %}
                             <p class="mt-1 text-sm text-red-600">
@@ -134,18 +134,18 @@
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                     <!-- Левая колонка -->
                     <div class="md:col-span-3">
-                        <h2 class="text-lg font-semibold text-gray-900">Был ли у вас опыт терапии?</h2>
+                        <h2 class="text-xl font-semibold text-gray-900">Был ли у вас опыт терапии?</h2>
                     </div>
 
                     <!-- Правая колонка -->
                     <div class="md:col-span-9 pt-1">
                         <label class="inline-flex items-center cursor-pointer">
                             {{ form.therapy_experience }}
-                            <div class="relative w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-indigo-500
+                            <div class="relative w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-indigo-700
                                     transition-all after:absolute after:h-5 after:w-5 after:bg-white after:rounded-full
                                     after:top-0.5 after:left-0.5 after:transition-all peer-checked:after:translate-x-5">
                             </div>
-                            <span class="ml-3 text-sm text-gray-700">Да, у меня был опыт</span>
+                            <span class="ml-3 text-base text-gray-700">Да, у меня был опыт</span>
                         </label>
                     </div>
                 </div>
@@ -154,21 +154,21 @@
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                     <!-- Левая колонка -->
                     <div class="md:col-span-3">
-                        <h2 class="text-lg font-semibold text-gray-900">Часовой пояс</h2>
+                        <h2 class="text-xl font-semibold text-gray-900">Часовой пояс</h2>
                     </div>
 
                     <!-- Правая колонка -->
                     <div class="md:col-span-9 pt-1">
+                        {{ form.timezone }}
                         <label class="block mb-2 text-sm font-medium text-gray-400">
                             Для корректного отображения расписания сессий
                         </label>
-                        {{ form.timezone }}
                     </div>
                 </div>
 
                 <!-- Кнопка -->
                 <div class="pt-6 pb-24 flex justify-center">
-                    <button type="submit" class="px-10 py-3.5 rounded-xl bg-indigo-700 text-white font-medium
+                    <button type="submit" class="px-10 py-3.5 rounded-xl bg-indigo-700 text-xl text-white font-medium
                                hover:bg-indigo-900 transition shadow">
                         Далее
                     </button>
