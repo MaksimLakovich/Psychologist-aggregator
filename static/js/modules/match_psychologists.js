@@ -1,4 +1,5 @@
 import { CLIENT_PROFILE_UPDATED } from "../events/client_profile_events.js";
+import { pluralizeRu } from "../utils/pluralize_ru.js";
 
 export function initMatchPsychologists() {
 
@@ -17,14 +18,23 @@ export function initMatchPsychologists() {
                 // placeholder "N специалистов"
                 // const remaining = items.length - topFive.length;
                 const remaining = items.length;
+
                 if (remaining > 0) {
+
+                    const word = pluralizeRu(
+                        remaining,
+                        "психолог",
+                        "психолога",
+                        "психологов"
+                    );
+
                     const wrap = document.createElement("div");
                     wrap.className = "avatar avatar-placeholder";
 
                     wrap.innerHTML = `
                         <div class="relative font-medium text-gray-500 bg-white inline-flex w-auto
                             rounded-full border-2 border-white items-center justify-center max-w-xs p-2">
-                            <span><strong>${remaining}</strong> психологов могут вам подойти</span>
+                            <span><strong>${remaining}</strong> ${word} могут вам подойти</span>
                         </div>
                     `;
                     container.appendChild(wrap);
