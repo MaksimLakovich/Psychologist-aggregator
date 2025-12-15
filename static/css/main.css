@@ -2005,6 +2005,18 @@ input:checked + .toggle-bg {
   margin-bottom: 1rem;
 }
 
+.mt-3 {
+  margin-top: 0.75rem;
+}
+
+.mb-0 {
+  margin-bottom: 0px;
+}
+
+.mt-0 {
+  margin-top: 0px;
+}
+
 .block {
   display: block;
 }
@@ -2351,6 +2363,10 @@ input:checked + .toggle-bg {
   gap: 2rem;
 }
 
+.gap-0 {
+  gap: 0px;
+}
+
 .gap-x-20 {
   -moz-column-gap: 5rem;
        column-gap: 5rem;
@@ -2677,6 +2693,11 @@ input:checked + .toggle-bg {
   background-color: rgb(35 56 118 / var(--tw-bg-opacity, 1));
 }
 
+.bg-gray-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(107 114 128 / var(--tw-bg-opacity, 1));
+}
+
 .object-contain {
   -o-object-fit: contain;
      object-fit: contain;
@@ -2722,6 +2743,10 @@ input:checked + .toggle-bg {
 
 .p-10 {
   padding: 2.5rem;
+}
+
+.p-0 {
+  padding: 0px;
 }
 
 .px-10 {
@@ -2828,6 +2853,38 @@ input:checked + .toggle-bg {
 
 .pt-0 {
   padding-top: 0px;
+}
+
+.pb-4 {
+  padding-bottom: 1rem;
+}
+
+.pb-14 {
+  padding-bottom: 3.5rem;
+}
+
+.pb-7 {
+  padding-bottom: 1.75rem;
+}
+
+.pb-6 {
+  padding-bottom: 1.5rem;
+}
+
+.pb-1 {
+  padding-bottom: 0.25rem;
+}
+
+.pb-5 {
+  padding-bottom: 1.25rem;
+}
+
+.pt-4 {
+  padding-top: 1rem;
+}
+
+.pb-3 {
+  padding-bottom: 0.75rem;
 }
 
 .text-left {
@@ -3581,6 +3638,10 @@ input:checked + .toggle-bg {
 
   .md\:col-span-9 {
     grid-column: span 9 / span 9;
+  }
+
+  .md\:col-span-1 {
+    grid-column: span 1 / span 1;
   }
 
   .md\:block {

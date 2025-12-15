@@ -93,15 +93,15 @@
 
 
                 <!-- ========== Блок 1 ========== -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 pb-7">
 
                     <!-- Левая колонка -->
-                    <div class="md:col-span-3 pt-3">
+                    <div class="md:col-span-3 pt-0">
                         <h2 class="text-xl font-semibold text-gray-900">Вид консультации</h2>
                     </div>
 
                     <!-- Правая колонка -->
-                    <div class="md:col-span-9 space-y-6 pt-3">
+                    <div class="md:col-span-9 space-y-6 pt-0">
 
                         <!-- ========== Переключатели ИНДИВИДУАЛЬНАЯ / ПАРНАЯ ========== -->
                         <div class="flex gap-3">
@@ -129,10 +129,10 @@
 
 
                 <!-- ========== Блок 2 ========== -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 pb-7">
 
                     <!-- Левая колонка -->
-                    <div class="md:col-span-3 pt-3">
+                    <div class="md:col-span-3 pt-0">
                         <h2 class="text-xl font-semibold text-gray-900">Что хотели бы обсудить в первую очередь?</h2>
                     </div>
 
@@ -143,7 +143,7 @@
                         <div id="topics-container"
                              data-save-url="{% url 'users:api:save-topics' %}"
                              data-csrf-token="{{ csrf_token }}"
-                             class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
+                             class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-0">
 
                             <!-- Индивидуальные темы -->
                             <div id="topics-individual"
@@ -151,7 +151,7 @@
 
                                 {% for group_name, items in topics_by_type.Индивидуальная.items %}
 
-                                <div class="topic-group mb-4">
+                                <div class="topic-group mb-1">
 
                                     <p class="block mb-2 text-lg font-medium text-indigo-500">
                                         <strong>{{ group_name }}</strong>
@@ -167,7 +167,9 @@
                                                     class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                                                     {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
                                             >
-                                            <span class="text-base text-gray-900">{{ topic.name }}</span>
+                                            <span class="text-base font-medium text-gray-900 dark:text-gray-200">
+                                                {{ topic.name }}
+                                            </span>
                                         </label>
                                         {% empty %}
                                         <p class="text-base text-gray-500">Темы не найдены.</p>
@@ -193,7 +195,7 @@
 
                                 {% for group_name, items in topics_by_type.Парная.items %}
 
-                                <div class="topic-group mb-4">
+                                <div class="topic-group mb-1">
 
                                     <p class="block mb-2 text-lg font-medium text-indigo-500">
                                         <strong>{{ group_name }}</strong>
@@ -209,7 +211,9 @@
                                                     class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                                                     {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
                                             >
-                                            <span class="text-base text-gray-900">{{ topic.name }}</span>
+                                            <span class="text-base font-medium text-gray-900 dark:text-gray-200">
+                                                {{ topic.name }}
+                                            </span>
                                         </label>
                                         {% empty %}
                                         <p class="text-base text-gray-500">Темы не найдены.</p>
@@ -233,18 +237,18 @@
 
 
                 <!-- ========== Блок 3 ========== -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 pb-7">
 
                     <!-- Левая колонка -->
-                    <div class="md:col-span-3 pt-3">
+                    <div class="md:col-span-3 pt-0">
                         <h2 class="text-xl font-semibold text-gray-900">С кем комфортнее работать?</h2>
                     </div>
 
                     <!-- Правая колонка -->
-                    <div class="md:col-span-9 space-y-6 pt-3">
+                    <div class="md:col-span-9 pt-0">
 
                         <!-- ========== Переключатели ВСЕ РАВНО / ЕСТЬ ПРЕДПОЧТЕНИЕ ========== -->
-                        <div class="flex gap-3">
+                        <div class="flex gap-3 mb-0 pb-7">
                             <button id="btn-any"
                                     type="button"
                                     class="px-4 py-2 rounded-lg border text-lg font-medium">
@@ -266,11 +270,11 @@
                         >
 
                         <!-- Обернем чекбоксы в контейнер и спрячем по умолчанию-->
-                        <div id="methods-wrapper" class="mt-4 hidden">
+                        <div id="methods-wrapper" class="hidden mt-0">
 
                             <!-- ========== ПОЛ ПСИХОЛОГА ========== -->
                             <div id="ps-gender-block"
-                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
+                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-0 pb-7">
                                 <label class="block mb-2 text-lg font-medium text-indigo-500">
                                     <strong>Пол психолога</strong>
                                 </label>
@@ -297,7 +301,7 @@
 
                             <!-- ========== ВОЗРАСТ ПСИХОЛОГА ========== -->
                             <div id="ps-age-block"
-                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
+                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-0 pb-7">
                                 <label class="block mb-2 text-lg font-medium text-indigo-500">
                                     <strong>Возраст психолога</strong>
                                 </label>
@@ -341,7 +345,7 @@
                             <div id="methods-container"
                                  data-save-url="{% url 'users:api:save-methods' %}"
                                  data-csrf-token="{{ csrf_token }}"
-                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
+                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-0">
 
                                 <label class="block mb-2 text-lg font-medium text-indigo-500">
                                     <strong>Психотерапевтический подход</strong>
@@ -374,7 +378,7 @@
                                 <button
                                         id="show-more-methods"
                                         type="button"
-                                        class="hidden mt-2 text-sm italic font-medium text-indigo-500 hover:text-indigo-900">
+                                        class="hidden mt-2 mb-1 text-sm italic font-medium text-indigo-500 hover:text-indigo-900">
                                     Ещё
                                 </button>
 
@@ -384,15 +388,15 @@
                 </div>
 
                 <!-- ========== Блок 4 ========== -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 pb-7">
 
                     <!-- Левая колонка -->
-                    <div class="md:col-span-3 pt-3">
+                    <div class="md:col-span-3 pt-0">
                         <h2 class="text-xl font-semibold text-gray-900">Предпочтение по времени сессии</h2>
                     </div>
 
                     <!-- Правая колонка -->
-                    <div class="md:col-span-9 space-y-6 pt-3">
+                    <div class="md:col-span-9 space-y-6 pt-0">
 
                         <!-- ========== Переключатели ЛЮБОЕ / КОНКРЕТНОЕ ========== -->
                         <div class="flex gap-3">
