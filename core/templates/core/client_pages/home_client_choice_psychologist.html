@@ -7,7 +7,7 @@
 {% block content %}
 
 
-<section class="bg-white py-8 antialiased dark:bg-gray-900 md:py-1">
+<section class="bg-white py-8 antialiased dark:bg-gray-900 md:py-0">
     <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
 
         <div class="gap-8 lg:flex">
@@ -17,91 +17,263 @@
 
                 {% csrf_token %}
 
-                <!-- ШАГИ / ЭТАПЫ -->
-                <div class="space-y-6 sm:space-y-8">
-                    <ol class="flex flex-col gap-4 rounded-lg border border-gray-200 bg-indigo-100 p-4
-                    dark:border-gray-700 dark:bg-gray-800 sm:justify-center md:flex-row md:items-center lg:gap-6">
+                <!-- ========== STICKY HEADER (ШАГИ + АВАТАРЫ) ========== -->
+                <div class="sticky top-0 z-30 bg-white border-b pb-4">
 
-                        <a href="{% url 'core:general-questions' %}" class="flex mr-4">
-                            <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                                <svg class="h-8 w-8 text-indigo-700" aria-hidden="true"
-                                     xmlns="http://www.w3.org/2000/svg"
-                                     width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                          stroke-width="2.5"
-                                          d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                </svg>
-                                <p class="text-base font-medium leading-tight text-indigo-700 dark:text-primary-500">
-                                    <strong>Общие вопросы</strong>
-                                </p>
-                            </li>
-                        </a>
+                    <!-- ========== ШАГИ / ЭТАПЫ ========== -->
+                    <div class="space-y-6 sm:space-y-8 pb-0">
+                        <ol class="flex flex-col gap-4 rounded-lg border border-gray-200 bg-indigo-100 p-2
+                        dark:border-gray-700 dark:bg-gray-800 sm:justify-center md:flex-row md:items-center lg:gap-6">
 
-                        <div class="hidden h-1 w-8 shrink-0 rounded-full bg-indigo-700 md:block xl:w-16"></div>
+                            <a href="{% url 'core:general-questions' %}" class="flex mr-4">
+                                <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                                    <svg class="h-8 w-8 text-indigo-700 dark:text-gray-400" aria-hidden="true"
+                                         xmlns="http://www.w3.org/2000/svg"
+                                         width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                              stroke-width="2.5"
+                                              d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                    </svg>
+                                    <p class="text-base font-medium leading-tight text-indigo-700 dark:text-gray-400">
+                                        <strong>Общие вопросы</strong>
+                                    </p>
+                                </li>
+                            </a>
 
-                        <a href="{% url 'core:personal-questions' %}" class="flex mr-4">
-                            <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                                <svg class="h-8 w-8 text-indigo-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                     width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                          stroke-width="2.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                </svg>
-                                <p class="text-base font-medium leading-tight text-indigo-700">
-                                    <strong>Личные вопросы</strong>
-                                </p>
-                            </li>
-                        </a>
+                            <div class="hidden h-1 w-8 shrink-0 rounded-full bg-indigo-700 dark:bg-gray-700 md:block xl:w-16"></div>
 
-                        <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+                            <a href="{% url 'core:personal-questions' %}" class="flex mr-4">
+                                <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                                    <svg class="h-8 w-8 text-indigo-700 dark:text-gray-400" aria-hidden="true"
+                                         xmlns="http://www.w3.org/2000/svg"
+                                         width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                              stroke-width="2.5"
+                                              d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                    </svg>
+                                    <p class="text-base font-medium leading-tight text-indigo-700 dark:text-gray-400">
+                                        <strong>Личные вопросы</strong>
+                                    </p>
+                                </li>
+                            </a>
 
-                        <a href="{% url 'core:choice-psychologist' %}" class="flex mr-4">
-                            <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                                <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
-                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                     viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                          stroke-width="1.5"
-                                          d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                </svg>
-                                <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
-                                    Выбор психолога
-                                </p>
-                            </li>
-                        </a>
+                            <div class="hidden h-1 w-8 shrink-0 rounded-full bg-indigo-700 dark:bg-gray-700 md:block xl:w-16"></div>
 
-                        <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+                            <a href="{% url 'core:choice-psychologist' %}" class="flex mr-4">
+                                <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                                    <svg class="h-8 w-8 text-indigo-700 dark:text-gray-400" aria-hidden="true"
+                                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                         viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                              stroke-width="2.5"
+                                              d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                    </svg>
+                                    <p class="text-base font-medium leading-tight text-indigo-700 dark:text-gray-400">
+                                        <strong>Выбор психолога</strong>
+                                    </p>
+                                </li>
+                            </a>
 
-                        <a href="#" class="flex mr-4">
-                            <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                                <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
-                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                     viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                          stroke-width="1.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                </svg>
-                                <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
-                                    Запись и оплата
-                                </p>
-                            </li>
-                        </a>
+                            <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
 
-                    </ol>
+                            <a href="#" class="flex mr-4">
+                                <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                                    <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                         viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                              stroke-width="1.5"
+                                              d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                    </svg>
+                                    <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
+                                        Запись и оплата
+                                    </p>
+                                </li>
+                            </a>
+
+                        </ol>
+                    </div>
+
+                    <!-- ========== АВАТАРЫ ========== -->
+                    <div class="mt-4">
+                        {% include 'core/client_pages/home_choice_avatar.html' %}
+                    </div>
+
                 </div>
 
-                <!-- АВАТАРЫ -->
-                <div class="flex justify-end min-h-[50px] w-full overflow-x-scroll rounded-lg lg:overflow-visible">
-                    {% include 'core/client_pages/home_avatar_group.html' %}
+                <!-- ========== КАРТОЧКА ПСИХОЛОГА ========== -->
+                <div id="psychologist-card"></div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        sdfds
+                    </p>
                 </div>
 
-
-                <!-- ========== Блок 1 ========== -->
-
-
-                <!-- Кнопка -->
-                <div class="pt-6 pb-24 flex justify-center">
+                <!-- ========== КНОПКА ========== -->
+                <div class="pt-6 pb-24 flex justify-center bg-gray-500">
                     <button type="submit" class="px-10 py-3.5 rounded-xl bg-indigo-700 text-xl text-white font-medium
                                hover:bg-indigo-900 transition shadow">
-                        Далее
+                        Выбрать время сессии
                     </button>
                 </div>
             </form>
@@ -110,7 +282,7 @@
 </section>
 
 
-<script type="module" src="{% static 'js/pages/personal_questions.js' %}"></script>
+<script type="module" src="{% static 'js/pages/choice_psychologist.js' %}"></script>
 
 
 {% endblock %}
