@@ -7,7 +7,7 @@
 {% block content %}
 
 
-<section class="bg-white py-8 antialiased dark:bg-gray-900 md:py-1">
+<section class="bg-white py-8 antialiased dark:bg-gray-900 md:py-0">
     <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
 
         <div class="gap-8 lg:flex">
@@ -17,102 +17,106 @@
 
                 {% csrf_token %}
 
-                <!-- ШАГИ / ЭТАПЫ -->
-                <div class="space-y-6 sm:space-y-8">
-                    <ol class="flex flex-col gap-4 rounded-lg border border-gray-200 bg-indigo-100 p-4
-                    dark:border-gray-700 dark:bg-gray-800 sm:justify-center md:flex-row md:items-center lg:gap-6">
+                <!-- ========== STICKY HEADER (ШАГИ + АВАТАРЫ) ========== -->
+                <div class="sticky top-0 z-30 bg-white border-b pb-3">
 
-                        <a href="{% url 'core:client_general_questions_page' %}" class="flex mr-4">
-                            <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                                <svg class="h-8 w-8 text-indigo-700" aria-hidden="true"
-                                     xmlns="http://www.w3.org/2000/svg"
-                                     width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                          stroke-width="2.5"
-                                          d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                </svg>
-                                <p class="text-base font-medium leading-tight text-indigo-700 dark:text-primary-500">
-                                    <strong>Общие вопросы</strong>
-                                </p>
-                            </li>
-                        </a>
+                    <!-- ШАГИ / ЭТАПЫ -->
+                    <div class="space-y-6 sm:space-y-8 pb-3">
+                        <ol class="flex flex-col gap-4 rounded-lg border border-gray-200 bg-indigo-100 p-2
+                        dark:border-gray-700 dark:bg-gray-800 sm:justify-center md:flex-row md:items-center lg:gap-6">
 
-                        <div class="hidden h-1 w-8 shrink-0 rounded-full bg-indigo-700 md:block xl:w-16"></div>
+                            <a href="{% url 'core:general-questions' %}" class="flex mr-4">
+                                <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                                    <svg class="h-8 w-8 text-indigo-700 dark:text-gray-400" aria-hidden="true"
+                                         xmlns="http://www.w3.org/2000/svg"
+                                         width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                              stroke-width="2.5"
+                                              d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                    </svg>
+                                    <p class="text-base font-medium leading-tight text-indigo-700 dark:text-gray-400">
+                                        <strong>Общие вопросы</strong>
+                                    </p>
+                                </li>
+                            </a>
 
-                        <a href="{% url 'core:client_personal_questions_page' %}" class="flex mr-4">
-                            <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                                <svg class="h-8 w-8 text-indigo-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                     width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                          stroke-width="2.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                </svg>
-                                <p class="text-base font-medium leading-tight text-indigo-700">
-                                    <strong>Личные вопросы</strong>
-                                </p>
-                            </li>
-                        </a>
+                            <div class="hidden h-1 w-8 shrink-0 rounded-full bg-indigo-700 dark:bg-gray-700 md:block xl:w-16"></div>
 
-                        <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+                            <a href="{% url 'core:personal-questions' %}" class="flex mr-4">
+                                <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                                    <svg class="h-8 w-8 text-indigo-700 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                         width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                              stroke-width="2.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                    </svg>
+                                    <p class="text-base font-medium leading-tight text-indigo-700 dark:text-gray-400">
+                                        <strong>Личные вопросы</strong>
+                                    </p>
+                                </li>
+                            </a>
 
-                        <a href="#" class="flex mr-4">
+                            <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+
+                            <a href="{% url 'core:choice-psychologist' %}" class="flex mr-4">
+                                <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                                    <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                         viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                              stroke-width="1.5"
+                                              d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                    </svg>
+                                    <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
+                                        Выбор психолога
+                                    </p>
+                                </li>
+                            </a>
+
+                            <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+
                             <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
                                 <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
                                      xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                                      viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                          stroke-width="1.5"
-                                          d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                          stroke-width="1.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                                 </svg>
                                 <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
-                                    Выбор психолога
+                                    Запись и оплата
                                 </p>
                             </li>
-                        </a>
 
-                        <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+                        </ol>
+                    </div>
 
-                        <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                            <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
-                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                 viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                      stroke-width="1.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                            </svg>
-                            <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
-                                Запись и оплата
-                            </p>
-                        </li>
+                    <!-- АВАТАРЫ -->
+                    <div class="flex justify-end min-h-[50px] w-full overflow-x-scroll rounded-lg lg:overflow-visible">
+                        {% include 'core/client_pages/home_avatar_group.html' %}
+                    </div>
 
-                    </ol>
                 </div>
-
-                <!-- АВАТАРЫ -->
-                <div class="flex justify-end min-h-[50px] w-full overflow-x-scroll rounded-lg lg:overflow-visible">
-                    {% include 'core/client_pages/home_avatar_group.html' %}
-                </div>
-
 
                 <!-- ========== Блок 1 ========== -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 pb-7">
 
                     <!-- Левая колонка -->
-                    <div class="md:col-span-3 pt-3">
-                        <h2 class="text-lg font-semibold text-gray-900">Вид консультации</h2>
+                    <div class="md:col-span-3 pt-0">
+                        <h2 class="text-xl font-semibold text-gray-900">Вид консультации</h2>
                     </div>
 
                     <!-- Правая колонка -->
-                    <div class="md:col-span-9 space-y-6 pt-3">
+                    <div class="md:col-span-9 space-y-6 pt-0">
 
                         <!-- ========== Переключатели ИНДИВИДУАЛЬНАЯ / ПАРНАЯ ========== -->
-                        <div class="flex gap-3">
+                        <div class="grid grid-cols-2 gap-3 max-w-md">
                             <button id="btn-individual"
                                     type="button"
-                                    class="px-4 py-2 rounded-lg border text-sm font-medium">
+                                    class="px-4 py-2 rounded-lg border text-lg font-medium">
                                 Индивидуальная
                             </button>
                             <button id="btn-couple"
                                     type="button"
-                                    class="px-4 py-2 rounded-lg border text-sm font-medium">
+                                    class="px-4 py-2 rounded-lg border text-lg font-medium">
                                 Парная
                             </button>
                         </div>
@@ -129,11 +133,11 @@
 
 
                 <!-- ========== Блок 2 ========== -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 pb-0">
 
                     <!-- Левая колонка -->
-                    <div class="md:col-span-3 pt-3">
-                        <h2 class="text-lg font-semibold text-gray-900">Что хотели бы обсудить в первую очередь?</h2>
+                    <div class="md:col-span-3 pt-0">
+                        <h2 class="text-xl font-semibold text-gray-900">Что хотели бы обсудить в первую очередь?</h2>
                     </div>
 
                     <!-- Правая колонка -->
@@ -143,7 +147,7 @@
                         <div id="topics-container"
                              data-save-url="{% url 'users:api:save-topics' %}"
                              data-csrf-token="{{ csrf_token }}"
-                             class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
+                             class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-0">
 
                             <!-- Индивидуальные темы -->
                             <div id="topics-individual"
@@ -151,9 +155,9 @@
 
                                 {% for group_name, items in topics_by_type.Индивидуальная.items %}
 
-                                <div class="topic-group mb-4">
+                                <div class="topic-group mb-1 pb-4">
 
-                                    <p class="block mb-2 text-base font-medium text-indigo-900">
+                                    <p class="block mb-2 text-lg font-medium text-indigo-500">
                                         <strong>{{ group_name }}</strong>
                                     </p>
 
@@ -167,16 +171,18 @@
                                                     class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                                                     {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
                                             >
-                                            <span class="text-sm text-gray-900">{{ topic.name }}</span>
+                                            <span class="text-base font-medium text-gray-900 dark:text-gray-200">
+                                                {{ topic.name }}
+                                            </span>
                                         </label>
                                         {% empty %}
-                                        <p class="text-sm text-gray-500">Темы не найдены.</p>
+                                        <p class="text-base text-gray-500">Темы не найдены.</p>
                                         {% endfor %}
                                     </div>
 
                                     <button
                                             type="button"
-                                            class="show-more-topics hidden mt-2 text-sm font-medium text-indigo-500 hover:text-indigo-900">
+                                            class="show-more-topics hidden mt-2 italic text-sm font-medium text-indigo-500 hover:text-indigo-900">
                                         Ещё
                                     </button>
 
@@ -193,9 +199,9 @@
 
                                 {% for group_name, items in topics_by_type.Парная.items %}
 
-                                <div class="topic-group mb-4">
+                                <div class="topic-group mb-1">
 
-                                    <p class="block mb-2 text-base font-medium text-indigo-900">
+                                    <p class="block mb-2 text-lg font-medium text-indigo-500">
                                         <strong>{{ group_name }}</strong>
                                     </p>
 
@@ -209,16 +215,18 @@
                                                     class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                                                     {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
                                             >
-                                            <span class="text-sm text-gray-900">{{ topic.name }}</span>
+                                            <span class="text-base font-medium text-gray-900 dark:text-gray-200">
+                                                {{ topic.name }}
+                                            </span>
                                         </label>
                                         {% empty %}
-                                        <p class="text-sm text-gray-500">Темы не найдены.</p>
+                                        <p class="text-base text-gray-500">Темы не найдены.</p>
                                         {% endfor %}
                                     </div>
 
                                     <!-- Кнопка "Показать еще" -->
                                     <button type="button"
-                                            class="show-more-topics hidden mt-2 text-sm font-medium text-indigo-500 hover:text-indigo-900">
+                                            class="show-more-topics hidden mt-2 italic text-sm font-medium text-indigo-500 hover:text-indigo-900">
                                         Ещё
                                     </button>
 
@@ -233,26 +241,26 @@
 
 
                 <!-- ========== Блок 3 ========== -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 pb-7">
 
                     <!-- Левая колонка -->
-                    <div class="md:col-span-3 pt-3">
-                        <h2 class="text-lg font-semibold text-gray-900">С кем комфортнее работать?</h2>
+                    <div class="md:col-span-3 pt-0">
+                        <h2 class="text-xl font-semibold text-gray-900">С кем комфортнее работать?</h2>
                     </div>
 
                     <!-- Правая колонка -->
-                    <div class="md:col-span-9 space-y-6 pt-3">
+                    <div class="md:col-span-9 pt-0">
 
                         <!-- ========== Переключатели ВСЕ РАВНО / ЕСТЬ ПРЕДПОЧТЕНИЕ ========== -->
-                        <div class="flex gap-3">
+                        <div class="grid grid-cols-2 gap-3 max-w-md mb-0 pb-7">
                             <button id="btn-any"
                                     type="button"
-                                    class="px-4 py-2 rounded-lg border text-sm font-medium">
+                                    class="px-4 py-2 rounded-lg border text-lg font-medium">
                                 Всё равно
                             </button>
                             <button id="btn-has-prefs"
                                     type="button"
-                                    class="px-4 py-2 rounded-lg border text-sm font-medium">
+                                    class="px-4 py-2 rounded-lg border text-lg font-medium">
                                 Есть пожелания
                             </button>
                         </div>
@@ -266,24 +274,24 @@
                         >
 
                         <!-- Обернем чекбоксы в контейнер и спрячем по умолчанию-->
-                        <div id="methods-wrapper" class="mt-4 hidden">
+                        <div id="methods-wrapper" class="hidden mt-0">
 
                             <!-- ========== ПОЛ ПСИХОЛОГА ========== -->
                             <div id="ps-gender-block"
-                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
-                                <label class="block mb-2 text-base font-medium text-indigo-900">
+                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-0 pb-7">
+                                <label class="block mb-2 text-lg font-medium text-indigo-500">
                                     <strong>Пол психолога</strong>
                                 </label>
 
                                 <div class="inline-flex gap-3" role="group" aria-label="Пол психолога">
                                     <button type="button"
                                             data-value="male"
-                                            class="ps-gender-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                            class="ps-gender-btn px-4 py-2 rounded-full border text-base font-medium">
                                         Мужчина
                                     </button>
                                     <button type="button"
                                             data-value="female"
-                                            class="ps-gender-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                            class="ps-gender-btn px-4 py-2 rounded-full border text-base font-medium">
                                         Женщина
                                     </button>
                                 </div>
@@ -297,35 +305,35 @@
 
                             <!-- ========== ВОЗРАСТ ПСИХОЛОГА ========== -->
                             <div id="ps-age-block"
-                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
-                                <label class="block mb-2 text-base font-medium text-indigo-900">
+                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-0 pb-7">
+                                <label class="block mb-2 text-lg font-medium text-indigo-500">
                                     <strong>Возраст психолога</strong>
                                 </label>
 
                                 <div class="inline-flex gap-3" role="group" aria-label="Возраст психолога">
                                     <button type="button"
                                             data-value="<25"
-                                            class="ps-age-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                            class="ps-age-btn px-4 py-2 rounded-full border text-base font-medium">
                                         До 25 лет
                                     </button>
                                     <button type="button"
                                             data-value="25-35"
-                                            class="ps-age-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                            class="ps-age-btn px-4 py-2 rounded-full border text-base font-medium">
                                         25-35 лет
                                     </button>
                                     <button type="button"
                                             data-value="35-45"
-                                            class="ps-age-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                            class="ps-age-btn px-4 py-2 rounded-full border text-base font-medium">
                                         35-45 лет
                                     </button>
                                     <button type="button"
                                             data-value="45-55"
-                                            class="ps-age-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                            class="ps-age-btn px-4 py-2 rounded-full border text-base font-medium">
                                         45-55 лет
                                     </button>
                                     <button type="button"
                                             data-value=">55"
-                                            class="ps-age-btn px-4 py-2 rounded-full border text-sm font-medium">
+                                            class="ps-age-btn px-4 py-2 rounded-full border text-base font-medium">
                                         От 55 лет
                                     </button>
                                 </div>
@@ -341,9 +349,9 @@
                             <div id="methods-container"
                                  data-save-url="{% url 'users:api:save-methods' %}"
                                  data-csrf-token="{{ csrf_token }}"
-                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-4">
+                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-0">
 
-                                <label class="block mb-2 text-base font-medium text-indigo-900">
+                                <label class="block mb-2 text-lg font-medium text-indigo-500">
                                     <strong>Психотерапевтический подход</strong>
                                 </label>
 
@@ -361,12 +369,12 @@
                                                 {% if method.pk|stringformat:"s" in selected_methods %}checked{% endif %}
                                         >
                                         <label for="method-{{ method.pk }}"
-                                               class="text-sm font-medium text-gray-900 dark:text-gray-200">
+                                               class="text-base font-medium text-gray-900 dark:text-gray-200">
                                             {{ method.name }}
                                         </label>
                                     </div>
                                     {% empty %}
-                                    <p class="text-sm text-gray-500">Методы не найдены.</p>
+                                    <p class="text-base text-gray-500">Методы не найдены.</p>
                                     {% endfor %}
                                 </div>
 
@@ -374,7 +382,7 @@
                                 <button
                                         id="show-more-methods"
                                         type="button"
-                                        class="hidden mt-2 text-sm font-medium text-indigo-500 hover:text-indigo-900">
+                                        class="hidden mt-2 mb-1 text-sm italic font-medium text-indigo-500 hover:text-indigo-900">
                                     Ещё
                                 </button>
 
@@ -384,26 +392,26 @@
                 </div>
 
                 <!-- ========== Блок 4 ========== -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 pb-7">
 
                     <!-- Левая колонка -->
-                    <div class="md:col-span-3 pt-3">
-                        <h2 class="text-lg font-semibold text-gray-900">Предпочтение по времени сессии</h2>
+                    <div class="md:col-span-3 pt-0">
+                        <h2 class="text-xl font-semibold text-gray-900">Предпочтение по времени сессии</h2>
                     </div>
 
                     <!-- Правая колонка -->
-                    <div class="md:col-span-9 space-y-6 pt-3">
+                    <div class="md:col-span-9 space-y-6 pt-0">
 
                         <!-- ========== Переключатели ЛЮБОЕ / КОНКРЕТНОЕ ========== -->
-                        <div class="flex gap-3">
+                        <div class="grid grid-cols-2 gap-3 max-w-md">
                             <button id="btn-any-time"
                                     type="button"
-                                    class="px-4 py-2 rounded-lg border text-sm font-medium">
+                                    class="px-4 py-2 rounded-lg border text-lg font-medium">
                                 Любое
                             </button>
                             <button id="btn-certain-time"
                                     type="button"
-                                    class="px-4 py-2 rounded-lg border text-sm font-medium">
+                                    class="px-4 py-2 rounded-lg border text-lg font-medium">
                                 Конкретное
                             </button>
                         </div>
@@ -420,7 +428,7 @@
 
                 <!-- Кнопка -->
                 <div class="pt-6 pb-24 flex justify-center">
-                    <button type="submit" class="px-10 py-3.5 rounded-xl bg-indigo-700 text-white font-medium
+                    <button type="submit" class="px-10 py-3.5 rounded-xl bg-indigo-700 text-xl text-white font-medium
                                hover:bg-indigo-900 transition shadow">
                         Далее
                     </button>

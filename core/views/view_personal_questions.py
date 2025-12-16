@@ -12,7 +12,7 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
 
     template_name = "core/client_pages/home_client_personal_questions.html"
     form_class = ClientPersonalQuestionsForm
-    success_url = reverse_lazy("core:client_personal_questions_page")  # TODO: заменить позже
+    success_url = reverse_lazy("core:choice-psychologist")
 
     def get_initial(self):
         """Возвращает предзаполненные значения формы, полученные из ClientProfile по данным:

@@ -1,4 +1,4 @@
-from django.db.models import F, FloatField, Value, IntegerField
+from django.db.models import F, FloatField, IntegerField, Value
 
 from aggregator._web.selectors.psychologist_selectors import (
     annotate_method_matches, annotate_topic_matches, annotate_type_topic_count,

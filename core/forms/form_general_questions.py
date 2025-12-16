@@ -17,7 +17,7 @@ class ClientGeneralQuestionsForm(forms.Form):
         max_length=150,
         required=True,
         widget=forms.TextInput(attrs={
-            "class": "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm "
+            "class": "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
                      "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm",
             "placeholder": "Ваше имя",
         })
@@ -26,7 +26,7 @@ class ClientGeneralQuestionsForm(forms.Form):
         required=True,
         widget=forms.EmailInput(attrs={
             "readonly": "readonly",
-            "class": "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm "
+            "class": "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
                      "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm cursor-not-allowed",
         })
     )
@@ -34,7 +34,7 @@ class ClientGeneralQuestionsForm(forms.Form):
         required=True,
         validators=[MinValueValidator(18), MaxValueValidator(120)],
         widget=forms.NumberInput(attrs={
-            "class": "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm "
+            "class": "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
                      "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm",
             "placeholder": "Ваш возраст",
         })
@@ -48,7 +48,7 @@ class ClientGeneralQuestionsForm(forms.Form):
     timezone = TimeZoneFormField(
         required=True,
         widget=forms.Select(attrs={
-            "class": "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm "
+            "class": "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
                      "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm",
         })
     )

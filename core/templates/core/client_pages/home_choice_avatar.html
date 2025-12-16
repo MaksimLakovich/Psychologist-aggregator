@@ -1,0 +1,35 @@
+<div class="w-full flex items-center justify-center gap-6">
+
+    <!-- Кнопка назад -->
+    <button
+            id="ps-prev"
+            type="button"
+            class="flex h-9 w-9 items-center justify-center rounded-full
+               text-indigo-600 hover:bg-indigo-100 transition
+               disabled:opacity-30 disabled:cursor-not-allowed">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#5145cd" viewBox="0 0 256 256">
+            <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm40,112H107.31l18.35,18.34a8,8,0,0,1-11.32,11.32l-32-32a8,8,0,0,1,0-11.32l32-32a8,8,0,0,1,11.32,11.32L107.31,120H168a8,8,0,0,1,0,16Z"></path>
+        </svg>
+    </button>
+
+    <!-- ОТОБРАЖЕНИЕ КАРУСЕЛИ С АВАМИ -->
+    <div
+            id="avatar-group"
+            data-avatar-class="h-16 w-16 rounded-full object-cover"
+            class="flex items-center justify-center gap-4">
+        {# JS вставит аватары #}
+    </div>
+
+    <!-- Кнопка вперед -->
+    <button
+            id="ps-next"
+            type="button"
+            class="flex h-9 w-9 items-center justify-center rounded-full
+               text-indigo-600 hover:bg-indigo-100 transition
+               disabled:opacity-30 disabled:cursor-not-allowed">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#5145cd" viewBox="0 0 256 256">
+            <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,109.66-32,32a8,8,0,0,1-11.32-11.32L148.69,136H88a8,8,0,0,1,0-16h60.69l-18.35-18.34a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,173.66,133.66Z"></path>
+        </svg>
+    </button>
+
+</div>

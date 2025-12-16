@@ -7,6 +7,6 @@ from users.apps import UsersConfig
 app_name = UsersConfig.name
 
 urlpatterns = [
-    path("login/", LoginPageView.as_view(), name="login_page"),
+    path("login/", LoginPageView.as_view(), name="login-page"),
     path("logout/", LogoutView.as_view(), name="logout"),
 ]
