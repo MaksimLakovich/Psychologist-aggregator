@@ -2149,6 +2149,10 @@ input:checked + .toggle-bg {
   height: 8rem;
 }
 
+.h-0 {
+  height: 0px;
+}
+
 .min-h-\[50px\] {
   min-height: 50px;
 }
@@ -2279,6 +2283,10 @@ input:checked + .toggle-bg {
 
 .w-32 {
   width: 8rem;
+}
+
+.w-0 {
+  width: 0px;
 }
 
 .max-w-7xl {
@@ -2874,6 +2882,11 @@ input:checked + .toggle-bg {
 .bg-gray-700 {
   --tw-bg-opacity: 1;
   background-color: rgb(55 65 81 / var(--tw-bg-opacity, 1));
+}
+
+.bg-gray-400 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(156 163 175 / var(--tw-bg-opacity, 1));
 }
 
 .object-contain {

@@ -5,7 +5,7 @@
 {% if menu_variant == "login" %}
 <header class="bg-white shadow">
 
-    <div class="mx-auto max-w-7xl px-4 py-7 flex justify-between items-center">
+    <div class="mx-auto max-w-7xl px-4 py-1 flex justify-between items-center">
         <a href="{% url 'core:start-page' %}" class="flex mr-4">
             <img src="{% static 'images/logo/opora-logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo_icon"/>
             <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
@@ -34,7 +34,7 @@
 {% elif user.is_authenticated and user.role_id == 2 %}
 <header class="bg-white shadow">
 
-    <div class="mx-auto max-w-7xl px-4 py-7">
+    <div class="mx-auto max-w-7xl px-4 py-1">
         <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800">
             <div class="flex flex-wrap justify-between items-center">
 
@@ -69,7 +69,7 @@
 {% elif user.is_authenticated %}
 <header class="bg-white shadow">
 
-    <div class="mx-auto max-w-7xl px-4 py-7">
+    <div class="mx-auto max-w-7xl px-4 py-1">
         <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800">
             <div class="flex flex-wrap justify-between items-center">
 
@@ -104,7 +104,7 @@
 {% else %}
 <header class="bg-white shadow">
 
-    <div class="mx-auto max-w-7xl px-4 py-7 flex justify-between items-center">
+    <div class="mx-auto max-w-7xl px-4 py-1 flex justify-between items-center">
         <a href="{% url 'core:start-page' %}" class="flex mr-4">
             <img src="{% static 'images/logo/opora-logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo"/>
             <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
