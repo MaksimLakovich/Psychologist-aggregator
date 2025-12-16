@@ -241,7 +241,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 LOGOUT_REDIRECT_URL = 'core:start-page'
 
-LOGIN_URL = 'core:home-page'
+# LOGIN_URL = 'core:home-page'
 
 # REDIS_URL = os.getenv('REDIS_URL')
 # CACHE_ENABLED = True
