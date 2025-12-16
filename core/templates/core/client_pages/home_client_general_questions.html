@@ -17,26 +17,44 @@
 
                 {% csrf_token %}
 
-                <!-- ШАГИ / ЭТАПЫ -->
-                <div class="space-y-6 sm:space-y-8">
-                    <ol class="flex flex-col gap-4 rounded-lg border border-gray-200 bg-indigo-100 p-4
-                    dark:border-gray-700 dark:bg-gray-800 sm:justify-center md:flex-row md:items-center lg:gap-6">
+                <!-- ========== STICKY HEADER (ШАГИ + АВАТАРЫ) ========== -->
+                <div class="sticky top-0 z-30 bg-white border-b pb-3">
 
-                        <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                            <svg class="h-8 w-8 text-indigo-700 dark:text-gray-400" aria-hidden="true"
-                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                 viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                      stroke-width="2.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                            </svg>
-                            <p class="text-base font-medium leading-tight text-indigo-700 dark:text-gray-400">
-                                <strong>Общие вопросы</strong>
-                            </p>
-                        </li>
+                    <!-- ШАГИ / ЭТАПЫ -->
+                    <div class="space-y-6 sm:space-y-8 pb-3">
+                        <ol class="flex flex-col gap-4 rounded-lg border border-gray-200 bg-indigo-100 p-2
+                        dark:border-gray-700 dark:bg-gray-800 sm:justify-center md:flex-row md:items-center lg:gap-6">
 
-                        <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+                            <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                                <svg class="h-8 w-8 text-indigo-700 dark:text-gray-400" aria-hidden="true"
+                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                     viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                          stroke-width="2.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                </svg>
+                                <p class="text-base font-medium leading-tight text-indigo-700 dark:text-gray-400">
+                                    <strong>Общие вопросы</strong>
+                                </p>
+                            </li>
 
-                        <a href="{% url 'core:personal-questions' %}" class="flex mr-4">
+                            <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+
+                            <a href="{% url 'core:personal-questions' %}" class="flex mr-4">
+                                <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                                    <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                         viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                              stroke-width="1.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                    </svg>
+                                    <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
+                                        Личные вопросы
+                                    </p>
+                                </li>
+                            </a>
+
+                            <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+
                             <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
                                 <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
                                      xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
@@ -45,45 +63,32 @@
                                           stroke-width="1.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                                 </svg>
                                 <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
-                                    Личные вопросы
+                                    Выбор психолога
                                 </p>
                             </li>
-                        </a>
 
-                        <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+                            <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
 
-                        <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                            <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
-                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                 viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                      stroke-width="1.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                            </svg>
-                            <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
-                                Выбор психолога
-                            </p>
-                        </li>
+                            <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
+                                <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                     viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                          stroke-width="1.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                </svg>
+                                <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
+                                    Запись и оплата
+                                </p>
+                            </li>
 
-                        <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+                        </ol>
+                    </div>
 
-                        <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                            <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
-                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                 viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                      stroke-width="1.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                            </svg>
-                            <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
-                                Запись и оплата
-                            </p>
-                        </li>
+                    <!-- Аватары -->
+                    <div class="flex justify-end min-h-[50px] w-full overflow-x-scroll rounded-lg lg:overflow-visible">
+                        {% include 'core/client_pages/home_avatar_group.html' %}
+                    </div>
 
-                    </ol>
-                </div>
-
-                <!-- Аватары -->
-                <div class="flex justify-end min-h-[50px] w-full overflow-x-scroll rounded-lg lg:overflow-visible">
-                    {% include 'core/client_pages/home_avatar_group.html' %}
                 </div>
 
                 <!-- ========== Блок 1 ========== -->

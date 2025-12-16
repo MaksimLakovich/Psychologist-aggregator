@@ -74,6 +74,7 @@ class MatchPsychologistsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
         # список словарей, который сами сформируем, например:
         data = [
             {
+                "id": ps.id,
                 "photo": ps.photo.url if ps.photo else "/static/images/menu/user-circle.svg",
                 "email": ps.user.email,
                 "topic_score": ps.topic_score,
