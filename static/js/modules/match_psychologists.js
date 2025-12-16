@@ -1,4 +1,5 @@
 import { CLIENT_PROFILE_UPDATED } from "../events/client_profile_events.js";
+import { pluralizeRu } from "../utils/pluralize_ru.js";
 
 export function initMatchPsychologists() {
 
@@ -14,7 +15,32 @@ export function initMatchPsychologists() {
                 const items = data.items || [];
                 const topFive = items.slice(0, 5);
 
-                // первые 5
+                // placeholder "N специалистов"
+                // const remaining = items.length - topFive.length;
+                const remaining = items.length;
+
+                if (remaining > 0) {
+
+                    const word = pluralizeRu(
+                        remaining,
+                        "психолог",
+                        "психолога",
+                        "психологов"
+                    );
+
+                    const wrap = document.createElement("div");
+                    wrap.className = "avatar avatar-placeholder";
+
+                    wrap.innerHTML = `
+                        <div class="relative font-medium text-gray-500 bg-white inline-flex w-auto
+                            rounded-full border-2 border-white items-center justify-center max-w-xs p-2">
+                            <span><strong>${remaining}</strong> ${word} могут вам подойти</span>
+                        </div>
+                    `;
+                    container.appendChild(wrap);
+                }
+
+                // Показать топ-5 специалистов
                 topFive.forEach(ps => {
                     const img = document.createElement("img");
                     img.src = ps.photo || "/static/images/menu/user-circle.svg";
@@ -25,20 +51,7 @@ export function initMatchPsychologists() {
                     container.appendChild(img);
                 });
 
-                // placeholder "+N специалистов"
-                const remaining = items.length - topFive.length;
-                if (remaining > 0) {
-                    const wrap = document.createElement("div");
-                    wrap.className = "avatar avatar-placeholder";
 
-                    wrap.innerHTML = `
-                        <div class="relative bg-white inline-flex w-auto rounded-full border-2 border-white
-                            items-center justify-center max-w-xs p-2">
-                            <span>+${remaining} специалистов могут вам подойти</span>
-                        </div>
-                    `;
-                    container.appendChild(wrap);
-                }
             })
             .catch(err => console.error("Ошибка загрузки психологов:", err));
     }

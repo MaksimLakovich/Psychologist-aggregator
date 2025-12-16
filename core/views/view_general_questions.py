@@ -10,7 +10,7 @@ class ClientGeneralQuestionsPageView(LoginRequiredMixin, FormView):
 
     template_name = "core/client_pages/home_client_general_questions.html"
     form_class = ClientGeneralQuestionsForm
-    success_url = reverse_lazy("core:client_personal_questions_page")
+    success_url = reverse_lazy("core:personal-questions")
 
     def get_initial(self):
         """Возвращает предзаполненные значения формы, полученные из AppUser и ClientProfile.
