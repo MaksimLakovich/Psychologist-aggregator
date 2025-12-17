@@ -491,12 +491,12 @@ class PsychologistProfile(TimeStampedModel):
         verbose_name="Фотография профиля",
         help_text="Добавьте фотографию вашего профиля",
     )
-    work_experience = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
-        null=True,
-        blank=True,
-        verbose_name="Опыт",
-        help_text="Укажите текущий опыт работы (лет)",
+    practice_start_year = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1900), MaxValueValidator(2100)],
+        null=False,
+        blank=False,
+        verbose_name="Год начала практики",
+        help_text="Укажите год начала практики",
     )
     languages = ArrayField(
         models.CharField(max_length=50, choices=LANGUAGE_CHOICES),
@@ -514,7 +514,7 @@ class PsychologistProfile(TimeStampedModel):
     price_individual = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        default=0.00,
+        default=0,
         blank=False,
         verbose_name="Стоимость индивидуальной сессии (руб.)",
         help_text="Укажите стоимость индивидуальной сессии (руб.)",
@@ -522,10 +522,17 @@ class PsychologistProfile(TimeStampedModel):
     price_couples = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        default=0.00,
+        default=0,
         blank=False,
         verbose_name="Стоимость парной сессии (руб.)",
         help_text="Укажите стоимость парной сессии (руб.)",
+    )
+    price_currency = models.CharField(
+        max_length=3,
+        default="RUB",
+        blank=False,
+        verbose_name="Валюта сессии",
+        help_text="Укажите валюту"
     )
     work_status = models.CharField(
         choices=WORK_STATUS_CHOICES,

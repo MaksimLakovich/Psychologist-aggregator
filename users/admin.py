@@ -136,7 +136,7 @@ class PsychologistProfileAdmin(admin.ModelAdmin):
     """Настройка отображения модели PsychologistProfile в админке."""
 
     list_display = (
-        "id", "user", "is_verified", "is_all_education_verified", "work_experience", "therapy_format", "work_status"
+        "id", "user", "is_verified", "is_all_education_verified", "practice_start_year", "therapy_format"
     )
     list_filter = ("specialisations", "methods", "topics", "therapy_format", "work_status")
     # # autocomplete_fields - улучшит производительность при большом объеме данных
