@@ -14,9 +14,7 @@ export function initPsychologistsChoice() {
     initNavigation();
 }
 
-/* ========================
-   ЗАГРУЗКА ДАННЫХ
-======================== */
+// ШАГ 1: ЗАГРУЗКА ДАННЫХ
 function fetchPsychologists() {
     fetch("/aggregator/api/match-psychologists/")
         .then(response => response.json())
@@ -46,9 +44,7 @@ function fetchPsychologists() {
         });
 }
 
-/* ========================
-   РЕНДЕР АВАТАРОВ
-======================== */
+// ШАГ 2: РЕНДЕР АВАТАРОВ
 function renderAvatars() {
     const container = document.getElementById("avatar-group");
     if (!container) return;
@@ -96,9 +92,7 @@ function renderAvatars() {
     updateNavigationState();
 }
 
-/* ========================
-   НАВИГАЦИЯ (кнопки ВЛЕВО / ВПРАВО)
-======================== */
+// НАВИГАЦИЯ (кнопки ВЛЕВО / ВПРАВО)
 function initNavigation() {
     const prevBtn = document.getElementById("ps-prev");
     const nextBtn = document.getElementById("ps-next");
@@ -135,25 +129,162 @@ function updateNavigationState() {
     }
 }
 
-/* ========================
-   КАРТОЧКА ПСИХОЛОГА (пока заглушка)
-======================== */
+// ШАГ 3: КАРТОЧКА ПСИХОЛОГА
 function renderPsychologistCard(ps) {
     const container = document.getElementById("psychologist-card");
-    if (!container) return;
+    if (!container || !ps) return;
 
+    // HELPERS
+    const renderEducations = (educations = []) => {
+        if (!educations.length) {
+            return `<p class="text-gray-500 text-sm">Информация об образовании не указана</p>`;
+        }
+
+        // Сортируем образование: сначала с year_end, потом "в процессе"
+        const sorted = [...educations].sort((a, b) => {
+            if (!a.year_end) return 1;
+            if (!b.year_end) return -1;
+            return b.year_end - a.year_end;
+        });
+
+        return `
+            <ul class="mt-3 space-y-3">
+                ${sorted.map(edu => `
+                    <li class="text-gray-700">
+                        <span class="font-medium">
+                            ${edu.year_start}–${edu.year_end ?? "в процессе"}
+                        </span>
+                        · ${edu.institution}
+                        ${edu.specialisation ? ` — ${edu.specialisation}` : ""}
+                    </li>
+                `).join("")}
+            </ul>
+        `;
+    };
+
+    const renderBadges = (items = [], color = "indigo") => {
+        if (!items.length) {
+            return `<p class="text-gray-500 text-sm">Не указано</p>`;
+        }
+
+        return `
+            <div class="mt-3 flex flex-wrap gap-2">
+                ${items.map(item => `
+                    <span class="rounded-full bg-${color}-100 px-3 py-1 text-sm text-${color}-700">
+                        ${item.name}
+                    </span>
+                `).join("")}
+            </div>
+        `;
+    };
+
+    // HTML-шаблон
     container.innerHTML = `
-        <div class="mt-8 rounded-xl border p-6 bg-white shadow">
-            <div class="flex gap-6 items-center">
-                <img src="${ps.photo}" class="h-32 w-32 rounded-full object-cover" />
-                <div>
-                    <p class="text-xl font-semibold">${ps.email}</p>
-                    <p class="text-gray-600 mt-2">
-                        Совпадение тем: ${ps.topic_score}
-                    </p>
-                    <p class="text-gray-600">
-                        Совпадение методов: ${ps.method_score}
-                    </p>
+        <div class="mt-8 rounded-2xl border border-gray-200 bg-white shadow-sm">
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 p-6">
+
+                <!-- LEFT COLUMN -->
+                <div class="md:col-span-3 flex justify-center">
+                    <img
+                        src="${ps.photo}"
+                        alt="Фото психолога"
+                        class="h-40 w-40 rounded-full object-cover shadow"
+                    />
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="md:col-span-9 space-y-6">
+
+                    <!-- Header -->
+                    <div>
+                        <h2 class="text-2xl font-semibold text-gray-900">
+                            ${ps.full_name}
+                        </h2>
+                        <p class="mt-1 text-gray-600">
+                            ${ps.work_experience
+                                ? `Опыт ${ps.work_experience} лет`
+                                : "Опыт не указан"}
+                        </p>
+
+                    </div>
+
+                    <!-- Price -->
+                    <div class="rounded-xl bg-gray-50 p-4">
+                        <p class="text-sm text-gray-500">
+                            Индивидуальная сессия · 50 минут
+                        </p>
+                        <p class="mt-1 text-xl font-semibold text-gray-900">
+                            ${ps.price.value} ${ps.price.currency}
+                        </p>
+                    </div>
+
+                    <!-- Nearest slot (stub) -->
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border p-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Ближайшая запись</p>
+                            <p class="text-gray-900 font-medium">
+                                скоро будет доступно
+                            </p>
+                            <p class="text-xs text-gray-400 mt-1">
+                                Часовой пояс: ${ps.timezone || "не указан"}
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="rounded-xl bg-indigo-600 px-6 py-2.5 text-white font-medium
+                                   hover:bg-indigo-700 transition"
+                            onclick="document.getElementById('psychologist-schedule')?.scrollIntoView({behavior: 'smooth'})"
+                        >
+                            Выбрать время
+                        </button>
+                    </div>
+
+                    <!-- Biography -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">
+                            О специалисте
+                        </h3>
+                        <p class="mt-2 text-gray-700 leading-relaxed">
+                            ${ps.biography || "Описание специалиста не указано"}
+                        </p>
+                    </div>
+
+                    <!-- Education -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">
+                            Образование
+                        </h3>
+                        ${renderEducations(ps.educations)}
+                    </div>
+
+                    <!-- Methods -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">
+                            Методы терапии
+                        </h3>
+                        ${renderBadges(ps.methods, "indigo")}
+                    </div>
+
+                    <!-- Topics -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">
+                            Работает с темами вашей анкеты
+                        </h3>
+                        ${renderBadges(ps.matched_topics, "green")}
+                    </div>
+
+                    <!-- Schedule -->
+                    <div
+                        id="psychologist-schedule"
+                        class="rounded-xl border border-dashed p-4"
+                    >
+                        <p class="text-sm text-gray-500">
+                            Расписание появится после подключения календаря
+                        </p>
+                    </div>
+
                 </div>
             </div>
         </div>

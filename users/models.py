@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -12,8 +13,9 @@ from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from timezone_field import TimeZoneField
 
-from users.constants import (AGE_BUCKET_CHOICES, GENDER_CHOICES,
-                             LANGUAGE_CHOICES, PREFERRED_TOPIC_TYPE_CHOICES,
+from users.constants import (AGE_BUCKET_CHOICES, CURRENCY_CHOICES,
+                             GENDER_CHOICES, LANGUAGE_CHOICES,
+                             PREFERRED_TOPIC_TYPE_CHOICES,
                              THERAPY_FORMAT_CHOICES, WORK_STATUS_CHOICES)
 from users.managers import AppUserManager
 from users.services.defaults import default_languages
@@ -491,12 +493,12 @@ class PsychologistProfile(TimeStampedModel):
         verbose_name="Фотография профиля",
         help_text="Добавьте фотографию вашего профиля",
     )
-    work_experience = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
+    practice_start_year = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1900), MaxValueValidator(2100)],
         null=True,
         blank=True,
-        verbose_name="Опыт",
-        help_text="Укажите текущий опыт работы (лет)",
+        verbose_name="Год начала практики",
+        help_text="Укажите год начала практики",
     )
     languages = ArrayField(
         models.CharField(max_length=50, choices=LANGUAGE_CHOICES),
@@ -514,7 +516,7 @@ class PsychologistProfile(TimeStampedModel):
     price_individual = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        default=0.00,
+        default=0,
         blank=False,
         verbose_name="Стоимость индивидуальной сессии (руб.)",
         help_text="Укажите стоимость индивидуальной сессии (руб.)",
@@ -522,10 +524,17 @@ class PsychologistProfile(TimeStampedModel):
     price_couples = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        default=0.00,
+        default=0,
         blank=False,
         verbose_name="Стоимость парной сессии (руб.)",
         help_text="Укажите стоимость парной сессии (руб.)",
+    )
+    price_currency = models.CharField(
+        max_length=3,
+        choices=CURRENCY_CHOICES,
+        default="RUB",
+        verbose_name="Валюта сессии",
+        help_text="Укажите валюту"
     )
     work_status = models.CharField(
         choices=WORK_STATUS_CHOICES,
@@ -537,7 +546,7 @@ class PsychologistProfile(TimeStampedModel):
     rating = models.DecimalField(
         max_digits=3,
         decimal_places=1,
-        default=0.0,
+        default=0,
         blank=False,
         verbose_name="Рейтинг",
         help_text="Рейтинг психолога",
@@ -546,6 +555,14 @@ class PsychologistProfile(TimeStampedModel):
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
         return f"{self.user.email}"
+
+    @property
+    def work_experience_years(self):
+        """Метод рассчитывает опыт в годах исходя из значения в "practice_start_year" в профиле
+        психолога и текущего года."""
+        if not self.practice_start_year:
+            return None
+        return date.today().year - self.practice_start_year
 
     class Meta:
         indexes = [
