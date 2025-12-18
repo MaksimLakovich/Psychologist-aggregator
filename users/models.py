@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -553,6 +554,14 @@ class PsychologistProfile(TimeStampedModel):
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
         return f"{self.user.email}"
+
+    @property
+    def work_experience_years(self):
+        """Метод рассчитывает опыт в годах исходя из значения в "practice_start_year" в профиле
+        психолога и текущего года."""
+        if not self.practice_start_year:
+            return None
+        return date.today().year - self.practice_start_year
 
     class Meta:
         indexes = [

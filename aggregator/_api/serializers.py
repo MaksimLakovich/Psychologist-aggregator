@@ -37,13 +37,18 @@ class PublicPsychologistListSerializer(serializers.ModelSerializer):
             "gender",
             "languages",
             "therapy_format",
-            "practice_start_year",
+            "work_experience_years",
             "rating",
             "work_status",
             "price_individual",
             "price_couples",
             "price_currency",
         ]
+
+    def get_work_experience_years(self, obj):
+        """Получаем из модели PsychologistProfile рассчитанный опыт в годах исходя из значения
+         в "practice_start_year" в профиле психолога и текущего года."""
+        return obj.work_experience_years
 
     def get_educations(self, obj):
         """Получаем из модели Education записи текущего психолога."""
