@@ -197,11 +197,12 @@ class PsychologistProfileReadSerializer(serializers.ModelSerializer):
             "biography",
             "photo",
             "rating",
-            "work_experience",
+            "practice_start_year",
             "languages",
             "therapy_format",
             "price_individual",
             "price_couples",
+            "price_currency",
             "work_status",
             "is_verified",
             "is_all_education_verified",
@@ -252,11 +253,12 @@ class PsychologistProfileWriteSerializer(serializers.ModelSerializer):
             "topics",
             "biography",
             "photo",
-            "work_experience",
+            "practice_start_year",
             "languages",
             "therapy_format",
             "price_individual",
             "price_couples",
+            "price_currency",
             "work_status",
         ]
 
@@ -310,9 +312,10 @@ class PublicPsychologistProfileSerializer(serializers.ModelSerializer):
             "therapy_format",
             "work_status",
             "rating",
-            "work_experience",
+            "practice_start_year",
             "price_individual",
             "price_couples",
+            "price_currency",
         ]
 
     def get_educations(self, obj):

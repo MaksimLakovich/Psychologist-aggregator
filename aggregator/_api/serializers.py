@@ -37,11 +37,12 @@ class PublicPsychologistListSerializer(serializers.ModelSerializer):
             "gender",
             "languages",
             "therapy_format",
-            "work_status",
+            "practice_start_year",
             "rating",
             "work_experience",
             "price_individual",
             "price_couples",
+            "price_currency",
         ]
 
     def get_educations(self, obj):
