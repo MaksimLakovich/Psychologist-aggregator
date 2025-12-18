@@ -23,7 +23,7 @@
 
 ---
 
-## <a> 1. Команда для запуска загрузки данных </a>
+## <a> 1. ШАГ 1: Команда для запуска загрузки данных </a>
 
 Загрузка **локально** для теста:
 ```bash
@@ -32,7 +32,7 @@ python manage.py loaddata fixtures/users_psychologists.json
 
 ---
 
-## <a> 2. Пример записи</a>
+## <a> 2. Пример записи AppUser + PsychologistProfile</a>
 ```json
 [
   {
@@ -84,6 +84,42 @@ python manage.py loaddata fixtures/users_psychologists.json
 
 ---
 
-## <a> 3. JSON-файл </a>
+## <a> 3. ШАГ 2: Команда для запуска загрузки данных об образовании психологов</a>
 
-Расположение JSON-файла в структуре проекта: [fixtures/users_psychologists.json](/Users/maksym/PycharmProjects/Psychologist-aggregator/fixtures/users_psychologists.json)
+Загрузка **локально** для теста:
+```bash
+python manage.py loaddata fixtures/users_ps_education.json
+```
+
+---
+
+## <a> 4. Пример записи Education</a>
+```json
+[
+  {
+    "model": "users.education",
+    "pk": 4,
+    "fields": {
+      "creator": "11111111-1111-4111-8111-111111111111",
+      "country": "RU",
+      "institution": "Московский государственный университет имени М. В. Ломоносова (МГУ)",
+      "degree": "Магистр",
+      "specialisation": "Клиническая психология",
+      "year_start": 2010,
+      "year_end": 2015,
+      "document": "education_docs/2025/11/04/Снимок_экрана_2025-11-04_в_20.42.53.png",
+      "is_verified": true,
+      "created_at": "2025-11-25T16:55:32.525181+03:00",
+      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+    }
+  }
+]
+```
+
+---
+
+## <a> 5. JSON-файл </a>
+
+Расположение JSON-файла в структуре проекта: 
+- [fixtures/users_psychologists.json](/Users/maksym/PycharmProjects/Psychologist-aggregator/fixtures/users_psychologists.json)
+- [fixtures/users_ps_education.json](/Users/maksym/PycharmProjects/Psychologist-aggregator/fixtures/users_ps_education.json)

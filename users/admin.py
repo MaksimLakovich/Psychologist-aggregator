@@ -71,7 +71,7 @@ class EducationAdmin(CreatorAndReadonlyFields):
     )
     list_filter = ("institution", "degree", "specialisation")
     search_fields = ("country", "institution", "degree", "specialisation")
-    ordering = ("country", "institution")
+    ordering = ("creator", "country", "institution")
     # list_editable = ("is_verified",)  # чтоб поле было доступно для изменения прямо из списка без захода в продукт
     list_display_links = ("institution",)  # чтобы кликать на название вместо ID
 
