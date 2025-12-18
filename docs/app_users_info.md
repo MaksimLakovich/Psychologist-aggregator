@@ -66,16 +66,17 @@
 
 ### users/constants.py:
 
-| Название константы             | Место использования | Значение                                                                                                                                   |
-|--------------------------------|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| `GENDER_CHOICES`               | models.py          | ("male", "мужской"), <br/> ("female", "женский"),                                                                                          |
-| `LANGUAGE_CHOICES`             | models.py          | ("english", "английский"), <br/> ("russian", "русский"),                                                                                   |
-| `THERAPY_FORMAT_CHOICES`       | models.py          | ("online", "удаленно"), <br/> ("offline", "встреча"), <br/> ("any", "любая"),                                                              |
-| `WORK_STATUS_CHOICES`          | models.py          | ("working", "работает"), <br/> ("not_working", "не работает"),                                                                             |
-| `MAX_AVAILABLE_FILE_SIZE`      | validators.py      | 5                                                                                                                                          |
-| `ALLOWED_REGISTER_ROLES`       | views.py           | ["psychologist", "client"]                                                                                                                 |
-| `AGE_BUCKET_CHOICES`           | models.py          | ("<25", "До 25 лет"), <br/> ("25-35", "25-35 лет"), <br/> ("35-45", "35-45 лет"), <br/> ("45-55", "45-55 лет"), <br/> (">55", "От 55 лет"), |
-| `PREFERRED_TOPIC_TYPE_CHOICES` | models.py          | ("individual", "Индивидуальная"), <br/> ("couple", "Парная"),                                                                              |
+| Название константы            | Место использования | Значение                                                                                                                                    |
+|-------------------------------|--------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| `GENDER_CHOICES`              | models.py          | ("male", "мужской"), <br/> ("female", "женский"),                                                                                           |
+| `LANGUAGE_CHOICES`            | models.py          | ("english", "английский"), <br/> ("russian", "русский"),                                                                                    |
+| `THERAPY_FORMAT_CHOICES`      | models.py          | ("online", "удаленно"), <br/> ("offline", "встреча"), <br/> ("any", "любая"),                                                               |
+| `WORK_STATUS_CHOICES`         | models.py          | ("working", "работает"), <br/> ("not_working", "не работает"),                                                                              |
+| `MAX_AVAILABLE_FILE_SIZE`     | validators.py      | 5                                                                                                                                           |
+| `ALLOWED_REGISTER_ROLES`      | views.py           | ["psychologist", "client"]                                                                                                                  |
+| `AGE_BUCKET_CHOICES`          | models.py          | ("<25", "До 25 лет"), <br/> ("25-35", "25-35 лет"), <br/> ("35-45", "35-45 лет"), <br/> ("45-55", "45-55 лет"), <br/> (">55", "От 55 лет"), |
+| `PREFERRED_TOPIC_TYPE_CHOICES` | models.py          | ("individual", "Индивидуальная"), <br/> ("couple", "Парная"),                                                                               |
+| `CURRENCY_CHOICES`            | models.py          | ("RUB", "Российский рубль"), <br/> ("BYN", "Белорусский рубль"), <br/> ("KZT", "Казахстанский тенге"),                                      |
 
 ---
 
@@ -193,7 +194,7 @@
 | `therapy_format`           | CharField(choices)           | Формат работы: онлайн / офлайн / гибрид                         |
 | `price_individual`         | DecimalField(10,2)           | Стоимость индивидуальной сессии                                 |
 | `price_couples`            | DecimalField(10,2)           | Стоимость парной сессии                                         |
-| `price_currency`           | CharField(3)                 | Валюта сессии                                                   |
+| `price_currency`           | CharField(choices)           | Валюта сессии                                                   |
 | `work_status`              | CharField(choices)           | Рабочий статус (работает / не принимает / в отпуске и т.д.)     |
 | `rating`                   | DecimalField(3,1)            | Рейтинг психолога                                               |
 | `created_at`               | DateTimeField                | Дата и время создания                                           |

@@ -14,7 +14,7 @@ from timezone_field import TimeZoneField
 
 from users.constants import (AGE_BUCKET_CHOICES, GENDER_CHOICES,
                              LANGUAGE_CHOICES, PREFERRED_TOPIC_TYPE_CHOICES,
-                             THERAPY_FORMAT_CHOICES, WORK_STATUS_CHOICES)
+                             THERAPY_FORMAT_CHOICES, WORK_STATUS_CHOICES, CURRENCY_CHOICES)
 from users.managers import AppUserManager
 from users.services.defaults import default_languages
 from users.services.slug import generate_unique_slug
@@ -493,8 +493,8 @@ class PsychologistProfile(TimeStampedModel):
     )
     practice_start_year = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1900), MaxValueValidator(2100)],
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         verbose_name="Год начала практики",
         help_text="Укажите год начала практики",
     )
@@ -529,8 +529,8 @@ class PsychologistProfile(TimeStampedModel):
     )
     price_currency = models.CharField(
         max_length=3,
+        choices=CURRENCY_CHOICES,
         default="RUB",
-        blank=False,
         verbose_name="Валюта сессии",
         help_text="Укажите валюту"
     )
@@ -544,7 +544,7 @@ class PsychologistProfile(TimeStampedModel):
     rating = models.DecimalField(
         max_digits=3,
         decimal_places=1,
-        default=0.0,
+        default=0,
         blank=False,
         verbose_name="Рейтинг",
         help_text="Рейтинг психолога",
