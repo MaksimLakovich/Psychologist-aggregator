@@ -1,3 +1,5 @@
+import { pluralizeRu } from "../utils/pluralize_ru.js";
+
 let psychologists = [];
 let currentOffset = 0;
 const PAGE_SIZE = 10;
@@ -135,12 +137,13 @@ function renderPsychologistCard(ps) {
     if (!container || !ps) return;
 
     // HELPERS
+
+    // 1) Логика для отображения и сортировки Education: сначала с year_end, потом "в процессе"
     const renderEducations = (educations = []) => {
         if (!educations.length) {
             return `<p class="text-gray-500 text-sm">Информация об образовании не указана</p>`;
         }
 
-        // Сортируем образование: сначала с year_end, потом "в процессе"
         const sorted = [...educations].sort((a, b) => {
             if (!a.year_end) return 1;
             if (!b.year_end) return -1;
@@ -162,6 +165,12 @@ function renderPsychologistCard(ps) {
         `;
     };
 
+    // 2) Логика для отображения БЕЙДЖЕВ
+    const COLOR_MAP = {
+        indigo: "bg-indigo-100 text-indigo-700",
+        green: "bg-green-100 text-green-700",
+    };
+
     const renderBadges = (items = [], color = "indigo") => {
         if (!items.length) {
             return `<p class="text-gray-500 text-sm">Не указано</p>`;
@@ -170,7 +179,7 @@ function renderPsychologistCard(ps) {
         return `
             <div class="mt-3 flex flex-wrap gap-2">
                 ${items.map(item => `
-                    <span class="rounded-full bg-${color}-100 px-3 py-1 text-sm text-${color}-700">
+                    <span class="rounded-full px-3 py-1 text-sm ${COLOR_MAP[color]}">
                         ${item.name}
                     </span>
                 `).join("")}
@@ -178,7 +187,16 @@ function renderPsychologistCard(ps) {
         `;
     };
 
-    // HTML-шаблон
+    // 3)
+    const word = pluralizeRu(
+        ps.work_experience,
+        "год",
+        "года",
+        "лет"
+    );
+
+
+    // HTML-ШАБЛОН
     container.innerHTML = `
         <div class="mt-8 rounded-2xl border border-gray-200 bg-white shadow-sm">
 
@@ -203,7 +221,7 @@ function renderPsychologistCard(ps) {
                         </h2>
                         <p class="mt-1 text-gray-600">
                             ${ps.work_experience
-                                ? `Опыт ${ps.work_experience} лет`
+                                ? `Опыт ${ps.work_experience} ${word}`
                                 : "Опыт не указан"}
                         </p>
 

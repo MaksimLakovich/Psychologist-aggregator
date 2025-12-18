@@ -2684,6 +2684,11 @@ input:checked + .toggle-bg {
   background-color: rgb(255 255 255 / 0.5);
 }
 
+.bg-green-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(222 247 236 / var(--tw-bg-opacity, 1));
+}
+
 .object-contain {
   -o-object-fit: contain;
      object-fit: contain;
@@ -3019,6 +3024,11 @@ input:checked + .toggle-bg {
 .text-green-400 {
   --tw-text-opacity: 1;
   color: rgb(49 196 141 / var(--tw-text-opacity, 1));
+}
+
+.text-green-700 {
+  --tw-text-opacity: 1;
+  color: rgb(4 108 78 / var(--tw-text-opacity, 1));
 }
 
 .antialiased {
