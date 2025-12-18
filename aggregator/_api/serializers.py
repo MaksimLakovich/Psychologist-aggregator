@@ -39,7 +39,7 @@ class PublicPsychologistListSerializer(serializers.ModelSerializer):
             "therapy_format",
             "practice_start_year",
             "rating",
-            "work_experience",
+            "work_status",
             "price_individual",
             "price_couples",
             "price_currency",
