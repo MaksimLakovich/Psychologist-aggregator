@@ -135,6 +135,7 @@ function updateNavigationState() {
 function renderPsychologistCard(ps) {
     const container = document.getElementById("psychologist-card");
     if (!container || !ps) return;
+    const staticUrl = container.dataset.staticUrl;
 
     // HELPERS
 
@@ -207,7 +208,11 @@ function renderPsychologistCard(ps) {
                     <img
                         src="${ps.photo}"
                         alt="Фото психолога"
-                        class="h-40 w-40 rounded-full object-cover shadow"
+                        class="
+                        h-64 w-64 rounded-full object-cover cursor-pointer transition-all
+                        duration-300 ease-out border-2 border-transparent hover:border-indigo-300
+                        hover:scale-[1.01] hover:shadow-2xl
+                        "
                     />
                 </div>
 
@@ -219,11 +224,17 @@ function renderPsychologistCard(ps) {
                         <h2 class="text-2xl font-semibold text-gray-900">
                             ${ps.full_name}
                         </h2>
-                        <p class="mt-1 text-gray-600">
-                            ${ps.work_experience
-                                ? `Опыт ${ps.work_experience} ${word}`
-                                : "Опыт не указан"}
-                        </p>
+                        <div class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2 mt-3 hover:bg-gray-200 transition">
+                            <img
+                                src="${staticUrl}images/psychologist_profile/seal-check.svg"
+                                alt="check_icon"
+                            />
+                            <span class="text-lg text-gray-700 font-medium">
+                                ${ps.work_experience
+                                    ? `Опыт ${ps.work_experience} ${word}`
+                                    : "Опыт не указан"}
+                            </span>
+                        </div>
 
                     </div>
 
