@@ -201,7 +201,7 @@ function renderPsychologistCard(ps) {
     container.innerHTML = `
         <div class="mt-8 rounded-2xl border border-gray-200 bg-white shadow-sm">
 
-            <div class="relative grid grid-cols-1 md:grid-cols-12 gap-6 p-6">
+            <div class="relative grid grid-cols-1 md:grid-cols-12 gap-6 p-6 pt-16">
 
                 <!-- LEFT COLUMN -->
                 <div class="md:col-span-3 flex justify-center md:sticky self-start" style="top: var(--choice-header-offset);">
@@ -217,88 +217,102 @@ function renderPsychologistCard(ps) {
                 </div>
 
                 <!-- RIGHT COLUMN -->
-                <div class="md:col-span-9 space-y-6">
+                <div class="md:col-span-9 space-y-6 md:pl-6 md:pr-6 lg:pl-8 lg:pr-12">
 
                     <!-- Header -->
                     <div>
-                        <h2 class="text-2xl font-semibold text-gray-900">
+                        <h2 class="text-3xl font-semibold text-gray-900 pb-2">
                             ${ps.full_name}
                         </h2>
-                        <div class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2 mt-3 hover:bg-gray-200 transition">
-                            <img
-                                src="${staticUrl}images/psychologist_profile/seal-check.svg"
-                                alt="check_icon"
-                            />
-                            <span class="text-lg text-gray-700 font-medium">
-                                ${ps.work_experience
-                                    ? `Опыт ${ps.work_experience} ${word}`
-                                    : "Опыт не указан"}
-                            </span>
+                        <div class="inline-flex items-center gap-3">
+                            <div class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2 mt-3 hover:bg-gray-200 transition">
+                                <img
+                                    src="${staticUrl}images/psychologist_profile/goal-svgrepo-com.svg"
+                                    alt="goal_icon"
+                                />
+                                <span class="text-lg text-gray-700 font-medium">
+                                    ${ps.rating} из 10
+                                </span>
+                            </div>
+                            <div class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2 mt-3 hover:bg-gray-200 transition">
+                                <img
+                                    src="${staticUrl}images/psychologist_profile/seal-check.svg"
+                                    alt="check_icon"
+                                />
+                                <span class="text-lg text-gray-700 font-medium">
+                                    ${ps.work_experience
+                                        ? `Опыт ${ps.work_experience} ${word}`
+                                        : "Опыт не указан"}
+                                </span>
+                            </div>
                         </div>
-
                     </div>
 
                     <!-- Price -->
-                    <div class="rounded-xl bg-gray-50 p-4">
-                        <p class="text-sm text-gray-500">
+                    <div class="rounded-xl bg-transparent p-0">
+                        <p class="text-lg font-medium text-gray-700 dark:text-gray-200">
                             Индивидуальная сессия · 50 минут
                         </p>
-                        <p class="mt-1 text-xl font-semibold text-gray-900">
-                            ${ps.price.value} ${ps.price.currency}
+                        <p class="mt-0 text-xl font-semibold text-gray-700">
+                            ${ps.price.value} ₽
                         </p>
                     </div>
 
                     <!-- Nearest slot (stub) -->
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border p-4">
-                        <div>
-                            <p class="text-sm text-gray-500">Ближайшая запись</p>
-                            <p class="text-gray-900 font-medium">
-                                скоро будет доступно
-                            </p>
-                            <p class="text-xs text-gray-400 mt-1">
-                                Часовой пояс: ${ps.timezone || "не указан"}
-                            </p>
+                    <div class="pb-7">
+                        <div class="gap-0 rounded-xl bg-transparent p-0 pb-2">
+                            <div class="inline-flex items-center gap-1">
+                                <p
+                                    class="text-lg font-medium text-gray-700 dark:text-gray-200"
+                                >
+                                    Ближайшая запись
+                                </p>
+                                <p
+                                    class="mt-0 text-lg font-semibold text-indigo-700 hover:text-indigo-800 transition"
+                                    onclick="document.getElementById('psychologist-schedule')?.scrollIntoView({behavior: 'smooth'})"
+                                >
+                                    20 декабря в 21:00
+                                </p>
+                            </div>
                         </div>
-
                         <button
                             type="button"
-                            class="rounded-xl bg-indigo-600 px-6 py-2.5 text-white font-medium
-                                   hover:bg-indigo-700 transition"
+                            class="rounded-xl bg-indigo-500 border-indigo-900 px-6 py-2.5 text-white text-lg font-medium hover:bg-indigo-900 transition"
                             onclick="document.getElementById('psychologist-schedule')?.scrollIntoView({behavior: 'smooth'})"
                         >
-                            Выбрать время
+                            Выбрать время сессии
                         </button>
                     </div>
 
                     <!-- Biography -->
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">
+                    <div class="pb-7">
+                        <h3 class="text-xl font-semibold text-gray-900">
                             О специалисте
                         </h3>
-                        <p class="mt-2 text-gray-700 leading-relaxed">
+                        <p class="mt-2 text-lg text-gray-700 leading-relaxed">
                             ${ps.biography || "Описание специалиста не указано"}
                         </p>
                     </div>
 
                     <!-- Education -->
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">
+                    <div class="pb-7">
+                        <h3 class="text-xl font-semibold text-gray-900">
                             Образование
                         </h3>
                         ${renderEducations(ps.educations)}
                     </div>
 
                     <!-- Methods -->
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">
+                    <div class="pb-7">
+                        <h3 class="text-xl font-semibold text-gray-900">
                             Методы терапии
                         </h3>
                         ${renderBadges(ps.methods, "indigo")}
                     </div>
 
                     <!-- Topics -->
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">
+                    <div class="pb-10">
+                        <h3 class="text-xl font-semibold text-gray-900">
                             Работает с темами вашей анкеты
                         </h3>
                         ${renderBadges(ps.matched_topics, "green")}
@@ -307,10 +321,13 @@ function renderPsychologistCard(ps) {
                     <!-- Schedule -->
                     <div
                         id="psychologist-schedule"
-                        class="rounded-xl border border-dashed p-4"
+                        class="rounded-xl border border-dashed p-4 pb-7
                     >
                         <p class="text-sm text-gray-500">
                             Расписание появится после подключения календаря
+                        </p>
+                        <p class="text-xs text-gray-400 mt-1">
+                            Часовой пояс: ${ps.timezone || "не указан"}
                         </p>
                     </div>
 

@@ -2,8 +2,10 @@ import { initPsychologistsChoice } from "../modules/match_ps_choice.js";
 
 document.addEventListener("DOMContentLoaded", () => {
 
+
     // 1. Получаем карточки отфильтрованных психологов по указанным клиентом параметрам
     initPsychologistsChoice();
+
 
     // 2. Вычисляем высоту header для блока "<!-- LEFT COLUMN -->" в match_ps_choice.js чтоб фото психолога не скроллилось вниз
     const header = document.getElementById("choice-sticky-header");
