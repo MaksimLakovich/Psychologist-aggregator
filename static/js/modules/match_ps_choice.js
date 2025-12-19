@@ -188,7 +188,7 @@ function renderPsychologistCard(ps) {
         `;
     };
 
-    // 3)
+    // 3) Подключаю pluralize_ru.js и рассчитываем правильное окончание для слова ГОД
     const word = pluralizeRu(
         ps.work_experience,
         "год",
@@ -201,10 +201,10 @@ function renderPsychologistCard(ps) {
     container.innerHTML = `
         <div class="mt-8 rounded-2xl border border-gray-200 bg-white shadow-sm">
 
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 p-6">
+            <div class="relative grid grid-cols-1 md:grid-cols-12 gap-6 p-6">
 
                 <!-- LEFT COLUMN -->
-                <div class="md:col-span-3 flex justify-center">
+                <div class="md:col-span-3 flex justify-center md:sticky self-start" style="top: var(--choice-header-offset);">
                     <img
                         src="${ps.photo}"
                         alt="Фото психолога"
