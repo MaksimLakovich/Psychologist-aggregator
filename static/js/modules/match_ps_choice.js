@@ -331,7 +331,7 @@ function renderPsychologistCard(ps) {
                         </div>
                         <button
                             type="button"
-                            class="mt-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                            class="mt-4 italic text-sm font-medium text-indigo-500 hover:text-indigo-900"
                             onclick="toggleBiography(this)"
                         >
                             Развернуть
