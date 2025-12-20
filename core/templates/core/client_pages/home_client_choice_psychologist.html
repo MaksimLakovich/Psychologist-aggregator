@@ -18,7 +18,10 @@
                 {% csrf_token %}
 
                 <!-- ========== STICKY HEADER (ШАГИ + АВАТАРЫ) ========== -->
-                <div class="sticky top-0 z-30 bg-white border-b pb-4">
+                <div
+                        id="choice-sticky-header"
+                        class="sticky top-0 z-30 bg-white border-b pb-4"
+                >
 
                     <!-- ========== ШАГИ / ЭТАПЫ ========== -->
                     <div class="space-y-6 sm:space-y-8 pb-0">
@@ -101,10 +104,21 @@
 
                 </div>
 
-                <!-- ========== КАРТОЧКА ПСИХОЛОГА ========== -->
-                <div id="psychologist-card"></div>
+                <!-- ========== КАРТОЧКА ПСИХОЛОГА + пустые отступы слева/справа ========== -->
+                <div class="mx-auto max-w-6xl px-7">
+                    <div
+                            id="psychologist-card"
+                            data-static-url="{% static '' %}"
+                    ></div>
+                </div>
 
                 <!-- ========== КНОПКА ========== -->
+                <div>
+                    <p>
+                        Нажимая кнопку, вы подтверждаете, что ознакомлены и согласны с договором оказания услуг
+                        и даёте согласие на обработку персональных данных психологу.
+                    </p>
+                </div>
                 <div class="pt-6 pb-24 flex justify-center bg-gray-500">
                     <button type="submit" class="px-10 py-3.5 rounded-xl bg-indigo-700 text-xl text-white font-medium
                                hover:bg-indigo-900 transition shadow">
