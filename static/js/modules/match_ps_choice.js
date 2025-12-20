@@ -5,7 +5,8 @@ let currentOffset = 0;
 const PAGE_SIZE = 10;
 let selectedPsychologistId = null;
 
-// ===== Вспомогательная функция для хранения состояния страницы выбора =====
+
+// Вспомогательная функция для хранения состояния страницы выбора (при обновлении браузер)
 function isPageReload() {
     const nav = performance.getEntriesByType("navigation")[0];
     return nav && nav.type === "reload";
@@ -16,7 +17,8 @@ export function initPsychologistsChoice() {
     initNavigation();
 }
 
-// ===== Кнопка СВЕРНУТЬ / РАЗВЕРНУТЬ для биографии и других полей карточки психологов =====
+
+// Вспомогательная функция для кнопки СВЕРНУТЬ / РАЗВЕРНУТЬ (биография и другие поля карточки психологов)
 window.toggleBiography = function (btn) {
     const wrapper = btn.previousElementSibling;
     if (!wrapper) return;
@@ -37,7 +39,7 @@ window.toggleBiography = function (btn) {
 };
 
 
-// ШАГ 1: ЗАГРУЗКА ДАННЫХ
+// ===== ШАГ 1: ЗАГРУЗКА ДАННЫХ =====
 function fetchPsychologists() {
     fetch("/aggregator/api/match-psychologists/")
         .then(response => response.json())
@@ -67,7 +69,8 @@ function fetchPsychologists() {
         });
 }
 
-// ШАГ 2: РЕНДЕР АВАТАРОВ
+
+// ===== ШАГ 2: РЕНДЕР АВАТАРОВ =====
 function renderAvatars() {
     const container = document.getElementById("avatar-group");
     if (!container) return;
@@ -115,7 +118,8 @@ function renderAvatars() {
     updateNavigationState();
 }
 
-// НАВИГАЦИЯ (кнопки ВЛЕВО / ВПРАВО)
+
+// ===== НАВИГАЦИЯ (кнопки ВЛЕВО / ВПРАВО) =====
 function initNavigation() {
     const prevBtn = document.getElementById("ps-prev");
     const nextBtn = document.getElementById("ps-next");
@@ -152,7 +156,8 @@ function updateNavigationState() {
     }
 }
 
-// ШАГ 3: КАРТОЧКА ПСИХОЛОГА
+
+// ===== ШАГ 3: КАРТОЧКА ПСИХОЛОГА =====
 function renderPsychologistCard(ps) {
     const container = document.getElementById("psychologist-card");
     if (!container || !ps) return;
@@ -235,58 +240,71 @@ function renderPsychologistCard(ps) {
             <div class="relative grid grid-cols-1 md:grid-cols-12 gap-6 p-6 pt-16">
 
                 <!-- LEFT COLUMN -->
-                <div class="md:col-span-3 flex justify-center md:sticky self-start" style="top: var(--choice-header-offset);">
+                <div
+                    class="md:col-span-4 flex flex-col items-center md:sticky self-start"
+                    style="top: var(--choice-header-offset);"
+                >
                     <img
                         src="${ps.photo}"
                         alt="Фото психолога"
                         class="
-                        h-64 w-64 rounded-full object-cover cursor-pointer transition-all
-                        duration-300 ease-out border-2 border-transparent hover:border-indigo-300
-                        hover:scale-[1.01] hover:shadow-2xl
+                            h-64 w-64 rounded-full object-cover cursor-pointer transition-all
+                            duration-300 ease-out border-2 border-transparent hover:border-indigo-300
+                            hover:scale-[1.01] hover:shadow-2xl
                         "
                     />
+                    <!-- SLOT: сюда будет переезжать Header + Price при скролле страницы вниз/вверх-->
+                    <div
+                        id="ps-left-companion"
+                        class="mt-6 w-full space-y-4 transition-all duration-300"
+                    ></div>
                 </div>
 
                 <!-- RIGHT COLUMN -->
-                <div class="md:col-span-9 space-y-6 md:pl-6 md:pr-6 lg:pl-8 lg:pr-12">
+                <div class="md:col-span-8 space-y-6 md:pl-6 md:pr-6 lg:pl-8 lg:pr-12">
 
-                    <!-- Header -->
-                    <div>
-                        <h2 class="text-3xl font-semibold text-gray-900 pb-2">
-                            ${ps.full_name}
-                        </h2>
-                        <div class="inline-flex items-center gap-3">
-                            <div class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2 mt-3 hover:bg-gray-200 transition">
-                                <img
-                                    src="${staticUrl}images/psychologist_profile/goal-svgrepo-com.svg"
-                                    alt="goal_icon"
-                                />
-                                <span class="text-lg text-gray-700 font-medium">
-                                    ${ps.rating} из 10
-                                </span>
-                            </div>
-                            <div class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2 mt-3 hover:bg-gray-200 transition">
-                                <img
-                                    src="${staticUrl}images/psychologist_profile/seal-check.svg"
-                                    alt="check_icon"
-                                />
-                                <span class="text-lg text-gray-700 font-medium">
-                                    ${ps.work_experience
-                                        ? `Опыт ${ps.work_experience} ${word}`
-                                        : "Опыт не указан"}
-                                </span>
+                    <!-- Оборачиваем Header + Price чтоб потом можно было перенести под фото при скролле -->
+                    <div id="ps-main-header">
+
+                        <!-- Header -->
+                        <div class="pb-4">
+                            <h2 class="text-3xl font-semibold text-gray-900 pb-2">
+                                ${ps.full_name}
+                            </h2>
+                            <div class="inline-flex items-center gap-3">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2 mt-3 hover:bg-gray-200 transition">
+                                    <img
+                                        src="${staticUrl}images/psychologist_profile/goal-svgrepo-com.svg"
+                                        alt="goal_icon"
+                                    />
+                                    <span class="text-lg text-gray-700 font-medium">
+                                        ${ps.rating} из 10
+                                    </span>
+                                </div>
+                                <div class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2 mt-3 hover:bg-gray-200 transition">
+                                    <img
+                                        src="${staticUrl}images/psychologist_profile/seal-check.svg"
+                                        alt="check_icon"
+                                    />
+                                    <span class="text-lg text-gray-700 font-medium">
+                                        ${ps.work_experience
+                                            ? `Опыт ${ps.work_experience} ${word}`
+                                            : "Опыт не указан"}
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Price -->
-                    <div class="rounded-xl bg-transparent p-0">
-                        <p class="text-lg font-medium text-gray-700 dark:text-gray-200">
-                            ${sessionLabel}
-                        </p>
-                        <p class="mt-0 text-xl font-semibold text-gray-700">
-                            ${priceValue} ₽
-                        </p>
+                        <!-- Price -->
+                        <div class="rounded-xl bg-transparent p-0">
+                            <p class="text-lg font-medium text-gray-700 dark:text-gray-200">
+                                ${sessionLabel}
+                            </p>
+                            <p class="mt-0 text-xl font-semibold text-gray-700">
+                                ${priceValue} ₽
+                            </p>
+                        </div>
+
                     </div>
 
                     <!-- Nearest slot (stub) -->
@@ -380,4 +398,58 @@ function renderPsychologistCard(ps) {
         </div>
     `;
 
+    // Инициализируем sticky-поведение в HTML-ШАБЛОН для Header + Price при скролле карточки психолога вниз
+    initStickyHeaderBehavior();
+
+}
+
+
+// ===== STICKY COMPANION: перенос "Header + Price" под АВАТАР при скролле карточки клиента вниз =====
+let headerObserver = null;
+let stickyHeaderClone = null;
+
+function initStickyHeaderBehavior() {
+    const header = document.getElementById("ps-main-header");
+    const leftSlot = document.getElementById("ps-left-companion");
+
+    if (!header || !leftSlot) return;
+
+    // Создаем clone ОДИН раз
+    if (!stickyHeaderClone) {
+        stickyHeaderClone = header.cloneNode(true);
+        stickyHeaderClone.id = "ps-main-header-clone";
+        stickyHeaderClone.classList.add("ps-header-clone");
+        stickyHeaderClone.classList.add(
+            "opacity-0",
+            "pointer-events-none",
+            "transition-opacity",
+            "duration-300"
+        );
+        leftSlot.appendChild(stickyHeaderClone);
+    }
+
+    if (headerObserver) {
+        headerObserver.disconnect();
+    }
+
+    headerObserver = new IntersectionObserver(
+        ([entry]) => {
+            if (!entry.isIntersecting) {
+                // показываем clone
+                stickyHeaderClone.classList.remove("opacity-2", "pointer-events-none");
+                stickyHeaderClone.classList.add("opacity-100");
+            } else {
+                // скрываем clone
+                stickyHeaderClone.classList.add("opacity-2", "pointer-events-none");
+                stickyHeaderClone.classList.remove("opacity-100");
+            }
+        },
+        {
+            root: null,
+            threshold: 0,
+            rootMargin: "-80px 0px 0px 0px",
+        }
+    );
+
+    headerObserver.observe(header);
 }

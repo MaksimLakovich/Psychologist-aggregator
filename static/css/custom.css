@@ -1,5 +1,4 @@
 /* ===== СТИЛЬ ДЛЯ СВОРАЧИВАНИЯ БИОГРАФИИ ПСИХОЛОГА В КАРТОЧКЕ ПСИХОЛОГА ===== */
-
 .biography-text[data-collapsed="true"] {
     max-height: 7.5em; /* ~5 строк */
 }
@@ -15,4 +14,27 @@
         rgba(255,255,255,0),
         rgba(255,255,255,1)
     );
+}
+
+
+/* ===== СТИЛЬ ДЛЯ УМЕНЬШЕНОГО ТЕКСТА ПОД ФОТО ПСИХОЛОГА ПРИ СКРОЛЛЕ ВНИЗ КАРТОЧКИ ПСИХОЛОГА ===== */
+.ps-header-clone {
+    font-size: 0.875rem; /* ≈ text-sm */
+}
+
+.ps-header-clone h2 {
+    font-size: 1.5rem; /* вместо text-3xl → примерно text-2xl */
+}
+
+.ps-header-clone .text-lg {
+    font-size: 1rem;
+}
+
+.ps-header-clone .text-xl {
+    font-size: 1.125rem;
+}
+
+/* ===== СТИЛЬ ДЛЯ ЭЛЕМЕНТОВ ПОД ФОТО ПСИХОЛОГА ЧТОБ ОНИ БЫЛИ ПО ЦЕНТРУ ПОД ФОТО ===== */
+.ps-header-clone {
+    text-align: center;
 }
