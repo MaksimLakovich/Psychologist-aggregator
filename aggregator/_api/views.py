@@ -146,6 +146,7 @@ class MatchPsychologistsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
                 "id": ps.id,
                 "full_name": f"{ps.user.first_name} {ps.user.last_name}".strip(),
                 "photo": ps.photo.url if ps.photo else "/static/images/menu/user-circle.svg",
+                "session_type": preferred_topic_type,
                 "price": {
                     "value": str(price_value),
                     "currency": ps.price_currency,

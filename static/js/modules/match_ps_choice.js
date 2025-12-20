@@ -5,7 +5,7 @@ let currentOffset = 0;
 const PAGE_SIZE = 10;
 let selectedPsychologistId = null;
 
-// Вспомогательная функция для хранения состояния страницы выбора
+// ===== Вспомогательная функция для хранения состояния страницы выбора =====
 function isPageReload() {
     const nav = performance.getEntriesByType("navigation")[0];
     return nav && nav.type === "reload";
@@ -15,6 +15,27 @@ export function initPsychologistsChoice() {
     fetchPsychologists();
     initNavigation();
 }
+
+// ===== Кнопка СВЕРНУТЬ / РАЗВЕРНУТЬ для биографии и других полей карточки психологов =====
+window.toggleBiography = function (btn) {
+    const wrapper = btn.previousElementSibling;
+    if (!wrapper) return;
+
+    const text = wrapper.querySelector(".biography-text");
+    const fade = wrapper.querySelector(".biography-fade");
+
+    if (!text) return;
+
+    const isCollapsed = text.dataset.collapsed === "true";
+
+    text.dataset.collapsed = String(!isCollapsed);
+    btn.textContent = isCollapsed ? "Свернуть" : "Развернуть";
+
+    if (fade) {
+        fade.style.display = isCollapsed ? "none" : "block";
+    }
+};
+
 
 // ШАГ 1: ЗАГРУЗКА ДАННЫХ
 function fetchPsychologists() {
@@ -196,6 +217,16 @@ function renderPsychologistCard(ps) {
         "лет"
     );
 
+    // 4) Логика отображения PRICE в зависимости от "individual/couple"
+    const isCoupleSession = ps.session_type === "couple";
+
+    const sessionLabel = isCoupleSession
+        ? "Парная сессия · 1,5 часа"
+        : "Индивидуальная сессия · 50 минут";
+
+    // 5) Убираем копейки
+    const priceValue = Number(ps.price.value).toFixed(0);
+
 
     // HTML-ШАБЛОН
     container.innerHTML = `
@@ -251,10 +282,10 @@ function renderPsychologistCard(ps) {
                     <!-- Price -->
                     <div class="rounded-xl bg-transparent p-0">
                         <p class="text-lg font-medium text-gray-700 dark:text-gray-200">
-                            Индивидуальная сессия · 50 минут
+                            ${sessionLabel}
                         </p>
                         <p class="mt-0 text-xl font-semibold text-gray-700">
-                            ${ps.price.value} ₽
+                            ${priceValue} ₽
                         </p>
                     </div>
 
@@ -268,7 +299,7 @@ function renderPsychologistCard(ps) {
                                     Ближайшая запись
                                 </p>
                                 <p
-                                    class="mt-0 text-lg font-semibold text-indigo-700 hover:text-indigo-800 transition"
+                                    class="mt-0 text-lg font-semibold text-indigo-700 hover:text-indigo-800 transition cursor-pointer"
                                     onclick="document.getElementById('psychologist-schedule')?.scrollIntoView({behavior: 'smooth'})"
                                 >
                                     20 декабря в 21:00
@@ -289,9 +320,22 @@ function renderPsychologistCard(ps) {
                         <h3 class="text-xl font-semibold text-gray-900">
                             О специалисте
                         </h3>
-                        <p class="mt-2 text-lg text-gray-700 leading-relaxed">
-                            ${ps.biography || "Описание специалиста не указано"}
-                        </p>
+                        <div class="relative mt-2">
+                            <p
+                                class="biography-text text-lg text-gray-700 leading-relaxed overflow-hidden transition-all"
+                                data-collapsed="true"
+                            >
+                                ${ps.biography || "Описание специалиста не указано"}
+                            </p>
+                            <div class="biography-fade pointer-events-none"></div>
+                        </div>
+                        <button
+                            type="button"
+                            class="mt-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                            onclick="toggleBiography(this)"
+                        >
+                            Развернуть
+                        </button>
                     </div>
 
                     <!-- Education -->
@@ -321,7 +365,7 @@ function renderPsychologistCard(ps) {
                     <!-- Schedule -->
                     <div
                         id="psychologist-schedule"
-                        class="rounded-xl border border-dashed p-4 pb-7
+                        class="rounded-xl border border-dashed p-4 pb-7"
                     >
                         <p class="text-sm text-gray-500">
                             Расписание появится после подключения календаря
