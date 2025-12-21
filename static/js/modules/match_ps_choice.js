@@ -40,11 +40,35 @@ window.toggleBiography = function (btn) {
 
 
 // Вспомогательная функция для автоматической прокрутки к началу страницы при переключении между карточками психологов
-function scrollToPageTop() {
+function scrollToTopThen(callback) {
     window.scrollTo({
         top: 0,
         behavior: "smooth",
     });
+
+    // Ждем пока автоматический scroll вверх реально завершится
+    let lastY = window.scrollY;
+    let sameCount = 0;
+
+    const check = () => {
+        const currentY = window.scrollY;
+
+        if (currentY === lastY) {
+            sameCount += 1;
+        } else {
+            sameCount = 0;
+            lastY = currentY;
+        }
+
+        // scroll стабилизировался
+        if (sameCount >= 3) {
+            callback();
+        } else {
+            requestAnimationFrame(check);
+        }
+    };
+
+    requestAnimationFrame(check);
 }
 
 
@@ -70,10 +94,11 @@ function fetchPsychologists() {
             selectedPsychologistId = selected.id;
 
             renderAvatars();
-            renderPsychologistCard(selected);
 
-            // ✅ чтобы при reload / или при первом заходе тоже было начало страницы
-            scrollToPageTop();
+            scrollToTopThen(() => {
+                renderPsychologistCard(selected);
+                initStickyHeaderBehavior();
+            });
         })
 
         .catch(err => {
@@ -121,10 +146,11 @@ function renderAvatars() {
             );
 
             renderAvatars();
-            renderPsychologistCard(ps);
 
-            // Отвечает за автоматическую прокрутку к началу страницы при переключении на другого психолога
-            scrollToPageTop();
+            scrollToTopThen(() => {
+                renderPsychologistCard(ps);
+                initStickyHeaderBehavior();
+            });
 
         });
 
@@ -414,9 +440,6 @@ function renderPsychologistCard(ps) {
         </div>
     `;
 
-    // Инициализируем sticky-поведение в HTML-ШАБЛОН для Header + Price при скролле карточки психолога вниз
-    initStickyHeaderBehavior();
-
 }
 
 
@@ -463,11 +486,11 @@ function initStickyHeaderBehavior() {
         ([entry]) => {
             if (!entry.isIntersecting) {
                 // показываем clone
-                stickyHeaderClone.classList.remove("opacity-2", "pointer-events-none");
+                stickyHeaderClone.classList.remove("opacity-0", "pointer-events-none");
                 stickyHeaderClone.classList.add("opacity-100");
             } else {
                 // скрываем clone
-                stickyHeaderClone.classList.add("opacity-2", "pointer-events-none");
+                stickyHeaderClone.classList.add("opacity-0", "pointer-events-none");
                 stickyHeaderClone.classList.remove("opacity-100");
             }
         },
