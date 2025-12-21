@@ -265,19 +265,25 @@ function renderPsychologistCard(ps) {
         `;
     };
 
-    // 2) Логика для отображения БЕЙДЖЕВ
+    // 2) Логика для отображения БЕЙДЖЕВ в КОЛОНКУ (например, Topics)
     const COLOR_MAP = {
         indigo: "bg-indigo-100 text-indigo-700",
         green: "bg-green-100 text-green-700",
     };
 
-    const renderBadges = (items = [], color = "indigo") => {
+    const renderBadges = (items = [], color = "indigo", direction = "row") => {
         if (!items.length) {
             return `<p class="text-gray-500 text-sm">Не указано</p>`;
         }
 
+        // Это задает в бэйджах отображение значений в колонку (один под одним)
+        const directionClass =
+            direction === "column"
+                ? "flex-col items-start"
+                : "flex-wrap";
+
         return `
-            <div class="mt-3 flex flex-wrap gap-2">
+            <div class="mt-3 flex flex-wrap gap-2 ${directionClass}">
                 ${items.map(item => `
                     <span class="rounded-full px-3 py-1 text-lg ${COLOR_MAP[color]}">
                         ${item.name}
@@ -287,7 +293,26 @@ function renderPsychologistCard(ps) {
         `;
     };
 
-    // 3) Подключаю pluralize_ru.js и рассчитываем правильное окончание для слова ГОД
+    // 3) Логика для отображения СПИСКА в КОЛОНКУ (например, Methods)
+    const renderVerticalList = (items = []) => {
+        if (!items.length) {
+            return `<p class="text-gray-500 text-sm">Не указано</p>`;
+        }
+
+        return `
+            <ul class="relative mt-2 space-y-2">
+                ${items.map(item => `
+                    <li class="flex items-center gap-2 text-lg text-gray-700">
+                        <span class="h-2 w-2 rounded-full bg-indigo-400 flex-shrink-0"></span>
+                        <span>${item.name}</span>
+                    </li>
+                `).join("")}
+            </ul>
+        `;
+    };
+
+
+    // 4) Подключаю pluralize_ru.js и рассчитываем правильное окончание для слова ГОД
     const word = pluralizeRu(
         ps.work_experience,
         "год",
@@ -295,14 +320,14 @@ function renderPsychologistCard(ps) {
         "лет"
     );
 
-    // 4) Логика отображения PRICE в зависимости от "individual/couple"
+    // 5) Логика отображения PRICE в зависимости от "individual/couple"
     const isCoupleSession = ps.session_type === "couple";
 
     const sessionLabel = isCoupleSession
         ? "Парная сессия · 1,5 часа"
         : "Индивидуальная сессия · 50 минут";
 
-    // 5) Убираем копейки
+    // 6) Убираем копейки
     const priceValue = Number(ps.price.value).toFixed(0);
 
 
@@ -439,10 +464,25 @@ function renderPsychologistCard(ps) {
 
                     <!-- Methods -->
                     <div class="pb-7">
-                        <h3 class="text-xl font-semibold text-gray-900">
-                            Методы терапии
-                        </h3>
-                        ${renderBadges(ps.methods, "indigo")}
+
+                        <div class="flex inline-flex items-center gap-2">
+                            <h3 class="text-xl font-semibold text-gray-900">
+                                Методы терапии
+                            </h3>
+                            <button
+                                type="button"
+                                class="text-sm font-medium text-indigo-500 hover:text-indigo-900 transition"
+                                onclick="openMethodsInfoModal(${ps.id})"
+                            >
+                                <img
+                                    src="${staticUrl}images/psychologist_profile/info.svg"
+                                    alt="info_icon"
+                                />
+                            </button>
+                        </div>
+
+                        ${renderVerticalList(ps.methods)}
+
                     </div>
 
                     <!-- Topics -->
@@ -450,7 +490,7 @@ function renderPsychologistCard(ps) {
                         <h3 class="text-xl font-semibold text-gray-900">
                             Работает с темами вашей анкеты
                         </h3>
-                        ${renderBadges(ps.matched_topics, "green")}
+                        ${renderBadges(ps.matched_topics, "indigo", "column")}
                     </div>
 
                     <!-- Schedule -->
@@ -535,3 +575,33 @@ function initStickyHeaderBehavior() {
 
     headerObserver.observe(header);
 }
+
+
+// МОДАЛКА
+window.openMethodsInfoModal = function (psychologistId) {
+    const ps = psychologists.find(p => p.id === psychologistId);
+    if (!ps || !ps.methods?.length) return;
+
+    const content = document.getElementById("methods-info-content");
+    const modal = document.getElementById("methods-info-modal");
+
+    content.innerHTML = ps.methods.map(method => `
+        <div>
+            <h4 class="text-lg font-semibold text-gray-900">
+                ${method.name}
+            </h4>
+            <p class="mt-1 text-gray-700 leading-relaxed">
+                ${method.description || "Описание отсутствует"}
+            </p>
+        </div>
+    `).join("");
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+};
+
+window.closeMethodsInfoModal = function () {
+    const modal = document.getElementById("methods-info-modal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+};
