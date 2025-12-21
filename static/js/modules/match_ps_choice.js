@@ -267,8 +267,8 @@ function renderPsychologistCard(ps) {
 
     // 2) Логика для отображения БЕЙДЖЕВ в КОЛОНКУ (например, Topics)
     const COLOR_MAP = {
-        indigo: "bg-indigo-100 text-indigo-700",
-        green: "bg-green-100 text-green-700",
+        indigo: "bg-indigo-200 text-indigo-700",
+        green: "bg-green-200 text-green-700",
     };
 
     const renderBadges = (items = [], color = "indigo", direction = "row") => {
@@ -508,9 +508,26 @@ function renderPsychologistCard(ps) {
 
                 </div>
             </div>
+
+            <!-- ========== КНОПКА + ЮРИДИЧЕСКИЙ ТЕКСТ ========== -->
+            <div class="pt-6 pb-16 flex justify-center">
+                <div class="w-full max-w-md text-center">
+                    <p class="mt-0 text-xs text-gray-500 leading-relaxed">
+                        Нажимая кнопку, вы подтверждаете, что ознакомлены и согласны с договором
+                        оказания услуг и даёте согласие на обработку персональных данных психологу.
+                    </p>
+                    <button
+                        type="submit"
+                        class="mt-6 w-full px-10 py-3.5 rounded-xl bg-indigo-700 text-xl text-white font-medium
+                               hover:bg-indigo-900 transition shadow"
+                    >
+                        Выбрать время сессии
+                    </button>
+                </div>
+            </div>
+
         </div>
     `;
-
 }
 
 

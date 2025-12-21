@@ -2745,6 +2745,11 @@ input:checked + .toggle-bg {
   background-color: rgb(255 255 255 / 0.5);
 }
 
+.bg-green-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(188 240 218 / var(--tw-bg-opacity, 1));
+}
+
 .object-contain {
   -o-object-fit: contain;
      object-fit: contain;
@@ -2925,6 +2930,18 @@ input:checked + .toggle-bg {
 
 .pt-4 {
   padding-top: 1rem;
+}
+
+.pb-12 {
+  padding-bottom: 3rem;
+}
+
+.pb-16 {
+  padding-bottom: 4rem;
+}
+
+.pb-20 {
+  padding-bottom: 5rem;
 }
 
 .text-center {
