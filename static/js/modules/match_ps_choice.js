@@ -39,14 +39,11 @@ window.toggleBiography = function (btn) {
 };
 
 
-// Вспомогательная функция для автоматической прокрутки к началу карточки при переключении между карточками психологов
-function scrollToPsychologistCard() {
-    const card = document.getElementById("psychologist-card");
-    if (!card) return;
-
-    card.scrollIntoView({
+// Вспомогательная функция для автоматической прокрутки к началу страницы при переключении между карточками психологов
+function scrollToPageTop() {
+    window.scrollTo({
+        top: 0,
         behavior: "smooth",
-        block: "start",
     });
 }
 
@@ -75,8 +72,8 @@ function fetchPsychologists() {
             renderAvatars();
             renderPsychologistCard(selected);
 
-            // ✅ чтобы при reload / первом заходе тоже было начало карточки
-            scrollToPsychologistCard();
+            // ✅ чтобы при reload / или при первом заходе тоже было начало страницы
+            scrollToPageTop();
         })
 
         .catch(err => {
@@ -126,8 +123,8 @@ function renderAvatars() {
             renderAvatars();
             renderPsychologistCard(ps);
 
-            // Отвечает за прокрутку к началу карточки при переключении на другого психолога
-            scrollToPsychologistCard();
+            // Отвечает за автоматическую прокрутку к началу страницы при переключении на другого психолога
+            scrollToPageTop();
 
         });
 
