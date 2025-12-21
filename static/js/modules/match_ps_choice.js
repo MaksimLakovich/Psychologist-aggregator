@@ -279,7 +279,7 @@ function renderPsychologistCard(ps) {
         return `
             <div class="mt-3 flex flex-wrap gap-2">
                 ${items.map(item => `
-                    <span class="rounded-full px-3 py-1 text-sm ${COLOR_MAP[color]}">
+                    <span class="rounded-full px-3 py-1 text-lg ${COLOR_MAP[color]}">
                         ${item.name}
                     </span>
                 `).join("")}
@@ -446,7 +446,7 @@ function renderPsychologistCard(ps) {
                     </div>
 
                     <!-- Topics -->
-                    <div class="pb-10">
+                    <div class="pb-7">
                         <h3 class="text-xl font-semibold text-gray-900">
                             Работает с темами вашей анкеты
                         </h3>
@@ -456,12 +456,12 @@ function renderPsychologistCard(ps) {
                     <!-- Schedule -->
                     <div
                         id="psychologist-schedule"
-                        class="rounded-xl border border-dashed p-4 pb-7"
+                        class="pb-7"
                     >
-                        <p class="text-sm text-gray-500">
-                            Расписание появится после подключения календаря
-                        </p>
-                        <p class="text-xs text-gray-400 mt-1">
+                        <h3 class="text-xl font-semibold text-gray-900">
+                            Расписание
+                        </h3>
+                        <p class="text-lg text-gray-700 leading-relaxed overflow-hidden transition-all mt-2">
                             Часовой пояс: ${ps.timezone || "не указан"}
                         </p>
                     </div>
