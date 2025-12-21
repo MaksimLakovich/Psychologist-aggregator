@@ -333,7 +333,7 @@ function renderPsychologistCard(ps) {
 
     // HTML-ШАБЛОН
     container.innerHTML = `
-        <div class="mt-8 rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div class="mt-8 rounded-2xl border border-indigo-100 bg-white shadow-2xl shadow-indigo-300">
 
             <div class="relative grid grid-cols-1 md:grid-cols-12 gap-6 p-6 pt-16">
 
