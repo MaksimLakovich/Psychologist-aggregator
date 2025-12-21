@@ -285,7 +285,7 @@ function renderPsychologistCard(ps) {
         return `
             <div class="mt-3 flex flex-wrap gap-2 ${directionClass}">
                 ${items.map(item => `
-                    <span class="rounded-full px-3 py-1 text-lg ${COLOR_MAP[color]}">
+                    <span class="rounded-full px-3 py-1 text-base font-medium ${COLOR_MAP[color]}">
                         ${item.name}
                     </span>
                 `).join("")}
@@ -333,7 +333,7 @@ function renderPsychologistCard(ps) {
 
     // HTML-ШАБЛОН
     container.innerHTML = `
-        <div class="mt-8 rounded-2xl border border-indigo-100 bg-white shadow-2xl shadow-indigo-300">
+        <div class="mt-8 rounded-2xl border-2 border-indigo-100 bg-indigo-50 shadow-2xl shadow-indigo-300">
 
             <div class="relative grid grid-cols-1 md:grid-cols-12 gap-6 p-6 pt-16">
 
@@ -347,7 +347,7 @@ function renderPsychologistCard(ps) {
                         alt="Фото психолога"
                         class="
                             h-64 w-64 rounded-full object-cover cursor-pointer transition-all
-                            duration-300 ease-out border-2 border-transparent hover:border-indigo-300
+                            duration-300 ease-out border-1 border-transparent hover:border-indigo-300
                             hover:scale-[1.01] hover:shadow-2xl
                         "
                     />
@@ -370,7 +370,7 @@ function renderPsychologistCard(ps) {
                                 ${ps.full_name}
                             </h2>
                             <div class="inline-flex items-center gap-3">
-                                <div class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2 mt-3 hover:bg-gray-200 transition">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-2 mt-3 hover:bg-indigo-200 transition">
                                     <img
                                         src="${staticUrl}images/psychologist_profile/goal-svgrepo-com.svg"
                                         alt="goal_icon"
@@ -379,7 +379,7 @@ function renderPsychologistCard(ps) {
                                         ${ps.rating} из 10
                                     </span>
                                 </div>
-                                <div class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2 mt-3 hover:bg-gray-200 transition">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-2 mt-3 hover:bg-indigo-200 transition">
                                     <img
                                         src="${staticUrl}images/psychologist_profile/seal-check.svg"
                                         alt="check_icon"
