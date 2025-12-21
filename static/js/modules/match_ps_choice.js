@@ -470,6 +470,7 @@ function initStickyHeaderBehavior() {
         stickyHeaderClone = header.cloneNode(true);
         stickyHeaderClone.id = "ps-main-header-clone";
         stickyHeaderClone.classList.add(
+            "ps-header-clone",          // ДОБАВЛЯЮ кастомный стиль для clone под ФОТО ПСИХОЛОГА
             "opacity-0",
             "pointer-events-none",
             "transition-opacity",
