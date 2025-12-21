@@ -39,6 +39,18 @@ window.toggleBiography = function (btn) {
 };
 
 
+// Вспомогательная функция для автоматической прокрутки к началу карточки при переключении между карточками психологов
+function scrollToPsychologistCard() {
+    const card = document.getElementById("psychologist-card");
+    if (!card) return;
+
+    card.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+    });
+}
+
+
 // ===== ШАГ 1: ЗАГРУЗКА ДАННЫХ =====
 function fetchPsychologists() {
     fetch("/aggregator/api/match-psychologists/")
@@ -62,6 +74,9 @@ function fetchPsychologists() {
 
             renderAvatars();
             renderPsychologistCard(selected);
+
+            // ✅ чтобы при reload / первом заходе тоже было начало карточки
+            scrollToPsychologistCard();
         })
 
         .catch(err => {
@@ -110,6 +125,10 @@ function renderAvatars() {
 
             renderAvatars();
             renderPsychologistCard(ps);
+
+            // Отвечает за прокрутку к началу карточки при переключении на другого психолога
+            scrollToPsychologistCard();
+
         });
 
         container.appendChild(img);
@@ -414,11 +433,22 @@ function initStickyHeaderBehavior() {
 
     if (!header || !leftSlot) return;
 
-    // Создаем clone ОДИН раз
+    // 1) ОТКЛЮЧАЕМ старый observer
+    if (headerObserver) {
+        headerObserver.disconnect();
+        headerObserver = null;
+    }
+
+    // 2) УДАЛЯЕМ старый clone
+    if (stickyHeaderClone) {
+        stickyHeaderClone.remove();
+        stickyHeaderClone = null;
+    }
+
+    // 3) Создаем clone ВСЕГДА заново
     if (!stickyHeaderClone) {
         stickyHeaderClone = header.cloneNode(true);
         stickyHeaderClone.id = "ps-main-header-clone";
-        stickyHeaderClone.classList.add("ps-header-clone");
         stickyHeaderClone.classList.add(
             "opacity-0",
             "pointer-events-none",
