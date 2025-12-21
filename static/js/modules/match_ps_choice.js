@@ -18,7 +18,7 @@ export function initPsychologistsChoice() {
 }
 
 
-// Вспомогательная функция для кнопки СВЕРНУТЬ / РАЗВЕРНУТЬ (биография и другие поля карточки психологов)
+// Вспомогательная функция для кнопки СВЕРНУТЬ / РАЗВЕРНУТЬ (биография)
 window.toggleBiography = function (btn) {
     const wrapper = btn.previousElementSibling;
     if (!wrapper) return;
@@ -31,11 +31,23 @@ window.toggleBiography = function (btn) {
     const isCollapsed = text.dataset.collapsed === "true";
 
     text.dataset.collapsed = String(!isCollapsed);
-    btn.textContent = isCollapsed ? "Свернуть" : "Развернуть";
+    btn.textContent = isCollapsed ? "Показать меньше" : "Показать больше";
 
     if (fade) {
         fade.style.display = isCollapsed ? "none" : "block";
     }
+};
+
+
+// Вспомогательная функция для кнопки СВЕРНУТЬ / РАЗВЕРНУТЬ (образование)
+window.toggleEducation = function (btn) {
+    const list = btn.previousElementSibling;
+    if (!list) return;
+
+    const isCollapsed = list.dataset.collapsed === "true";
+
+    list.dataset.collapsed = String(!isCollapsed);
+    btn.textContent = isCollapsed ? "Показать меньше" : "Показать больше";
 };
 
 
@@ -219,18 +231,37 @@ function renderPsychologistCard(ps) {
             return b.year_end - a.year_end;
         });
 
+        const hasMoreThanTwo = sorted.length > 2;
+
         return `
-            <ul class="mt-3 space-y-3">
+            <ul
+                class="relative education-list mt-2 space-y-3"
+                data-collapsed="true"
+            >
                 ${sorted.map(edu => `
-                    <li class="text-gray-700">
-                        <span class="font-medium">
-                            ${edu.year_start}–${edu.year_end ?? "в процессе"}
-                        </span>
-                        · ${edu.institution}
-                        ${edu.specialisation ? ` — ${edu.specialisation}` : ""}
+
+                    <li class="text-lg text-gray-700 leading-relaxed transition-all">
+                        <div class="font-medium">
+                            ${edu.year_end ?? "в процессе"}
+                        </div>
+                        <div>
+                            ${edu.institution}
+                            ${edu.specialisation ? `, ${edu.specialisation}` : ""}
+                        </div>
                     </li>
+
                 `).join("")}
             </ul>
+
+            ${hasMoreThanTwo ? `
+                <button
+                    type="button"
+                    class="mt-3 italic text-sm font-medium text-indigo-500 hover:text-indigo-900"
+                    onclick="toggleEducation(this)"
+                >
+                    Показать больше
+                </button>
+            ` : ""}
         `;
     };
 
@@ -394,7 +425,7 @@ function renderPsychologistCard(ps) {
                             class="mt-4 italic text-sm font-medium text-indigo-500 hover:text-indigo-900"
                             onclick="toggleBiography(this)"
                         >
-                            Развернуть
+                            Показать больше
                         </button>
                     </div>
 

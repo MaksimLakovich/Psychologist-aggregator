@@ -17,6 +17,12 @@
 }
 
 
+/* ===== СВОРАЧИВАНИЕ СПИСКА ОБРАЗОВАНИЯ ===== */
+.education-list[data-collapsed="true"] li:nth-child(n + 3) {
+    display: none;
+}
+
+
 /* ===== СТИЛЬ ДЛЯ УМЕНЬШЕНОГО ТЕКСТА ПОД ФОТО ПСИХОЛОГА ПРИ СКРОЛЛЕ ВНИЗ КАРТОЧКИ ПСИХОЛОГА ===== */
 .ps-header-clone {
     font-size: 0.875rem; /* ≈ text-sm */
