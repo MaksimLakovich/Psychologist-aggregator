@@ -1,0 +1,30 @@
+<div class="relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-lg">
+
+    <div class="flex items-center justify-between pb-6">
+        <h3 class="text-xl font-semibold text-indigo-500">
+            Методы терапии
+        </h3>
+        <button
+            type="button"
+            class="text-gray-400 hover:text-gray-900"
+            onclick="closeMethodsInfoModal()"
+        >
+            ✕
+        </button>
+    </div>
+
+    <div id="methods-info-content" class="border-t border-default space-y-4 pb-3 pt-3">
+        <!-- JS вставит контент -->
+    </div>
+
+    <div class="flex justify-center items-center border-t border-default space-x-4 pt-6 md:pt-5">
+        <button
+                type="button"
+                class="rounded-xl bg-indigo-500 border-indigo-900 px-6 py-2.5 text-white text-lg font-medium hover:bg-indigo-900 transition"
+                onclick="closeMethodsInfoModal()"
+        >
+            Ок
+        </button>
+    </div>
+
+</div>
