@@ -285,7 +285,7 @@ function renderPsychologistCard(ps) {
         return `
             <div class="mt-3 flex flex-wrap gap-2 ${directionClass}">
                 ${items.map(item => `
-                    <span class="rounded-full px-3 py-1 text-base font-medium ${COLOR_MAP[color]}">
+                    <span class="rounded-full px-3 py-1 text-base font-medium tracking-wider ${COLOR_MAP[color]}">
                         ${item.name}
                     </span>
                 `).join("")}
@@ -514,7 +514,7 @@ function renderPsychologistCard(ps) {
                 <div class="w-full max-w-md text-center">
                     <p class="mt-0 text-xs text-gray-500 leading-relaxed">
                         Нажимая кнопку, вы подтверждаете, что ознакомлены и согласны с договором
-                        оказания услуг и даёте согласие на обработку персональных данных психологу.
+                        оказания услуг и даёте согласие на обработку персональных данных психологу
                     </p>
                     <button
                         type="submit"
