@@ -5,6 +5,7 @@ from core.views.start_view import StartPageView
 from core.views.view_choice_psychologist import \
     ClientChoicePsychologistPageView
 from core.views.view_general_questions import ClientGeneralQuestionsPageView
+from core.views.view_payment_card import ClientAddPaymentCardPageView
 from core.views.view_personal_questions import ClientPersonalQuestionsPageView
 
 app_name = CoreConfig.name
@@ -14,4 +15,5 @@ urlpatterns = [
     path("general-questions/", ClientGeneralQuestionsPageView.as_view(), name="general-questions"),
     path("personal-questions/", ClientPersonalQuestionsPageView.as_view(), name="personal-questions"),
     path("choice-psychologist/", ClientChoicePsychologistPageView.as_view(), name="choice-psychologist"),
+    path("payment-card/", ClientAddPaymentCardPageView.as_view(), name="payment-card"),
 ]
