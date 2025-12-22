@@ -1,0 +1,24 @@
+<div class="relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-lg">
+
+    <div class="flex items-center justify-between pb-6">
+        <h3 class="text-xl font-semibold text-indigo-500">
+            Договор оказания услуг
+        </h3>
+        <button
+                type="button"
+                class="text-gray-400 hover:text-gray-900"
+                onclick="closeServiceAgreementModal()"
+        >
+            ✕
+        </button>
+    </div>
+
+    <!-- ВАЖНО: уникальный id -->
+    <div
+            id="service-agreement-content"
+            class="border-t border-default space-y-4 pb-3 pt-3 text-sm text-gray-700 leading-relaxed max-h-[70vh] overflow-y-auto"
+    >
+        <!-- Контент будет подставляться через JS -->
+    </div>
+
+</div>
