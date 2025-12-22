@@ -92,7 +92,7 @@
                 </div>
 
                 <!-- ========== Блок 1 ========== -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 pb-7">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-16 pb-7">
                     <!-- Левая колонка -->
                     <div class="md:col-span-3">
                         <h2 class="text-xl font-semibold text-gray-900">Общие вопросы</h2>
@@ -136,7 +136,7 @@
                 </div>
 
                 <!-- ========== Блок 2 ========== -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 pb-7">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-16 pb-7">
                     <!-- Левая колонка -->
                     <div class="md:col-span-3">
                         <h2 class="text-xl font-semibold text-gray-900">Был ли у вас опыт терапии?</h2>
@@ -156,7 +156,7 @@
                 </div>
 
                 <!-- ========== Блок 3 ========== -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 pb-7">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-16 pb-7">
                     <!-- Левая колонка -->
                     <div class="md:col-span-3">
                         <h2 class="text-xl font-semibold text-gray-900">Часовой пояс</h2>
@@ -167,6 +167,26 @@
                         {{ form.timezone }}
                         <label class="block mb-2 mt-1 text-sm font-medium text-gray-400">
                             Для корректного отображения расписания сессий
+                        </label>
+                    </div>
+                </div>
+
+                <!-- ========== Блок 4 ========== -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-16 pb-7">
+                    <!-- Левая колонка -->
+                    <div class="md:col-span-3">
+                        <h2 class="text-xl font-semibold text-gray-900">Получать информацию о сессиях, полезные материалы и персональные предложения</h2>
+                    </div>
+
+                    <!-- Правая колонка -->
+                    <div class="md:col-span-9 pt-1">
+                        <label class="inline-flex items-center cursor-pointer">
+
+                            <div class="relative w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-indigo-700
+                                    transition-all after:absolute after:h-5 after:w-5 after:bg-white after:rounded-full
+                                    after:top-0.5 after:left-0.5 after:transition-all peer-checked:after:translate-x-5">
+                            </div>
+                            <span class="ml-3 text-base text-gray-700">Да, хочу получать</span>
                         </label>
                     </div>
                 </div>
