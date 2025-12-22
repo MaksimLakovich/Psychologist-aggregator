@@ -10,7 +10,7 @@
 <section class="bg-white py-8 antialiased dark:bg-gray-900 md:py-0">
     <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
 
-        <div class="gap-8 lg:flex">
+        <div class="pb-24 gap-8 lg:flex">
 
             <!-- ФОРМА -->
             <form method="post" action="" class="w-full space-y-6 lg:space-y-8">
@@ -98,7 +98,7 @@
                     </div>
 
                     <!-- ========== АВАТАРЫ ========== -->
-                    <div class="mt-4">
+                    <div class="mt-4 p-4">
                         {% include 'core/client_pages/home_choice_avatar.html' %}
                     </div>
 
@@ -112,23 +112,32 @@
                     ></div>
                 </div>
 
-                <!-- ========== КНОПКА ========== -->
-                <div>
-                    <p>
-                        Нажимая кнопку, вы подтверждаете, что ознакомлены и согласны с договором оказания услуг
-                        и даёте согласие на обработку персональных данных психологу.
-                    </p>
-                </div>
-                <div class="pt-6 pb-24 flex justify-center bg-gray-500">
-                    <button type="submit" class="px-10 py-3.5 rounded-xl bg-indigo-700 text-xl text-white font-medium
-                               hover:bg-indigo-900 transition shadow">
-                        Выбрать время сессии
-                    </button>
-                </div>
             </form>
+
         </div>
+
     </div>
 </section>
+
+
+<!-- МОДАЛЬНОЕ ОКНО - Methods Info Modal -->
+<div
+        id="methods-info-modal"
+        tabindex="-1"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+>
+    {% include 'core/client_pages/modal_method_info.html' %}
+</div>
+
+
+<!-- МОДАЛЬНОЕ ОКНО - Договор оказания услуг -->
+<div
+        id="service-agreement-modal"
+        tabindex="-1"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+>
+    {% include 'core/client_pages/modal_service_agreement.html' %}
+</div>
 
 
 <script type="module" src="{% static 'js/pages/choice_psychologist.js' %}"></script>
