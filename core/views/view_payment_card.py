@@ -2,15 +2,15 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import FormView
 
-from core.forms.form_choice_psychologist import ClientChoicePsychologistForm
+from core.forms.form_payment_card import ClientAddPaymentCardForm
 
 
-class ClientChoicePsychologistPageView(LoginRequiredMixin, FormView):
-    """Контроллер на основе FormView для отображения страницы *Выбор психолога*."""
+class ClientAddPaymentCardPageView(LoginRequiredMixin, FormView):
+    """Контроллер на основе FormView для отображения страницы *Завершение записи и добавление платежной карты*."""
 
-    template_name = "core/client_pages/home_client_choice_psychologist.html"
-    form_class = ClientChoicePsychologistForm
-    success_url = reverse_lazy("core:payment-card")
+    template_name = "core/client_pages/home_client_payment_card.html"
+    form_class = ClientAddPaymentCardForm
+    success_url = reverse_lazy("core:payment-card")  # TODO: Заменить позже, когда создам след страницу
 
     def get_context_data(self, **kwargs):
         """Формирование контекста для передачи данных в HTML-шаблон.
