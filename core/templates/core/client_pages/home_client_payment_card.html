@@ -91,27 +91,28 @@
                     </ol>
                 </div>
 
-                <!-- ========== ДОБАВЛЕНИЕ КАРТЫ ========== -->
-                <div class="bg-white py-8 antialiased dark:bg-gray-900 md:py-1">
+                <!-- ========== БРОНЬ + ДОБАВЛЕНИЕ КАРТЫ ========== -->
+                <div class="flex justify-center text-center bg-white py-8 antialiased dark:bg-gray-900 md:py-6">
                     <div class="mx-auto max-w-screen-xl px-4 2xl:px-0 bg-white">
-                        <div class="mx-auto max-w-5xl">
-                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
+                        <div class="mx-auto max-w-5xl py-1 bg-white">
+
+                            <h2 class="text-3xl font-semibold text-gray-900 dark:text-white">
                                 Добавьте карту для записи
                             </h2>
 
                             <div class="mt-6 sm:mt-8 lg:flex lg:items-start lg:gap-12">
-                                <div class="w-full rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-6 lg:max-w-xl lg:p-8">
+                                <div class="w-full rounded-lg border-0 border-gray-200 bg-white p-2 shadow-0
+                                dark:border-gray-700 dark:bg-gray-800 lg:max-w-xl">
 
+                                    <!-- Блок с инфо: психолог, слот, добавление карты и подтверждение -->
+                                    <div
+                                            id="payment-psychologist-summary"
+                                            class="mb-1 pb-4"
+                                    ></div>
 
+                                    <!-- Картинки платежных систем -->
                                     <div class="mt-6 grow sm:mt-8 lg:mt-0">
-
-                                        <div class="mt-6 flex items-center justify-center gap-8">
-                                            <img class="h-8 w-auto dark:hidden"
-                                                 src="https://flowbite.s3.amazonaws.com/blocks/e-commerce/brand-logos/paypal.svg"
-                                                 alt=""/>
-                                            <img class="hidden h-8 w-auto dark:flex"
-                                                 src="https://flowbite.s3.amazonaws.com/blocks/e-commerce/brand-logos/paypal-dark.svg"
-                                                 alt=""/>
+                                        <div class="mt-1 flex items-center justify-center gap-8 pb-20">
                                             <img class="h-8 w-auto dark:hidden"
                                                  src="https://flowbite.s3.amazonaws.com/blocks/e-commerce/brand-logos/visa.svg"
                                                  alt=""/>
@@ -124,14 +125,18 @@
                                             <img class="hidden h-8 w-auto dark:flex"
                                                  src="https://flowbite.s3.amazonaws.com/blocks/e-commerce/brand-logos/mastercard-dark.svg"
                                                  alt=""/>
+                                            <img class="h-8 w-auto dark:hidden"
+                                                 src="https://flowbite.s3.amazonaws.com/blocks/e-commerce/brand-logos/paypal.svg"
+                                                 alt=""/>
+                                            <img class="hidden h-8 w-auto dark:flex"
+                                                 src="https://flowbite.s3.amazonaws.com/blocks/e-commerce/brand-logos/paypal-dark.svg"
+                                                 alt=""/>
                                         </div>
-
                                     </div>
 
+                                    <!-- КНОПКА -->
                                     <button type="submit"
-                                            class="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium
-                                            text-white hover:bg-primary-800 focus:outline-none focus:ring-4
-                                            focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                                            class="px-10 py-3.5 rounded-xl bg-indigo-700 text-xl text-white font-medium hover:bg-indigo-900 transition shadow">
                                         Добавить карту и записаться
                                     </button>
 
@@ -148,6 +153,9 @@
 
     </div>
 </section>
+
+
+<script type="module" src="{% static 'js/pages/appointment_payment_card.js' %}"></script>
 
 
 {% endblock %}
