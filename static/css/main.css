@@ -4019,6 +4019,11 @@ input:checked + .toggle-bg {
     padding-bottom: 4rem;
   }
 
+  .md\:py-1 {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
   .md\:pl-6 {
     padding-left: 1.5rem;
   }
