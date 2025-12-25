@@ -4,7 +4,7 @@
 const ACTIVE_CLASSES = [
     "bg-indigo-500",
     "text-white",
-    "border-indigo-900",
+    "border-indigo-100",
     "hover:bg-indigo-900"
 ];
 

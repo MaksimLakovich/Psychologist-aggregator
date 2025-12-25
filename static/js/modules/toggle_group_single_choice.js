@@ -23,7 +23,7 @@ export function initToggleGroup({
     showBlockWhen = "second",
     initialValue = undefined,
     hiddenInputSelector = null,
-    activeClasses = ["bg-indigo-500", "text-white", "border-indigo-900", "hover:bg-indigo-900"],
+    activeClasses = ["bg-indigo-500", "text-white", "border-indigo-100", "hover:bg-indigo-900"],
     inactiveClasses = ["bg-white", "text-gray-700", "border-gray-300", "hover:bg-gray-50"],
 } = {}) {
 
