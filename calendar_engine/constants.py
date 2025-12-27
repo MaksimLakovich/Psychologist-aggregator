@@ -6,10 +6,10 @@ EVENT_TYPE_CHOICES = [
 EVENT_STATUS_CHOICES = [
     ("draft", "Черновик"),
     ("planned", "Запланировано"),
-    ("current", "Текущее"),
+    ("started", "Начато"),
     ("rescheduled", "Перенесено"),
     ("completed", "Завершено"),
-    ("cancelled", "Отменено"),
+    ("canceled", "Отменено"),
 ],
 
 EVENT_SOURCE_CHOICES = [
@@ -21,10 +21,10 @@ EVENT_SOURCE_CHOICES = [
 
 SLOT_STATUS_CHOICES = [
     ("planned", "Запланировано"),
-    ("current", "Текущее"),
+    ("started", "Начато"),
     ("rescheduled", "Перенесено"),
     ("completed", "Завершено"),
-    ("cancelled", "Отменено"),
+    ("canceled", "Отменено"),
 ],
 
 PARTICIPANT_ROLE_CHOICES = [
@@ -44,4 +44,20 @@ PARTICIPANT_SLOT_STATUS_CHOICES = [
     ("planned", "Запланировано"),
     ("attended", "Посещено"),
     ("missed", "Пропущено"),
+],
+
+WEEKDAYS_CHOICES = [
+    (0, "Monday"),
+    (1, "Tuesday"),
+    (2, "Wednesday"),
+    (3, "Thursday"),
+    (4, "Friday"),
+    (5, "Saturday"),
+    (6, "Sunday"),
+],
+
+AVAILABILITY_EXCEPTION_CHOICES = [
+    ("day_off", "Выходной"),
+    ("vacation", "Отпуск"),
+    ("sick_leave", "Больничный"),
 ],
