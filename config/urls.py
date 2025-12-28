@@ -25,9 +25,10 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # ПРИЛОЖЕНИЯ
     # 1) namespace="users" - это заданное пространство имен, которое есть в users/urls.py с помощью UsersConfig.name
-    path("", include("core.urls", namespace="core")),
     path("", include("users.urls", namespace="users")),
+    path("", include("calendar_engine.urls", namespace="calendar")),
     path("", include("aggregator.urls", namespace="aggregator")),
+    path("", include("core.urls", namespace="core")),
     # API-ДОКУМЕНТАЦИЯ
     # 1) кэш = 0 (на этапе разработки это правильно, потом исправить)
     path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),

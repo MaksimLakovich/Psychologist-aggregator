@@ -3,4 +3,4 @@ from django.apps import AppConfig
 
 class AppCalendarConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'app_calendar'
+    name = 'calendar_engine'
