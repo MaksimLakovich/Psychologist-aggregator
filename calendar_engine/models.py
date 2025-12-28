@@ -1,10 +1,17 @@
 import uuid
+from django.db.backends.postgresql.psycopg_any import DateTimeRange
+from django.db.models import F
 from django.conf import settings
+from django.contrib.postgres.constraints import ExclusionConstraint
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from calendar_engine.constants import (EVENT_TYPE_CHOICES, EVENT_STATUS_CHOICES, EVENT_SOURCE_CHOICES,
-                                       SLOT_STATUS_CHOICES, PARTICIPANT_ROLE_CHOICES, PARTICIPANT_EVENT_STATUS_CHOICES,
+                                       SLOT_STATUS_CHOICES, PARTICIPANT_EVENT_ROLE_CHOICES,
+                                       PARTICIPANT_EVENT_STATUS_CHOICES,
                                        PARTICIPANT_SLOT_STATUS_CHOICES, WEEKDAYS_CHOICES,
-                                       AVAILABILITY_EXCEPTION_CHOICES)
+                                       AVAILABILITY_EXCEPTION_CHOICES, PARTICIPANT_SLOT_ROLE_CHOICES,
+                                       EVENT_VISIBILITY_CHOICES, FREQUENCY_RECURRENCE_CHOICES,
+                                       GLOBAL_AVAILABILITY_TYPE_CHOICES)
 from timezone_field import TimeZoneField
 
 
@@ -75,11 +82,36 @@ class CalendarEvent(TimeStampedModel):
         verbose_name="Статус события",
         help_text="Укажите статус события",
     )
+    visibility = models.CharField(
+        choices=EVENT_VISIBILITY_CHOICES,
+        default="private",
+        max_length=32,
+        null=False,
+        blank=False,
+        verbose_name="Видимость события",
+        help_text="Укажите видимость события",
+    )
+    capacity = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Максимально допустимое количество участников в групповом событии",
+        help_text="Укажите максимально допустимое количество участников в групповом событии"
+    )
     is_recurring = models.BooleanField(
+        default=False,
         null=False,
         blank=False,
         verbose_name="Повторяющееся события",
         help_text="Флаг повторяющегося события",
+    )
+    previous_event_id = models.ForeignKey(
+        to="self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="rescheduled_events",
+        verbose_name="Предыдущее событие при переносе",
+        help_text="Связь с предыдущим событием при переносе (перенос = archived текущего события + planned новое)",
     )
     source = models.CharField(
         choices=EVENT_SOURCE_CHOICES,
@@ -108,6 +140,91 @@ class CalendarEvent(TimeStampedModel):
         ordering = ["id"]
 
 
+class RecurrenceRule(TimeStampedModel):
+    """Правила для повторяющегося события."""
+
+    owner = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
+        related_name="recurrences_rules",
+        verbose_name="Пользователь",
+        help_text="Укажите пользователя",
+    )
+    event = models.ForeignKey(
+        to=CalendarEvent,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
+        related_name="recurrences",
+        verbose_name="Событие для повторения",
+        help_text="Укажите событие для повторения",
+    )
+    timezone = TimeZoneField(
+        blank=True,
+        null=True,
+        verbose_name="Часовой пояс",
+        help_text="Для корректного применения правила повторения в календаре пользователя",
+    )
+    rule_start = models.DateField(
+        null=False,
+        blank=False,
+        verbose_name="Дата старта правила повторения",
+        help_text="Укажите дату старта правила повторения",
+    )
+    rule_end = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Дата окончания правила повторения",
+        help_text="Укажите дату окончания правила повторения",
+    )
+    count_recurrences = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Максимальное количество повторений",
+        help_text="Укажите максимальное количество повторений",
+    )
+    frequency = models.CharField(
+        choices=FREQUENCY_RECURRENCE_CHOICES,
+        max_length=32,
+        null=True,
+        blank=True,
+        verbose_name="Периодичность повторения",
+        help_text="Укажите периодичность повторения (monthly / weekly / daily)",
+    )
+    interval = models.PositiveSmallIntegerField(
+        default=1,
+        null=False,
+        blank=False,
+        verbose_name="Интервал повторения",
+        help_text="Интервал повторения (1 - каждую неделю, 2 - через неделю)",
+    )
+    weekdays_recurrences = ArrayField(
+        models.PositiveSmallIntegerField(choices=WEEKDAYS_CHOICES),
+        null=False,
+        blank=False,
+        verbose_name="Дни недели для повторений",
+        help_text="Укажите дни недели для повторения",
+    )
+    is_active = models.BooleanField(
+        default=True,
+        null=False,
+        blank=False,
+        verbose_name="Признак действия правила повторения",
+        help_text="Флаг действия правила повторения",
+    )
+
+    def __str__(self):
+        """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
+        return f"{self.owner (self.rule_start - self.rule_end)}"
+
+    class Meta:
+        verbose_name = "Правило повторения события"
+        verbose_name_plural = "Правила повторений событий"
+        ordering = ["pk", "owner", "rule_start"]
+
+
 class TimeSlot(TimeStampedModel):
     """Атом времени внутри события календаря (конкретный интервал времени, часть события)."""
 
@@ -116,6 +233,15 @@ class TimeSlot(TimeStampedModel):
         primary_key=True,
         default=uuid.uuid4,
         editable=False
+    )
+    owner = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
+        related_name="owned_slots",
+        verbose_name="Владелец слота",
+        help_text="Укажите владельца слота",
     )
     event = models.ForeignKey(
         to=CalendarEvent,
@@ -186,6 +312,21 @@ class TimeSlot(TimeStampedModel):
         indexes = [
             models.Index(fields=["start_datetime", "end_datetime"]),
         ]
+        # Защита от пересечений:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(end_datetime__gt=models.F("start_datetime")),
+                name="slot_end_after_start"
+            )
+        ]
+        # Защита от double booking (защита от пересечений слотов одного owner):
+        ExclusionConstraint(
+            name="prevent_slot_overlap_per_owner",
+            expressions=[
+                (F("owner"), "="),
+                (DateTimeRange(lower="start_datetime", upper="end_datetime"), "&&"),
+            ],
+        )
 
 
 class EventParticipant(TimeStampedModel):
@@ -209,8 +350,18 @@ class EventParticipant(TimeStampedModel):
         verbose_name="Участник события",
         help_text="Укажите участника события",
     )
+    joined_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Дата/время присоединения",
+    )
+    left_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Дата/время выхода",
+    )
     role = models.CharField(
-        choices=PARTICIPANT_ROLE_CHOICES,
+        choices=PARTICIPANT_EVENT_ROLE_CHOICES,
         default="participant",
         max_length=32,
         null=False,
@@ -257,11 +408,30 @@ class SlotParticipant(TimeStampedModel):
         on_delete=models.CASCADE,
         null=False,
         blank=False,
-        related_name="calendar_participations",
+        related_name="slot_participations",
         verbose_name="Участник слота события",
         help_text="Укажите участника слота события",
     )
-    attendance_status = models.CharField(
+    joined_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Дата/время присоединения",
+    )
+    left_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Дата/время выхода",
+    )
+    role = models.CharField(
+        choices=PARTICIPANT_SLOT_ROLE_CHOICES,
+        default="participant",
+        max_length=32,
+        null=False,
+        blank=False,
+        verbose_name="Роль участника в слоте",
+        help_text="Укажите роль участника в слоте событии",
+    )
+    status = models.CharField(
         choices=PARTICIPANT_SLOT_STATUS_CHOICES,
         default="planned",
         max_length=32,
@@ -295,6 +465,12 @@ class AvailabilityRule(TimeStampedModel):
         verbose_name="Пользователь",
         help_text="Укажите пользователя",
     )
+    timezone = TimeZoneField(
+        blank=True,
+        null=True,
+        verbose_name="Часовой пояс",
+        help_text="Для корректного применения правила в календаре пользователя",
+    )
     rule_start = models.DateField(
         null=False,
         blank=False,
@@ -307,8 +483,8 @@ class AvailabilityRule(TimeStampedModel):
         verbose_name="Дата окончания правила",
         help_text="Укажите дату окончания правила",
     )
-    weekdays = models.PositiveSmallIntegerField(
-        choices=WEEKDAYS_CHOICES,
+    weekdays = ArrayField(
+        models.PositiveSmallIntegerField(choices=WEEKDAYS_CHOICES),
         null=False,
         blank=False,
         verbose_name="Рабочие дни недели",
@@ -358,7 +534,7 @@ class AvailabilityRule(TimeStampedModel):
         ordering = ["pk", "owner", "rule_start"]
 
 
-class AvailabilityException(models.Model):
+class AvailabilityException(TimeStampedModel):
     """Исключения из правил доступности специалиста (отпуск, болезнь, day-off)."""
 
     owner = models.ForeignKey(
@@ -369,6 +545,14 @@ class AvailabilityException(models.Model):
         related_name="availability_exceptions",
         verbose_name="Пользователь",
         help_text="Укажите пользователя",
+    )
+    rule = models.ForeignKey(
+        to=AvailabilityRule,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name="Правило для которого устанавливается исключение",
+        help_text="Укажите правило для которого устанавливается исключение",
     )
     exception_start = models.DateField(
         null=False,
@@ -395,19 +579,20 @@ class AvailabilityException(models.Model):
         help_text="Укажите время окончания исключения",
     )
     reason = models.CharField(
-        choices = AVAILABILITY_EXCEPTION_CHOICES,
-        max_length = 32,
-        null = True,
-        blank = True,
-        verbose_name = "Причина исключения",
-        help_text = "Укажите причину исключения",
-    )
-    is_available = models.BooleanField(
-        default=True,
+        choices=AVAILABILITY_EXCEPTION_CHOICES,
+        max_length=32,
         null=True,
         blank=True,
-        verbose_name="Признак глобальной доступности специалиста (True - доступен / False - недоступен)",
-        help_text="False - полностью недоступен"
+        verbose_name="Причина исключения",
+        help_text="Укажите причину исключения",
+    )
+    global_availability = models.CharField(
+        choices=GLOBAL_AVAILABILITY_TYPE_CHOICES,
+        default="available",
+        null=False,
+        blank=False,
+        verbose_name="Глобальная доступность (available / unavailable)",
+        help_text="Укажите значение для глобальной доступности (available / unavailable)",
     )
 
     def __str__(self):
