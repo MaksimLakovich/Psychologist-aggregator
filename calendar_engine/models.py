@@ -139,7 +139,7 @@ class CalendarEvent(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.id - self.title}"
+        return f"{self.id} - {self.title}"
 
     class Meta:
         verbose_name = "Событие"
@@ -224,7 +224,7 @@ class RecurrenceRule(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.owner - self.rule_start - self.rule_end}"
+        return f"{self.owner} - {self.rule_start} - {self.rule_end}"
 
     class Meta:
         verbose_name = "Правило повторения события"
@@ -310,7 +310,7 @@ class TimeSlot(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.id - self.event.title}"
+        return f"{self.id} - {self.event.title}"
 
     class Meta:
         verbose_name = "Слот"
@@ -388,7 +388,7 @@ class EventParticipant(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.pk - self.event.title - self.user.email}"
+        return f"{self.pk} - {self.event.title} - {self.user.email}"
 
     class Meta:
         verbose_name = "Участник события"
@@ -450,7 +450,7 @@ class SlotParticipant(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.pk - self.slot.id - self.user.email}"
+        return f"{self.pk} - {self.slot.id} - {self.user.email}"
 
     class Meta:
         verbose_name = "Участник слота в событии"
@@ -533,7 +533,7 @@ class AvailabilityRule(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.owner - self.start_time - self.end_time / self.weekdays}"
+        return f"{self.owner} - {self.start_time} - {self.end_time} / {self.weekdays}"
 
     class Meta:
         verbose_name = "Правило доступности специалиста"
