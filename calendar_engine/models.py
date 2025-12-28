@@ -1,18 +1,25 @@
 import uuid
-from django.db.backends.postgresql.psycopg_any import DateTimeRange
-from django.db.models import F
+
 from django.conf import settings
 from django.contrib.postgres.constraints import ExclusionConstraint
-from django.db import models
 from django.contrib.postgres.fields import ArrayField
-from calendar_engine.constants import (EVENT_TYPE_CHOICES, EVENT_STATUS_CHOICES, EVENT_SOURCE_CHOICES,
-                                       SLOT_STATUS_CHOICES, PARTICIPANT_EVENT_ROLE_CHOICES,
-                                       PARTICIPANT_EVENT_STATUS_CHOICES,
-                                       PARTICIPANT_SLOT_STATUS_CHOICES, WEEKDAYS_CHOICES,
-                                       AVAILABILITY_EXCEPTION_CHOICES, PARTICIPANT_SLOT_ROLE_CHOICES,
-                                       EVENT_VISIBILITY_CHOICES, FREQUENCY_RECURRENCE_CHOICES,
-                                       GLOBAL_AVAILABILITY_TYPE_CHOICES)
+from django.db import models
+from django.db.backends.postgresql.psycopg_any import DateTimeRange
+from django.db.models import F
 from timezone_field import TimeZoneField
+
+from calendar_engine.constants import (AVAILABILITY_EXCEPTION_CHOICES,
+                                       EVENT_SOURCE_CHOICES,
+                                       EVENT_STATUS_CHOICES,
+                                       EVENT_TYPE_CHOICES,
+                                       EVENT_VISIBILITY_CHOICES,
+                                       FREQUENCY_RECURRENCE_CHOICES,
+                                       GLOBAL_AVAILABILITY_TYPE_CHOICES,
+                                       PARTICIPANT_EVENT_ROLE_CHOICES,
+                                       PARTICIPANT_EVENT_STATUS_CHOICES,
+                                       PARTICIPANT_SLOT_ROLE_CHOICES,
+                                       PARTICIPANT_SLOT_STATUS_CHOICES,
+                                       SLOT_STATUS_CHOICES, WEEKDAYS_CHOICES)
 
 
 class TimeStampedModel(models.Model):
@@ -217,7 +224,7 @@ class RecurrenceRule(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.owner (self.rule_start - self.rule_end)}"
+        return f"{self.owner - self.rule_start - self.rule_end}"
 
     class Meta:
         verbose_name = "Правило повторения события"
@@ -526,7 +533,7 @@ class AvailabilityRule(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.owner (self.start_time - self.end_time / self.weekdays)}"
+        return f"{self.owner - self.start_time - self.end_time / self.weekdays}"
 
     class Meta:
         verbose_name = "Правило доступности специалиста"

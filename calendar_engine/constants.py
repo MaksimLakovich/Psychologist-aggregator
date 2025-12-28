@@ -24,7 +24,7 @@ EVENT_SOURCE_CHOICES = [
     ("outlook", "Outlook"),
 ],
 
-FREQUENCY_RECURRENCE_CHOICES=[
+FREQUENCY_RECURRENCE_CHOICES = [
     ("daily", "Ежедневно"),
     ("weekly", "Еженедельно"),
     ("monthly", "Ежегодно"),
@@ -82,7 +82,7 @@ AVAILABILITY_EXCEPTION_CHOICES = [
     ("sick_leave", "Больничный"),
 ],
 
-GLOBAL_AVAILABILITY_TYPE_CHOICES=[
+GLOBAL_AVAILABILITY_TYPE_CHOICES = [
     ("available", "Доступный"),
     ("unavailable", "Недоступный")
 ],
