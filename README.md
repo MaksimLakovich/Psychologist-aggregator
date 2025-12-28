@@ -94,7 +94,7 @@
 | **Email / SMS**    | **SMTP (Яндекс 360) / на первом этапе mock-SMS (вопрос бюджета)**                                              | Подтверждения регистрации, уведомления                                                                                               |
 | **SSR (рендеринг)** | Django Templates                                                                                               | Страницы генерируются сервером (Server-Side Rendering)                                                                               |
 | **CSS/HTML**       | **Tailwind + Flowbite + DaisyUI + HyperUI**                                                                    | MVP UI без необходимости SPA - через Django templates <br/> **SSR** - это Server-side rendering (рендеринг страниц на стороне Django) |
-| **JavaScript**     | Vanilla JS + Fetch API + HTMX (постепенно)                                                                     | Интерактив: autosave чего-то в БД, AJAX, локальная логика (например, свернуть/развернуть)                                            |
+| **JavaScript**     | Vanilla JS + Fetch API + HTMX (постепенно) + FullCalendar.js                                                   | Интерактив: autosave чего-то в БД, AJAX, локальная логика (например, свернуть/развернуть)                                            |
 | **Frontend**       | (этап 2)                                                                                                       | Развитие UI (2 этап): разработка SPA/MPA-приложения на чем-то из: React, Vue или Next.js и т.д.                                      |
 
 
@@ -107,6 +107,7 @@
    - **Flowbite** - сложные продвинутые компоненты (модалки, таблицы, datepicker, navbar)
    - **DaisyUI** - UI-компоненты (кнопки, поля, карточки) 
    - **HTMX** - динамика/интерактив без React (календарь, фильтры, списки, пагинация, сортировка)
+   - **FullCalendar.js** - JS-календарь (есть drag&drop, поддержка событий, блокировка занятых слотов)
 
 ---
 
@@ -244,7 +245,7 @@
 │    ├── permissions.py               # Кастомные права доступов как для DRF так и для CBV ("владелец?", "админ?" и прочее)
 │    └── urls.py                      # Корневой маршрутизатор users/
 │
-├── calendar_engine/               # ⭐️ Приложение django-проекта ("Календарь")
+├── calendar_engine/            # ⭐️ Приложение django-проекта ("Календарь")
 │    ├── _api/
 │    │    └── 
 │    ├── _web/
@@ -252,9 +253,10 @@
 │    ├── services/
 │    │    └── calendar_service.py     # Управление расписаниями и записями: создание, перенос, отмена, проверка пересечений, генерация доступных слотов
 │    ├── apps.py
+│    ├── constants.py                 # Статические справочники и переменные
 │    ├── models.py                    # Модели данных
 │    ├── admin.py                     # Админки для моделей данных
-│    └── urls.py                      # Маршруты
+│    └── urls.py                      # Корневой маршрутизатор calendar_engine/
 │
 ├── aggregator/                 # ⭐️ Приложение django-проекта ("ПУБЛИЧНЫЙ КАТАЛОГ ПСИХОЛОГОВ - подбор психолога")
 │    ├── _api/                        # ℹ️ API-часть (DRF)
@@ -366,21 +368,43 @@
 
 ### 2.2. Приложение `calendar_engine`:
 
-- ℹ️ **Детальная информация о приложении *"Calendar_engine"*: [Calendar (calendar_engine_info.md)](docs/calendar_engine_info.md).**
+- ℹ️ **Детальная информация о приложении *"Calendar_engine"*: [Calendar (app_calendar_info.md)](docs/app_calendar_info.md).**
 
 
 - Список сущностей (моделей):
-  - `TimeSlot`: представляет .
-  - `Appointment`: представляет .
-  - `?`: представляет .
-  - `?`: представляет .
-
+  - `TimeStampedModel`: это абстрактная базовая модель для дальнейшего создания *created_at* и *updated_at* во всех моделях приложения при необходимости.
+  - `CalendarEvent`: событие календаря.
+  - `RecurrenceRule`: правила повторений.
+  - `TimeSlot`: временной слот события.
+  - `EventParticipant`: участник события.
+  - `SlotParticipant`: участник конкретного слота (если отличается от события).
+  - `AvailabilityRule`: правила доступности: рабочее расписание.
+  - `AvailabilityException`: исключения из расписания.
 
 - Структура связей:
     ```python
-    AppUser 1───1 PsychologistProfile
-    AppUser *───1 UserRole
-    PsychologistProfile *───* Specialisation
+    AppUser 1───* CalendarEvent                              # пользователь может организовать много событий
+    CalendarEvent 1───* TimeSlot                             # событие состоит из 1+ слотов
+    CalendarEvent 1───* RecurrenceRule                       # у события может быть несколько правил повторения для разных событий
+    
+    AppUser (через EventParticipant) *───* CalendarEvent     # участие пользователей в событиях
+        # Пояснение:
+            # поддержка групповых событий
+            # роли и статусы находятся в EventParticipant
+            # один пользователь может участвовать в тысячах событий
+    AppUser (через SlotParticipant) *───* TimeSlot           # участие пользователей в конкретных слотах
+        # Пояснение:
+            # используется только при необходимости
+            # позволяет разный состав участников по слотам
+            # критично для курсов, переносов, аналитики
+  
+    AppUser 1───* AvailabilityRule
+    AvailabilityRule 1───* AvailabilityException
+    AppUser 1───* AvailabilityException
+        # Пояснение:
+            # AvailabilityRule: базовое рабочее расписание
+            # AvailabilityException: привязано к рабочему расписанию; может быть глобальным (отпуск, больничный)
+            # availability никогда не равно бронированию
     ```
 
 
@@ -447,7 +471,7 @@ urlpatterns = [
 | Приложение        | Страница с инфо                                                   | Описание                                                                                                                  |
 |-------------------|-------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
 | `users`           | [Users (app_users_info.md)](docs/app_users_info.md)               | Модели, админки, кастомные команды, константы, права доступов, сериализаторы, вьюхи, маршруты, API, доп.сервисные функции |
-| `calendar_engine` | [Calendar (calendar_engine_info.md)](docs/calendar_engine_info.md)      | Модели, админки, кастомные команды, константы, права доступов, сериализаторы, вьюхи, маршруты, API, доп.сервисные функции |
+| `calendar_engine` | [Calendar (app_calendar_info.md)](docs/app_calendar_info.md)      | Модели, админки, кастомные команды, константы, права доступов, сериализаторы, вьюхи, маршруты, API, доп.сервисные функции |
 | `aggregator`      | [Aggregator (app_aggregator_info.md)](docs/app_aggregator_info.md) | Cериализаторы, вьюхи, маршруты, API, доп.сервисные функции                                                                |
 | `core`            |                                                                   | Шаблоны страниц                                                                                                           |
 
