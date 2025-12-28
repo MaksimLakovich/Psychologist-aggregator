@@ -1,7 +1,7 @@
 EVENT_TYPE_CHOICES = [
     ("event", "Встреча"),
     ("group_event", "Группа встреч"),
-],
+]
 
 EVENT_STATUS_CHOICES = [
     ("draft", "Черновик"),
@@ -10,25 +10,25 @@ EVENT_STATUS_CHOICES = [
     ("completed", "Завершено"),
     ("canceled", "Отменено"),
     ("archived", "Архивировано"),
-],
+]
 
 EVENT_VISIBILITY_CHOICES = [
     ("private", "Приватная"),
     ("public", "Публичная"),
-],
+]
 
 EVENT_SOURCE_CHOICES = [
     ("internal", "Internal"),
     ("google", "Google Calendar"),
     ("apple", "Apple Calendar"),
     ("outlook", "Outlook"),
-],
+]
 
 FREQUENCY_RECURRENCE_CHOICES = [
     ("daily", "Ежедневно"),
     ("weekly", "Еженедельно"),
-    ("monthly", "Ежегодно"),
-],
+    ("monthly", "Ежемесячно"),
+]
 
 SLOT_STATUS_CHOICES = [
     ("planned", "Запланировано"),
@@ -38,25 +38,25 @@ SLOT_STATUS_CHOICES = [
     ("archived", "Архивировано"),
     ("no_show", "Неявка"),
     ("blocked", "Заблокирован"),
-],
+]
 
 PARTICIPANT_EVENT_ROLE_CHOICES = [
     ("organizer", "Организатор"),
     ("participant", "Участник"),
     ("observer", "Наблюдатель"),
-],
+]
 
 PARTICIPANT_EVENT_STATUS_CHOICES = [
     ("invited", "Приглашен"),
     ("accepted", "Принято"),
     ("declined", "Отклонено"),
     ("removed", "Покинул"),
-],
+]
 
 PARTICIPANT_SLOT_ROLE_CHOICES = [
     ("organizer", "Организатор"),
     ("participant", "Участник"),
-],
+]
 
 PARTICIPANT_SLOT_STATUS_CHOICES = [
     ("planned", "Запланировано"),
@@ -64,7 +64,7 @@ PARTICIPANT_SLOT_STATUS_CHOICES = [
     ("left_early", "Покинул раньше"),
     ("attended", "Посещено"),
     ("missed", "Пропущено"),
-],
+]
 
 WEEKDAYS_CHOICES = [
     (0, "Monday"),
@@ -74,15 +74,15 @@ WEEKDAYS_CHOICES = [
     (4, "Friday"),
     (5, "Saturday"),
     (6, "Sunday"),
-],
+]
 
 AVAILABILITY_EXCEPTION_CHOICES = [
     ("day_off", "Выходной"),
     ("vacation", "Отпуск"),
     ("sick_leave", "Больничный"),
-],
+]
 
 GLOBAL_AVAILABILITY_TYPE_CHOICES = [
     ("available", "Доступный"),
     ("unavailable", "Недоступный")
-],
+]

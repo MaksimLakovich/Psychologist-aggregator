@@ -29,6 +29,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',  # обязательно, иначе UI не поднимется
 
+    # В моделях используем ArrayField, ExclusionConstraint и DateTimeRange, а все эти вещи официально требуют
+    # подключенного приложения postgres
+    'django.contrib.postgres',
+
     # Добавляем это чтобы библиотека https://django-phonenumber-field.readthedocs.io/en/stable/index.html
     # использовала локализованные ошибки валидации номеров в поле PhoneNumberField
     'phonenumber_field',

@@ -89,6 +89,12 @@ class CalendarEvent(TimeStampedModel):
         verbose_name="Статус события",
         help_text="Укажите статус события",
     )
+    cancel_reason = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="Причина отмены события",
+        help_text="Укажите причину отмены события",
+    )
     visibility = models.CharField(
         choices=EVENT_VISIBILITY_CHOICES,
         default="private",
@@ -144,7 +150,7 @@ class CalendarEvent(TimeStampedModel):
     class Meta:
         verbose_name = "Событие"
         verbose_name_plural = "События"
-        ordering = ["id"]
+        ordering = ["-created_at"]
 
 
 class RecurrenceRule(TimeStampedModel):
@@ -209,8 +215,8 @@ class RecurrenceRule(TimeStampedModel):
     )
     weekdays_recurrences = ArrayField(
         models.PositiveSmallIntegerField(choices=WEEKDAYS_CHOICES),
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         verbose_name="Дни недели для повторений",
         help_text="Укажите дни недели для повторения",
     )
@@ -224,7 +230,7 @@ class RecurrenceRule(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.owner} - {self.rule_start} - {self.rule_end}"
+        return f"{self.owner} / ({self.rule_start} - {self.rule_end})"
 
     class Meta:
         verbose_name = "Правило повторения события"
@@ -315,25 +321,24 @@ class TimeSlot(TimeStampedModel):
     class Meta:
         verbose_name = "Слот"
         verbose_name_plural = "Слоты"
-        ordering = ["id", "slot_index"]
+        ordering = ["start_datetime", "event", "slot_index"]
         indexes = [
             models.Index(fields=["start_datetime", "end_datetime"]),
         ]
-        # Защита от пересечений:
+        # Защита от double booking (защита от пересечений слотов одного owner):
         constraints = [
             models.CheckConstraint(
                 check=models.Q(end_datetime__gt=models.F("start_datetime")),
                 name="slot_end_after_start"
-            )
+            ),
+            ExclusionConstraint(
+                name="prevent_slot_overlap_per_owner",
+                expressions=[
+                    (F("owner"), "="),
+                    (DateTimeRange(lower="start_datetime", upper="end_datetime"), "&&"),
+                ],
+            ),
         ]
-        # Защита от double booking (защита от пересечений слотов одного owner):
-        ExclusionConstraint(
-            name="prevent_slot_overlap_per_owner",
-            expressions=[
-                (F("owner"), "="),
-                (DateTimeRange(lower="start_datetime", upper="end_datetime"), "&&"),
-            ],
-        )
 
 
 class EventParticipant(TimeStampedModel):
@@ -456,7 +461,7 @@ class SlotParticipant(TimeStampedModel):
         verbose_name = "Участник слота в событии"
         verbose_name_plural = "Участники слота в событии"
         unique_together = ("slot", "user")
-        ordering = ["pk", "slot", "user"]
+        ordering = ["pk", "slot__start_datetime", "slot", "user"]
 
 
 class AvailabilityRule(TimeStampedModel):
@@ -604,7 +609,7 @@ class AvailabilityException(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.owner} - {self.exception_start} ({'Доступен' if self.is_available else 'Недоступен'})"
+        return f"{self.owner} - {self.exception_start} (глобально: {self.global_availability})"
 
     class Meta:
         verbose_name = "Исключение из правил доступности"
