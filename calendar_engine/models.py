@@ -321,6 +321,7 @@ class TimeSlot(TimeStampedModel):
     class Meta:
         verbose_name = "Слот"
         verbose_name_plural = "Слоты"
+        unique_together = ("event", "slot_index")
         ordering = ["start_datetime", "event", "slot_index"]
         indexes = [
             models.Index(fields=["start_datetime", "end_datetime"]),
@@ -337,6 +338,9 @@ class TimeSlot(TimeStampedModel):
                     (F("owner"), "="),
                     (DateTimeRange(lower="start_datetime", upper="end_datetime"), "&&"),
                 ],
+                # Предотвращать наложение только для активных слотов (запланированных/начатых).
+                # Исторические слоты не должны блокировать доступность.
+                condition=models.Q(status__in=["planned", "started"]),
             ),
         ]
 

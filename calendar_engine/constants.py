@@ -36,13 +36,12 @@ SLOT_STATUS_CHOICES = [
     ("completed", "Завершено"),
     ("canceled", "Отменено"),
     ("archived", "Архивировано"),
-    ("no_show", "Неявка"),
-    ("blocked", "Заблокирован"),
 ]
 
 PARTICIPANT_EVENT_ROLE_CHOICES = [
     ("organizer", "Организатор"),
     ("participant", "Участник"),
+    ("moderator", "Модератор"),
     ("observer", "Наблюдатель"),
 ]
 
@@ -50,12 +49,15 @@ PARTICIPANT_EVENT_STATUS_CHOICES = [
     ("invited", "Приглашен"),
     ("accepted", "Принято"),
     ("declined", "Отклонено"),
-    ("removed", "Покинул"),
+    ("left", "Покинул"),
 ]
 
 PARTICIPANT_SLOT_ROLE_CHOICES = [
     ("organizer", "Организатор"),
     ("participant", "Участник"),
+    ("speaker", "Выступающий"),
+    ("moderator", "Модератор"),
+    ("observer", "Наблюдатель"),
 ]
 
 PARTICIPANT_SLOT_STATUS_CHOICES = [
