@@ -4,8 +4,6 @@ from django.conf import settings
 from django.contrib.postgres.constraints import ExclusionConstraint
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.backends.postgresql.psycopg_any import DateTimeRange
-from django.db.models import F
 from timezone_field import TimeZoneField
 
 from calendar_engine.constants import (AVAILABILITY_EXCEPTION_CHOICES,
@@ -330,19 +328,42 @@ class TimeSlot(TimeStampedModel):
         constraints = [
             models.CheckConstraint(
                 check=models.Q(end_datetime__gt=models.F("start_datetime")),
-                name="slot_end_after_start"
+                name="slot_end_after_start",
             ),
             ExclusionConstraint(
                 name="prevent_slot_overlap_per_owner",
                 expressions=[
-                    (F("owner"), "="),
-                    (DateTimeRange(lower="start_datetime", upper="end_datetime"), "&&"),
+                    (models.F("owner"), "="),
+                    (
+                        models.Func(
+                            models.F("start_datetime"),
+                            models.F("end_datetime"),
+                            function="tstzrange",
+                        ),
+                        "&&",
+                    ),
                 ],
                 # Предотвращать наложение только для активных слотов (запланированных/начатых).
                 # Исторические слоты не должны блокировать доступность.
                 condition=models.Q(status__in=["planned", "started"]),
             ),
         ]
+        # ВАЖНО: для корректной работы constraint нужно включить расширение btree_gist.
+        # ExclusionConstraint НЕ РАБОТАЕТ, если в PostgreSQL не включено расширение:
+        #   CREATE EXTENSION IF NOT EXISTS btree_gist;
+        #
+        # Чтобы правильно это сделать в Django нужно:
+        #   1) Создаем миграцию вручную (один раз): python manage.py makemigrations calendar_engine
+        #   2) Добавляем в нее операцию перед созданием constraint:
+        #       from django.contrib.postgres.operations import BtreeGistExtension
+        #
+        #       class Migration(migrations.Migration):
+        #
+        #           operations = [
+        #               BtreeGistExtension(),
+        #               ...
+        #           ]
+        # Без этого PostgreSQL либо упадет, либо constraint просто не создастся.
 
 
 class EventParticipant(TimeStampedModel):
