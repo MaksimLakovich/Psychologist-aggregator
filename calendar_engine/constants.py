@@ -8,7 +8,7 @@ EVENT_STATUS_CHOICES = [
     ("planned", "Запланировано"),
     ("started", "Начато"),
     ("completed", "Завершено"),
-    ("canceled", "Отменено"),
+    ("cancelled", "Отменено"),
     ("archived", "Архивировано"),
 ]
 
@@ -34,7 +34,7 @@ SLOT_STATUS_CHOICES = [
     ("planned", "Запланировано"),
     ("started", "Начато"),
     ("completed", "Завершено"),
-    ("canceled", "Отменено"),
+    ("cancelled", "Отменено"),
     ("archived", "Архивировано"),
 ]
 
