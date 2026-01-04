@@ -22,7 +22,10 @@ class DomainTimePolicy(AbsDomainTimePolicy):
 
     def __init__(self, *, day_time_start: time, day_time_end: time, slot_duration_minutes: int,) -> None:
         """
-        * - это защита от positional misuse
+        * - это защита от positional misuse, чтоб случайно не передать в day_time_start данные time для окончания дня
+        и наоборот.
+        Positional Misuse - это ситуация, когда разработчик путает порядок аргументов, потому что они передаются
+        просто списком (позиционно).
         """
         if slot_duration_minutes <= 0:
             raise ValueError("slot_duration_minutes должно быть положительным значением.")
