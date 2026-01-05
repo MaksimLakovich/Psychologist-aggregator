@@ -10,20 +10,11 @@ class AbsAvailabilityRule(ABC):
         - применяется поверх доменной временной сетки;
         - не знает ничего про: бронирования, исключения, клиентов, UI."""
 
-    # Декоратор, который помечает метод как "обязательный". Если создать дочерний класс и забыть написать там
-    # этот метод, то Python не позволит создать экземпляр этого класса.
     @abstractmethod
-    def applies_to_day(self, day: date) -> bool:
-        """Метод проверяет - применяется ли правило к конкретной календарной дате.
-        Например:
-            - только по понедельникам;
-            - только по будням;
-            - только в определенный диапазон дат."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def iter_time_windows(self) -> Iterable[Tuple[time, time]]:
-        """Метод возвращает временные окна внутри дня, в которые специалист работает (например 09:00–12:00).
+    def iter_time_windows(self, day: date) -> Iterable[Tuple[time, time]]:
+        """Метод возвращает временные окна внутри указанного дня, в которые специалист работает (например 09:00–12:00):
+            - Iterable[(start, end)]: временные окна внутри рабочего дня;
+            - пустой iterable: нерабочий день возвращает пустой iterable.
         ВАЖНО:
             - это НЕ слоты;
             - это НЕ доменная сетка;
@@ -41,13 +32,9 @@ class AbsAvailabilityException(ABC):
             - или переопределить рабочие окна дня."""
 
     @abstractmethod
-    def applies_to_day(self, day: date) -> bool:
-        """Метод проверяет - применяется ли исключение к указанной дате/датам."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def override_time_windows(self) -> Optional[Iterable[Tuple[time, time]]]:
+    def override_time_windows(self, day: date) -> Optional[Iterable[Tuple[time, time]]]:
         """Метод возвращает новые временные окна внутри дня, в которые специалист работает по правилам исключения:
-            - None: день полностью закрыт (day-off);
+            - None: исключение НЕ применяется к этому дню;
+            - []: день полностью закрыт (day-off);
             - Iterable[(start, end)]: новые временные окна дня."""
         raise NotImplementedError

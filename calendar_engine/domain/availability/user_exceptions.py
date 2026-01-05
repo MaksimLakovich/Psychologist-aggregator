@@ -7,7 +7,6 @@ from calendar_engine.domain.availability.base import AbsAvailabilityException
 class DateAvailabilityException(AbsAvailabilityException):
     """Исключение для конкретной даты.
     Используется для:
-        - выходного дня;
         - отпуска;
         - больничного;
         - праздника."""
@@ -18,20 +17,22 @@ class DateAvailabilityException(AbsAvailabilityException):
         с неправильным набором (вначале конец, а потом начало).
         Positional Misuse - это ситуация, когда разработчик путает порядок аргументов, потому что они передаются
         просто списком (позиционно).
+
+        :param day: Конкретный рабочий день.
         """
         self._day = day
 
-    def applies_to_day(self, day: date) -> bool:
-        """Метод проверяет - применяется ли исключение к указанной дате."""
-        return day == self._day
-
-    def override_time_windows(self) -> Optional[Iterable[Tuple[time, time]]]:
-        """Метод возвращает временные окна внутри дня, в которые специалист работает по правилам исключения:
-            - None: день полностью закрыт (day-off)."""
+    def override_time_windows(self, day: date) -> Optional[Iterable[Tuple[time, time]]]:
+        """Метод проверяет - применяется ли исключение к указанной дате и если да, то возвращает пустой список,
+        что означает отсутствие временных слотов на данный день:
+            - []: день полностью закрыт (day-off);
+            - None: исключение НЕ применяется к этому дню."""
+        if day == self._day:
+            return []
         return None
 
 
-class DayAvailabilityException(AbsAvailabilityException):
+class TimeAvailabilityException(AbsAvailabilityException):
     """Переопределение рабочих окон конкретного дня (сокращенный или особый день).
     Пример: 31 декабря: 09:00–15:00."""
 
@@ -42,8 +43,7 @@ class DayAvailabilityException(AbsAvailabilityException):
         Positional Misuse - это ситуация, когда разработчик путает порядок аргументов, потому что они передаются
         просто списком (позиционно).
 
-        :param day: Конкретный календарный день.
-
+        :param day: Конкретный рабочий день.
         :param time_windows: Итерируемый набор временных окон (start_time, end_time) внутри заданного календарного дня.
         """
         validated_windows = []
@@ -61,11 +61,11 @@ class DayAvailabilityException(AbsAvailabilityException):
         self._day = day
         self._time_windows = tuple(validated_windows)
 
-    def applies_to_day(self, day: date) -> bool:
-        """Метод проверяет - применяется ли исключение к указанной дате."""
-        return day == self._day
-
-    def override_time_windows(self) -> Optional[Iterable[Tuple[time, time]]]:
-        """Метод возвращает новые временные окна внутри дня, в которые специалист работает по правилам исключения:
-            - Iterable[(start, end)]: новые временные окна дня."""
-        return self._time_windows
+    def override_time_windows(self, day: date) -> Optional[Iterable[Tuple[time, time]]]:
+        """Метод проверяет - применяется ли исключение к указанной дате и если да, то возвращает
+        новые временные окна внутри дня, в которые специалист работает по правилам исключения:
+            - Iterable[(start, end)]: новые временные окна дня;
+            - None: исключение НЕ применяется к этому дню."""
+        if day == self._day:
+            return self._time_windows
+        return None
