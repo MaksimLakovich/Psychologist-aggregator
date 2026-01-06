@@ -4,7 +4,7 @@ from typing import Iterable, Set, Tuple
 from calendar_engine.domain.availability.base import AbsAvailabilityRule
 
 
-class AvailabilityRule(AbsAvailabilityRule):
+class WeeklyAvailabilityRule(AbsAvailabilityRule):
     """Правило доступности специалиста по дням недели (базовое рабочее расписание).
     Пример:
         - работает по понедельникам и средам;
@@ -22,7 +22,6 @@ class AvailabilityRule(AbsAvailabilityRule):
             0 = Monday
             6 = Sunday
             (соответствует datetime.date.weekday())
-
         :param time_windows: Итерируемый набор временных окон (start_time, end_time) внутри одного рабочего дня.
         """
 
@@ -44,17 +43,9 @@ class AvailabilityRule(AbsAvailabilityRule):
         self._weekdays = weekdays
         self._time_windows = tuple(validated_windows)
 
-    def applies_to_day(self, day: date) -> bool:
-        """Метод проверяет - применяется ли правило к указанной дате на основе дня недели.
-        То есть: работает ли специалист в конкретный день недели?"""
-        # 1) day.weekday() - это встроенный метод python, который берет дату и вычисляет, какой это день недели
-        # в числовом формате: если это понедельник, метод вернет 0, если вторник - 1, ... , если воскресенье - 6.
-        # 2) Это "белый список" дней недели, который был сохранен в объекте при его создании (в методе __init__).
-        # Например, если специалист работает только по понедельникам и средам, то внутри self._weekdays будет: {0, 2}.
-        return day.weekday() in self._weekdays
-
-    def iter_time_windows(self) -> Iterable[Tuple[time, time]]:
-        """Метод возвращает временные окна рабочего дня.
+    def iter_time_windows(self, day: date) -> Iterable[Tuple[time, time]]:
+        """Метод проверяет - применяется ли правило к указанной дате на основе дня недели, то есть отвечает
+        на вопрос "Работает ли специалист в конкретный день недели?" и возвращает временные окна этого рабочего дня.
         1) yield превращает функцию в генератор. Вместо того чтобы вернуть все сразу (как return), функция как бы
         "приостанавливается" на каждом значении и отдает его по запросу;
         2) Конструкция yield from это по сути тоже самое что:
@@ -69,4 +60,10 @@ class AvailabilityRule(AbsAvailabilityRule):
               логика перебора для пользователя останется прежней.
             - Безопасность: получая генератор, вызывающий код не сможет случайно изменить ваш внутренний
             кортеж self._time_windows (например, через pop или append), так как генератор позволяет только читать."""
+        # 1) day.weekday() - это встроенный метод python, который берет дату и вычисляет, какой это день недели
+        # в числовом формате: если это понедельник, метод вернет 0, если вторник - 1, ... , если воскресенье - 6.
+        # 2) Это "белый список" дней недели, который был сохранен в объекте при его создании (в методе __init__).
+        # Например, если специалист работает только по понедельникам и средам, то внутри self._weekdays будет: {0, 2}.
+        if day.weekday() not in self._weekdays:
+            return
         yield from self._time_windows
