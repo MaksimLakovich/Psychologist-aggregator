@@ -189,7 +189,7 @@ calendar_engine/
     │    │    ├── user_rules.py       # Индивидуальные правила доступности специалиста - AvailabilityRule
     │    │    ├── user_exceptions.py  # Исключения из правил (day-off, отпуск, больничный) - AvailabilityException
     │    │    ├── generator.py        # Генерация доступных слотов "на лету" (on-the-fly)
-    │    │    └── dto.py              # SlotDTO, AvailabilityDTO
+    │    │    └── dto.py              # SlotDTO, AvailabilityDayDTO, AvailabilityDTO
     │    │
     │    ├── matching/                    # Алгоритмы сопоставления time_policy и availability
     │    │    └── ...
@@ -602,7 +602,7 @@ calendar_engine/domain/availability/
 ├── user_rules.py         # Индивидуальные правила доступности специалиста - AvailabilityRule
 ├── user_exceptions.py    # Исключения из правил (day-off, отпуск, больничный) - AvailabilityException
 ├── generator.py          # Генерация доступных слотов "на лету" (on-the-fly)
-└── dto.py                # SlotDTO, AvailabilityDTO
+└── dto.py                # SlotDTO, AvailabilityDayDTO, AvailabilityDTO
 ```
 
 ---
@@ -665,8 +665,7 @@ calendar_engine/domain/availability/
 
 - ❗ Оркестратор НЕ делает:
     - не читает Django-модели
-    - не знает про CalendarEvent
-    - не знает про бронирование
+    - не знает про БД
     - не знает про клиентов
 
 | Класс                   | Описание                                                                                                      |
@@ -678,12 +677,22 @@ calendar_engine/domain/availability/
 ### `dto.py` - транспортные объекты
 
 ☝️ ***Data Transfer Object (DTO)*** - это объект (класс или структура), предназначенный только для транспортировки
-данных между слоями/частями приложения.
+данных (чистый transport layer) между слоями/частями приложения.
 
-| Класс             | Описание               |
-|-------------------|------------------------|
-| `SlotDTO`         | Один доступный слот    |
-| `AvailabilityDTO` | Набор слотов за период |
+❗ Используется @dataclass(frozen=True), что позволяет сделать DTO иммутабельны, следовательно, данные не могут быть 
+случайно "испорчены" в UI / API / сервисами.
+
+❗ DTO:
+- не содержат бизнес-логики; 
+- не знают про БД; 
+- не знают про пользователей; 
+- не знают про бронирования.
+
+| Класс                | Описание               |
+|----------------------|------------------------|
+| `SlotDTO`            | Один доступный слот    |
+| `AvailabilityDayDTO` | Набор слотов в 1 день  |
+| `AvailabilityDTO`    | Набор слотов за период |
 
 ---
 
