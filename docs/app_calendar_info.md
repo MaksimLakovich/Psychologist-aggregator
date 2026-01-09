@@ -387,37 +387,37 @@ calendar_engine/
    Корень агрегата - событие календаря. Может содержать 1 или несколько временных слотов (т.е., если составное событие,
    то будет N-записей с одним ID события и разными ID слотов).
 
-| Поле                | Тип                  | Описание                |
-|---------------------|----------------------|-------------------------|
-| `id`                | UUID                 | Публичный идентификатор |
-| `organizer`         | FK(AppUser)          | Организатор события     |
-| `title`             | CharField            | Название                |
-| `description`       | TextField            | Описание                |
-| `event_type`        | CharField(choices)   | Тип события             |
-| `status`            | CharField(choices)   | Статус                  |
-| `cancel_reason`     | TextField            | Причина отмены          |
-| `visibility`        | CharField(choices)   | Видимость               |
-| `capacity`          | PositiveSmallInteger | Лимит участников        |
-| `is_recurring`      | Boolean              | Повторяющееся           |
+| Поле               | Тип                  | Описание                |
+|--------------------|----------------------|-------------------------|
+| `id`               | UUID                 | Публичный идентификатор |
+| `creator`          | FK(AppUser)          | Организатор события     |
+| `title`            | CharField            | Название                |
+| `description`      | TextField            | Описание                |
+| `event_type`       | CharField(choices)   | Тип события             |
+| `status`           | CharField(choices)   | Статус                  |
+| `cancel_reason`    | TextField            | Причина отмены          |
+| `visibility`       | CharField(choices)   | Видимость               |
+| `capacity`         | PositiveSmallInteger | Лимит участников        |
+| `is_recurring`     | Boolean              | Повторяющееся           |
 | `previous_event_id` | FK(self)             | Связь при переносе      |
-| `source`            | CharField            | Источник                |
-| `external_id`       | CharField            | ID во внешнем календаре |
+| `source`           | CharField            | Источник                |
+| `external_id`      | CharField            | ID во внешнем календаре |
 
 3. Модель `RecurrenceRule`:  
    Правила для повторяющегося события.
 
-| Поле                   | Тип                  | Описание                                       |
-|------------------------|----------------------|------------------------------------------------|
-| `owner`                | FK(AppUser)          | Владелец                                       |
-| `event`                | FK(CalendarEvent)    | Событие                                        |
-| `timezone`             | TimeZoneField        | Часовой пояс                                   |
-| `rule_start`           | DateField            | Начало                                         |
-| `rule_end`             | DateField            | Конец                                          |
-| `count_recurrences`    | SmallInt             | Ограничение по кол-ву повторнений              |
-| `frequency`            | CharField(choices)   | Daily / Weekly / Monthly                       |
-| `interval`             | PositiveSmallInteger | Интервал (1 - каждую неделю, 2 - через неделю) |
+| Поле                  | Тип                  | Описание                                       |
+|-----------------------|----------------------|------------------------------------------------|
+| `creator`             | FK(AppUser)          | Владелец                                       |
+| `event`               | FK(CalendarEvent)    | Событие                                        |
+| `timezone`            | TimeZoneField        | Часовой пояс                                   |
+| `rule_start`          | DateField            | Начало                                         |
+| `rule_end`            | DateField            | Конец                                          |
+| `count_recurrences`   | SmallInt             | Ограничение по кол-ву повторнений              |
+| `frequency`           | CharField(choices)   | Daily / Weekly / Monthly                       |
+| `interval`            | PositiveSmallInteger | Интервал (1 - каждую неделю, 2 - через неделю) |
 | `weekdays_recurrences` | Array(choices)       | Дни недели                                     |
-| `is_active`            | Boolean              | Признак действия правила                       |
+| `is_active`           | Boolean              | Признак действия правила                       |
 
 4. Модель `TimeSlot`:  
    Атом времени внутри события (конкретный интервал времени, часть события).
@@ -426,21 +426,21 @@ calendar_engine/
         - multi-slot
         - разные статусы
         - переносы
-        - защита от double booking (защита от пересечений слотов одного owner)
+        - защита от double booking (защита от пересечений слотов одного creator)
     - slot_index - для составного события (курсы и серии)
 
-| Поле             | Тип                       | Описание                     |
-|------------------|---------------------------|------------------------------|
-| `id`             | UUID                      | Идентификатор                |
-| `owner`          | FK(AppUser)               | Владелец слота               |
-| `event`          | FK(CalendarEvent)         | Событие                      |
+| Поле            | Тип                       | Описание                     |
+|-----------------|---------------------------|------------------------------|
+| `id`            | UUID                      | Идентификатор                |
+| `creator`       | FK(AppUser)               | Владелец слота               |
+| `event`         | FK(CalendarEvent)         | Событие                      |
 | `start_datetime` | DateTimeField             | Начало                       |
-| `end_datetime`   | DateTimeField             | Конец                        |
-| `status`         | CharField(choices)        | Статус                       |
-| `timezone`       | TimeZoneField             | Часовой пояс                 |
-| `meeting_url`    | URL                       | Ссылка на видео-комнату      |
-| `comment`        | TextField                 | Комментарий                  |
-| `slot_index`     | PositiveSmallIntegerField | Порядок слота внутри события |
+| `end_datetime`  | DateTimeField             | Конец                        |
+| `status`        | CharField(choices)        | Статус                       |
+| `timezone`      | TimeZoneField             | Часовой пояс                 |
+| `meeting_url`   | URL                       | Ссылка на видео-комнату      |
+| `comment`       | TextField                 | Комментарий                  |
+| `slot_index`    | PositiveSmallIntegerField | Порядок слота внутри события |
 
 5. Модель `EventParticipant`:  
    Участник события с ролью и статусом.
@@ -478,31 +478,31 @@ calendar_engine/
    Правила доступности специалиста (рабочее расписание).
    Например: Пн-Пт, 10:00–18:00.
 
-| Поле                    | Тип                       | Описание                 |
-|-------------------------|---------------------------|--------------------------|
-| `owner`                 | FK(AppUser)               | Пользователь             |
-| `timezone`              | TimeZoneField             | Часовой пояс             |
-| `rule_start`            | Date                      | Начало                   |
-| `rule_end`              | Date                      | Конец                    |
-| `weekdays`              | Array(choices)            | Дни недели               |
-| `start_time`            | Time                      | Начало дня               |
-| `end_time`              | Time                      | Конец дня                |
+| Поле                   | Тип                       | Описание                 |
+|------------------------|---------------------------|--------------------------|
+| `creator`              | FK(AppUser)               | Пользователь             |
+| `timezone`             | TimeZoneField             | Часовой пояс             |
+| `rule_start`           | Date                      | Начало                   |
+| `rule_end`             | Date                      | Конец                    |
+| `weekdays`             | Array(choices)            | Дни недели               |
+| `start_time`           | Time                      | Начало дня               |
+| `end_time`             | Time                      | Конец дня                |
 | `slot_duration_minutes` | PositiveSmallIntegerField | Длительность             |
-| `break_minutes`         | PositiveSmallIntegerField | Перерыв между сессиями   |
-| `is_active`             | Boolean                   | Признак действия правила |
+| `break_minutes`        | PositiveSmallIntegerField | Перерыв между сессиями   |
+| `is_active`            | Boolean                   | Признак действия правила |
 
 8. Модель `AvailabilityException`:  
    Исключения из правил доступности специалиста (отпуск, болезнь, выходной)
 
-| Поле                  | Тип                  | Описание                                        |
-|-----------------------|----------------------|-------------------------------------------------|
-| `owner`               | FK(AppUser)          | Пользователь                                    |
-| `rule`                | FK(AvailabilityRule) | Правило                                         |
-| `exception_start`     | Date                 | Начало                                          |
-| `exception_end`       | Date                 | Конец                                           |
-| `start_time`          | Time                 | Частичное                                       |
-| `end_time`            | Time                 | Частичное                                       |
-| `reason`              | CharField(choices)   | Выбор причины                                   |
+| Поле                 | Тип                  | Описание                                        |
+|----------------------|----------------------|-------------------------------------------------|
+| `creator`            | FK(AppUser)          | Пользователь                                    |
+| `rule`               | FK(AvailabilityRule) | Правило                                         |
+| `exception_start`    | Date                 | Начало                                          |
+| `exception_end`      | Date                 | Конец                                           |
+| `start_time`         | Time                 | Частичное                                       |
+| `end_time`           | Time                 | Частичное                                       |
+| `reason`             | CharField(choices)   | Выбор причины                                   |
 | `global_availability` | CharField(choices)   | Глобальная доступность: available / unavailable |
 
 ---

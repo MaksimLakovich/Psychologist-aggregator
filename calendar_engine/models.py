@@ -47,7 +47,7 @@ class CalendarEvent(TimeStampedModel):
         default=uuid.uuid4,
         editable=False
     )
-    organizer = models.ForeignKey(
+    creator = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=False,
@@ -154,7 +154,7 @@ class CalendarEvent(TimeStampedModel):
 class RecurrenceRule(TimeStampedModel):
     """Правила для повторяющегося события."""
 
-    owner = models.ForeignKey(
+    creator = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=False,
@@ -228,12 +228,12 @@ class RecurrenceRule(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.owner} / ({self.rule_start} - {self.rule_end})"
+        return f"{self.creator} / ({self.rule_start} - {self.rule_end})"
 
     class Meta:
         verbose_name = "Правило повторения события"
         verbose_name_plural = "Правила повторений событий"
-        ordering = ["pk", "owner", "rule_start"]
+        ordering = ["pk", "creator", "rule_start"]
 
 
 class TimeSlot(TimeStampedModel):
@@ -245,7 +245,7 @@ class TimeSlot(TimeStampedModel):
         default=uuid.uuid4,
         editable=False
     )
-    owner = models.ForeignKey(
+    creator = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=False,
@@ -324,16 +324,16 @@ class TimeSlot(TimeStampedModel):
         indexes = [
             models.Index(fields=["start_datetime", "end_datetime"]),
         ]
-        # Защита от double booking (защита от пересечений слотов одного owner):
+        # Защита от double booking (защита от пересечений слотов одного creator):
         constraints = [
             models.CheckConstraint(
                 check=models.Q(end_datetime__gt=models.F("start_datetime")),
                 name="slot_end_after_start",
             ),
             ExclusionConstraint(
-                name="prevent_slot_overlap_per_owner",
+                name="prevent_slot_overlap_per_creator",
                 expressions=[
-                    (models.F("owner"), "="),
+                    (models.F("creator"), "="),
                     (
                         models.Func(
                             models.F("start_datetime"),
@@ -493,7 +493,7 @@ class AvailabilityRule(TimeStampedModel):
     """Правила доступности специалиста (рабочее расписание).
     Например: Пн-Пт, 10:00–18:00."""
 
-    owner = models.ForeignKey(
+    creator = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=False,
@@ -563,18 +563,18 @@ class AvailabilityRule(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.owner} - {self.start_time} - {self.end_time} / {self.weekdays}"
+        return f"{self.creator} - {self.start_time} - {self.end_time} / {self.weekdays}"
 
     class Meta:
         verbose_name = "Правило доступности специалиста"
         verbose_name_plural = "Правила доступности специалиста"
-        ordering = ["pk", "owner", "rule_start"]
+        ordering = ["pk", "creator", "rule_start"]
 
 
 class AvailabilityException(TimeStampedModel):
     """Исключения из правил доступности специалиста (отпуск, болезнь, day-off)."""
 
-    owner = models.ForeignKey(
+    creator = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=False,
@@ -634,9 +634,9 @@ class AvailabilityException(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.owner} - {self.exception_start} (глобально: {self.global_availability})"
+        return f"{self.creator} - {self.exception_start} (глобально: {self.global_availability})"
 
     class Meta:
         verbose_name = "Исключение из правил доступности"
         verbose_name_plural = "Исключения из правил доступности"
-        ordering = ["pk", "owner", "exception_start"]
+        ordering = ["pk", "creator", "exception_start"]
