@@ -1,8 +1,7 @@
 from datetime import date
 
 from calendar_engine.application.use_cases.base import AbsUseCase
-from calendar_engine.domain.availability.base import (AbsAvailabilityException,
-                                                      AbsAvailabilityRule)
+from calendar_engine.domain.availability.base import AbsAvailabilityException, AbsAvailabilityRule
 from calendar_engine.domain.availability.generator import AvailabilityGenerator
 from calendar_engine.domain.matching.base import AbsTimeMatcher
 from calendar_engine.domain.matching.dto import MatchResultDTO
@@ -11,14 +10,14 @@ from calendar_engine.domain.time_policy.base import AbsDomainTimePolicy
 
 class GenerateAndMatchAvailabilityUseCase(AbsUseCase):
     """Use-case генерации и matching доступных слотов специалиста.
-
     Отвечает за прикладной сценарий:
-        1) генерация доступных слотов по правилам специалиста;
-        2) применение matching-логики (предпочтения клиента, фильтры);
+        1) генерация доступных слотов специалиста в заданном временном окне;
+        2) применение matching-логики (через переданный matcher);
         3) возврат итогового результата.
-
-    НЕ содержит бизнес-логики:
-        - вся логика находится в domain-слое."""
+    ВАЖНО:
+        - use-case не знает, по каким критериям происходит matching;
+        - критерии (период, выбранные слоты и т.п.) инкапсулированы в matcher;
+        - date_from/date_to используются ТОЛЬКО как окно генерации."""
 
     def __init__(
         self,
@@ -42,23 +41,24 @@ class GenerateAndMatchAvailabilityUseCase(AbsUseCase):
     def execute(self, *, date_from: date, date_to: date) -> MatchResultDTO:
         """Выполняет сценарий генерации и matching доступных слотов.
 
-        :param date_from: Дата начала интересующего периода.
-        :param date_to: Дата окончания интересующего периода.
-        :return: MatchResultDTO - итоговый результат, готовый к использованию во внешних слоях (aggregator, UI)."""
+        :param date_from: Дата начала окна генерации доступности.
+        :param date_to: Дата окончания окна генерации доступности.
+        :return: MatchResultDTO - результат matching, определяемый matcher-ом."""
 
-        # 1) Генерация доступности специалиста
+        # 1) Создание генератора доступности специалиста
         generator = AvailabilityGenerator(
             time_policy=self._time_policy,
             rule=self._rule,
             exceptions=self._exceptions,
         )
 
+        # 2) Запуск метода по нарезке слотов в генераторе
         availability = generator.generate_slots(
             date_from=date_from,
             date_to=date_to,
         )
 
-        # 2) Применение matching-логики
+        # 3) Применение matching-логики
         return self._matcher.match(
             availability=availability,
             date_from=date_from,
