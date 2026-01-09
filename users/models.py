@@ -631,6 +631,19 @@ class ClientProfile(TimeStampedModel):
         verbose_name="Вид консультации",
         help_text="Укажите интересующий вид консультации",
     )
+    has_time_preferences = models.BooleanField(
+        default=False,
+        verbose_name="Наличие предпочтения по времени сессии",
+        help_text="Есть ли личные предпочтения по времени сессии",
+    )
+    preferred_slots = ArrayField(
+        models.DateTimeField(),
+        null=False,  # False потому что в default и так передаем пустой список. Можно null=False вообще удалить
+        blank=True,
+        default=list,
+        verbose_name="Предпочитаемые временные слоты для сессии",
+        help_text="Выбор клиентом предпочитаемых временных слотов для сессии с учетом UTC",
+    )
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
