@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
+from django.db import transaction
 from django.http import JsonResponse
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
@@ -13,7 +14,9 @@ from rest_framework_simplejwt.token_blacklist.models import (BlacklistedToken,
                                                              OutstandingToken)
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from calendar_engine.models import AvailabilityRule
 from users._api.serializers import (AppUserSerializer,
+                                    AvailabilityRuleSerializer,
                                     ChangePasswordSerializer,
                                     ClientProfileReadSerializer,
                                     ClientProfileWriteSerializer,
@@ -40,6 +43,10 @@ from users.services.throttles import (ChangePasswordThrottle, LoginThrottle,
                                       PasswordResetThrottle, RegisterThrottle,
                                       ResendThrottle)
 
+
+# =====
+# РЕГИСТРАЦИЯ / АВТОРИЗАЦИЙ / ПАРОЛИ / ВЫХОД
+# =====
 
 class RegisterView(generics.GenericAPIView):
     """Класс-контроллер на основе базового GenericAPIView для регистрации:
@@ -265,6 +272,10 @@ class PasswordResetConfirmView(APIView):
         )
 
 
+# =====
+# ПОЛЬЗОВАТЕЛИ СИСТЕМЫ
+# =====
+
 class AppUserRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     """Класс-контроллер на основе Generic для работы с одним конкретным AppUser (аккаунт):
         - получение данных текущего пользователя;
@@ -391,6 +402,72 @@ class ClientProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
             raise NotFound("У текущего пользователя нет профиля клиента.")
 
 
+# =====
+# РАБОЧИЙ ГРАФИК ПСИХОЛОГА
+# =====
+
+class AvailabilityRuleListCreateView(generics.ListCreateAPIView):
+    """Класс-контроллер на основе Generic для управления рабочим расписанием специалиста.
+    Возможности:
+    1) GET:
+        - по умолчанию возвращает только активное правило (is_active=True)
+        - include_archived=true -> возвращает все правила (включая архивные)
+    2) POST:
+        - создает новое правило доступности (рабочее расписание)
+        - при создании нового автоматически деактивируется предыдущее активное правило
+        - автоматически проставляет creator и timezone"""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = AvailabilityRuleSerializer
+
+    @transaction.atomic  # Отвечает за то, чтоб итоговое сохранение произошло только при успешном завершении всех шагов
+    def perform_create(self, serializer):
+        """Метод для создания нового рабочего расписания.
+        Алгоритм:
+            1) деактивировать текущее активное правило (если есть)
+            2) создать новое правило как is_active=True
+            3) timezone берется из профиля пользователя"""
+        user = self.request.user
+
+        # Ищем существующее активное правило и деактивируем его перед сохранением нового правила
+        # (у специалиста может быть только 1 активное правило)
+        AvailabilityRule.objects.filter(
+            creator=user,
+            is_active=True,
+        ).update(is_active=False)
+
+        serializer.save(
+            timezone=getattr(user, "timezone", None),
+            is_active=True,
+        )
+
+    def create(self, request, *args, **kwargs):
+        """Переопределен для явного возврата 201 + serialized data (поведение DRF сохранено,
+        но логика более читаема)."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_create(serializer)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get_queryset(self):
+        """Возвращает правила доступности текущего пользователя. По умолчанию - только активное правило."""
+        user = self.request.user
+        include_archived = self.request.query_params.get("include_archived")
+
+        queryset = AvailabilityRule.objects.filter(creator=user)
+
+        if include_archived not in ("true", "1", "yes"):
+            queryset = queryset.filter(is_active=True)
+
+        return queryset.order_by("-created_at")
+
+
+# =====
+# ОБЩИЕ СПРАВОЧНИКИ СИСТЕМЫ
+# =====
+
 class TopicListView(generics.ListAPIView):
     """Класс-контроллер на основе Generic для получения списка всех Topics.
     Используется, например, при выборе темы в профиле клиента/психолога."""
@@ -483,6 +560,10 @@ class EducationRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
             return Education.objects.all()
         return Education.objects.filter(creator=user)
 
+
+# =====
+# AJAX-ЗАПРОСЫ (fetch)
+# =====
 
 class SavePreferredTopicTypeAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
     """Класс-контроллер на основе View для автосохранения без кнопки "Сохранить", как это делают
