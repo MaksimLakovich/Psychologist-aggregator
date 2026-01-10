@@ -177,44 +177,46 @@
 
 8. Модель `PsychologistProfile(TimeStampedModel)`:
 
-| Поле                       | Тип                          | Описание                                                        |
-|----------------------------|------------------------------|-----------------------------------------------------------------|
-| `id`                       | AutoField                    | Уникальный ID профиля психолога                                 |
-| `user`                     | OneToOneField → `AppUser`    | Связь с пользователем                                           |
-| `is_verified`              | BooleanField                 | Подтвержден ли профиль администратором                          |
-| `gender`                   | CharField(choices)           | Пол                                                             |
-| `specialisations`          | ManyToMany → `Specialisation` | Список специализаций (методологических школ)                    |
-| `methods`                  | ManyToMany → `Method`        | Методы или подходы, используемые психологом                     |
-| `topics`                   | ManyToMany → `Topic`         | Темы или запросы, с которыми работает психолог                  |
-| `is_all_education_verified` | BooleanField                 | Проверено ли все образование                                    |
-| `biography`                | TextField                    | Описание, биография психолога                                   |
-| `photo`                    | ImageField                   | Фотография профиля (.jpg, .jpeg, .png)                          |
-| `practice_start_year`      | PositiveSmallIntegerField    | Год начала практики для вычисления опыта работы в годах         |
-| `languages`                | ArrayField(CharField(50))    | Языки, на которых проводятся сессии (по умолчанию `["russian"]`) |
-| `therapy_format`           | CharField(choices)           | Формат работы: онлайн / офлайн / гибрид                         |
-| `price_individual`         | DecimalField(10,2)           | Стоимость индивидуальной сессии                                 |
-| `price_couples`            | DecimalField(10,2)           | Стоимость парной сессии                                         |
-| `price_currency`           | CharField(choices)           | Валюта сессии                                                   |
-| `work_status`              | CharField(choices)           | Рабочий статус (работает / не принимает / в отпуске и т.д.)     |
-| `rating`                   | DecimalField(3,1)            | Рейтинг психолога                                               |
-| `created_at`               | DateTimeField                | Дата и время создания                                           |
-| `updated_at`               | DateTimeField                | Дата и время последнего обновления                              |
+    | Поле                       | Тип                          | Описание                                                        |
+    |----------------------------|------------------------------|-----------------------------------------------------------------|
+    | `id`                       | AutoField                    | Уникальный ID профиля психолога                                 |
+    | `user`                     | OneToOneField → `AppUser`    | Связь с пользователем                                           |
+    | `is_verified`              | BooleanField                 | Подтвержден ли профиль администратором                          |
+    | `gender`                   | CharField(choices)           | Пол                                                             |
+    | `specialisations`          | ManyToMany → `Specialisation` | Список специализаций (методологических школ)                    |
+    | `methods`                  | ManyToMany → `Method`        | Методы или подходы, используемые психологом                     |
+    | `topics`                   | ManyToMany → `Topic`         | Темы или запросы, с которыми работает психолог                  |
+    | `is_all_education_verified` | BooleanField                 | Проверено ли все образование                                    |
+    | `biography`                | TextField                    | Описание, биография психолога                                   |
+    | `photo`                    | ImageField                   | Фотография профиля (.jpg, .jpeg, .png)                          |
+    | `practice_start_year`      | PositiveSmallIntegerField    | Год начала практики для вычисления опыта работы в годах         |
+    | `languages`                | ArrayField(CharField(50))    | Языки, на которых проводятся сессии (по умолчанию `["russian"]`) |
+    | `therapy_format`           | CharField(choices)           | Формат работы: онлайн / офлайн / гибрид                         |
+    | `price_individual`         | DecimalField(10,2)           | Стоимость индивидуальной сессии                                 |
+    | `price_couples`            | DecimalField(10,2)           | Стоимость парной сессии                                         |
+    | `price_currency`           | CharField(choices)           | Валюта сессии                                                   |
+    | `work_status`              | CharField(choices)           | Рабочий статус (работает / не принимает / в отпуске и т.д.)     |
+    | `rating`                   | DecimalField(3,1)            | Рейтинг психолога                                               |
+    | `created_at`               | DateTimeField                | Дата и время создания                                           |
+    | `updated_at`               | DateTimeField                | Дата и время последнего обновления                              |
 
 9. Модель `ClientProfile(TimeStampedModel)`:
 
-    | Поле                   | Тип                      | Описание                                       |
-    |------------------------|--------------------------|------------------------------------------------|
-    | `id`                   | AutoField                | Уникальный ID профиля клиента                  |
-    | `user`                 | OneToOneField → `AppUser` | Связь с пользователем                          |
-    | `therapy_experience`   | BooleanField             | Есть ли у клиента опыт психотерапии            |
-    | `has_preferences`      | BooleanField             | Есть ли у клиента предпочтения среди психологов |
-    | `preferred_methods`    | ManyToMany → `Method`    | Предпочтительные методы и подходы клиента      |
-    | `preferred_topic_type` | CharField(choices)       | Вид консультации (индивидуальная/парная)       |
-    | `requested_topics`     | ManyToMany → `Topic`     | Запросы, с которыми клиент приходит            |
-    | `preferred_ps_age`     | CharField(choices)       | Предпочитаемый возраст психолога               |
-    | `preferred_ps_gender`  | CharField(choices)       | Предпочитаемый пол психолога                   |
-    | `created_at`           | DateTimeField            | Дата и время создания                          |
-    | `updated_at`           | DateTimeField            | Дата и время последнего обновления             |
+    | Поле                  | Тип                       | Описание                                               |
+    |-----------------------|---------------------------|--------------------------------------------------------|
+    | `id`                  | AutoField                 | Уникальный ID профиля клиента                          |
+    | `user`                | OneToOneField → `AppUser` | Связь с пользователем                                  |
+    | `therapy_experience`  | BooleanField              | Есть ли у клиента опыт психотерапии                    |
+    | `has_preferences`     | BooleanField              | Есть ли у клиента предпочтения среди психологов        |
+    | `preferred_methods`   | ManyToMany → `Method`     | Предпочтительные методы и подходы клиента              |
+    | `preferred_topic_type` | CharField(choices)        | Вид консультации (индивидуальная/парная)               |
+    | `requested_topics`    | ManyToMany → `Topic`      | Запросы, с которыми клиент приходит                    |
+    | `preferred_ps_age`    | CharField(choices)        | Предпочитаемый возраст психолога                       |
+    | `preferred_ps_gender` | CharField(choices)        | Предпочитаемый пол психолога                           |
+    | `has_time_preferences` | BooleanField              | Наличие предпочтения по времени сессии                 |
+    | `preferred_slots`     | ArrayField(DateTimeField) | Предпочитаемые временные слоты для сессии с учетом UTC |
+    | `created_at`          | DateTimeField             | Дата и время создания                                  |
+    | `updated_at`          | DateTimeField             | Дата и время последнего обновления                     |
 
 ---
 

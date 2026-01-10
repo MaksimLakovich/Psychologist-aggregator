@@ -84,7 +84,7 @@ AVAILABILITY_EXCEPTION_CHOICES = [
     ("sick_leave", "Больничный"),
 ]
 
-GLOBAL_AVAILABILITY_TYPE_CHOICES = [
-    ("available", "Доступный"),
-    ("unavailable", "Недоступный")
+EXCEPTION_TYPE_CHOICES = [
+    ("unavailable", "Полностью недоступен"),
+    ("override", "Частичное переопределение")
 ]
