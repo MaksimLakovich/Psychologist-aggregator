@@ -283,6 +283,11 @@
   - `LogoutSerializer` - ***выход (logout)*** пользователя (помещение токена в blacklist refresh token)
 
 
+- Рабочее расписание специалиста (правило рабочего времени / исключения):
+  - `AvailabilityRuleSerializer` - создание рабочего расписания психолога
+  - `AvailabilityExceptionSerializer` - исключение из рабочего расписания психолога
+
+
 ### 2. КОНТРОЛЛЕРЫ 
 
 ### users/_api/views.py:
