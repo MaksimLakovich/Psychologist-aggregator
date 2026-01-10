@@ -11,8 +11,8 @@ from calendar_engine.constants import (AVAILABILITY_EXCEPTION_CHOICES,
                                        EVENT_STATUS_CHOICES,
                                        EVENT_TYPE_CHOICES,
                                        EVENT_VISIBILITY_CHOICES,
+                                       EXCEPTION_TYPE_CHOICES,
                                        FREQUENCY_RECURRENCE_CHOICES,
-                                       GLOBAL_AVAILABILITY_TYPE_CHOICES,
                                        PARTICIPANT_EVENT_ROLE_CHOICES,
                                        PARTICIPANT_EVENT_STATUS_CHOICES,
                                        PARTICIPANT_SLOT_ROLE_CHOICES,
@@ -47,7 +47,7 @@ class CalendarEvent(TimeStampedModel):
         default=uuid.uuid4,
         editable=False
     )
-    organizer = models.ForeignKey(
+    creator = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=False,
@@ -154,7 +154,7 @@ class CalendarEvent(TimeStampedModel):
 class RecurrenceRule(TimeStampedModel):
     """Правила для повторяющегося события."""
 
-    owner = models.ForeignKey(
+    creator = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=False,
@@ -228,12 +228,12 @@ class RecurrenceRule(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.owner} / ({self.rule_start} - {self.rule_end})"
+        return f"{self.creator} / ({self.rule_start} - {self.rule_end})"
 
     class Meta:
         verbose_name = "Правило повторения события"
         verbose_name_plural = "Правила повторений событий"
-        ordering = ["pk", "owner", "rule_start"]
+        ordering = ["pk", "creator", "rule_start"]
 
 
 class TimeSlot(TimeStampedModel):
@@ -245,7 +245,7 @@ class TimeSlot(TimeStampedModel):
         default=uuid.uuid4,
         editable=False
     )
-    owner = models.ForeignKey(
+    creator = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=False,
@@ -324,16 +324,16 @@ class TimeSlot(TimeStampedModel):
         indexes = [
             models.Index(fields=["start_datetime", "end_datetime"]),
         ]
-        # Защита от double booking (защита от пересечений слотов одного owner):
+        # Защита от double booking (защита от пересечений слотов одного creator):
         constraints = [
             models.CheckConstraint(
                 check=models.Q(end_datetime__gt=models.F("start_datetime")),
                 name="slot_end_after_start",
             ),
             ExclusionConstraint(
-                name="prevent_slot_overlap_per_owner",
+                name="prevent_slot_overlap_per_creator",
                 expressions=[
-                    (models.F("owner"), "="),
+                    (models.F("creator"), "="),
                     (
                         models.Func(
                             models.F("start_datetime"),
@@ -493,7 +493,7 @@ class AvailabilityRule(TimeStampedModel):
     """Правила доступности специалиста (рабочее расписание).
     Например: Пн-Пт, 10:00–18:00."""
 
-    owner = models.ForeignKey(
+    creator = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=False,
@@ -563,18 +563,18 @@ class AvailabilityRule(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.owner} - {self.start_time} - {self.end_time} / {self.weekdays}"
+        return f"{self.creator} - {self.start_time} - {self.end_time} / {self.weekdays}"
 
     class Meta:
         verbose_name = "Правило доступности специалиста"
         verbose_name_plural = "Правила доступности специалиста"
-        ordering = ["pk", "owner", "rule_start"]
+        ordering = ["pk", "creator", "rule_start"]
 
 
 class AvailabilityException(TimeStampedModel):
     """Исключения из правил доступности специалиста (отпуск, болезнь, day-off)."""
 
-    owner = models.ForeignKey(
+    creator = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=False,
@@ -591,29 +591,29 @@ class AvailabilityException(TimeStampedModel):
         verbose_name="Правило для которого устанавливается исключение",
         help_text="Укажите правило для которого устанавливается исключение",
     )
-    exception_start = models.DateField(
+    exception_date_start = models.DateField(
         null=False,
         blank=False,
-        verbose_name="Дата старта исключения",
-        help_text="Укажите дату старта исключения",
+        verbose_name="Дата старта действия исключения",
+        help_text="Укажите дату старта действия исключения",
     )
-    exception_end = models.DateField(
+    exception_date_end = models.DateField(
         null=False,
         blank=False,
-        verbose_name="Дата окончания исключения",
-        help_text="Укажите дату окончания исключения",
+        verbose_name="Дата окончания действия исключения",
+        help_text="Укажите дату окончания действия исключения",
     )
-    start_time = models.TimeField(
+    exception_start_time = models.TimeField(
         null=True,
         blank=True,
-        verbose_name="Время начала исключения",
-        help_text="Укажите время начала исключения",
+        verbose_name="Время начала действия исключения",
+        help_text="Укажите время начала действия исключения",
     )
-    end_time = models.TimeField(
+    exception_end_time = models.TimeField(
         null=True,
         blank=True,
-        verbose_name="Время окончания исключения",
-        help_text="Укажите время окончания исключения",
+        verbose_name="Время окончания действия исключения",
+        help_text="Укажите время окончания действия исключения",
     )
     reason = models.CharField(
         choices=AVAILABILITY_EXCEPTION_CHOICES,
@@ -623,20 +623,54 @@ class AvailabilityException(TimeStampedModel):
         verbose_name="Причина исключения",
         help_text="Укажите причину исключения",
     )
-    global_availability = models.CharField(
-        choices=GLOBAL_AVAILABILITY_TYPE_CHOICES,
-        default="available",
+    exception_type = models.CharField(
+        choices=EXCEPTION_TYPE_CHOICES,
+        default="unavailable",
         null=False,
         blank=False,
-        verbose_name="Глобальная доступность (available / unavailable)",
-        help_text="Укажите значение для глобальной доступности (available / unavailable)",
+        verbose_name="Тип исключения",
+        help_text="Укажите тип исключения (полностью недоступен или изменение текущего рабочего правила",
+    )
+    # Если exception_type=override (переопределение), то:
+    override_start_time = models.TimeField(
+        null=True,
+        blank=True,
+        verbose_name="Новое начало рабочего дня согласно исключения",
+        help_text="Укажите новое начало рабочего дня согласно исключения",
+    )
+    override_end_time = models.TimeField(
+        null=True,
+        blank=True,
+        verbose_name="Новое окончание рабочего дня согласно исключения",
+        help_text="Укажите новое окончание рабочего дня согласно исключения",
+    )
+    override_slot_duration_minutes = models.PositiveSmallIntegerField(
+        default=60,
+        null=True,
+        blank=True,
+        verbose_name="Продолжительность 1 слота согласно исключения",
+        help_text="Укажите продолжительность 1 слота согласно исключения",
+    )
+    override_break_minutes = models.PositiveSmallIntegerField(
+        default=0,
+        null=True,
+        blank=True,
+        verbose_name="Перерыв между сессиями согласно исключения",
+        help_text="Укажите перерыв между сессиями согласно исключения",
+    )
+    is_active = models.BooleanField(
+        default=True,
+        null=False,
+        blank=False,
+        verbose_name="Признак действия исключения",
+        help_text="Флаг действия исключения",
     )
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.owner} - {self.exception_start} (глобально: {self.global_availability})"
+        return f"{self.creator} - {self.exception_date_start} (тип исключения: {self.exception_type})"
 
     class Meta:
         verbose_name = "Исключение из правил доступности"
         verbose_name_plural = "Исключения из правил доступности"
-        ordering = ["pk", "owner", "exception_start"]
+        ordering = ["pk", "creator", "exception_date_start", "exception_start_time"]
