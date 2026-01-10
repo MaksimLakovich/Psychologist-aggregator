@@ -494,16 +494,22 @@ calendar_engine/
 8. Модель `AvailabilityException`:  
    Исключения из правил доступности специалиста (отпуск, болезнь, выходной)
 
-| Поле                 | Тип                  | Описание                                        |
-|----------------------|----------------------|-------------------------------------------------|
-| `creator`            | FK(AppUser)          | Пользователь                                    |
-| `rule`               | FK(AvailabilityRule) | Правило                                         |
-| `exception_start`    | Date                 | Начало                                          |
-| `exception_end`      | Date                 | Конец                                           |
-| `start_time`         | Time                 | Частичное                                       |
-| `end_time`           | Time                 | Частичное                                       |
-| `reason`             | CharField(choices)   | Выбор причины                                   |
-| `global_availability` | CharField(choices)   | Глобальная доступность: available / unavailable |
+| Поле                            | Тип                 | Описание                                        |
+|---------------------------------|---------------------|-------------------------------------------------|
+| `creator`                       | FK(AppUser)         | Пользователь                                    |
+| `rule`                          | FK(AvailabilityRule) | Правило для которого устанавливается исключение |
+| `exception_date_start`          | Date                | Дата старта действия исключения                 |
+| `exception_date_end`            | Date                | Дата окончания действия исключения              |
+| `exception_start_time`          | Time                | Время начала действия исключения                |
+| `exception_end_time`            | Time                | Время окончания действия исключения             |
+| `reason`                        | CharField(choices)  | Выбор причины                                   |
+| `exception_type`                | CharField(choices)  | Тип исключения: unavailable / override          |
+| `is_active`                     | Boolean             | Признак действия исключения                     |
+| `override_start_time`           | Date                | Новое начало рабочего дня согласно исключения   |
+| `override_end_time`             | Date                | Новое окончание рабочего дня согласно исключения |
+| `override_slot_duration_minutes` | Time                | Продолжительность 1 слота согласно исключения   |
+| `override_break_minutes`        | Time                | Перерыв между сессиями согласно исключения      |
+| `is_active`                     | Boolean             | Признак действия исключения                     |
 
 ---
 
