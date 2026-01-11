@@ -781,6 +781,10 @@ class AvailabilityRuleSerializer(CreatorMixin, serializers.ModelSerializer):
 
     creator = serializers.StringRelatedField(read_only=True)
 
+    # TimeZoneField в Python это объект "zoneinfo.ZoneInfo", а ZoneInfo не JSON-serializable, поэтому сериализатор
+    # его не переведет JSON и получим ошибку, поэтому нужно явно описать поле timezone в сериализаторе
+    timezone = serializers.CharField(read_only=True)
+
     class Meta:
         model = AvailabilityRule
         fields = [

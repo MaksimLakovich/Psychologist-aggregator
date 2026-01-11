@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from users._api.views import (AppUserRetrieveUpdateView,
+                              AvailabilityRuleDeactivateView,
                               AvailabilityRuleListCreateView,
                               ChangePasswordView,
                               ClientProfileRetrieveUpdateView,
@@ -56,6 +57,9 @@ urlpatterns = [
     # Рабочее расписание психолога
     path(
         "my-availability-rules/", AvailabilityRuleListCreateView.as_view(), name="availability-rule-list-create"
+    ),
+    path(
+        "my-availability-rules/close/", AvailabilityRuleDeactivateView.as_view(), name="availability-rule-close"
     ),
 
     # Topic (справочник)
