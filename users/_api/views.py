@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
 from django.db import transaction
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.views import View
@@ -14,8 +15,9 @@ from rest_framework_simplejwt.token_blacklist.models import (BlacklistedToken,
                                                              OutstandingToken)
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from calendar_engine.models import AvailabilityRule
+from calendar_engine.models import AvailabilityException, AvailabilityRule
 from users._api.serializers import (AppUserSerializer,
+                                    AvailabilityExceptionSerializer,
                                     AvailabilityRuleSerializer,
                                     ChangePasswordSerializer,
                                     ClientProfileReadSerializer,
@@ -44,10 +46,10 @@ from users.services.throttles import (ChangePasswordThrottle, LoginThrottle,
                                       PasswordResetThrottle, RegisterThrottle,
                                       ResendThrottle)
 
-
 # =====
 # РЕГИСТРАЦИЯ / АВТОРИЗАЦИЙ / ПАРОЛИ / ВЫХОД
 # =====
+
 
 class RegisterView(generics.GenericAPIView):
     """Класс-контроллер на основе базового GenericAPIView для регистрации:
@@ -470,7 +472,7 @@ class AvailabilityRuleDeactivateView(APIView):
 
         rule = AvailabilityRule.objects.filter(
             creator=user,
-            is_active=True
+            is_active=True,
         ).first()
 
         if not rule:
@@ -481,6 +483,87 @@ class AvailabilityRuleDeactivateView(APIView):
 
         rule.is_active = False
         rule.save(update_fields=["is_active"])
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AvailabilityExceptionListCreateView(generics.ListCreateAPIView):
+    """Класс-контроллер на основе Generic для управления исключениями в рабочем расписании специалиста.
+    Возможности:
+    1) GET (200_OK):
+        - по умолчанию возвращает только активные исключения (is_active=True)
+        - include_archived=true -> возвращает все исключения (включая архивные)
+    2) POST (201_CREATED):
+        - создает новое исключение из рабочего расписания
+        - автоматическая привязка исключения к действующему AvailabilityRule(is_active=True)
+        - автоматически проставляет creator"""
+
+    permission_classes = [IsAuthenticated, IsPsychologistOrAdmin]
+    serializer_class = AvailabilityExceptionSerializer
+
+    @transaction.atomic
+    def perform_create(self, serializer):
+        """Метод для создания нового исключения в рабочем расписании.
+        Алгоритм:
+            1) создать новое исключение как is_active=True
+            2) автоматическая привязка исключения к действующему AvailabilityRule(is_active=True)
+            3) автоматически проставляет creator"""
+        user = self.request.user
+
+        # Ищем существующее активное правило
+        rule = AvailabilityRule.objects.filter(
+            creator=user,
+            is_active=True,
+        ).first()
+
+        if not rule:
+            raise NotFound(
+                {"Активное рабочее расписание не найдено"}
+            )
+
+        serializer.save(
+            rule=rule,
+            is_active=True,
+        )
+
+    def get_queryset(self):
+        """Возвращает исключения из рабочего расписания. По умолчанию - только активные исключения."""
+        user = self.request.user
+        include_archived = self.request.query_params.get("include_archived")
+
+        queryset = AvailabilityException.objects.filter(creator=user)
+
+        if include_archived not in ["true", "1", "yes"]:
+            queryset = queryset.filter(is_active=True)
+
+        return queryset.order_by("-created_at")
+
+
+class AvailabilityExceptionDeactivateView(APIView):
+    """Класс-контроллер на основе APIView для явного "закрытия" исключения из расписания специалиста. В реальной жизни:
+        - больничный отменили
+        - отпуск сократили
+        - day-off перенесли
+    Возможности:
+    1) PATCH:
+        - применяется только к действующим активным исключениям (is_active=True)
+        - soft-delete: вместо DESTROY-запроса (устанавливаем is_active=False)."""
+
+    permission_classes = [IsAuthenticated, IsPsychologistOrAdmin]
+
+    def patch(self, request, *args, **kwargs):
+        """Soft-delete для явного "закрытия" исключения из рабочего расписания специалиста: is_active=False."""
+        user = request.user
+
+        exception = get_object_or_404(
+            AvailabilityException,
+            creator=user,
+            pk=kwargs["pk"],
+            is_active=True,
+        )
+
+        exception.is_active = False
+        exception.save(update_fields=["is_active"])
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
