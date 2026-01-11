@@ -1,7 +1,10 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from users._api.views import (AppUserRetrieveUpdateView, ChangePasswordView,
+from users._api.views import (AppUserRetrieveUpdateView,
+                              AvailabilityRuleDeactivateView,
+                              AvailabilityRuleListCreateView,
+                              ChangePasswordView,
                               ClientProfileRetrieveUpdateView,
                               CustomTokenObtainPairView,
                               EducationListCreateView,
@@ -50,6 +53,14 @@ urlpatterns = [
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("password-reset/", PasswordResetView.as_view(), name="password-reset"),
     path("password-reset-confirm/", PasswordResetConfirmView.as_view(), name="password-reset-confirm"),
+
+    # Рабочее расписание психолога
+    path(
+        "my-availability-rules/", AvailabilityRuleListCreateView.as_view(), name="availability-rule-list-create"
+    ),
+    path(
+        "my-availability-rules/close/", AvailabilityRuleDeactivateView.as_view(), name="availability-rule-close"
+    ),
 
     # Topic (справочник)
     path("topics/", TopicListView.as_view(), name="topic-list"),
