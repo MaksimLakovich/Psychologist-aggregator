@@ -4,20 +4,26 @@ from django.db import transaction
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from timezone_field.rest_framework import TimeZoneSerializerField
 
+from calendar_engine.models import AvailabilityException, AvailabilityRule
 from users.constants import GENDER_CHOICES
 from users.mixins.creator_mixin import CreatorMixin
 from users.models import (AppUser, ClientProfile, Education, Method,
                           PsychologistProfile, Specialisation, Topic)
 from users.services.send_verification_email import send_verification_email
 
+# =====
+# ОБЩИЕ СПРАВОЧНИКИ СИСТЕМЫ
+# =====
+
 
 class TopicSerializer(CreatorMixin, serializers.ModelSerializer):
-    """Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
+    """Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализации в DRF на
     основе модели Topic. Описывает, какие поля из Topic будут участвовать в сериализации/десериализации."""
 
     creator = serializers.StringRelatedField(read_only=True)
@@ -29,7 +35,7 @@ class TopicSerializer(CreatorMixin, serializers.ModelSerializer):
 
 
 class SpecialisationSerializer(CreatorMixin, serializers.ModelSerializer):
-    """Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
+    """Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализации в DRF на
     основе Specialisation. Описывает, какие поля из Specialisation будут участвовать в сериализации/десериализации."""
 
     creator = serializers.StringRelatedField(read_only=True)
@@ -41,7 +47,7 @@ class SpecialisationSerializer(CreatorMixin, serializers.ModelSerializer):
 
 
 class MethodSerializer(CreatorMixin, serializers.ModelSerializer):
-    """Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
+    """Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализации в DRF на
     основе модели Method. Описывает, какие поля из Method будут участвовать в сериализации/десериализации."""
 
     creator = serializers.StringRelatedField(read_only=True)
@@ -53,7 +59,7 @@ class MethodSerializer(CreatorMixin, serializers.ModelSerializer):
 
 
 class EducationSerializer(CreatorMixin, serializers.ModelSerializer):
-    """Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
+    """Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализации в DRF на
     основе модели Education. Описывает, какие поля из Education будут участвовать в сериализации/десериализации."""
 
     creator = serializers.StringRelatedField(read_only=True)
@@ -96,7 +102,7 @@ class EducationSerializer(CreatorMixin, serializers.ModelSerializer):
 
 class PublicEducationSerializer(serializers.ModelSerializer):
     """Кастомный класс-сериализатор (используется только для GET) с использованием класса ModelSerializer
-    для осуществления базовой сериализация в DRF на основе модели Education.
+    для осуществления базовой сериализации в DRF на основе модели Education.
     Описывает, какие поля из ОБРАЗОВАНИЯ будут участвовать в сериализации/десериализации данных при получении
     любым авторизованным пользователем системы информации из *Публичного профиля психолога* (где скрыты персональные
     секретные и системные данные - document, id, creator, created_at и так далее)."""
@@ -114,8 +120,12 @@ class PublicEducationSerializer(serializers.ModelSerializer):
         ]
 
 
+# =====
+# ПОЛЬЗОВАТЕЛИ СИСТЕМЫ
+# =====
+
 class AppUserSerializer(serializers.ModelSerializer):
-    """Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
+    """Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализации в DRF на
     основе модели AppUser. Описывает, какие поля из AppUser будут участвовать в сериализации/десериализации."""
 
     # SlugRelatedField(read_only=True) не создает и не меняет ничего, а просто берет существующее значение
@@ -176,7 +186,7 @@ class AppUserSerializer(serializers.ModelSerializer):
 
 class PsychologistProfileReadSerializer(serializers.ModelSerializer):
     """Read-сериализатор (используется только для GET - создавать/редактировать вложенные объекты через него нельзя)
-    с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
+    с использованием класса ModelSerializer для осуществления базовой сериализации в DRF на
     основе модели PsychologistProfile. Описывает, какие поля из PsychologistProfile будут участвовать в
     сериализации/десериализации."""
 
@@ -224,7 +234,7 @@ class PsychologistProfileReadSerializer(serializers.ModelSerializer):
 
 class PsychologistProfileWriteSerializer(serializers.ModelSerializer):
     """Write-сериализатор (используется для PATCH/PUT - разрешает модифицировать только связи через список PK)
-    с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
+    с использованием класса ModelSerializer для осуществления базовой сериализации в DRF на
     основе модели PsychologistProfile. Описывает, какие поля из PsychologistProfile будут участвовать в
     сериализации/десериализации."""
 
@@ -279,7 +289,7 @@ class PsychologistProfileWriteSerializer(serializers.ModelSerializer):
 
 class PublicPsychologistProfileSerializer(serializers.ModelSerializer):
     """Кастомный класс-сериализатор (используется только для GET) с использованием класса ModelSerializer
-    для осуществления базовой сериализация в DRF на основе моделей AppUser и PsychologistProfile.
+    для осуществления базовой сериализации в DRF на основе моделей AppUser и PsychologistProfile.
     Описывает, какие поля АККАУНТА/ПРОФИЛЯ будут участвовать в сериализации/десериализации данных при получении
     любым авторизованным пользователем системы информации из *Публичного профиля психолога* (где скрыты персональные
     секретные данные - телефон, email и так далее)."""
@@ -338,7 +348,7 @@ class PublicPsychologistProfileSerializer(serializers.ModelSerializer):
 
 class ClientProfileReadSerializer(serializers.ModelSerializer):
     """Read-сериализатор (используется только для GET - создавать/редактировать вложенные объекты через него нельзя)
-     с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
+     с использованием класса ModelSerializer для осуществления базовой сериализации в DRF на
     основе ClientProfile. Описывает, какие поля из ClientProfile будут участвовать в сериализации/десериализации."""
 
     preferred_methods = MethodSerializer(read_only=True, many=True)
@@ -346,13 +356,26 @@ class ClientProfileReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClientProfile
-        fields = ["id", "therapy_experience", "preferred_methods", "requested_topics", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "therapy_experience",
+            "preferred_methods",
+            "requested_topics",
+            "created_at",
+            "updated_at",
+            "has_preferences",
+            "preferred_ps_gender",
+            "preferred_ps_age",
+            "preferred_topic_type",
+            "has_time_preferences",
+            "preferred_slots",
+        ]
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
 class ClientProfileWriteSerializer(serializers.ModelSerializer):
     """Write-сериализатор (используется для PATCH/PUT - разрешает модифицировать только связи через список PK)
-     с использованием класса ModelSerializer для осуществления базовой сериализация в DRF на
+     с использованием класса ModelSerializer для осуществления базовой сериализации в DRF на
     основе ClientProfile. Описывает, какие поля из ClientProfile будут участвовать в сериализации/десериализации."""
 
     preferred_methods = serializers.PrimaryKeyRelatedField(
@@ -368,7 +391,17 @@ class ClientProfileWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClientProfile
-        fields = ["therapy_experience", "preferred_methods", "requested_topics"]
+        fields = [
+            "therapy_experience",
+            "preferred_methods",
+            "requested_topics",
+            "has_preferences",
+            "preferred_ps_gender",
+            "preferred_ps_age",
+            "preferred_topic_type",
+            "has_time_preferences",
+            "preferred_slots",
+        ]
 
     def update(self, instance, validated_data):
         """Метод для обновления M2M через set(), а остальные поля через super()."""
@@ -384,6 +417,10 @@ class ClientProfileWriteSerializer(serializers.ModelSerializer):
         # Обновляем обычные поля
         return super().update(instance, validated_data)
 
+
+# =====
+# РЕГИСТРАЦИЯ / АВТОРИЗАЦИЙ / ПАРОЛИ / ВЫХОД
+# =====
 
 class RegisterSerializer(serializers.ModelSerializer):
     """Сериализатор-"оркестр" (он соединяет разные сериализаторы) для регистрации нового пользователя в системе.
@@ -730,3 +767,134 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         user.save()
 
         return user
+
+
+# =====
+# РАБОЧИЙ ГРАФИК ПСИХОЛОГА
+# =====
+
+class AvailabilityRuleSerializer(CreatorMixin, serializers.ModelSerializer):
+    """Рабочее расписание психолога.
+    Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализации в DRF на
+    основе модели AvailabilityRule. Описывает, какие поля из AvailabilityRule будут участвовать в
+    сериализации/десериализации."""
+
+    creator = serializers.StringRelatedField(read_only=True)
+
+    # TimeZoneField в Python это объект "zoneinfo.ZoneInfo", а ZoneInfo не JSON-serializable, поэтому сериализатор
+    # его не переведет JSON и получим ошибку, поэтому нужно явно описать поле timezone в сериализаторе
+    timezone = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = AvailabilityRule
+        fields = [
+            "id",
+            "creator",
+            "timezone",
+            "rule_start",
+            "rule_end",
+            "weekdays",
+            "start_time",
+            "end_time",
+            "slot_duration_minutes",
+            "break_minutes",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "creator", "is_active", "created_at", "updated_at"]
+
+    def validate_weekdays(self, value):
+        """Метод для кастомной валидации поля weekdays."""
+        if not value:
+            raise ValidationError("Нужно указать хотя бы один рабочий день")
+
+        return value
+
+    def validate(self, attrs):
+        """Метод для кастомной валидации даты и времени начала/окончания правила."""
+        rule_start = attrs.get("rule_start")
+        rule_end = attrs.get("rule_end")
+        start_time = attrs.get("start_time")
+        end_time = attrs.get("end_time")
+
+        if rule_start and rule_end and rule_start > rule_end:
+            raise ValidationError("Дата в rule_start должна быть раньше даты в rule_end")
+
+        if start_time and end_time and start_time >= end_time:
+            raise ValidationError("start_time должно быть меньше end_time")
+
+        return attrs
+
+
+class AvailabilityExceptionSerializer(CreatorMixin, serializers.ModelSerializer):
+    """Исключение из рабочего расписания психолога.
+    Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализации в DRF на
+    основе модели AvailabilityException. Описывает, какие поля из AvailabilityException будут участвовать в
+    сериализации/десериализации."""
+
+    creator = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = AvailabilityException
+        fields = [
+            "id",
+            "creator",
+            "rule",
+            "exception_date_start",
+            "exception_date_end",
+            "exception_start_time",
+            "exception_end_time",
+            "reason",
+            "exception_type",
+            "override_start_time",
+            "override_end_time",
+            "override_slot_duration_minutes",
+            "override_break_minutes",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "creator", "is_active", "created_at", "updated_at"]
+
+    def __init__(self, *args, **kwargs):
+        """Ограничение rule только правилами текущего пользователя, чтоб исключить кейс с передачей rule_id
+        другого специалиста."""
+        super().__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            self.fields["rule"].queryset = AvailabilityRule.objects.filter(
+                creator=request.user
+            )
+
+    def validate(self, attrs):
+        """Метод для кастомной валидации:
+         1) поля exception_type - проверка заполнения необходимых параметров при создании исключения.
+         2) валидации дат и времени используемых в правиле."""
+        exception_type = attrs.get("exception_type")
+        exception_date_start = attrs.get("exception_date_start")
+        exception_date_end = attrs.get("exception_date_end")
+        exception_start_time = attrs.get("exception_start_time")
+        exception_end_time = attrs.get("exception_end_time")
+        override_start_time = attrs.get("override_start_time")
+        override_end_time = attrs.get("override_end_time")
+
+        if exception_type == "override":  # Частичное переопределение
+            if not override_start_time or not override_end_time:
+                raise ValidationError(
+                    "Для exception_type='override' необходимо указать override_start_time и override_end_time"
+                )
+        else:  # Полностью недоступен
+            if override_start_time or override_end_time:
+                raise ValidationError("Для exception_type='unavailable' поля override_* недопустимы")
+
+        if exception_date_start and exception_date_end and exception_date_start > exception_date_end:
+            raise ValidationError("exception_date_start не может быть позже exception_date_end")
+
+        if exception_start_time and exception_end_time and exception_start_time >= exception_end_time:
+            raise ValidationError("exception_start_time должно быть меньше exception_end_time")
+
+        if override_start_time and override_end_time and override_start_time >= override_end_time:
+            raise ValidationError("override_start_time должно быть меньше override_end_time")
+
+        return attrs

@@ -70,6 +70,26 @@ class IsProfileOwnerOrAdmin(BasePermission):
         )
 
 
+class IsPsychologistOrAdmin(BasePermission):
+    """Кастомный DRF permission-класс, который разрешает доступ если пользователь является:
+        - психологом;
+        - действующим админом."""
+
+    message = "Вы не являетесь психологом, поэтому не можете создавать рабочее расписание в системе."
+
+    def has_permission(self, request, view):
+        """Возвращает True, если пользователь является психологом ИЛИ действующим админом."""
+        user = request.user
+
+        if not user or not user.is_authenticated:
+            return False
+
+        return (
+            hasattr(user, "psychologist_profile")
+            or (user.is_staff and user.is_active)
+        )
+
+
 # ------
 # Permission-классы для CBV:
 # ------
