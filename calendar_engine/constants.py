@@ -1,3 +1,8 @@
+from datetime import time
+
+from calendar_engine.domain.time_policy.policy import DomainTimePolicy
+
+# ====== ДЛЯ МОДЕЛЕЙ ======
 EVENT_TYPE_CHOICES = [
     ("event", "Встреча"),
     ("group_event", "Группа встреч"),
@@ -88,3 +93,10 @@ EXCEPTION_TYPE_CHOICES = [
     ("unavailable", "Полностью недоступен"),
     ("override", "Частичное переопределение")
 ]
+
+# ====== ДЛЯ ДОМЕННОЙ ПОЛИТИКИ ======
+DOMAIN_TIME_POLICY = DomainTimePolicy(
+    day_time_start=time(0, 0),
+    day_time_end=time(23, 59),
+    slot_duration_minutes=60,
+)
