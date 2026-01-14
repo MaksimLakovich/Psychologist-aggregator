@@ -8,7 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from aggregator._api.filters import PsychologistFilter
 from aggregator._api.serializers import PublicPsychologistListSerializer
-from aggregator._web.services.filter_service import match_psychologists
+from aggregator._web.services.final_aggregator import \
+    PsychologistAggregatorService
 from aggregator._web.services.topic_type_mapping import \
     CLIENT_TO_TOPIC_TYPE_MAP
 from aggregator.paginators import PsychologistCatalogPagination
@@ -59,8 +60,10 @@ class PublicPsychologistListView(generics.ListAPIView):
 
 class MatchPsychologistsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
     """Класс-контроллер на основе View для автоматического запуска фильтрации психологов без кнопки "Далее"
-    по указанным клиентом интересующих его параметрам (темы, методы, возраст, пол), как это делают
-    профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint."""
+    по указанным клиентом:
+        - интересующих его базовым параметрам: темы, методы, возраст, пол;
+        - интересующих его временным слотам.
+    Решение: AJAX-запрос (fetch) на специальный API-endpoint."""
 
     def get(self, request, *args, **kwargs):
         """Метод для запуска фильтрации и возврата JSON-контракта с готовыми данными для карточки психолога."""
@@ -71,18 +74,21 @@ class MatchPsychologistsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
         except Exception:
             return JsonResponse({"error": "no_client_profile"}, status=400)
 
-        # ШАГ 1: Запускаем процесс фильтрации психологов по заданным клиентом параметрам
-        qs = match_psychologists(client_profile)
+        # ШАГ 1: Создаем и запускаем АГРЕГАТОР с процессом фильтрации психологов по заданным клиентом параметрам
+
+        aggregator = PsychologistAggregatorService(client_profile)
+        aggregated_results = aggregator.get_aggregated_results()
 
         # ШАГ 2: Формируем для каждого отфильтрованного психолога JSON с детальными данными для карточки психолога.
         # Для инфо: JsonResponse не умеет сериализовать QuerySet, поэтому нужно из QuerySet сделать подходящий
         # список словарей (собственно нужный нам JSON)
 
         data = []
-
         preferred_topic_type = client_profile.preferred_topic_type  # Для определения цены (individual / couple)
 
-        for ps in qs:
+        for item in aggregated_results.values():
+            ps = item["profile"]
+            availability = item["availability"]  # MatchResultDTO | None
 
             # Цена
             price_value = (
@@ -144,6 +150,8 @@ class MatchPsychologistsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
             # Формируем итоговый контракт
             data.append({
                 "id": ps.id,
+                "topic_score": ps.topic_score,
+                "method_score": ps.method_score,
                 "full_name": f"{ps.user.first_name} {ps.user.last_name}".strip(),
                 "photo": ps.photo.url if ps.photo else "/static/images/menu/user-circle.svg",
                 "session_type": preferred_topic_type,
@@ -158,9 +166,11 @@ class MatchPsychologistsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
                 "methods": methods_data,
                 "matched_topics": matched_topics_data,
                 "timezone": str(ps.user.timezone) if ps.user.timezone else None,
-                "schedule": {
-                    "status": "stub"
-                }
+                "schedule": (
+                    availability.to_dict()
+                    if availability
+                    else {"status": "no_match"}
+                ),
             })
 
         return JsonResponse({"items": data})

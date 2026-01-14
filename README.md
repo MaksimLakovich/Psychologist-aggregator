@@ -266,13 +266,14 @@
 │    │    └── urls.py                         # Все API-роуты
 │    ├── _web/                        # ℹ️ WEB-часть (формы + HTML)
 │    │    ├── selectors.py
-│    │    │    ├── psychologist_selectors.py    # Методы фильтрации психологов по различным параметрам + аннотация доп полей (расчет коэфф совпадения и т.д.)
+│    │    │    ├── psychologist_selectors.py    # Отдельные методы фильтрации психологов по различным параметрам + аннотация доп полей (расчет коэфф совпадения и т.д.)
 │    │    │    └── ...
 │    │    ├── services.py
-│    │    │    ├── filter_service.py        # Возвращает итоговый QuerySet, содержащий психологов отсортированных по коэффициенту совпадения тем
-│    │    │    ├── scoring.py               # Метод аннотирует (рассчитывает в БД) поле topic_score (коэффициент совпадения тем)
-│    │    │    ├── topic_type_mapping.py    # Явный mapping-слой (адаптер) между полем TYPE в users_topic (где указано "Индивидуальная"/"Парная") и полем PREFERRED_TOPIC_TYPE в users_clientprofile (где указано "Individual"/"Couple" на английском)
-│    │    │    ├── age_bucket_mapping.py  # Явный mapping-слой (адаптер) между полем BUCKET и тем какие значения (числа) в него входят. Например, в "25-35" значения от >=25, но меньше 35
+│    │    │    ├── topic_type_mapping.py        # Явный mapping-слой (адаптер) между полем TYPE в users_topic (где указано "Индивидуальная"/"Парная") и полем PREFERRED_TOPIC_TYPE в users_clientprofile (где указано "Individual"/"Couple" на английском)
+│    │    │    ├── age_bucket_mapping.py        # Явный mapping-слой (адаптер) между полем BUCKET и тем какие значения (числа) в него входят. Например, в "25-35" значения от >=25, но меньше 35
+│    │    │    ├── scoring.py                   # Метод аннотирует (рассчитывает в БД) итоговый scoring, где: topic_score - главный критерий; method_score - вторичный критерий (внутри одинакового topic_score)
+│    │    │    ├── basic_filter_service.py      # Возвращает итоговый QuerySet, содержащий первичную фильтрации по: topics, methods, age, gender, price range, experience range
+│    │    │    ├── final_aggregator.py          # Центральный сервис агрегации (первичная + финальная по предпочитаемому времени)
 │    │    │    └── ...
 │    │    └── ...
 │    ├── migrations/

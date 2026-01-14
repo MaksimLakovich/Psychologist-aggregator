@@ -16,9 +16,8 @@ class DomainTimePolicy(AbsDomainTimePolicy):
             - события
         Ее задача:
             - задать шаг времени (slot size)
-            - задать границы дня (сделать 24/7 или сделать 09:00–18:00)
-            - уметь итерировать слоты дня
-    """
+            - задать границы доменного дня, которые общие для всех пользователей (сделать 24/7 или сделать 09:00–18:00)
+            - уметь итерировать слоты дня"""
 
     def __init__(self, *, day_time_start: time, day_time_end: time, slot_duration_minutes: int,) -> None:
         """
@@ -41,17 +40,21 @@ class DomainTimePolicy(AbsDomainTimePolicy):
         """Генерирует базовые слоты домена для одного дня:
             - Работает в доменном времени (TIME_ZONE проекта);
             - Это НЕ availability и НЕ бронирование;
-            - Это базовая временная сетка домена.
+            - Это базовая временная сетка домена - общие для всех пользователей (сделать 24/7 или сделать 09:00–18:00).
         Возвращает итератор пар (start, end) для одного календарного дня.
         Возвращаемые интервалы НЕ учитывают availability и бронирования."""
 
         current_day_start = datetime.combine(day, self.day_time_start)
         current_day_end = datetime.combine(day, self.day_time_end)
 
+        # Пока текущее время плюс длительность слота не вылезли за границу конца дня - то продолжаем
         while current_day_start + self.duration_slot <= current_day_end:
             start = current_day_start.time()
             end = (current_day_start + self.duration_slot).time()
 
-            yield start, end  # ленивая генерация
+            # yield - ленивая генерация. Вместо того чтобы создавать огромный список всех слотов в памяти,
+            # функция выдает их по одному. Как только мы попросим следующий слот - она "проснется", и делает
+            # один шаг цикла и снова замирает. Это очень экономно для памяти.
+            yield start, end
 
             current_day_start += self.duration_slot
