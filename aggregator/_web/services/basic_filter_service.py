@@ -3,8 +3,7 @@ from django.db.models import F, FloatField, IntegerField, Value
 from aggregator._web.selectors.psychologist_selectors import (
     annotate_method_matches, annotate_topic_matches, annotate_type_topic_count,
     base_queryset, filter_by_age, filter_by_gender, filter_by_topic_type)
-from aggregator._web.services.scoring import (apply_final_ordering,
-                                              method_score, topic_score)
+from aggregator._web.services.scoring import method_score, topic_score
 from aggregator._web.services.topic_type_mapping import \
     CLIENT_TO_TOPIC_TYPE_MAP
 
@@ -54,8 +53,6 @@ def match_psychologists(client_profile):
     # --- PREFS ---
     # 1) Если клиент указал, что нет дополнительных предпочтений/пожеланий
     if not client_profile.has_preferences:
-        qs = apply_final_ordering(qs)
-
         return qs
 
     # 2) Если клиент указал, что есть доп пожелания - фильтруем по полу, возрасту и методам
@@ -71,7 +68,5 @@ def match_psychologists(client_profile):
         qs = annotate_method_matches(qs, preferred_method_ids)
         # 2) аннотируем method_score = matched_methods_count / requested_count
         qs = method_score(qs, requested_count=len(preferred_method_ids))
-
-    qs = apply_final_ordering(qs)
 
     return qs

@@ -618,8 +618,8 @@ class AvailabilityException(TimeStampedModel):
     reason = models.CharField(
         choices=AVAILABILITY_EXCEPTION_CHOICES,
         max_length=32,
-        null=True,
-        blank=True,
+        null=False,
+        blank=False,
         verbose_name="Причина исключения",
         help_text="Укажите причину исключения",
     )
