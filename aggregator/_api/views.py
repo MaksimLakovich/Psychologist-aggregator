@@ -8,7 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from aggregator._api.filters import PsychologistFilter
 from aggregator._api.serializers import PublicPsychologistListSerializer
-from aggregator._web.services.final_aggregator import PsychologistAggregatorService
+from aggregator._web.services.final_aggregator import \
+    PsychologistAggregatorService
 from aggregator._web.services.topic_type_mapping import \
     CLIENT_TO_TOPIC_TYPE_MAP
 from aggregator.paginators import PsychologistCatalogPagination

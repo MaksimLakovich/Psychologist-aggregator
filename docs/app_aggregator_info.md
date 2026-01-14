@@ -21,29 +21,25 @@
 ```text
 ClientProfile
       ↓
-Агрегатор: PsychologistAggregatorService
+aggregator.MatchPsychologistsAjaxView
+      ↓
+aggregator.PsychologistAggregatorService
  - если has_match == False → психолог исключается
  - если has_match == True → психолог остается + availability передается в контекст
       ↓
-aggregator.MatchPsychologistsAjaxView (первичная фильтрация по: topics, methods, age, gender, price range, experience range)
+aggregator.basic_filter_service.py    (Первичная фильтрация по: topics, methods, age, gender, price range, experience range)
       ↓
-QuerySet[PsychologistProfile]
+QuerySet[PsychologistProfile]    (ORM / SQL)
       ↓
-generate_and_match_factory
+calendar_engine.generate_and_match_factory    (Собирает use-case генерации и matching доступности для одного психолога)
       ↓
-GenerateAndMatchAvailabilityUseCase (итоговая фильтрация по: selected_slots) Центральный сервис агрегации (первичная + финальная по предпочитаемому времени)
+calendar_engine.GenerateAndMatchAvailabilityUseCase    (фильтрация по: selected_slots)
       ↓
-MatchResultDTO
+MatchResultDTO    (Python-объект)
       ↓
-scoring + ordering
-
-
-ClientProfile
- → match_psychologists()        (ORM / SQL)
- → PsychologistAggregatorService
- → calendar_engine (use cases)
- → MatchResultDTO
- → JSON
+aggregator.scoring.py    (Финальное ранжирование по коэфф совпадения тем/методов среди отсортированных психологов)
+      ↓
+JSON
 
 ```
 
@@ -53,8 +49,7 @@ ClientProfile
 
 ### aggregator/paginators.py:
 
-- `PsychologistCatalogPagination(PageNumberPagination)` - класс-пагинатор для API-эндпоинта
-  ***Публичного каталога психологов***.
+- `PsychologistCatalogPagination(PageNumberPagination)` - класс-пагинатор для API-эндпоинта ***Публичного каталога психологов***.
 
 ---
 
@@ -82,13 +77,13 @@ ClientProfile
 
 ### aggregator/_web/services/:
 
-| № | Модуль                  | Метод                    | Описание функционала (docstring)                                                                                                                                                 |
-|---|-------------------------|--------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1 | scoring.py              | `topic_score()`          | Метод аннотирует поле topic_score (коэффициент совпадения тем)                                                                                                                   |
-| 2 | scoring.py              | `method_score()`         | Метод аннотирует поле method_score (коэффициент совпадения методов)                                                                                                              |
-| 3 | scoring.py              | `apply_final_ordering()` | Метод итоговой сортировки психологов. Логика: 1) topic_score - главный критерий; 2) method_score - вторичный критерий                                                            |
-| 4 | basic_filter_service.py | `match_psychologists()`  | Первичная фильтрация. Метод возвращает итоговый QuerySet, содержащий психологов отсортированных по коэффициенту совпадения тем, полу, возрасту и коэффициенту совпадения методов |
-| 5 |                         |                          |                                                                                                                                                                                  |
+| № | Модуль                 | Метод                      | Описание функционала (docstring)                                                                                                                                                                                                                                                                                          |
+|---|------------------------|----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | scoring.py             | `topic_score()`            | Метод аннотирует поле topic_score (коэффициент совпадения тем)                                                                                                                                                                                                                                                            |
+| 2 | scoring.py             | `method_score()`           | Метод аннотирует поле method_score (коэффициент совпадения методов)                                                                                                                                                                                                                                                       |
+| 3 | scoring.py             | `apply_final_ordering()`   | Метод итоговой сортировки психологов. Логика: 1) topic_score - главный критерий; 2) method_score - вторичный критерий                                                                                                                                                                                                     |
+| 4 | basic_filter_service.py | `match_psychologists()`    | Первичная фильтрация. Метод возвращает итоговый QuerySet, содержащий психологов отсортированных по коэффициенту совпадения тем, полу, возрасту и коэффициенту совпадения методов                                                                                                                                          |
+| 5 | final_aggregator.py    | `PsychologistAggregatorService` | Центральный сервис агрегации: <br/> - запуск первичной фильтрации match_psychologists(); <br/> - финальная фильтрация по selected_slots от пользователя и AvailabilityRule от специалиста; <br/> - финальное ранжирование по коэффициенту совпадения тем и методов (scoring.py); <br/> - подготовка данных для API / AJAX |
 
 ---
 
@@ -202,7 +197,7 @@ ClientProfile
       ],
       "timezone": "Europe/Minsk",
       "schedule": {
-        "status": "stub"
+        "status": "no_match"
       }
     }
   ]
