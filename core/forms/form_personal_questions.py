@@ -42,3 +42,6 @@ class ClientPersonalQuestionsForm(forms.Form):
         required=False,
         widget=forms.CheckboxSelectMultiple  # в html-шаблоне мы рендерим руками, так что widget не обязателен тут
     )
+    has_time_preferences = forms.BooleanField(
+        required=False
+    )

@@ -3,8 +3,10 @@ from django.contrib.auth.tokens import default_token_generator
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils.dateparse import parse_datetime
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
+from django.utils.timezone import is_naive, make_aware, now
 from django.views import View
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -811,4 +813,89 @@ class SavePreferredMethodsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixi
 
         return JsonResponse(
             data={"status": "ok", "saved": ids}, status=200
+        )
+
+
+class SaveHasTimePreferencesAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
+    """Класс-контроллер на основе View для автосохранения без кнопки "Сохранить", как это делают
+    профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint.
+    Моментальное сохранение выбранного клиентом значения в has_time_preferences на html-страницах."""
+
+    def post(self, request, *args, **kwargs):
+        """Сохранение значения в has_time_preferences."""
+        value = request.POST.get("has_time_preferences")  # получаем значение в has_time_preferences с html-страницы
+
+        if value not in ["1", "0"]:  # проверяем что это bool
+            return JsonResponse(
+                data={"status": "error", "error": "invalid_value"}, status=400
+            )
+
+        # Это профессиональный Python-паттерн: "= (value == "1")" возвращает значение True или False:
+        has_pref = (value == "1")
+
+        profile = request.user.client_profile
+        profile.has_time_preferences = has_pref
+        profile.save(update_fields=["has_time_preferences"])
+
+        return JsonResponse(
+            data={"status": "ok", "saved": has_pref}, status=200
+        )
+
+
+class SavePreferredSlotsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
+    """Класс-контроллер на основе View для автосохранения без кнопки "Сохранить", как это делают
+    профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint.
+    Моментальное сохранение выбранных клиентом значений в preferred_slots на html-страницах."""
+
+    def post(self, request, *args, **kwargs):
+        """Сохранение значения в preferred_slots."""
+        value = request.POST.get("slot")  # Получаем из запроса значение в slot (например, "2026-01-15 10:00")
+
+        if not value:
+            return JsonResponse(
+                data={"status": "error", "error": "slot_required"}, status=400
+            )
+
+        # Далее превращаю строку в дату.
+        # parse_datetime - магическая функция, которая понимает формат даты и превращает "2026-01-15" в объект Python
+        slot_dt = parse_datetime(value)
+
+        if not slot_dt:
+            return JsonResponse(
+                data={"status": "error", "error": "invalid_datetime"}, status=400
+            )
+
+        if is_naive(slot_dt):
+            slot_dt = make_aware(slot_dt)
+
+        # Нельзя бронировать время, которое уже прошло. Мы сравниваем присланное время с текущим моментом - now().
+        # У нас изначально планируется отображение на странице слотов текущего дня + ближайшие дни и отображать
+        # прошло не планируется, но лучше добавить эту проверку, хоть она и может показаться лишней
+        if slot_dt < now():
+            return JsonResponse(
+                data={"status": "error", "error": "slot_in_past"}, status=400
+            )
+
+        profile = request.user.client_profile
+        slots = list(profile.preferred_slots)  # берем все ранее добавленные слоты пользователем в его профиле
+
+        slot_dt = slot_dt.replace(minute=0, second=0, microsecond=0)
+
+        if slot_dt in slots:
+            slots.remove(slot_dt)
+            action = "removed"
+        else:
+            slots.append(slot_dt)
+            action = "added"
+
+        profile.preferred_slots = slots
+        profile.save(update_fields=["preferred_slots"])
+
+        return JsonResponse(
+            {
+                "status": "ok",
+                "action": action,
+                "slots_count": len(slots),
+            },
+            status=200
         )
