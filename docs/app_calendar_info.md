@@ -173,70 +173,71 @@ Redis нужен для:
 ```bash
 calendar_engine/
     ├── apps.py
-    ├── constants.py                  # ⭐ Параметры доменной политики (базовые размеры слотов) + значения справочников
+    ├── constants.py                  # Параметры доменной политики (базовые размеры слотов) + значения справочников
     ├── models.py
     ├── admin.py
     ├── urls.py
     │
     ├── domain/                       # ⭐ Бизнес-логика (НЕ Django)
-    │    ├── time_policy/                 # ДОМЕННЫЕ правила временной сетки календаря
-    │    │    ├── base.py             # Абстракция TimePolicy (абстрактный контракт доменной временной сетки)
-    │    │    ├── policy.py           # Основная TimePolicy домена (реализация доменной временной сетки)
-    │    │    └── exceptions.py       # Бизнес-исключения доменной временной сетки (Domain Business Exceptions)
+    │    ├── time_policy/               # ДОМЕННЫЕ правила временной сетки календаря
+    │    │    ├── base.py                 # Абстракция TimePolicy (абстрактный контракт доменной временной сетки)
+    │    │    ├── policy.py               # 💡 Основная DomainTimePolicy домена (создание доменной временной сетки)
+    │    │    └── exceptions.py           # Бизнес-исключения доменной временной сетки (Domain Business Exceptions)
     │    │
-    │    ├── availability/                # Чистая логика доступности конкретного специалиста
-    │    │    ├── base.py             # Абстрактные контракты AvailabilityRule и AvailabilityException
-    │    │    ├── user_rules.py       # Индивидуальные правила доступности специалиста - AvailabilityRule
-    │    │    ├── user_exceptions.py  # Исключения из правил (day-off, отпуск, больничный) - AvailabilityException
-    │    │    ├── dto.py              # SlotDTO, AvailabilityDayDTO, AvailabilityDTO
-    │    │    └── generator.py        # Генерация доступных слотов "на лету" (on-the-fly)
+    │    ├── availability/              # Чистая логика доступности конкретного специалиста
+    │    │    ├── base.py                 # Абстрактные контракты AvailabilityRule и AvailabilityException
+    │    │    ├── user_rules.py           # Индивидуальные правила доступности специалиста - AvailabilityRule
+    │    │    ├── user_exceptions.py      # Исключения из правил (day-off, отпуск, больничный) - AvailabilityException
+    │    │    ├── dto.py                  # SlotDTO, AvailabilityDayDTO, AvailabilityDTO
+    │    │    └── generator.py            # 💡 Генерация доступных слотов специалиста "на лету" (on-the-fly)
     │    │
-    │    ├── matching/                    # Алгоритмы сопоставления time_policy и availability
-    │    │    ├── base.py             # Абстрактные контракты matching-логики
-    │    │    ├── dto.py              # DTO результата matching: MatchResultDTO
-    │    │    └── matcher.py          # Реализация временных matching'ов
-    │    │
-    │    ├── booking/
-    │    │    ├── policies.py         # Правила бронирования
-    │    │    ├── dto.py
-    │    │    └── validator.py        # Проверки
-    │    │
-    │    ├── recurrence/
-    │    │    └── engine.py
-    │    │
-    │    └── exceptions.py            # Системные ошибки
+    │    ├── matching/                  # Алгоритмы сопоставления time_policy и availability
+    │    │    ├── base.py                 # Абстрактные контракты matching-логики
+    │    │    ├── dto.py                  # DTO результата matching: MatchResultDTO
+    │    │    └── matcher.py              # 💡 Основной пользовательский matcher - оставляет только тех специалистов, свободные слоты у которых совпадают с пользовательским запросом
+#    │    │
+#    │    ├── booking/
+#    │    │    ├── policies.py             # Правила бронирования
+#    │    │    ├── dto.py
+#    │    │    └── validator.py            # Проверки
+#    │    │
+#    │    ├── recurrence/
+#    │    │    └── engine.py
+#    │    │
+#    │    └── exceptions.py              # Системные ошибки
     │
-    ├── application/                  # ⭐ Use-cases / Оркестрация процессов (orchestration)
+    ├── application/                  # ⭐ Оркестрация процессов
     │    ├── use_cases/
-    │    │    ├── base.py                               # Абстрактный контракт базовой логики use-case
-    │    │    └── generate_and_match_availability.py    # Use-case генерации и matching доступных слотов специалиста
+    │    │    ├── base.py                             # Абстрактный контракт базовой логики use-cases
+    │    │    ├── get_domain_slots_use_case.py        # Use-case для создания и показа клиенту всех возможных временных слотов домена (общее правило домена) 
+    │    │    └── generate_and_match_availability.py  # Use-case для генерации и matching доступных слотов специалиста
     │    │    
     │    ├── factories/
-    │    │    └── generate_and_match_factory.py    # Собирает use-case генерации и выполняет matching доступности (на входе: СПЕЦИАЛИСТА + ВЫБРАННЫЕ КЛИЕНТОМ СЛОТЫ)
+    │    │    └── generate_and_match_factory.py       # 💡 ИТОГОВЫЙ ПОДБОР СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - этот модуль использует use-cases, передает на вход "СПЕЦИАЛИСТА + ВЫБРАННЫЕ КЛИЕНТОМ "СЛОТЫ" и запускает ПОДБОР
     │    │
-    │    ├── availability_service.py
-    │    ├── booking_service.py
-    │    ├── calendar_query_service.py
-    │    └── sync_service.py   
-    │
-    ├── infrastructure/               # ⭐ Django / Redis / Celery / External
-    │    ├── persistence/
-    │    │    ├── repositories.py     # ORM-обертки
-    │    │    └── selectors.py        # Read-оптимизированные запросы
-    │    │
-    │    ├── cache/                   # Redis
-    │    │    ├── availability_cache.py
-    │    │    └── keys.py
-    │    │
-    │    ├── tasks/                   # Celery
-    │    │    ├── reminders.py
-    │    │    └── sync.py
-    │    │
-    │    └── integrations/            # External
-    │         ├── google/
-    │         ├── apple/
-    │         └── outlook/
-    │
+#    │    ├── availability_service.py
+#    │    ├── booking_service.py
+#    │    ├── calendar_query_service.py
+#    │    └── sync_service.py   
+#    │
+#    ├── infrastructure/               # ⭐ Django / Redis / Celery / External
+#    │    ├── persistence/
+#    │    │    ├── repositories.py     # ORM-обертки
+#    │    │    └── selectors.py        # Read-оптимизированные запросы
+#    │    │
+#    │    ├── cache/                   # Redis
+#    │    │    ├── availability_cache.py
+#    │    │    └── keys.py
+#    │    │
+#    │    ├── tasks/                   # Celery
+#    │    │    ├── reminders.py
+#    │    │    └── sync.py
+#    │    │
+#    │    └── integrations/            # External
+#    │         ├── google/
+#    │         ├── apple/
+#    │         └── outlook/
+#    │
     ├── api/                          # ⭐ DRF
     │    ├── serializers.py
     │    ├── permissions.py
@@ -554,7 +555,7 @@ calendar_engine/
 ```bash
 calendar_engine/domain/time_policy/
 ├── base.py          # Абстракция TimePolicy (абстрактный контракт доменной временной сетки)
-├── policy.py        # Основная TimePolicy домена (реализация доменной временной сетки)
+├── policy.py        # 💡 Основная DomainTimePolicy домена (создание доменной временной сетки)
 └── exceptions.py    # Бизнес-исключения доменной временной сетки (Domain Business Exceptions)
 ```
 
@@ -625,7 +626,7 @@ calendar_engine/domain/availability/
 ├── user_rules.py         # Индивидуальные правила доступности специалиста - AvailabilityRule
 ├── user_exceptions.py    # Исключения из правил (day-off, отпуск, больничный) - AvailabilityException
 ├── dto.py                # SlotDTO, AvailabilityDayDTO, AvailabilityDTO
-└── generator.py          # Генерация доступных слотов "на лету" (on-the-fly)
+└── generator.py          # 💡 Генерация доступных слотов специалиста "на лету" (on-the-fly)
 ```
 
 ---
@@ -753,7 +754,7 @@ Matching (по выбранным пользователем слотам)
 calendar_engine/domain/matching/
 ├── base.py          # Абстрактные контракты matching-логики
 ├── dto.py           # DTO результата matching: MatchResultDTO
-└── matcher.py       # Реализация временных matching'ов
+└── matcher.py       # 💡 Основной пользовательский matcher - оставляет только тех специалистов, свободные слоты у которых совпадают с пользовательским запросом
 ```
 
 ---
@@ -869,7 +870,8 @@ domain/
 ```bash
 calendar_engine/application/use_cases/
 ├── base.py                               # Абстрактный контракт базовой логики use-case
-└── generate_and_match_availability.py    # Use-case генерации и matching доступных слотов специалиста
+├── get_domain_slots_use_case.py          # Use-case для создания и показа клиенту всех возможных временных слотов домена (общее правило домена)
+└── generate_and_match_availability.py    # Use-case для генерации и matching доступных слотов специалиста
 ```
 
 ---
@@ -879,6 +881,14 @@ calendar_engine/application/use_cases/
 | Класс             | Описание                                                                                                            |
 |-------------------|---------------------------------------------------------------------------------------------------------------------|
 | `AbsUseCase(ABC)` | Базовый контракт application use-case. Use-case: описывает сценарий, оркестрирует доменные сервисы, возвращает DTO. |
+
+---
+
+### `get_domain_slots_use_case.py` - создание и показ клиенту всех возможных временных слотов домена (общее правило домена)
+
+| Класс                   | Описание                                                                                                                                                                                                                        |
+|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `GetDomainSlotsUseCase` | Use-case для создания и показа клиенту на UI всех возможных доменных временных слотов (общее правило домена) для заданного в системе определенного количества ближайших дней (например, на ближайшие 7 дней: "DAYS_AHEAD = 7"). |
 
 ---
 
@@ -900,7 +910,7 @@ calendar_engine/application/use_cases/
 
 ```bash
 calendar_engine/application/factories/
-└── generate_and_match_factory.py    # Собирает use-case генерации и выполняет matching доступности (на входе: СПЕЦИАЛИСТА + ВЫБРАННЫЕ КЛИЕНТОМ СЛОТЫ)
+└── generate_and_match_factory.py    # 💡 ИТОГОВЫЙ ПОДБОР СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - этот модуль использует use-cases, передает на вход "СПЕЦИАЛИСТА + ВЫБРАННЫЕ КЛИЕНТОМ "СЛОТЫ" и запускает ПОДБОР
 ```
 
 ---

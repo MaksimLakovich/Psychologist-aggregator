@@ -21,7 +21,9 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
             - has_preferences;
             - preferred_ps_gender;
             - preferred_ps_age;
-            - preferred_methods.
+            - preferred_methods;
+            - has_time_preferences
+            - preferred_slots.
         Вызывается автоматически FormView при создании формы."""
         initial = super().get_initial()
         user = self.request.user
@@ -52,6 +54,12 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
             initial["preferred_methods"] = list(selected)
         except Exception:
             initial["preferred_methods"] = []
+
+        # 7) has_time_preferences
+        initial["has_time_preferences"] = profile.has_time_preferences
+
+        # 8) preferred_slots
+        initial["preferred_slots"] = profile.preferred_slots
 
         return initial
 
@@ -116,6 +124,15 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
             str(pk) for pk in form.initial.get("preferred_methods", [])
         ]
 
+        # 7) has_time_preferences
+        context["has_time_preferences"] = form.initial.get("has_time_preferences", False)
+
+        # 8) preferred_slots (сразу сериализоруем потому что JS не должен работать с Python datetime)
+        context["preferred_slots"] = [
+            slot.isoformat()
+            for slot in form.initial.get("preferred_slots", [])
+        ]
+
         context["title_home_page_view"] = "Психологи онлайн на Опора — поиск и подбор психолога"
 
         return context
@@ -143,6 +160,9 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
         # 6) preferred_methods
         selected_methods = form.cleaned_data["preferred_methods"]
         profile.preferred_methods.set(selected_methods)
+
+        # 7) has_time_preferences
+        profile.has_time_preferences = form.cleaned_data.get("has_time_preferences", False)
 
         profile.save()
 
