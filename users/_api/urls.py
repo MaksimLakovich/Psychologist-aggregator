@@ -11,16 +11,18 @@ from users._api.views import (AppUserRetrieveUpdateView,
                               CustomTokenObtainPairView,
                               EducationListCreateView,
                               EducationRetrieveUpdateDestroyView,
-                              EmailVerificationView, LogoutAPIView,
-                              MethodDetailView, MethodListView,
+                              EmailVerificationView, GetDomainSlotsAjaxView,
+                              LogoutAPIView, MethodDetailView, MethodListView,
                               PasswordResetConfirmView, PasswordResetView,
                               PsychologistProfileRetrieveUpdateView,
                               PublicPsychologistProfileRetrieveView,
                               RegisterView, ResendEmailVerificationView,
                               SaveHasPreferencesAjaxView,
+                              SaveHasTimePreferencesAjaxView,
                               SavePreferredAgeAjaxView,
                               SavePreferredGenderAjaxView,
                               SavePreferredMethodsAjaxView,
+                              SavePreferredSlotsAjaxView,
                               SavePreferredTopicTypeAjaxView,
                               SaveRequestedTopicsAjaxView,
                               SpecialisationDetailView, SpecialisationListView,
@@ -99,4 +101,11 @@ urlpatterns = [
     path("save-preferred-gender/", SavePreferredGenderAjaxView.as_view(), name="save-preferred-gender"),
     path("save-preferred-age/", SavePreferredAgeAjaxView.as_view(), name="save-preferred-age"),
     path("save-preferred-methods/", SavePreferredMethodsAjaxView.as_view(), name="save-methods"),
+    path(
+        "save-has-time-preferences/", SaveHasTimePreferencesAjaxView.as_view(), name="save-has-time-preferences"
+    ),
+    path("save-preferred-slots/", SavePreferredSlotsAjaxView.as_view(), name="save-preferred-slots"),
+
+    # AJAX-запрос (fetch) на создание и отображение всех возможных доменных слотов на html-страницах
+    path("get-domain-slots/", GetDomainSlotsAjaxView.as_view(), name="get-domain-slots"),
 ]
