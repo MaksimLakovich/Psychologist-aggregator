@@ -11,8 +11,8 @@ from users._api.views import (AppUserRetrieveUpdateView,
                               CustomTokenObtainPairView,
                               EducationListCreateView,
                               EducationRetrieveUpdateDestroyView,
-                              EmailVerificationView, LogoutAPIView,
-                              MethodDetailView, MethodListView,
+                              EmailVerificationView, GetDomainSlotsAjaxView,
+                              LogoutAPIView, MethodDetailView, MethodListView,
                               PasswordResetConfirmView, PasswordResetView,
                               PsychologistProfileRetrieveUpdateView,
                               PublicPsychologistProfileRetrieveView,
@@ -105,4 +105,7 @@ urlpatterns = [
         "save-has-time-preferences/", SaveHasTimePreferencesAjaxView.as_view(), name="save-has-time-preferences"
     ),
     path("save-preferred-slots/", SavePreferredSlotsAjaxView.as_view(), name="save-preferred-slots"),
+
+    # AJAX-запрос (fetch) на создание и отображение всех возможных доменных слотов на html-страницах
+    path("get-domain-slots/", GetDomainSlotsAjaxView.as_view(), name="get-domain-slots"),
 ]

@@ -17,6 +17,8 @@ from rest_framework_simplejwt.token_blacklist.models import (BlacklistedToken,
                                                              OutstandingToken)
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from calendar_engine.application.use_cases.get_domain_slots_use_case import \
+    GetDomainSlotsUseCase
 from calendar_engine.models import AvailabilityException, AvailabilityRule
 from users._api.serializers import (AppUserSerializer,
                                     AvailabilityExceptionSerializer,
@@ -898,4 +900,28 @@ class SavePreferredSlotsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
                 "slots_count": len(slots),
             },
             status=200
+        )
+
+
+class GetDomainSlotsAjaxView(LoginRequiredMixin, View):
+    """Возвращает клиенту на UI все возможные доменные временные слоты (общее правило домена).
+    Read-only эндпоинт только для показа возможных слотов на странице пользователя, без сохранения в БД."""
+
+    def get(self, request, *args, **kwargs):
+        """Получить все доменные временные слоты."""
+        user = request.user
+        profile = user.client_profile
+
+        use_case = GetDomainSlotsUseCase(
+            timezone=user.timezone
+        )
+
+        result = use_case.execute()
+
+        return JsonResponse(
+            {
+                "status": "ok",
+                "slots": result,
+            },
+            status=200,
         )
