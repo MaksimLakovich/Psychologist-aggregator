@@ -2,13 +2,13 @@ import { initCollapsibleList } from "../modules/collapsible_methods_list.js";
 import { initCollapsibleTopicGroups } from "../modules/collapsible_topics_list.js";
 import { initToggleGroup } from "../modules/toggle_group_single_choice.js";
 import { initAutosaveMethods } from "../modules/autosave_methods.js";
-import { initMultiToggle } from "../modules/toggle_group_multi_choice.js"
-import { initAutosaveHasPreferences } from "../modules/autosave_has_preferences.js"
-import { initAutosavePreferredTopicType } from "../modules/autosave_topic_type.js"
-import { initAutosaveTopics } from "../modules/autosave_topics.js"
+import { initMultiToggle } from "../modules/toggle_group_multi_choice.js";
+import { initAutosaveHasPreferences } from "../modules/autosave_has_preferences.js";
+import { initAutosavePreferredTopicType } from "../modules/autosave_topic_type.js";
+import { initAutosaveTopics } from "../modules/autosave_topics.js";
 import { initToggleTopicBlocks } from "../modules/toggle_topic_blocks.js";
-import { initAutosavePreferredGender } from "../modules/autosave_gender.js"
-import { initAutosavePreferredAge } from "../modules/autosave_age.js"
+import { initAutosavePreferredGender } from "../modules/autosave_gender.js";
+import { initAutosavePreferredAge } from "../modules/autosave_age.js";
 import { initMatchPsychologists } from "../modules/match_psychologists.js";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const topicsSaveUrl = topicsContainer ? topicsContainer.dataset.saveUrl : null;
     const topicsCsrfToken = topicsContainer ? topicsContainer.dataset.csrfToken : null;
 
-    // 1. Логика работы переключателя ИЛИ/ИЛИ (например, "Индивидуальная" / "Парная" где показываем нужный набор значений)
+    // 1. Логика работы переключателя ИЛИ/ИЛИ (кнопка: "Индивидуальная" / "Парная" где показываем нужный набор значений)
     initToggleGroup({
         firstBtn: "#btn-individual",
         secondBtn: "#btn-couple",
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
         csrfToken: topicsCsrfToken || window.CSRF_TOKEN,
     });
 
-    // 6. Логика работы переключателя ИЛИ/ИЛИ (например, "Все равно" / "Есть пожелания" где показываем набор предпочтения для выбора или нет)
+    // 6. Логика работы переключателя ИЛИ/ИЛИ (кнопка: "Все равно" / "Есть пожелания" где показываем набор предпочтения для выбора или нет)
     initToggleGroup({
         firstBtn: "#btn-any",
         secondBtn: "#btn-has-prefs",
@@ -135,7 +135,19 @@ document.addEventListener("DOMContentLoaded", () => {
         debounceMs: 500,
     })
 
-    // 14. Слушаем изменения на странице и, при их наличии, автоматически сразу запускаем процесс фильтрации психолога по указанным клиентом параметрам
+    // 14. Логика работы переключателя ИЛИ/ИЛИ (кнопка: "Любое" / "конкретное" где показываем набор предпочтения для выбора или нет)
+    initToggleGroup({
+        firstBtn: "#btn-any-time",
+        secondBtn: "#btn-certain-time",
+        valFirst: false, // мы используем false/true потому что в поле HAS_TIME_PREFERENCES используется boolean
+        valSecond: true,
+        blockToToggleSelector: "#time-slots-wrapper", // показываем методы когда второй (secondBtn) активен
+        initialValue: window.HAS_TIME_PREFERENCES,
+        hiddenInputSelector: "#input-has-time-preferences",
+        showBlockWhen: "second",
+    });
+
+    // Слушаем изменения на странице и, при их наличии, автоматически сразу запускаем процесс фильтрации психолога по указанным клиентом параметрам
     initMatchPsychologists();
 
 });

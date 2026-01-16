@@ -415,14 +415,20 @@
                                 Конкретное
                             </button>
                         </div>
-                        <!-- ВАЖНО: скрытое поле, которое и отправляется при submit. -->
-                        <!-- Это нужно чтоб при загрузке страницы значение hidden-поля совпадало с данными из БД. -->
+
+                        <!-- Скрытое поле для submit + JS autosave (как в других блоках) -->
                         <input
-                                id="input-preferred-time"
-                                type="hidden"
-                                name="preferred_time"
-                                value="{{ preferred_ttime }}"
+                            id="input-has-time-preferences"
+                            type="hidden"
+                            name="has_time_preferences"
+                            value="{{ has_time_preferences|yesno:'true,false' }}"
                         >
+
+                        <!-- Контейнер под будущий UI слотов (пока пустой и скрытый) -->
+                        <div id="time-slots-wrapper" class="hidden mt-4">
+                            <!-- позже здесь появится time_slots_picker -->
+                        </div>
+
                     </div>
                 </div>
 
@@ -441,20 +447,21 @@
 
 <script type="module" src="{% static 'js/pages/personal_questions.js' %}"></script>
 
-<!-- Передаем в JS текущие значения пользователя: "has_preferences" и "preferred_topic_type" -->
+<!-- Передаем в JS текущие значения пользователя из БД -->
 <script>
     window.HAS_PREFERENCES = {{ has_preferences|yesno:"true,false" }};
     window.PREFERRED_TOPIC_TYPE = "{{ preferred_topic_type }}";
     window.PREFERRED_GENDER = {{ preferred_ps_gender|safe }};
     window.PREFERRED_AGE = {{ preferred_ps_age|safe }};
+    window.HAS_TIME_PREFERENCES = {{ has_time_preferences|yesno:"true,false" }};
 </script>
 
 <!-- Передаем в JS URL_API и CSRF-токен для автосохранения настроек -->
 <script>
     window.API_SAVE_HAS_PREFS = "{% url 'users:api:save-has-preferences' %}";
-    window.API_SAVE_PREFERRED_TOPIC_TYPE = "{% url 'users:api:save-preferred-topic-type' %}"
-    window.API_SAVE_PREFERRED_GENDER = "{% url 'users:api:save-preferred-gender' %}"
-    window.API_SAVE_PREFERRED_AGE = "{% url 'users:api:save-preferred-age' %}"
+    window.API_SAVE_PREFERRED_TOPIC_TYPE = "{% url 'users:api:save-preferred-topic-type' %}";
+    window.API_SAVE_PREFERRED_GENDER = "{% url 'users:api:save-preferred-gender' %}";
+    window.API_SAVE_PREFERRED_AGE = "{% url 'users:api:save-preferred-age' %}";
     window.CSRF_TOKEN = "{{ csrf_token }}";
 </script>
 
