@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from django.utils.timezone import make_aware, now
 
@@ -30,7 +30,7 @@ class GetDomainSlotsUseCase(AbsUseCase):
             raise ValueError("timezone обязателен для генерации доменных слотов")
         self.timezone = timezone
 
-    def execute(self) -> Dict:
+    def execute(self) -> dict[str, Any]:
         """Выполняет генерацию всех возможных доменных временных слотов."""
         # ШАГ 1: Получаем текущее время в timezone КЛИЕНТА, где astimezone(self.timezone) - это метод, который
         # говорит: "И пересчитай это время для моего часового пояса".
