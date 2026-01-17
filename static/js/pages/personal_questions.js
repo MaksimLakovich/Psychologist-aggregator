@@ -11,6 +11,7 @@ import { initAutosavePreferredGender } from "../modules/autosave_gender.js";
 import { initAutosavePreferredAge } from "../modules/autosave_age.js";
 import { initMatchPsychologists } from "../modules/match_psychologists.js";
 import { initAutosaveHasTimePreferences } from "../modules/autosave_has_time_preferences.js";
+import { initTimeSlotsPicker } from "../modules/time_slots_picker.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     // безопасно получаем опции из контейнера (data-attributes) - для METHOD
@@ -21,6 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const topicsContainer = document.getElementById("topics-container");
     const topicsSaveUrl = topicsContainer ? topicsContainer.dataset.saveUrl : null;
     const topicsCsrfToken = topicsContainer ? topicsContainer.dataset.csrfToken : null;
+    // ???
+    const timeSlotsWrapper = document.querySelector("#time-slots-wrapper");
+    const btnCertainTime = document.querySelector("#btn-certain-time");
 
     // 1. Логика работы переключателя ИЛИ/ИЛИ (кнопка: "Индивидуальная" / "Парная" где показываем нужный набор значений)
     initToggleGroup({
@@ -136,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
         debounceMs: 500,
     })
 
-    // 14. Логика работы переключателя ИЛИ/ИЛИ (кнопка: "Любое" / "конкретное" где показываем набор предпочтения для выбора или нет)
+    // 14. Логика работы переключателя ИЛИ/ИЛИ (кнопка: "Любое" / "Конкретное" где показываем набор предпочтения для выбора или нет)
     initToggleGroup({
         firstBtn: "#btn-any-time",
         secondBtn: "#btn-certain-time",
@@ -156,6 +160,41 @@ document.addEventListener("DOMContentLoaded", () => {
         prefsBtnSelector: "#btn-certain-time",
         debounceMs: 500,
     });
+
+    // 16. Логика отображения всех возможных доменных временных слотов при нажатии на "КОНКРЕТНОЕ"
+    /**
+     * Унифицированная функция инициализации, чтобы не дублировать код
+     */
+    function initTimeSlotsIfNeeded() {
+        if (!timeSlotsWrapper) return;
+
+        if (timeSlotsWrapper.dataset.initialized === "true") {
+            return;
+        }
+
+        initTimeSlotsPicker({
+            containerSelector: "#time-slots-wrapper",
+            apiUrl: "/users/api/get-domain-slots/",
+            csrfToken: window.CSRF_TOKEN,
+        });
+
+        timeSlotsWrapper.dataset.initialized = "true";
+    }
+    /**
+     * 1) Если пользователь перешел на страницу и в БД уже has_time_preferences = true
+     */
+    if (window.HAS_TIME_PREFERENCES === true) {
+        initTimeSlotsIfNeeded();
+    }
+    /**
+     * 2) Если пользователь кликает "Конкретное" уже на странице
+     */
+    if (btnCertainTime) {
+        btnCertainTime.addEventListener("click", () => {
+            initTimeSlotsIfNeeded();
+        });
+    }
+
 
     // Слушаем изменения на странице и, при их наличии, автоматически сразу запускаем процесс фильтрации психолога по указанным клиентом параметрам
     initMatchPsychologists();
