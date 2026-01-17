@@ -29,11 +29,8 @@ class DomainTimePolicy(AbsDomainTimePolicy):
         if slot_duration_minutes <= 0:
             raise ValueError("slot_duration_minutes должно быть положительным значением.")
 
-        if day_time_start >= day_time_end:
-            raise ValueError("day_time_end не может быть раньше day_time_start")
-
-        self.day_time_start = day_time_start  # Начало календарного дня
-        self.day_time_end = day_time_end  # Конец календарного дня (НЕ включительно)
+        self.day_time_start = day_time_start  # Начало дня
+        self.day_time_end = day_time_end  # Конец дня (НЕ включительно)
         self.duration_slot = timedelta(minutes=slot_duration_minutes)  # Длительность одного базового слота (в минутах)
 
     def iter_day_slots(self, day: date) -> Iterable[Tuple[time, time]]:
@@ -45,7 +42,14 @@ class DomainTimePolicy(AbsDomainTimePolicy):
         Возвращаемые интервалы НЕ учитывают availability и бронирования."""
 
         current_day_start = datetime.combine(day, self.day_time_start)
-        current_day_end = datetime.combine(day, self.day_time_end)
+
+        # Так как в текущем домене у нас НАЧАЛО_ДНЯ=time(0, 0) и КОНЕЦ_ДНЯ=time(0, 0), потому что мы генерируем
+        # временную сетку под 24/7, а не "с 09-00 до 18-00", то чтоб генерился 24-й слот в сутках ('23:00:00')
+        # нам нужно для 24-го слота сместить день +1
+        if self.day_time_end <= self.day_time_start:
+            current_day_end = datetime.combine(day + timedelta(days=1), self.day_time_end)
+        else:
+            current_day_end = datetime.combine(day, self.day_time_end)
 
         # Пока текущее время плюс длительность слота не вылезли за границу конца дня - то продолжаем
         while current_day_start + self.duration_slot <= current_day_end:
