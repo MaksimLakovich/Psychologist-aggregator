@@ -16,40 +16,26 @@
 import { initToggleGroup } from "./toggle_group_single_choice.js";
 import { initMultiToggle } from "./toggle_group_multi_choice.js";
 
-/**
- * Форматирует стиль для кнопок с выбором ДНЕЙ: например, "Пт, 16 янв", "Сб, 17 янв" и так далее...
- */
-function formatDayLabel(dateStr, locale = "ru-RU") {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(locale, {
+// Форматирует стиль для кнопок с выбором ДНЕЙ: например, "Пт, 16 янв", "Сб, 17 янв" и так далее...
+function formatDayLabel(dateStr) {
+    // dateStr = "2026-01-17"
+    const [year, month, day] = dateStr.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+
+    return date.toLocaleDateString("ru-RU", {
         weekday: "short",
         day: "numeric",
         month: "short",
     });
 }
 
-/**
- * Форматирует datetime слота в заданный стиль: "HH:MM", например, "09:00", "14:00" и так далее...
- */
-function formatTimeLabel(isoString, locale = "ru-RU") {
-    const date = new Date(isoString);
-    return date.toLocaleTimeString(locale, {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-    });
+// Форматирует datetime слота в заданный стиль: "HH:MM", например, "09:00", "14:00" и так далее...
+function formatTimeLabel(isoString) {
+    // isoString у нас get_domain_slots_use_case.py возвращает в формате: "2026-01-17T00:00:00+10:00"
+    return isoString.slice(11, 16); // применяем слайс и получаем эту часть: "00:00"
 }
 
-/**
- * Проверка: слот в прошлом или нет и если в прошлом то деактивируем его (делаем недоступным к выбору)
- */
-function isPastSlot(isoString, now = new Date()) {
-    return new Date(isoString) <= now;
-}
-
-/**
- * Главная точка входа
- */
+// ГЛАВНАЯ ТОЧКА ВХОДА
 export function initTimeSlotsPicker({
     containerSelector,
     apiUrl,
@@ -99,6 +85,9 @@ export function initTimeSlotsPicker({
 
             renderDaysAndSlots({
                 slotsByDay: data.slots,
+                // ВАЖНО: Передаем текущее время пользователя (nowIso) из его профиля а не сервера, чтоб потом
+                // деактивировать слоты в прошлом (делаем недоступным к выбору)
+                nowIso: data.now_iso,
                 daysRow,
                 slotsContainer,
             });
@@ -111,8 +100,12 @@ export function initTimeSlotsPicker({
 /**
  * Рендер дней + логика переключения
  */
+
+// nowIso: Передаем текущее время пользователя из его профиля а не сервера, чтоб потом деактивировать слоты
+// в прошлом (делаем недоступным к выбору)
 function renderDaysAndSlots({
     slotsByDay,
+    nowIso,
     daysRow,
     slotsContainer,
 }) {
@@ -142,6 +135,7 @@ function renderDaysAndSlots({
             renderSlotsForDay({
                 day: selectedDay,
                 slots: slotsByDay[selectedDay],
+                nowIso,                     // ← проброс
                 slotsContainer,
             });
         },
@@ -151,6 +145,7 @@ function renderDaysAndSlots({
     renderSlotsForDay({
         day: days[0],
         slots: slotsByDay[days[0]],
+        nowIso,                     // ← проброс
         slotsContainer,
     });
 }
@@ -158,9 +153,12 @@ function renderDaysAndSlots({
 /**
  * Рендер слотов конкретного дня
  */
+// nowIso: Передаем текущее время пользователя из его профиля а не сервера, чтоб потом деактивировать слоты
+// в прошлом (делаем недоступным к выбору)
 function renderSlotsForDay({
     day,
     slots,
+    nowIso,
     slotsContainer,
 }) {
     slotsContainer.innerHTML = "";
@@ -173,8 +171,6 @@ function renderSlotsForDay({
     hiddenInputsWrap.id = "ts-hidden-inputs";
     hiddenInputsWrap.className = "hidden";
 
-    const now = new Date();
-
     slots.forEach(isoString => {
         const btn = document.createElement("button");
         btn.type = "button";
@@ -182,7 +178,7 @@ function renderSlotsForDay({
         btn.textContent = formatTimeLabel(isoString);
         btn.className = "px-3 py-2 rounded-lg border text-sm";
 
-        if (isPastSlot(isoString, now)) {
+        if (isoString <= nowIso) {
             btn.disabled = true;
             btn.classList.add(
                 "bg-gray-100",

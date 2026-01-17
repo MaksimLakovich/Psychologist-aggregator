@@ -168,6 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function initTimeSlotsIfNeeded() {
         if (!timeSlotsWrapper) return;
 
+        // Ленивый init (инициализация только при необходимости) - нет лишних API-запросов и повторного DOM-рендера
         if (timeSlotsWrapper.dataset.initialized === "true") {
             return;
         }
@@ -180,15 +181,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         timeSlotsWrapper.dataset.initialized = "true";
     }
-    /**
-     * 1) Если пользователь перешел на страницу и в БД уже has_time_preferences = true
-     */
+    // 1) Если пользователь перешел на страницу и в БД уже has_time_preferences = true
     if (window.HAS_TIME_PREFERENCES === true) {
         initTimeSlotsIfNeeded();
     }
-    /**
-     * 2) Если пользователь кликает "Конкретное" уже на странице
-     */
+    // 2) Если пользователь кликает "Конкретное" уже на странице
     if (btnCertainTime) {
         btnCertainTime.addEventListener("click", () => {
             initTimeSlotsIfNeeded();
@@ -196,7 +193,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    // Слушаем изменения на странице и, при их наличии, автоматически сразу запускаем процесс фильтрации психолога по указанным клиентом параметрам
+    // ИТОГ: Слушаем изменения на странице и, при их наличии,
+    // автоматически сразу запускаем процесс фильтрации психолога по указанным клиентом параметрам
     initMatchPsychologists();
 
 });
