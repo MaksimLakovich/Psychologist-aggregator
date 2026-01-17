@@ -10,6 +10,7 @@ import { initToggleTopicBlocks } from "../modules/toggle_topic_blocks.js";
 import { initAutosavePreferredGender } from "../modules/autosave_gender.js";
 import { initAutosavePreferredAge } from "../modules/autosave_age.js";
 import { initMatchPsychologists } from "../modules/match_psychologists.js";
+import { initAutosaveHasTimePreferences } from "../modules/autosave_has_time_preferences.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     // безопасно получаем опции из контейнера (data-attributes) - для METHOD
@@ -141,10 +142,19 @@ document.addEventListener("DOMContentLoaded", () => {
         secondBtn: "#btn-certain-time",
         valFirst: false, // мы используем false/true потому что в поле HAS_TIME_PREFERENCES используется boolean
         valSecond: true,
-        blockToToggleSelector: "#time-slots-wrapper", // показываем методы когда второй (secondBtn) активен
+        blockToToggleSelector: "#time-slots-wrapper", // показываем выбор временных слотов, когда выбран "Конкретное"
         initialValue: window.HAS_TIME_PREFERENCES,
         hiddenInputSelector: "#input-has-time-preferences",
         showBlockWhen: "second",
+    });
+
+    // 15. Автосохранение выбранного значения "has_time_preferences" в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
+    initAutosaveHasTimePreferences({
+        saveUrl: window.API_SAVE_HAS_TIME_PREFS,
+        csrfToken: window.CSRF_TOKEN,
+        anyBtnSelector: "#btn-any-time",
+        prefsBtnSelector: "#btn-certain-time",
+        debounceMs: 500,
     });
 
     // Слушаем изменения на странице и, при их наличии, автоматически сразу запускаем процесс фильтрации психолога по указанным клиентом параметрам
