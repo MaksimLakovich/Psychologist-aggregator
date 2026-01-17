@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from django.utils.timezone import make_aware, now
 
@@ -30,7 +30,7 @@ class GetDomainSlotsUseCase(AbsUseCase):
             raise ValueError("timezone обязателен для генерации доменных слотов")
         self.timezone = timezone
 
-    def execute(self) -> Dict[str, List[str]]:
+    def execute(self) -> dict[str, Any]:
         """Выполняет генерацию всех возможных доменных временных слотов."""
         # ШАГ 1: Получаем текущее время в timezone КЛИЕНТА, где astimezone(self.timezone) - это метод, который
         # говорит: "И пересчитай это время для моего часового пояса".
@@ -58,4 +58,12 @@ class GetDomainSlotsUseCase(AbsUseCase):
             if day_slots:
                 slots_by_day[str(day)] = day_slots
 
-        return slots_by_day
+        # ВАЖНО: кроме сгенерированных слотов (slots_by_day) нам необходимо передать на фронт еще текущее время
+        # пользователя (now_iso), потому что определять его по времени сервера неправильно. Так как клиент в
+        # настройках своего профиля указывает свой timezone и он может отличаться от сервера (путешествует например).
+        # ОБОСНОВАНИЕ: текущее время пользователя нам необходимо для того, чтоб потом на странице деактивировать
+        # слоты, которые уже в прошлом (делать их недоступными к выбору).
+        return {
+            "now_iso": current_time.isoformat(),
+            "slots": slots_by_day,
+        }
