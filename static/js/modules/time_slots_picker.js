@@ -13,10 +13,9 @@
  * - availability психологов
  */
 
-import { initToggleGroup } from "./toggle_group_single_choice.js";
 import { initMultiToggle } from "./toggle_group_multi_choice.js";
 
-// Форматирует стиль для кнопок с выбором ДНЕЙ: например, "Пт, 16 янв", "Сб, 17 янв" и так далее...
+// Задаем формат для кнопок с выбором ДНЕЙ: например, "Пт, 16 янв", "Сб, 17 янв" и так далее...
 function formatDayLabel(dateStr) {
     // dateStr = "2026-01-17"
     const [year, month, day] = dateStr.split("-").map(Number);
@@ -29,7 +28,7 @@ function formatDayLabel(dateStr) {
     });
 }
 
-// Форматирует datetime слота в заданный стиль: "HH:MM", например, "09:00", "14:00" и так далее...
+// Задаем формат для кнопок с выбором СЛОТОВ: форматируем datetime в "HH:MM", например, "09:00", "14:00" и так далее...
 function formatTimeLabel(isoString) {
     // isoString у нас get_domain_slots_use_case.py возвращает в формате: "2026-01-17T00:00:00+10:00"
     return isoString.slice(11, 16); // применяем слайс и получаем эту часть: "00:00"
@@ -112,47 +111,74 @@ function renderDaysAndSlots({
     const days = Object.keys(slotsByDay);
     if (!days.length) return;
 
+    let activeDay = days[0]; // текущий день активен по умолчанию
+
+    function setActiveDay(day) {
+        activeDay = day;
+
+        // обновляем стили кнопок
+        daysRow.querySelectorAll("button").forEach(btn => {
+            if (btn.dataset.value === day) {
+                btn.classList.add(
+                    "bg-indigo-500",
+                    "text-white",
+                    "border-indigo-100",
+                    "hover:bg-indigo-900"
+                );
+                btn.classList.remove(
+                    "bg-white",
+                    "text-gray-700",
+                    "border-gray-300",
+                    "hover:bg-gray-50"
+                );
+            } else {
+                btn.classList.remove(
+                    "bg-indigo-500",
+                    "text-white",
+                    "border-indigo-100",
+                    "hover:bg-indigo-900"
+                );
+                btn.classList.add(
+                    "bg-white",
+                    "text-gray-700",
+                    "border-gray-300",
+                    "hover:bg-gray-50"
+                );
+            }
+        });
+
+        // Первичная отрисовка
+        renderSlotsForDay({
+            day,
+            slots: slotsByDay[day],
+            nowIso,                     // ← проброс
+            slotsContainer,
+        });
+    }
+
     // --- КНОПКИ С ДНЯМИ ---
-    days.forEach((day, index) => {
+    days.forEach(day => {
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.id = `ts-day-${day}`;
         btn.dataset.value = day;
         btn.textContent = formatDayLabel(day);
         btn.className = "px-3 py-2 rounded-lg border text-sm font-medium";
 
+        btn.addEventListener("click", () => {
+            setActiveDay(day);
+        });
+
         daysRow.appendChild(btn);
     });
 
-    // --- Для кнопок с ДНЯМИ используем СТИЛЬ из toggle_group_single_choice.js ---
-    initToggleGroup({
-        firstBtn: `#ts-day-${days[0]}`,
-        secondBtn: null, // используем кастомный режим ниже
-        initialValue: days[0],
-        hiddenInputSelector: null,
-        customButtonsSelector: "#ts-days-row button",
-        onChange: (selectedDay) => {
-            renderSlotsForDay({
-                day: selectedDay,
-                slots: slotsByDay[selectedDay],
-                nowIso,                     // ← проброс
-                slotsContainer,
-            });
-        },
-    });
-
-    // Первичная отрисовка
-    renderSlotsForDay({
-        day: days[0],
-        slots: slotsByDay[days[0]],
-        nowIso,                     // ← проброс
-        slotsContainer,
-    });
+    // --- первичная активация ---
+    setActiveDay(activeDay);
 }
 
 /**
  * Рендер слотов конкретного дня
  */
+
 // nowIso: Передаем текущее время пользователя из его профиля а не сервера, чтоб потом деактивировать слоты
 // в прошлом (делаем недоступным к выбору)
 function renderSlotsForDay({
