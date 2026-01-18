@@ -2029,6 +2029,14 @@ input:checked + .toggle-bg {
   margin-bottom: 1rem;
 }
 
+.mt-40 {
+  margin-top: 10rem;
+}
+
+.mt-12 {
+  margin-top: 3rem;
+}
+
 .\!block {
   display: block !important;
 }
@@ -2899,6 +2907,21 @@ input:checked + .toggle-bg {
 .py-8 {
   padding-top: 2rem;
   padding-bottom: 2rem;
+}
+
+.px-0 {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.px-1 {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
 .pb-0 {

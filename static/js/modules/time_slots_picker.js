@@ -38,8 +38,6 @@ function formatTimeLabel(isoString) {
 export function initTimeSlotsPicker({
     containerSelector,
     apiUrl,
-    csrfToken,
-    daysAhead = 7,
 }) {
     const container = document.querySelector(containerSelector);
     if (!container) {
@@ -47,24 +45,17 @@ export function initTimeSlotsPicker({
         return;
     }
 
-    if (!apiUrl) {
-        console.error("TimeSlotsPicker: apiUrl is required");
+    const daysRow = container.querySelector("#ts-days-row");
+    const slotsGrid = container.querySelector("#ts-slots-grid");
+    const hiddenInputsWrap = container.querySelector("#ts-hidden-inputs");
+
+    if (!daysRow || !slotsGrid || !hiddenInputsWrap) {
+        console.error("TimeSlotsPicker: required DOM nodes not found");
         return;
     }
 
-    // Очистка контейнера
-    container.innerHTML = "";
-
-    const daysRow = document.createElement("div");
-    daysRow.id = "ts-days-row";
-    daysRow.className = "flex gap-2 flex-wrap";
-
-    const slotsContainer = document.createElement("div");
-    slotsContainer.id = "ts-slots-container";
-    slotsContainer.className = "mt-4";
-
-    container.appendChild(daysRow);
-    container.appendChild(slotsContainer);
+    const dayBtnClass = daysRow.dataset.btnClass;
+    const slotBtnClass = slotsGrid.dataset.btnClass;
 
     fetch(apiUrl, {
         method: "GET",
@@ -78,17 +69,16 @@ export function initTimeSlotsPicker({
             return res.json();
         })
         .then(data => {
-            if (!data.slots) {
-                throw new Error("Invalid response format");
-            }
-
             renderDaysAndSlots({
                 slotsByDay: data.slots,
                 // ВАЖНО: Передаем текущее время пользователя (nowIso) из его профиля а не сервера, чтоб потом
                 // деактивировать слоты в прошлом (делаем недоступным к выбору)
                 nowIso: data.now_iso,
                 daysRow,
-                slotsContainer,
+                slotsGrid,
+                hiddenInputsWrap,
+                dayBtnClass,
+                slotBtnClass,
             });
         })
         .catch(err => {
@@ -106,7 +96,10 @@ function renderDaysAndSlots({
     slotsByDay,
     nowIso,
     daysRow,
-    slotsContainer,
+    slotsGrid,
+    hiddenInputsWrap,
+    dayBtnClass,
+    slotBtnClass,
 }) {
     const days = Object.keys(slotsByDay);
     if (!days.length) return;
@@ -118,43 +111,28 @@ function renderDaysAndSlots({
 
         // обновляем стили кнопок
         daysRow.querySelectorAll("button").forEach(btn => {
-            if (btn.dataset.value === day) {
-                btn.classList.add(
-                    "bg-indigo-500",
-                    "text-white",
-                    "border-indigo-100",
-                    "hover:bg-indigo-900"
-                );
-                btn.classList.remove(
-                    "bg-white",
-                    "text-gray-700",
-                    "border-gray-300",
-                    "hover:bg-gray-50"
-                );
-            } else {
-                btn.classList.remove(
-                    "bg-indigo-500",
-                    "text-white",
-                    "border-indigo-100",
-                    "hover:bg-indigo-900"
-                );
-                btn.classList.add(
-                    "bg-white",
-                    "text-gray-700",
-                    "border-gray-300",
-                    "hover:bg-gray-50"
-                );
-            }
+            const isActive = btn.dataset.value === day;
+
+            btn.classList.toggle("bg-indigo-500", isActive);
+            btn.classList.toggle("text-white", isActive);
+            btn.classList.toggle("border-indigo-100", isActive);
+
+            btn.classList.toggle("bg-white", !isActive);
+            btn.classList.toggle("text-gray-700", !isActive);
+            btn.classList.toggle("border-gray-300", !isActive);
         });
 
         // Первичная отрисовка
         renderSlotsForDay({
-            day,
             slots: slotsByDay[day],
             nowIso,                     // ← проброс
-            slotsContainer,
+            slotsGrid,
+            hiddenInputsWrap,
+            slotBtnClass,
         });
     }
+
+    daysRow.innerHTML = "";
 
     // --- КНОПКИ С ДНЯМИ ---
     days.forEach(day => {
@@ -162,12 +140,9 @@ function renderDaysAndSlots({
         btn.type = "button";
         btn.dataset.value = day;
         btn.textContent = formatDayLabel(day);
-        btn.className = "px-3 py-2 rounded-lg border text-sm font-medium";
+        btn.className = dayBtnClass;
 
-        btn.addEventListener("click", () => {
-            setActiveDay(day);
-        });
-
+        btn.addEventListener("click", () => setActiveDay(day));
         daysRow.appendChild(btn);
     });
 
@@ -182,27 +157,21 @@ function renderDaysAndSlots({
 // nowIso: Передаем текущее время пользователя из его профиля а не сервера, чтоб потом деактивировать слоты
 // в прошлом (делаем недоступным к выбору)
 function renderSlotsForDay({
-    day,
     slots,
     nowIso,
-    slotsContainer,
+    slotsGrid,
+    hiddenInputsWrap,
+    slotBtnClass,
 }) {
-    slotsContainer.innerHTML = "";
-
-    const grid = document.createElement("div");
-    grid.className = "grid grid-cols-4 sm:grid-cols-6 gap-2";
-    grid.id = "ts-slots-grid";
-
-    const hiddenInputsWrap = document.createElement("div");
-    hiddenInputsWrap.id = "ts-hidden-inputs";
-    hiddenInputsWrap.className = "hidden";
+    slotsGrid.innerHTML = "";
+    hiddenInputsWrap.innerHTML = "";
 
     slots.forEach(isoString => {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.dataset.value = isoString;
         btn.textContent = formatTimeLabel(isoString);
-        btn.className = "px-3 py-2 rounded-lg border text-sm";
+        btn.className = slotBtnClass;
 
         if (isoString <= nowIso) {
             btn.disabled = true;
@@ -213,11 +182,8 @@ function renderSlotsForDay({
             );
         }
 
-        grid.appendChild(btn);
+        slotsGrid.appendChild(btn);
     });
-
-    slotsContainer.appendChild(grid);
-    slotsContainer.appendChild(hiddenInputsWrap);
 
     // --- Для кнопок с СЛОТАМИ используем СТИЛЬ из toggle_group_multi_choice.js ---
     initMultiToggle({

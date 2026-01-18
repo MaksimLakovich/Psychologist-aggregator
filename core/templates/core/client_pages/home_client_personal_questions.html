@@ -426,8 +426,27 @@
 
                         <!-- Контейнер под будущий UI слотов (пока пустой и скрытый) -->
                         <div id="time-slots-wrapper" class="hidden mt-4">
-                            <!-- time_slots_picker.js рендерит сюда возможные доменные СЛОТЫ -->
+                            <!-- ДНИ -->
+                            <div
+                                id="ts-days-row"
+                                class="flex gap-2 flex-wrap"
+                                data-btn-class="px-3 py-2 rounded-lg border text-sm font-medium"
+                            ></div>
+                            <!-- СЛОТЫ -->
+                            <div class="mt-4">
+                                <div
+                                    id="ts-slots-grid"
+                                    class="grid grid-cols-4 sm:grid-cols-6 gap-2"
+                                    data-btn-class="px-4 py-2 rounded-full border text-sm font-medium"
+                                ></div>
+
+                                <div id="ts-hidden-inputs" class="hidden"></div>
+                            </div>
                         </div>
+                        <p class="text-sm text-gray-500">
+                            Сначала будут показаны терапевты, к которым можно записаться в указанное вами день и время.
+                            При необходимости вы сможете договариваться об удобном расписании с вашим психологом
+                        </p>
 
                     </div>
                 </div>
