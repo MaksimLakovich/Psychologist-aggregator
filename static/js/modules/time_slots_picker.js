@@ -16,16 +16,16 @@
 import { initMultiToggle } from "./toggle_group_multi_choice.js";
 
 // Задаем формат для кнопок с выбором ДНЕЙ: например, "Пт, 16 янв", "Сб, 17 янв" и так далее...
+// Возвращаем объект с двумя частями: weekday и date
 function formatDayLabel(dateStr) {
     // dateStr = "2026-01-17"
     const [year, month, day] = dateStr.split("-").map(Number);
     const date = new Date(year, month - 1, day);
 
-    return date.toLocaleDateString("ru-RU", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-    });
+    const weekday = date.toLocaleDateString("ru-RU", { weekday: "short" }).toUpperCase(); // ВС
+    const dayMonth = date.toLocaleDateString("ru-RU", { day: "numeric", month: "short" }); // 18 янв
+
+    return { weekday, dayMonth };
 }
 
 // Задаем формат для кнопок с выбором СЛОТОВ: форматируем datetime в "HH:MM", например, "09:00", "14:00" и так далее...
@@ -115,13 +115,13 @@ function renderDaysAndSlots({
 
             btn.classList.toggle("bg-indigo-500", isActive);
             btn.classList.toggle("text-white", isActive);
-            btn.classList.toggle("border-indigo-100", isActive);
+            btn.classList.toggle("border-indigo-500", isActive);
             btn.classList.toggle("hover:bg-indigo-900", isActive);
 
-            btn.classList.toggle("bg-white", !isActive);
+            btn.classList.toggle("bg-indigo-100", !isActive);
             btn.classList.toggle("text-gray-700", !isActive);
-            btn.classList.toggle("border-gray-300", !isActive);
-            btn.classList.toggle("hover:bg-gray-50", !isActive);
+            btn.classList.toggle("border-indigo-300", !isActive);
+            btn.classList.toggle("hover:bg-indigo-200", !isActive);
         });
 
         // Первичная отрисовка
@@ -141,8 +141,15 @@ function renderDaysAndSlots({
         const btn = document.createElement("button");
         btn.type = "button";
         btn.dataset.value = day;
-        btn.textContent = formatDayLabel(day);
         btn.className = dayBtnClass;
+
+        const { weekday, dayMonth } = formatDayLabel(day);
+
+        // Добавляем 2 строки в кнопку
+        btn.innerHTML = `
+            <div class="font-bold">${weekday}</div>
+            <div>${dayMonth}</div>
+        `;
 
         btn.addEventListener("click", () => setActiveDay(day));
         daysRow.appendChild(btn);
@@ -180,6 +187,7 @@ function renderSlotsForDay({
             btn.classList.add(
                 "bg-gray-100",
                 "text-gray-400",
+                "line-through",
                 "cursor-not-allowed"
             );
         }
