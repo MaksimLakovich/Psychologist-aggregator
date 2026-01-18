@@ -424,12 +424,12 @@
                             value="{{ has_time_preferences|yesno:'true,false' }}"
                         >
 
-                        <!-- Контейнер под будущий UI слотов (пока пустой и скрытый) -->
+                        <!-- Контейнер под UI дней и слотов -->
                         <div id="time-slots-wrapper" class="hidden mt-4">
                             <!-- ДНИ -->
                             <div
                                 id="ts-days-row"
-                                class="flex gap-2 flex-wrap"
+                                class="flex gap-2 flex-wrap mt-8"
                                 data-btn-class="px-3 py-2 rounded-lg border text-sm font-medium"
                             ></div>
                             <!-- СЛОТЫ -->
@@ -443,9 +443,9 @@
                                 <div id="ts-hidden-inputs" class="hidden"></div>
                             </div>
                         </div>
-                        <p class="text-sm text-gray-500">
+                        <p class="text-sm text-center text-gray-500">
                             Сначала будут показаны терапевты, к которым можно записаться в указанное вами день и время.
-                            При необходимости вы сможете договариваться об удобном расписании с вашим психологом
+                            При необходимости вы сможете договариваться об удобном расписании с вашим психологом.
                         </p>
 
                     </div>

@@ -116,10 +116,12 @@ function renderDaysAndSlots({
             btn.classList.toggle("bg-indigo-500", isActive);
             btn.classList.toggle("text-white", isActive);
             btn.classList.toggle("border-indigo-100", isActive);
+            btn.classList.toggle("hover:bg-indigo-900", isActive);
 
             btn.classList.toggle("bg-white", !isActive);
             btn.classList.toggle("text-gray-700", !isActive);
             btn.classList.toggle("border-gray-300", !isActive);
+            btn.classList.toggle("hover:bg-gray-50", !isActive);
         });
 
         // Первичная отрисовка
