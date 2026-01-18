@@ -147,8 +147,8 @@ function renderDaysAndSlots({
 
         // Добавляем 2 строки в кнопку
         btn.innerHTML = `
-            <div class="font-bold">${weekday}</div>
-            <div>${dayMonth}</div>
+            <div class="text-base font-bold">${weekday}</div>
+            <div class="text-xs">${dayMonth}</div>
         `;
 
         btn.addEventListener("click", () => setActiveDay(day));
