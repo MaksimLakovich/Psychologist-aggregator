@@ -13,23 +13,22 @@
  * - availability психологов
  */
 
-import { initToggleGroup } from "./toggle_group_single_choice.js";
 import { initMultiToggle } from "./toggle_group_multi_choice.js";
 
-// Форматирует стиль для кнопок с выбором ДНЕЙ: например, "Пт, 16 янв", "Сб, 17 янв" и так далее...
+// Задаем формат для кнопок с выбором ДНЕЙ: например, "Пт, 16 янв", "Сб, 17 янв" и так далее...
+// Возвращаем объект с двумя частями: weekday и date
 function formatDayLabel(dateStr) {
     // dateStr = "2026-01-17"
     const [year, month, day] = dateStr.split("-").map(Number);
     const date = new Date(year, month - 1, day);
 
-    return date.toLocaleDateString("ru-RU", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-    });
+    const weekday = date.toLocaleDateString("ru-RU", { weekday: "short" }).toUpperCase(); // ВС
+    const dayMonth = date.toLocaleDateString("ru-RU", { day: "numeric", month: "short" }); // 18 янв
+
+    return { weekday, dayMonth };
 }
 
-// Форматирует datetime слота в заданный стиль: "HH:MM", например, "09:00", "14:00" и так далее...
+// Задаем формат для кнопок с выбором СЛОТОВ: форматируем datetime в "HH:MM", например, "09:00", "14:00" и так далее...
 function formatTimeLabel(isoString) {
     // isoString у нас get_domain_slots_use_case.py возвращает в формате: "2026-01-17T00:00:00+10:00"
     return isoString.slice(11, 16); // применяем слайс и получаем эту часть: "00:00"
@@ -39,8 +38,6 @@ function formatTimeLabel(isoString) {
 export function initTimeSlotsPicker({
     containerSelector,
     apiUrl,
-    csrfToken,
-    daysAhead = 7,
 }) {
     const container = document.querySelector(containerSelector);
     if (!container) {
@@ -48,24 +45,17 @@ export function initTimeSlotsPicker({
         return;
     }
 
-    if (!apiUrl) {
-        console.error("TimeSlotsPicker: apiUrl is required");
+    const daysRow = container.querySelector("#ts-days-row");
+    const slotsGrid = container.querySelector("#ts-slots-grid");
+    const hiddenInputsWrap = container.querySelector("#ts-hidden-inputs");
+
+    if (!daysRow || !slotsGrid || !hiddenInputsWrap) {
+        console.error("TimeSlotsPicker: required DOM nodes not found");
         return;
     }
 
-    // Очистка контейнера
-    container.innerHTML = "";
-
-    const daysRow = document.createElement("div");
-    daysRow.id = "ts-days-row";
-    daysRow.className = "flex gap-2 flex-wrap";
-
-    const slotsContainer = document.createElement("div");
-    slotsContainer.id = "ts-slots-container";
-    slotsContainer.className = "mt-4";
-
-    container.appendChild(daysRow);
-    container.appendChild(slotsContainer);
+    const dayBtnClass = daysRow.dataset.btnClass;
+    const slotBtnClass = slotsGrid.dataset.btnClass;
 
     fetch(apiUrl, {
         method: "GET",
@@ -79,17 +69,16 @@ export function initTimeSlotsPicker({
             return res.json();
         })
         .then(data => {
-            if (!data.slots) {
-                throw new Error("Invalid response format");
-            }
-
             renderDaysAndSlots({
                 slotsByDay: data.slots,
                 // ВАЖНО: Передаем текущее время пользователя (nowIso) из его профиля а не сервера, чтоб потом
                 // деактивировать слоты в прошлом (делаем недоступным к выбору)
                 nowIso: data.now_iso,
                 daysRow,
-                slotsContainer,
+                slotsGrid,
+                hiddenInputsWrap,
+                dayBtnClass,
+                slotBtnClass,
             });
         })
         .catch(err => {
@@ -107,91 +96,104 @@ function renderDaysAndSlots({
     slotsByDay,
     nowIso,
     daysRow,
-    slotsContainer,
+    slotsGrid,
+    hiddenInputsWrap,
+    dayBtnClass,
+    slotBtnClass,
 }) {
     const days = Object.keys(slotsByDay);
     if (!days.length) return;
 
+    let activeDay = days[0]; // текущий день активен по умолчанию
+
+    function setActiveDay(day) {
+        activeDay = day;
+
+        // обновляем стили кнопок
+        daysRow.querySelectorAll("button").forEach(btn => {
+            const isActive = btn.dataset.value === day;
+
+            btn.classList.toggle("bg-indigo-500", isActive);
+            btn.classList.toggle("text-white", isActive);
+            btn.classList.toggle("border-indigo-500", isActive);
+            btn.classList.toggle("hover:bg-indigo-900", isActive);
+
+            btn.classList.toggle("bg-indigo-100", !isActive);
+            btn.classList.toggle("text-gray-700", !isActive);
+            btn.classList.toggle("border-indigo-300", !isActive);
+            btn.classList.toggle("hover:bg-indigo-200", !isActive);
+        });
+
+        // Первичная отрисовка
+        renderSlotsForDay({
+            slots: slotsByDay[day],
+            nowIso,                     // ← проброс
+            slotsGrid,
+            hiddenInputsWrap,
+            slotBtnClass,
+        });
+    }
+
+    daysRow.innerHTML = "";
+
     // --- КНОПКИ С ДНЯМИ ---
-    days.forEach((day, index) => {
+    days.forEach(day => {
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.id = `ts-day-${day}`;
         btn.dataset.value = day;
-        btn.textContent = formatDayLabel(day);
-        btn.className = "px-3 py-2 rounded-lg border text-sm font-medium";
+        btn.className = dayBtnClass;
 
+        const { weekday, dayMonth } = formatDayLabel(day);
+
+        // Добавляем 2 строки в кнопку
+        btn.innerHTML = `
+            <div class="text-base font-bold">${weekday}</div>
+            <div class="text-xs">${dayMonth}</div>
+        `;
+
+        btn.addEventListener("click", () => setActiveDay(day));
         daysRow.appendChild(btn);
     });
 
-    // --- Для кнопок с ДНЯМИ используем СТИЛЬ из toggle_group_single_choice.js ---
-    initToggleGroup({
-        firstBtn: `#ts-day-${days[0]}`,
-        secondBtn: null, // используем кастомный режим ниже
-        initialValue: days[0],
-        hiddenInputSelector: null,
-        customButtonsSelector: "#ts-days-row button",
-        onChange: (selectedDay) => {
-            renderSlotsForDay({
-                day: selectedDay,
-                slots: slotsByDay[selectedDay],
-                nowIso,                     // ← проброс
-                slotsContainer,
-            });
-        },
-    });
-
-    // Первичная отрисовка
-    renderSlotsForDay({
-        day: days[0],
-        slots: slotsByDay[days[0]],
-        nowIso,                     // ← проброс
-        slotsContainer,
-    });
+    // --- первичная активация ---
+    setActiveDay(activeDay);
 }
 
 /**
  * Рендер слотов конкретного дня
  */
+
 // nowIso: Передаем текущее время пользователя из его профиля а не сервера, чтоб потом деактивировать слоты
 // в прошлом (делаем недоступным к выбору)
 function renderSlotsForDay({
-    day,
     slots,
     nowIso,
-    slotsContainer,
+    slotsGrid,
+    hiddenInputsWrap,
+    slotBtnClass,
 }) {
-    slotsContainer.innerHTML = "";
-
-    const grid = document.createElement("div");
-    grid.className = "grid grid-cols-4 sm:grid-cols-6 gap-2";
-    grid.id = "ts-slots-grid";
-
-    const hiddenInputsWrap = document.createElement("div");
-    hiddenInputsWrap.id = "ts-hidden-inputs";
-    hiddenInputsWrap.className = "hidden";
+    slotsGrid.innerHTML = "";
+    hiddenInputsWrap.innerHTML = "";
 
     slots.forEach(isoString => {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.dataset.value = isoString;
         btn.textContent = formatTimeLabel(isoString);
-        btn.className = "px-3 py-2 rounded-lg border text-sm";
+        btn.className = slotBtnClass;
 
         if (isoString <= nowIso) {
             btn.disabled = true;
             btn.classList.add(
                 "bg-gray-100",
                 "text-gray-400",
+                "line-through",
                 "cursor-not-allowed"
             );
         }
 
-        grid.appendChild(btn);
+        slotsGrid.appendChild(btn);
     });
-
-    slotsContainer.appendChild(grid);
-    slotsContainer.appendChild(hiddenInputsWrap);
 
     // --- Для кнопок с СЛОТАМИ используем СТИЛЬ из toggle_group_multi_choice.js ---
     initMultiToggle({

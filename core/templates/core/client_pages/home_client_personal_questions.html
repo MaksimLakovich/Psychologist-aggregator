@@ -423,13 +423,42 @@
                             name="has_time_preferences"
                             value="{{ has_time_preferences|yesno:'true,false' }}"
                         >
+                    </div>
 
-                        <!-- Контейнер под будущий UI слотов (пока пустой и скрытый) -->
-                        <div id="time-slots-wrapper" class="hidden mt-4">
-                            <!-- time_slots_picker.js рендерит сюда возможные доменные СЛОТЫ -->
+                    <!-- Левая колонка -->
+                    <div class="md:col-span-3 pt-0"></div>
+
+                    <!-- Правая колонка -->
+                    <div class="md:col-span-6 space-y-6 pt-0">
+
+                        <!-- ========== Контейнер под UI для ДНЕЙ и СЛОТОВ ========== -->
+                        <div id="time-slots-wrapper" class="hidden mt-4 rounded-2xl bg-gray-50">
+
+                            <!-- ДНИ -->
+                            <div
+                                id="ts-days-row"
+                                class="flex flex-wrap justify-center gap-4 py-6"
+                                data-btn-class="w-16 h-16 flex flex-col items-center justify-center rounded-full border text-sm text-indigo-600 font-medium"
+                            ></div>
+
+                            <!-- СЛОТЫ -->
+                            <div class="mt-4">
+                                <div
+                                    id="ts-slots-grid"
+                                    class="grid grid-cols-4 sm:grid-cols-4 gap-2"
+                                    data-btn-class="px-5 py-3 w-auto justify-self-center rounded-full border text-sm font-medium"
+                                ></div>
+
+                                <div id="ts-hidden-inputs" class="hidden"></div>
+                            </div>
+                            <p class="text-sm text-center text-gray-500 py-6 px-6">
+                                Сначала будут показаны терапевты, к которым можно записаться в указанное вами день и время.
+                                При необходимости вы сможете договариваться об удобном расписании с вашим психологом.
+                            </p>
                         </div>
 
                     </div>
+
                 </div>
 
                 <!-- Кнопка -->
