@@ -483,6 +483,7 @@
     window.PREFERRED_GENDER = {{ preferred_ps_gender|safe }};
     window.PREFERRED_AGE = {{ preferred_ps_age|safe }};
     window.HAS_TIME_PREFERENCES = {{ has_time_preferences|yesno:"true,false" }};
+    window.PREFERRED_SLOTS = {{ preferred_slots|safe }};
 </script>
 
 <!-- Передаем в JS URL_API и CSRF-токен для автосохранения настроек -->
@@ -491,8 +492,9 @@
     window.API_SAVE_PREFERRED_TOPIC_TYPE = "{% url 'users:api:save-preferred-topic-type' %}";
     window.API_SAVE_PREFERRED_GENDER = "{% url 'users:api:save-preferred-gender' %}";
     window.API_SAVE_PREFERRED_AGE = "{% url 'users:api:save-preferred-age' %}";
-    window.CSRF_TOKEN = "{{ csrf_token }}";
     window.API_SAVE_HAS_TIME_PREFS = "{% url 'users:api:save-has-time-preferences' %}";
+    window.API_SAVE_PREFERRED_SLOTS = "{% url 'users:api:save-preferred-slots' %}";
+    window.CSRF_TOKEN = "{{ csrf_token }}";
 </script>
 
 

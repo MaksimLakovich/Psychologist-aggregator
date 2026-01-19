@@ -851,55 +851,50 @@ class SavePreferredSlotsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
 
     def post(self, request, *args, **kwargs):
         """Сохранение значения в preferred_slots."""
-        value = request.POST.get("slot")  # Получаем из запроса значение в slot (например, "2026-01-15 10:00")
+        slot_values = request.POST.getlist("slots[]")  # Получаем из запроса значения в slot
 
-        if not value:
+        # допустимо: пользователь снял все слоты
+        if not slot_values:
+            profile = request.user.client_profile
+            profile.preferred_slots = []
+            profile.save(update_fields=["preferred_slots"])
             return JsonResponse(
-                data={"status": "error", "error": "slot_required"}, status=400
+                data={"status": "ok", "slots_count": 0}, status=200,
             )
 
-        # Далее превращаю строку в дату.
-        # parse_datetime - магическая функция, которая понимает формат даты и превращает "2026-01-15" в объект Python
-        slot_dt = parse_datetime(value)
+        slots = []
 
-        if not slot_dt:
-            return JsonResponse(
-                data={"status": "error", "error": "invalid_datetime"}, status=400
-            )
+        for value in slot_values:
+            # Далее превращаю строку в дату.
+            # parse_datetime - магическая функция, которая понимает формат и превращает "2026-01-15" в объект Python
+            slot_dt = parse_datetime(value)
 
-        if is_naive(slot_dt):
-            slot_dt = make_aware(slot_dt)
+            if not slot_dt:
+                return JsonResponse(
+                    data={"status": "error", "error": "invalid_datetime"}, status=400,
+                )
 
-        # Нельзя бронировать время, которое уже прошло. Мы сравниваем присланное время с текущим моментом - now().
-        # У нас изначально планируется отображение на странице слотов текущего дня + ближайшие дни и отображать
-        # прошло не планируется, но лучше добавить эту проверку, хоть она и может показаться лишней
-        if slot_dt < now():
-            return JsonResponse(
-                data={"status": "error", "error": "slot_in_past"}, status=400
-            )
+            if is_naive(slot_dt):
+                slot_dt = make_aware(slot_dt)
+
+            slot_dt = slot_dt.replace(minute=0, second=0, microsecond=0)
+
+            # Нельзя бронировать время, которое уже прошло. Мы сравниваем присланное время с текущим моментом - now().
+            # У нас изначально планируется отображение на странице слотов текущего дня + ближайшие дни и отображать
+            # прошло не планируется, но лучше добавить эту проверку, хоть она и может показаться лишней
+            if slot_dt < now():
+                return JsonResponse(
+                    data={"status": "error", "error": "slot_in_past"}, status=400,
+                )
+
+            slots.append(slot_dt)
 
         profile = request.user.client_profile
-        slots = list(profile.preferred_slots)  # берем все ранее добавленные слоты пользователем в его профиле
-
-        slot_dt = slot_dt.replace(minute=0, second=0, microsecond=0)
-
-        if slot_dt in slots:
-            slots.remove(slot_dt)
-            action = "removed"
-        else:
-            slots.append(slot_dt)
-            action = "added"
-
         profile.preferred_slots = slots
         profile.save(update_fields=["preferred_slots"])
 
         return JsonResponse(
-            {
-                "status": "ok",
-                "action": action,
-                "slots_count": len(slots),
-            },
-            status=200
+            data={"status": "ok", "slots_count": len(slots)}, status=200,
         )
 
 
@@ -924,7 +919,7 @@ class GetDomainSlotsAjaxView(LoginRequiredMixin, View):
         # ОБОСНОВАНИЕ: текущее время пользователя нам необходимо для того, чтоб потом на странице деактивировать
         # слоты, которые уже в прошлом (делать их недоступными к выбору).
         return JsonResponse(
-            {
+            data={
                 "status": "ok",
                 "now_iso": result["now_iso"],
                 "slots": result["slots"],
