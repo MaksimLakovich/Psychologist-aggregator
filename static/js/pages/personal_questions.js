@@ -12,6 +12,7 @@ import { initAutosavePreferredAge } from "../modules/autosave_age.js";
 import { initMatchPsychologists } from "../modules/match_psychologists.js";
 import { initAutosaveHasTimePreferences } from "../modules/autosave_has_time_preferences.js";
 import { initTimeSlotsPicker } from "../modules/time_slots_picker.js";
+import { initAutosavePreferredSlots } from "../modules/autosave_preferred_slots.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     // безопасно получаем опции из контейнера (data-attributes) - для METHOD
@@ -177,6 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
             containerSelector: "#time-slots-wrapper",
             apiUrl: "/users/api/get-domain-slots/",
             csrfToken: window.CSRF_TOKEN,
+            initialSelectedSlots: window.PREFERRED_SLOTS || [],
         });
 
         timeSlotsWrapper.dataset.initialized = "true";
@@ -192,6 +194,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // 17. Автосохранение выбранных значений "preferred_slots" в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
+    initAutosavePreferredSlots({
+        containerSelector: "#time-slots-wrapper",
+        hiddenInputsSelector: "#ts-hidden-inputs input",
+        saveUrl: window.API_SAVE_PREFERRED_SLOTS,
+        csrfToken: window.CSRF_TOKEN,
+        debounceMs: 500,
+    })
 
     // ИТОГ: Слушаем изменения на странице и, при их наличии,
     // автоматически сразу запускаем процесс фильтрации психолога по указанным клиентом параметрам
