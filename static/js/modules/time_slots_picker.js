@@ -1,15 +1,17 @@
 /**
- * КЛИЕНТСКИЙ ВЫВБОР ИНТЕРЕСУЮЩИХ СЛОТОВ
+ * КЛИЕНТСКИЙ ВЫБОР ИНТЕРЕСУЮЩИХ СЛОТОВ
  *
  * Отвечает ТОЛЬКО за:
  * - загрузку доменных слотов (GET /get-domain-slots/)
  * - визуализацию:
  *    - дней (single toggle)
  *    - слотов дня (multi toggle)
+ * - отображение ранее выбранных preferred_slots
+ * - toggle (add / remove) на уровне UI
  * - disable слотов в прошлом
  *
  * НЕ отвечает за:
- * - autosave preferred_slots (будет следующим шагом)
+ * - autosave preferred_slots
  * - availability психологов
  */
 
@@ -38,6 +40,8 @@ function formatTimeLabel(isoString) {
 export function initTimeSlotsPicker({
     containerSelector,
     apiUrl,
+    csrfToken,
+    initialSelectedSlots = [],
 }) {
     const container = document.querySelector(containerSelector);
     if (!container) {
@@ -56,6 +60,9 @@ export function initTimeSlotsPicker({
 
     const dayBtnClass = daysRow.dataset.btnClass;
     const slotBtnClass = slotsGrid.dataset.btnClass;
+
+    // --- Получаем ранее сохраненные слоты (из БД) ---
+    const selectedSet = new Set(initialSelectedSlots || []);
 
     fetch(apiUrl, {
         method: "GET",
@@ -79,6 +86,8 @@ export function initTimeSlotsPicker({
                 hiddenInputsWrap,
                 dayBtnClass,
                 slotBtnClass,
+                selectedSet,
+                container,
             });
         })
         .catch(err => {
@@ -100,6 +109,8 @@ function renderDaysAndSlots({
     hiddenInputsWrap,
     dayBtnClass,
     slotBtnClass,
+    selectedSet,
+    container,
 }) {
     const days = Object.keys(slotsByDay);
     if (!days.length) return;
@@ -124,13 +135,15 @@ function renderDaysAndSlots({
             btn.classList.toggle("hover:bg-indigo-200", !isActive);
         });
 
-        // Первичная отрисовка
+        // Рендер слотов для выбранного дня
         renderSlotsForDay({
             slots: slotsByDay[day],
             nowIso,                     // ← проброс
             slotsGrid,
             hiddenInputsWrap,
             slotBtnClass,
+            selectedSet,
+            container,
         });
     }
 
@@ -155,7 +168,7 @@ function renderDaysAndSlots({
         daysRow.appendChild(btn);
     });
 
-    // --- первичная активация ---
+    // Первичная активация
     setActiveDay(activeDay);
 }
 
@@ -171,6 +184,8 @@ function renderSlotsForDay({
     slotsGrid,
     hiddenInputsWrap,
     slotBtnClass,
+    selectedSet,
+    container,
 }) {
     slotsGrid.innerHTML = "";
     hiddenInputsWrap.innerHTML = "";
@@ -192,8 +207,22 @@ function renderSlotsForDay({
             );
         }
 
+        // При клике обновляем selectedSet
+        btn.addEventListener("click", () => {
+            if (btn.disabled) return;
+
+            if (selectedSet.has(isoString)) {
+                selectedSet.delete(isoString);
+            } else {
+                selectedSet.add(isoString);
+            }
+        });
+
         slotsGrid.appendChild(btn);
     });
+
+    // Флаг инициализации для initMultiToggle
+    container.dataset.initializing = "true";
 
     // --- Для кнопок с СЛОТАМИ используем СТИЛЬ из toggle_group_multi_choice.js ---
     initMultiToggle({
@@ -201,6 +230,11 @@ function renderSlotsForDay({
         buttonSelector: "button:not(:disabled)",
         hiddenInputsContainerSelector: "#ts-hidden-inputs",
         inputName: "preferred_slots",
-        initialValues: [],
+        initialValues: Array.from(selectedSet),
+    });
+
+    // Удаляем флаг после рендера через requestAnimationFrame
+    requestAnimationFrame(() => {
+        delete container.dataset.initializing;
     });
 }
