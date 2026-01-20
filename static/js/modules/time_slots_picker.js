@@ -17,6 +17,20 @@
 
 import { initMultiToggle } from "./toggle_group_multi_choice.js";
 
+// Нормализация слота из БД к ISO-формату API
+// Пример:
+//   "2026-01-20 10:00:00+03" → "2026-01-20T10:00:00+03:00"
+function normalizeSlot(value) {
+    if (!value) return null;
+
+    // если уже ISO - то ничего не делаем
+    if (value.includes("T")) return value;
+
+    return value
+        .replace(" ", "T")
+        .replace(/(\+\d{2})$/, "$1:00");
+}
+
 // Задаем формат для кнопок с выбором ДНЕЙ: например, "Пт, 16 янв", "Сб, 17 янв" и так далее...
 // Возвращаем объект с двумя частями: weekday и date
 function formatDayLabel(dateStr) {
@@ -40,7 +54,7 @@ function formatTimeLabel(isoString) {
 export function initTimeSlotsPicker({
     containerSelector,
     apiUrl,
-    csrfToken,
+    csrfToken, // (оставлен для симметрии API, здесь не используется)
     initialSelectedSlots = [],
 }) {
     const container = document.querySelector(containerSelector);
@@ -62,7 +76,12 @@ export function initTimeSlotsPicker({
     const slotBtnClass = slotsGrid.dataset.btnClass;
 
     // --- Получаем ранее сохраненные слоты (из БД) ---
-    const selectedSet = new Set(initialSelectedSlots || []);
+    // нормализуем preferred_slots из БД к ISO формату API
+    const selectedSet = new Set(
+        (initialSelectedSlots || [])
+            .map(normalizeSlot)
+            .filter(Boolean)
+    );
 
     fetch(apiUrl, {
         method: "GET",
@@ -221,7 +240,7 @@ function renderSlotsForDay({
         slotsGrid.appendChild(btn);
     });
 
-    // Флаг инициализации для initMultiToggle
+    // флаг для autosave / сторонних слушателей
     container.dataset.initializing = "true";
 
     // --- Для кнопок с СЛОТАМИ используем СТИЛЬ из toggle_group_multi_choice.js ---
