@@ -17,20 +17,6 @@
 
 import { initMultiToggle } from "./toggle_group_multi_choice.js";
 
-// Нормализация слота из БД к ISO-формату API
-// Пример:
-//   "2026-01-20 10:00:00+03" → "2026-01-20T10:00:00+03:00"
-function normalizeSlot(value) {
-    if (!value) return null;
-
-    // если уже ISO - то ничего не делаем
-    if (value.includes("T")) return value;
-
-    return value
-        .replace(" ", "T")
-        .replace(/(\+\d{2})$/, "$1:00");
-}
-
 // Задаем формат для кнопок с выбором ДНЕЙ: например, "Пт, 16 янв", "Сб, 17 янв" и так далее...
 // Возвращаем объект с двумя частями: weekday и date
 function formatDayLabel(dateStr) {
@@ -50,50 +36,44 @@ function formatTimeLabel(isoString) {
     return isoString.slice(11, 16); // применяем слайс и получаем эту часть: "00:00"
 }
 
+function toTimestamp(value) {
+    const ts = Date.parse(value);
+    return Number.isNaN(ts) ? null : ts;
+}
+
 // ГЛАВНАЯ ТОЧКА ВХОДА
 export function initTimeSlotsPicker({
     containerSelector,
     apiUrl,
-    csrfToken, // (оставлен для симметрии API, здесь не используется)
     initialSelectedSlots = [],
 }) {
     const container = document.querySelector(containerSelector);
-    if (!container) {
-        console.warn("TimeSlotsPicker: container not found");
-        return;
-    }
+    if (!container) return;
+
+    // ❌ ЛОГИ ДЛЯ ОТЛАДКИ - потом удалить
+    console.group("🧪 TimeSlotsPicker init");
+    console.log("initialSelectedSlots (raw):", initialSelectedSlots);
+    console.groupEnd();
+
+    // КАНОНИЧЕСКОЕ ХРАНЕНИЕ - timestamps
+    const selectedTsSet = new Set(
+        initialSelectedSlots
+            .map(toTimestamp)
+            .filter(ts => ts !== null)
+    );
 
     const daysRow = container.querySelector("#ts-days-row");
     const slotsGrid = container.querySelector("#ts-slots-grid");
     const hiddenInputsWrap = container.querySelector("#ts-hidden-inputs");
 
-    if (!daysRow || !slotsGrid || !hiddenInputsWrap) {
-        console.error("TimeSlotsPicker: required DOM nodes not found");
-        return;
-    }
-
     const dayBtnClass = daysRow.dataset.btnClass;
     const slotBtnClass = slotsGrid.dataset.btnClass;
 
-    // --- Получаем ранее сохраненные слоты (из БД) ---
-    // нормализуем preferred_slots из БД к ISO формату API
-    const selectedSet = new Set(
-        (initialSelectedSlots || [])
-            .map(normalizeSlot)
-            .filter(Boolean)
-    );
-
     fetch(apiUrl, {
-        method: "GET",
+        headers: { "X-Requested-With": "XMLHttpRequest" },
         credentials: "same-origin",
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-        },
     })
-        .then(res => {
-            if (!res.ok) throw new Error("Failed to load domain slots");
-            return res.json();
-        })
+        .then(r => r.json())
         .then(data => {
             renderDaysAndSlots({
                 slotsByDay: data.slots,
@@ -105,12 +85,9 @@ export function initTimeSlotsPicker({
                 hiddenInputsWrap,
                 dayBtnClass,
                 slotBtnClass,
-                selectedSet,
+                selectedTsSet,
                 container,
             });
-        })
-        .catch(err => {
-            console.error("TimeSlotsPicker error:", err);
         });
 }
 
@@ -128,30 +105,27 @@ function renderDaysAndSlots({
     hiddenInputsWrap,
     dayBtnClass,
     slotBtnClass,
-    selectedSet,
+    selectedTsSet,
     container,
 }) {
     const days = Object.keys(slotsByDay);
     if (!days.length) return;
 
-    let activeDay = days[0]; // текущий день активен по умолчанию
-
     function setActiveDay(day) {
-        activeDay = day;
 
         // обновляем стили кнопок
         daysRow.querySelectorAll("button").forEach(btn => {
-            const isActive = btn.dataset.value === day;
+            const active = btn.dataset.value === day;
 
-            btn.classList.toggle("bg-indigo-500", isActive);
-            btn.classList.toggle("text-white", isActive);
-            btn.classList.toggle("border-indigo-500", isActive);
-            btn.classList.toggle("hover:bg-indigo-900", isActive);
+            btn.classList.toggle("bg-indigo-500", active);
+            btn.classList.toggle("text-white", active);
+            btn.classList.toggle("border-indigo-500", active);
+            btn.classList.toggle("hover:bg-indigo-900", active);
 
-            btn.classList.toggle("bg-indigo-100", !isActive);
-            btn.classList.toggle("text-gray-700", !isActive);
-            btn.classList.toggle("border-indigo-300", !isActive);
-            btn.classList.toggle("hover:bg-indigo-200", !isActive);
+            btn.classList.toggle("bg-indigo-100", !active);
+            btn.classList.toggle("text-gray-700", !active);
+            btn.classList.toggle("border-indigo-300", !active);
+            btn.classList.toggle("hover:bg-indigo-200", !active);
         });
 
         // Рендер слотов для выбранного дня
@@ -161,7 +135,7 @@ function renderDaysAndSlots({
             slotsGrid,
             hiddenInputsWrap,
             slotBtnClass,
-            selectedSet,
+            selectedTsSet,
             container,
         });
     }
@@ -187,8 +161,8 @@ function renderDaysAndSlots({
         daysRow.appendChild(btn);
     });
 
-    // Первичная активация
-    setActiveDay(activeDay);
+    // Первичная активация - текущий день активен по умолчанию
+    setActiveDay(days[0]);
 }
 
 /**
@@ -203,11 +177,13 @@ function renderSlotsForDay({
     slotsGrid,
     hiddenInputsWrap,
     slotBtnClass,
-    selectedSet,
+    selectedTsSet,
     container,
 }) {
     slotsGrid.innerHTML = "";
     hiddenInputsWrap.innerHTML = "";
+
+    const initialValuesForDay = [];
 
     slots.forEach(isoString => {
         const btn = document.createElement("button");
@@ -226,16 +202,10 @@ function renderSlotsForDay({
             );
         }
 
-        // При клике обновляем selectedSet
-        btn.addEventListener("click", () => {
-            if (btn.disabled) return;
-
-            if (selectedSet.has(isoString)) {
-                selectedSet.delete(isoString);
-            } else {
-                selectedSet.add(isoString);
-            }
-        });
+        const ts = toTimestamp(isoString);
+        if (ts !== null && selectedTsSet.has(ts)) {
+            initialValuesForDay.push(isoString);
+        }
 
         slotsGrid.appendChild(btn);
     });
@@ -249,7 +219,7 @@ function renderSlotsForDay({
         buttonSelector: "button:not(:disabled)",
         hiddenInputsContainerSelector: "#ts-hidden-inputs",
         inputName: "preferred_slots",
-        initialValues: Array.from(selectedSet),
+        initialValues: initialValuesForDay,
     });
 
     // Удаляем флаг после рендера через requestAnimationFrame
