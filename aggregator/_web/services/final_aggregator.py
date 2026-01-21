@@ -30,7 +30,8 @@ class PsychologistAggregatorService:
         psychologists_qs = match_psychologists(self.client_profile)
 
         # Шаг 2: Если нет предпочтений по времени - просто применяем финальный scoring для итогового ранжирования
-        if not self.client_profile.has_time_preferences:
+        selected_slots = self.client_profile.preferred_slots
+        if not self.client_profile.has_time_preferences or not selected_slots:
             ordered_by_scoring_qs = apply_final_ordering(psychologists_qs)
 
             # Тут превращаем QuerySet в словарь (API удобно работать с profile + availability),
