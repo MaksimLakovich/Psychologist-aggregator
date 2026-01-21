@@ -59,16 +59,6 @@ export function initAutosavePreferredSlots({
     const debouncedSave = debounce(doSave, debounceMs);
 
     // Реагируем на изменения состояния (через initMultiToggle)
-//    container.addEventListener("click", (e) => {
-//        const btn = e.target.closest("button[data-value]");
-//        if (!btn || btn.disabled) return;
-//
-//        // Даём toggle_group_multi_choice закончить работу
-//        requestAnimationFrame(() => {
-//            debouncedSave();
-//        });
-//    });
-
     container.addEventListener("click", (e) => {
         if (container.dataset.initializing === "true") return;
 
