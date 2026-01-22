@@ -1,9 +1,9 @@
-// ШАГ 1: Используем helper в autosave-файлах чтоб при срабатывании данного автосохранения срабатывал и
+// Используем helper в autosave-файлах чтоб при срабатывании данного автосохранения срабатывал и
 // client_profile_events.js, который отвечает за запуск фильтрации психологов
 
 import { dispatchClientProfileUpdated } from "../events/client_profile_events.js";
 
-// Шаг 2: Автосохранение выбора предпочитаемых СЛОТОВ.
+// Вспомогательные функции (utils).
 
 function debounce(fn, wait = 500) {
     let t = null;
@@ -12,6 +12,16 @@ function debounce(fn, wait = 500) {
         t = setTimeout(fn, wait);
     };
 }
+
+function setsEqual(a, b) {
+    if (a.size !== b.size) return false;
+    for (const v of a) {
+        if (!b.has(v)) return false;
+    }
+    return true;
+}
+
+// ГЛАВНАЯ ТОЧКА: Автосохранение выбора предпочитаемых СЛОТОВ.
 
 export function initAutosavePreferredSlots({
     containerSelector,
@@ -24,18 +34,33 @@ export function initAutosavePreferredSlots({
     const container = document.querySelector(containerSelector);
     if (!container) return;
 
-    function collectSlots() {
-        return Array.from(
-            document.querySelectorAll(hiddenInputsSelector)
-        ).map(input => input.value);
+    let lastSavedSlots = new Set();
+
+    // Собираем текущие состояния (выбранные слоты)
+    function collectSlotsSet() {
+        return new Set(
+            Array.from(document.querySelectorAll(hiddenInputsSelector))
+                .map(input => input.value)
+                .filter(Boolean)
+        );
     }
 
     // Отправляет POST запрос на API
-    function doSave() {
-        const slots = collectSlots();
+    function doSaveIfChanged() {
+        const currentSlots = collectSlotsSet();
+
+        // 🚫 Ничего не изменилось - ничего не делаем
+        if (setsEqual(currentSlots, lastSavedSlots)) {
+            return;
+        }
+
+        // 🚫 Оба состояния пустые - ничего не делаем
+        if (currentSlots.size === 0 && lastSavedSlots.size === 0) {
+            return;
+        }
 
         const params = new URLSearchParams();
-        slots.forEach(slot => params.append("slots[]", slot));
+        currentSlots.forEach(slot => params.append("slots[]", slot));
 
         fetch(saveUrl, {
             method: "POST",
@@ -49,6 +74,7 @@ export function initAutosavePreferredSlots({
         })
             .then(res => {
                 if (!res.ok) throw new Error("Save failed");
+                lastSavedSlots = new Set(currentSlots);  // ⚠️ Фиксируем сохраненное состояние
                 dispatchClientProfileUpdated();
             })
             .catch(err => {
@@ -56,18 +82,21 @@ export function initAutosavePreferredSlots({
             });
     }
 
-    const debouncedSave = debounce(doSave, debounceMs);
+    const debouncedSave = debounce(doSaveIfChanged, debounceMs);
 
-    // Реагируем на изменения состояния (через initMultiToggle)
+    // Реагируем на изменения состояния по разным кликам
     container.addEventListener("click", (e) => {
         if (container.dataset.initializing === "true") return;
 
         const btn = e.target.closest("button[data-value]");
         if (!btn || btn.disabled) return;
 
-        const slot = btn.dataset.value;
-        debouncedSave(slot);
+        // ⚠️ Если никаких данных из клика мы не используем
+        // autosave работает ТОЛЬКО со state
+        debouncedSave();
     });
 
-    console.log("initAutosavePreferredSlots: initialized");
+    lastSavedSlots = collectSlotsSet();
+
+    console.log("initAutosavePreferredSlots: initialized (state-based)");
 }

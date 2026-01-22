@@ -66,7 +66,7 @@ class AvailabilityGenerator:
         :return: DTO - объект, предназначенный только для транспортировки данных между слоями/частями приложения."""
         slots: List[SlotDTO] = []
 
-        for slot_start, slot_end in self._time_policy.iter_day_slots(day):
+        for slot_start, slot_end in self._time_policy.iter_domain_day_slots(day):
             # Слот должен полностью помещаться в рабочее окно
             if slot_start < window_start:
                 continue

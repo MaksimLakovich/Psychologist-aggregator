@@ -23,16 +23,14 @@
 
 ---
 
-## <a> 1. ШАГ 1: Команда для запуска загрузки данных </a>
+## <a> ШАГ 1: Команда для запуска загрузки данных </a>
 
 Загрузка **локально** для теста:
 ```bash
 python manage.py loaddata fixtures/users_psychologists.json
 ```
 
----
-
-## <a> 2. Пример записи AppUser + PsychologistProfile</a>
+### Пример записи `AppUser + PsychologistProfile`
 ```json
 [
   {
@@ -84,16 +82,14 @@ python manage.py loaddata fixtures/users_psychologists.json
 
 ---
 
-## <a> 3. ШАГ 2: Команда для запуска загрузки данных об образовании психологов</a>
+## <a> ШАГ 2: Команда для запуска загрузки данных об образовании психологов</a>
 
 Загрузка **локально** для теста:
 ```bash
 python manage.py loaddata fixtures/users_ps_education.json
 ```
 
----
-
-## <a> 4. Пример записи Education</a>
+### Пример записи `Education`
 ```json
 [
   {
@@ -118,8 +114,42 @@ python manage.py loaddata fixtures/users_ps_education.json
 
 ---
 
-## <a> 5. JSON-файл </a>
+## <a> ШАГ 3: Команда для запуска загрузки данных об персональном рабочем расписании психологов</a>
+
+Загрузка **локально** для теста:
+```bash
+python manage.py loaddata fixtures/users_ps_availability_rule.json
+```
+
+### Пример записи `AvailabilityRule`
+```json
+[
+  {
+    "model": "calendar_engine.availabilityrule",
+    "pk": 1,
+    "fields": {
+      "creator": "11111111-1111-4111-8111-111111111111",
+      "timezone": "Europe/Minsk",
+      "rule_start": "2024-01-01",
+      "rule_end": null,
+      "weekdays": [0,1,2,3,4,5,6],
+      "start_time": "00:00:00",
+      "end_time": "00:00:00",
+      "slot_duration_minutes": 50,
+      "break_minutes": 10,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000000+03:00",
+      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+    }
+  }
+]
+```
+
+---
+
+## <a> JSON-файлы </a>
 
 Расположение JSON-файла в структуре проекта: 
 - [fixtures/users_psychologists.json](/Users/maksym/PycharmProjects/Psychologist-aggregator/fixtures/users_psychologists.json)
 - [fixtures/users_ps_education.json](/Users/maksym/PycharmProjects/Psychologist-aggregator/fixtures/users_ps_education.json)
+- [fixtures/users_ps_availability_rule.json](/Users/maksym/PycharmProjects/Psychologist-aggregator/fixtures/users_ps_availability_rule.json)

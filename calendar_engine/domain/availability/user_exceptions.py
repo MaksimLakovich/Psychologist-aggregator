@@ -50,9 +50,7 @@ class TimeAvailabilityException(AbsAvailabilityException):
 
         for start, end in time_windows:
             if start >= end:
-                raise ValueError(
-                    f"Некорректное временное окно: {start} >= {end}"
-                )
+                raise ValueError(f"Некорректное временное окно: {start} >= {end}")
             validated_windows.append((start, end))
 
         if not validated_windows:

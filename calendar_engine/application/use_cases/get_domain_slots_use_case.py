@@ -47,7 +47,7 @@ class GetDomainSlotsUseCase(AbsUseCase):
             day_slots: List[str] = []
 
             # Берем дату и нарезаем ее на слоты ('2026-01-16T00:00:00+03:00', '2026-01-16T01:00:00+03:00', ...)
-            for start_time, _ in DOMAIN_TIME_POLICY.iter_day_slots(day):
+            for start_time, _ in DOMAIN_TIME_POLICY.iter_domain_day_slots(day):
                 start_dt = make_aware(
                     datetime.combine(day, start_time),
                     timezone=self.timezone,
