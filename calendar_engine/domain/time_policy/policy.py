@@ -33,7 +33,7 @@ class DomainTimePolicy(AbsDomainTimePolicy):
         self.day_time_end = day_time_end  # время окончания доменного дня
         self.duration_slot = timedelta(minutes=slot_duration_minutes)  # Длительность одного базового слота (в минутах)
 
-    def iter_day_slots(self, day: date) -> Iterable[Tuple[time, time]]:
+    def iter_domain_day_slots(self, day: date) -> Iterable[Tuple[time, time]]:
         """Генерирует базовые временные слоты домена для одного дня (список всех возможных слотов):
             - работает в доменном времени (TIME_ZONE проекта);
             - это базовая временная сетка домена - общее рабочее правило для всех пользователей, которое будет
