@@ -201,7 +201,8 @@
 │    ├── methods.json
 │    ├── specialisations.json
 │    ├── users_psychologists.json
-│    └── users_ps_education.json
+│    ├── users_ps_education.json
+│    └── users_ps_availability_rule.json
 │
 ├── users/                      # ⭐️ Приложение django-проекта ("Пользователи") + справочники системы (UserRole, Topic, Specialisation, Method, Education, Experience)
 │    ├── _api/                        # ℹ️ API-часть (DRF)

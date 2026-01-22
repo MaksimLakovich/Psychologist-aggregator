@@ -29,12 +29,14 @@ class PsychologistAggregatorService:
         # Шаг 1: Первичная фильтрация (topics, methods, age, gender и считает коэффициенты topic_score, method_score)
         psychologists_qs = match_psychologists(self.client_profile)
 
+        selected_slots = self.client_profile.preferred_slots  # Получаем выбранные предпочитаемые слоты
+
         # Шаг 2: Если нет предпочтений по времени - просто применяем финальный scoring для итогового ранжирования
-        if not self.client_profile.has_time_preferences:
+        if not self.client_profile.has_time_preferences or not selected_slots:
             ordered_by_scoring_qs = apply_final_ordering(psychologists_qs)
 
-            # Тут превращаем QuerySet в словарь (API удобно работать с profile + availability),
-            # где "availability = None" потому что мы ее не считали (if not):
+            # Тут превращаем QuerySet в словарь (API удобно работать с profile + availability), где
+            # "availability = None" потому что мы ее не считали (if not):
             return {
                 ps.id: {
                     "profile": ps,
@@ -42,12 +44,14 @@ class PsychologistAggregatorService:
                 }
                 for ps in ordered_by_scoring_qs
             }
+        # Шаг 3: Если есть предпочтения по времени - формируем окно генерации (с date_from по date_to)
+        slot_dates = [slot.date() for slot in selected_slots]
+        date_from = min(slot_dates)
+        date_to = max(slot_dates)
 
-        # Шаг 3: Если есть предпочтения по времени - финальный агрегированный результат с учетом временными слотами
+        # Шаг 4: Финальный агрегированный результат с учетом временными слотами
         aggregated = {}  # Хранит итоговые данные (ТОЛЬКО психологи, которые: прошли проф фильтрацию + проверку слотов
         availability_map = {}  # Временно хранит availability, чтобы потом снова второй раз не вызывать calendar_engine
-
-        selected_slots = self.client_profile.preferred_slots
 
         # Идем по каждому психологу, который прошел первичную фильтрацию и создаем use-case:
         # - проверяем: есть ли у психолога активный AvailabilityRule
@@ -62,7 +66,10 @@ class PsychologistAggregatorService:
                 continue  # Выходим: у психолога нет активного AvailabilityRule (например, сейчас не работает)
 
             # Выполняем расчет слотов: смотрим расписание, применяем исключения, сравниваем с selected_slots
-            match_result = use_case.execute()
+            match_result = use_case.execute(
+                date_from=date_from,
+                date_to=date_to,
+            )
 
             if not match_result.has_match:
                 continue  # Выходим: нет совпадений по слотам (психолог подходит по профилю, но не подходит по времени)
@@ -73,8 +80,7 @@ class PsychologistAggregatorService:
             }
             availability_map[ps.id] = match_result
 
-        # Шаг 4: Итоговое ранжирование полученных результатов с помощью scoring
-
+        # Шаг 5: Итоговое ранжирование полученных результатов с помощью scoring
         if not aggregated:  # Если вообще никто не подошел - это просто безопасный early-return
             return {}
 
