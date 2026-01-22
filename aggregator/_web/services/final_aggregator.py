@@ -29,9 +29,9 @@ class PsychologistAggregatorService:
         # Шаг 1: Первичная фильтрация (topics, methods, age, gender и считает коэффициенты topic_score, method_score)
         psychologists_qs = match_psychologists(self.client_profile)
 
-        # Шаг 2: Если нет предпочтений по времени - просто применяем финальный scoring для итогового ранжирования
-        selected_slots = self.client_profile.preferred_slots
+        selected_slots = self.client_profile.preferred_slots  # Получаем выбранные предпочитаемые слоты
 
+        # Шаг 2: Если нет предпочтений по времени - просто применяем финальный scoring для итогового ранжирования
         if not self.client_profile.has_time_preferences or not selected_slots:
             ordered_by_scoring_qs = apply_final_ordering(psychologists_qs)
 
