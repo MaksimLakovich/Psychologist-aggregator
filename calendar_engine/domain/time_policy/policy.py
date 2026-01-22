@@ -5,10 +5,10 @@ from calendar_engine.domain.time_policy.base import AbsDomainTimePolicy
 
 
 class DomainTimePolicy(AbsDomainTimePolicy):
-    """Доменная временная сетка.
+    """Генерация доменной временной сетки.
         Пример:
             - слот: 60 минут или 30 минут
-            - день: 09:00–21:00 или 00:00-23-59
+            - день: 09:00–21:00 (установленный период) или 00:00-00:00 (круглосуточно)
         Она НЕ знает ничего про:
             - пользователей
             - availability
@@ -17,7 +17,7 @@ class DomainTimePolicy(AbsDomainTimePolicy):
         Ее задача:
             - задать шаг времени (slot size)
             - задать границы доменного дня, которые общие для всех пользователей (сделать 24/7 или сделать 09:00–18:00)
-            - уметь итерировать слоты дня"""
+            - уметь итерировать слоты дня."""
 
     def __init__(self, *, day_time_start: time, day_time_end: time, slot_duration_minutes: int,) -> None:
         """
@@ -29,17 +29,17 @@ class DomainTimePolicy(AbsDomainTimePolicy):
         if slot_duration_minutes <= 0:
             raise ValueError("slot_duration_minutes должно быть положительным значением.")
 
-        self.day_time_start = day_time_start  # Начало дня
-        self.day_time_end = day_time_end  # Конец дня (НЕ включительно)
+        self.day_time_start = day_time_start  # время начала доменного дня
+        self.day_time_end = day_time_end  # время окончания доменного дня
         self.duration_slot = timedelta(minutes=slot_duration_minutes)  # Длительность одного базового слота (в минутах)
 
     def iter_day_slots(self, day: date) -> Iterable[Tuple[time, time]]:
-        """Генерирует базовые слоты домена для одного дня:
-            - Работает в доменном времени (TIME_ZONE проекта);
-            - Это НЕ availability и НЕ бронирование;
-            - Это базовая временная сетка домена - общие для всех пользователей (сделать 24/7 или сделать 09:00–18:00).
-        Возвращает итератор пар (start, end) для одного календарного дня.
-        Возвращаемые интервалы НЕ учитывают availability и бронирования."""
+        """Генерирует базовые временные слоты домена для одного дня (список всех возможных слотов):
+            - работает в доменном времени (TIME_ZONE проекта);
+            - это базовая временная сетка домена - общее рабочее правило для всех пользователей, которое будет
+              доступно к регулированию каждым специалистом индивидуально на основе его персональных AvailabiliyRule,
+              но в установленных доменом границах.
+        Возвращает итератор пар (start_time, end_time) для одного календарного дня."""
 
         current_day_start = datetime.combine(day, self.day_time_start)
 
