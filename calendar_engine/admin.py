@@ -1,8 +1,11 @@
 from django.contrib import admin
 
-from calendar_engine.models import (AvailabilityException, AvailabilityRule,
-                                    CalendarEvent, EventParticipant,
-                                    RecurrenceRule, SlotParticipant, TimeSlot)
+from calendar_engine.models import (AvailabilityException,
+                                    AvailabilityExceptionTimeWindow,
+                                    AvailabilityRule,
+                                    AvailabilityRuleTimeWindow, CalendarEvent,
+                                    EventParticipant, RecurrenceRule,
+                                    SlotParticipant, TimeSlot)
 
 
 class CreatorAndReadonlyFields(admin.ModelAdmin):
@@ -78,11 +81,21 @@ class AvailabilityRuleAdmin(CreatorAndReadonlyFields):
     """Настройка отображения модели AvailabilityRule в админке."""
 
     list_display = (
-        "id", "creator", "rule_start", "rule_end", "weekdays", "slot_duration_minutes", "break_minutes", "is_active"
+        "id", "creator", "rule_start", "rule_end", "weekdays", "slot_duration", "break_between_sessions", "is_active"
     )
     list_filter = ("is_active",)
     search_fields = ("creator__email", "creator__last_name")
     ordering = ("creator__email", "-created_at")
+
+
+@admin.register(AvailabilityRuleTimeWindow)
+class AvailabilityRuleTimeWindowAdmin(admin.ModelAdmin):
+    """Настройка отображения модели AvailabilityRuleTimeWindow в админке."""
+
+    list_display = ("id", "rule", "start_time", "end_time", "rule__is_active")
+    list_filter = ("rule__is_active",)
+    search_fields = ("rule__creator__email", "rule__creator__last_name")
+    ordering = ("rule", "start_time", "-created_at")
 
 
 @admin.register(AvailabilityException)
@@ -90,17 +103,18 @@ class AvailabilityExceptionAdmin(CreatorAndReadonlyFields):
     """Настройка отображения модели AvailabilityException в админке."""
 
     list_display = (
-        "id",
-        "creator",
-        "rule",
-        "exception_date_start",
-        "exception_date_end",
-        "exception_start_time",
-        "exception_end_time",
-        "reason",
-        "exception_type",
-        "is_active",
+        "id", "creator", "rule", "exception_start", "exception_end", "reason", "exception_type", "is_active"
     )
     list_filter = ("is_active", "reason", "exception_type")
     search_fields = ("rule__creator__email", "creator__email", "creator__last_name")
     ordering = ("creator__email", "-created_at")
+
+
+@admin.register(AvailabilityExceptionTimeWindow)
+class AvailabilityExceptionTimeWindowAdmin(admin.ModelAdmin):
+    """Настройка отображения модели AvailabilityExceptionTimeWindow в админке."""
+
+    list_display = ("id", "exception", "override_start_time", "override_end_time", "exception__is_active")
+    list_filter = ("exception__is_active",)
+    search_fields = ("exception__creator__email", "exception__creator__last_name")
+    ordering = ("exception", "override_start_time", "-created_at")
