@@ -3,6 +3,7 @@ import uuid
 from django.conf import settings
 from django.contrib.postgres.constraints import ExclusionConstraint
 from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import ValidationError
 from django.db import models
 from timezone_field import TimeZoneField
 
@@ -491,7 +492,9 @@ class SlotParticipant(TimeStampedModel):
 
 class AvailabilityRule(TimeStampedModel):
     """Правила доступности специалиста (рабочее расписание).
-    Например: Пн-Пт, 10:00–18:00."""
+    Например: Пн-Пт, с набором рабочих окон внутри дня:
+        - одно окно с 09:00 до 18:00;
+        - или несколько окон с 06:00 до 11:00 и с 16:00 до 22:00."""
 
     creator = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
@@ -511,14 +514,14 @@ class AvailabilityRule(TimeStampedModel):
     rule_start = models.DateField(
         null=False,
         blank=False,
-        verbose_name="Дата старта правила",
-        help_text="Укажите дату старта правила",
+        verbose_name="Дата начала действия правила",
+        help_text="Укажите дату начала действия правила",
     )
     rule_end = models.DateField(
         null=True,
         blank=True,
-        verbose_name="Дата окончания правила",
-        help_text="Укажите дату окончания правила",
+        verbose_name="Дата окончания действия правила",
+        help_text="Укажите дату окончания действия правила",
     )
     weekdays = ArrayField(
         models.PositiveSmallIntegerField(choices=WEEKDAYS_CHOICES),
@@ -527,31 +530,19 @@ class AvailabilityRule(TimeStampedModel):
         verbose_name="Рабочие дни недели",
         help_text="Укажите рабочие дни недели",
     )
-    start_time = models.TimeField(
-        null=False,
-        blank=False,
-        verbose_name="Начало рабочего дня",
-        help_text="Укажите начало рабочего дня",
-    )
-    end_time = models.TimeField(
-        null=False,
-        blank=False,
-        verbose_name="Окончание рабочего дня",
-        help_text="Укажите окончание рабочего дня",
-    )
-    slot_duration_minutes = models.PositiveSmallIntegerField(
+    slot_duration = models.PositiveSmallIntegerField(
         default=60,
         null=False,
         blank=False,
-        verbose_name="Продолжительность 1 слота",
-        help_text="Укажите продолжительность 1 слота",
+        verbose_name="Продолжительность 1 сессии (минуты)",
+        help_text="Укажите продолжительность 1 сессии (минуты)",
     )
-    break_minutes = models.PositiveSmallIntegerField(
+    break_between_sessions = models.PositiveSmallIntegerField(
         default=0,
         null=True,
         blank=True,
-        verbose_name="Перерыв между сессиями",
-        help_text="Укажите перерыв между сессиями",
+        verbose_name="Перерыв между сессиями (минуты)",
+        help_text="Укажите перерыв между сессиями (минуты)",
     )
     is_active = models.BooleanField(
         default=True,
@@ -563,12 +554,52 @@ class AvailabilityRule(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.creator} - {self.start_time} - {self.end_time} / {self.weekdays}"
+        return f"{self.creator} / {self.weekdays}"
 
     class Meta:
-        verbose_name = "Правило доступности специалиста"
-        verbose_name_plural = "Правила доступности специалиста"
+        verbose_name = "Правило доступности"
+        verbose_name_plural = "Правила доступности"
         ordering = ["pk", "creator", "rule_start"]
+
+
+class AvailabilityRuleTimeWindow(TimeStampedModel):
+    """Временное окно доступности внутри рабочего дня из AvailabilityRule
+    (например, "с 09:00 до 18:00")."""
+
+    rule = models.ForeignKey(
+        to=AvailabilityRule,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
+        related_name="time_windows",
+        verbose_name="Рабочее расписание",
+        help_text="Укажите рабочее расписание",
+    )
+    start_time = models.TimeField(
+        null=False,
+        blank=False,
+        verbose_name="Начало временного окна",
+        help_text="Укажите начало временного окна",
+    )
+    end_time = models.TimeField(
+        null=False,
+        blank=False,
+        verbose_name="Окончание временного окна",
+        help_text="Укажите окончание временного окна",
+    )
+
+    def clean(self):
+        if self.start_time >= self.end_time:
+            raise ValidationError("start_time должен быть меньше end_time")
+
+    def __str__(self):
+        """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
+        return f"{self.rule} (временное окно: с {self.start_time} до {self.end_time})"
+
+    class Meta:
+        verbose_name = "Временное окно доступности"
+        verbose_name_plural = "Временные окна доступности"
+        ordering = ["rule", "start_time"]
 
 
 class AvailabilityException(TimeStampedModel):
@@ -591,29 +622,17 @@ class AvailabilityException(TimeStampedModel):
         verbose_name="Правило для которого устанавливается исключение",
         help_text="Укажите правило для которого устанавливается исключение",
     )
-    exception_date_start = models.DateField(
+    exception_start = models.DateField(
         null=False,
         blank=False,
-        verbose_name="Дата старта действия исключения",
-        help_text="Укажите дату старта действия исключения",
+        verbose_name="Дата начала действия исключения",
+        help_text="Укажите дату начала действия исключения",
     )
-    exception_date_end = models.DateField(
+    exception_end = models.DateField(
         null=False,
         blank=False,
         verbose_name="Дата окончания действия исключения",
         help_text="Укажите дату окончания действия исключения",
-    )
-    exception_start_time = models.TimeField(
-        null=True,
-        blank=True,
-        verbose_name="Время начала действия исключения",
-        help_text="Укажите время начала действия исключения",
-    )
-    exception_end_time = models.TimeField(
-        null=True,
-        blank=True,
-        verbose_name="Время окончания действия исключения",
-        help_text="Укажите время окончания действия исключения",
     )
     reason = models.CharField(
         choices=AVAILABILITY_EXCEPTION_CHOICES,
@@ -631,33 +650,6 @@ class AvailabilityException(TimeStampedModel):
         verbose_name="Тип исключения",
         help_text="Укажите тип исключения (полностью недоступен или изменение текущего рабочего правила",
     )
-    # Если exception_type=override (переопределение), то:
-    override_start_time = models.TimeField(
-        null=True,
-        blank=True,
-        verbose_name="Новое начало рабочего дня согласно исключения",
-        help_text="Укажите новое начало рабочего дня согласно исключения",
-    )
-    override_end_time = models.TimeField(
-        null=True,
-        blank=True,
-        verbose_name="Новое окончание рабочего дня согласно исключения",
-        help_text="Укажите новое окончание рабочего дня согласно исключения",
-    )
-    override_slot_duration_minutes = models.PositiveSmallIntegerField(
-        default=60,
-        null=True,
-        blank=True,
-        verbose_name="Продолжительность 1 слота согласно исключения",
-        help_text="Укажите продолжительность 1 слота согласно исключения",
-    )
-    override_break_minutes = models.PositiveSmallIntegerField(
-        default=0,
-        null=True,
-        blank=True,
-        verbose_name="Перерыв между сессиями согласно исключения",
-        help_text="Укажите перерыв между сессиями согласно исключения",
-    )
     is_active = models.BooleanField(
         default=True,
         null=False,
@@ -668,9 +660,64 @@ class AvailabilityException(TimeStampedModel):
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.creator} - {self.exception_date_start} (тип исключения: {self.exception_type})"
+        return f"{self.creator} / {self.exception_start}–{self.exception_end} ({self.exception_type})"
 
     class Meta:
         verbose_name = "Исключение из правил доступности"
         verbose_name_plural = "Исключения из правил доступности"
-        ordering = ["pk", "creator", "exception_date_start", "exception_start_time"]
+        ordering = ["pk", "creator", "exception_start"]
+
+
+class AvailabilityExceptionTimeWindow(TimeStampedModel):
+    """Переопределенное временное окно доступности внутри рабочего дня из AvailabilityException
+    (например, "с 09:00 до 18:00")."""
+
+    exception = models.ForeignKey(
+        to=AvailabilityException,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
+        related_name="time_windows",
+        verbose_name="Исключение",
+        help_text="Укажите исключение",
+    )
+    # Если exception_type=override (переопределение), то:
+    override_start_time = models.TimeField(
+        null=True,
+        blank=True,
+        verbose_name="Новое начало временного окна согласно исключения",
+        help_text="Укажите новое начало временного окна согласно исключения",
+    )
+    override_end_time = models.TimeField(
+        null=True,
+        blank=True,
+        verbose_name="Новое окончание временного окна согласно исключения",
+        help_text="Укажите новое окончание временного окна согласно исключения",
+    )
+    override_slot_duration = models.PositiveSmallIntegerField(
+        default=60,
+        null=True,
+        blank=True,
+        verbose_name="Продолжительность 1 сессии согласно исключения (минуты)",
+        help_text="Укажите продолжительность 1 сессии согласно исключения (минуты)",
+    )
+    override_break_between_sessions = models.PositiveSmallIntegerField(
+        default=0,
+        null=True,
+        blank=True,
+        verbose_name="Перерыв между сессиями согласно исключения (минуты)",
+        help_text="Укажите перерыв между сессиями согласно исключения (минуты)",
+    )
+
+    def clean(self):
+        if self.override_start_time >= self.override_end_time:
+            raise ValidationError("override_start_time должен быть меньше override_end_time")
+
+    def __str__(self):
+        """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
+        return f"{self.exception} (временное окно: с {self.override_start_time} до {self.override_end_time})"
+
+    class Meta:
+        verbose_name = "Переопределенное временное окно доступности"
+        verbose_name_plural = "Переопределенные временные окна доступности"
+        ordering = ["exception", "override_start_time"]

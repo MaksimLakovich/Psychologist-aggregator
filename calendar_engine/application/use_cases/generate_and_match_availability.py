@@ -3,7 +3,8 @@ from datetime import date
 from calendar_engine.application.use_cases.base import AbsUseCase
 from calendar_engine.domain.availability.base import (AbsAvailabilityException,
                                                       AbsAvailabilityRule)
-from calendar_engine.domain.availability.generator import AvailabilityGenerator
+from calendar_engine.domain.availability.get_user_slots import \
+    AvailabilitySlotFilter
 from calendar_engine.domain.matching.base import AbsTimeMatcher
 from calendar_engine.domain.matching.dto import MatchResultDTO
 from calendar_engine.domain.time_policy.base import AbsDomainTimePolicy

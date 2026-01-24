@@ -100,3 +100,5 @@ DOMAIN_TIME_POLICY = DomainTimePolicy(
     day_time_end=time(0, 0),  # день заканчивается в 00:00 следующего дня
     slot_duration_minutes=60,
 )
+
+DAYS_AHEAD = 1

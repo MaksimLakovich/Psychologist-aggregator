@@ -1,23 +1,27 @@
 from abc import ABC, abstractmethod
-from datetime import date
+from typing import Iterable
 
-from calendar_engine.domain.availability.dto import AvailabilityDTO
+from calendar_engine.domain.availability.dto import SlotDTO
 from calendar_engine.domain.matching.dto import MatchResultDTO
 
 
-class AbsTimeMatcher(ABC):
-    """Абстрактный контракт временного matching.
-    Задача matching:
-        - принять доступность специалиста;
-        - применить временные критерии (даты, слоты, ограничения);
-        - вернуть отфильтрованную доступность.
+class AbsSlotMatcher(ABC):
+    """Абстрактный контракт domain-matching по временным слотам.
+
+    Ответственность matcher-а:
+        - принять доступные слоты специалиста;
+        - принять предпочитаемые клиентом слоты;
+        - вернуть пересечение слотов.
     ВАЖНО:
-        - matching НЕ знает ничего про специалистов;
-        - matching НЕ знает ничего про UI, HTTP, БД;
-        - matching работает ТОЛЬКО с доменными DTO."""
+        - matcher не знает про БД, пользователей, UI;
+        - matcher работает ТОЛЬКО с SlotDTO;
+        - matcher НЕ группирует слоты по дням."""
 
     @abstractmethod
-    def match(self, *, availability: AvailabilityDTO, date_from: date, date_to: date) -> MatchResultDTO:
-        """Применяет временные критерии и возвращает результат matching.
-        :return: Итоговая отфильтрованная доступность (AvailabilityDTO - DTO-объект с доступными слотами)."""
+    def match(self, *, allowed_slots: Iterable[SlotDTO]) -> MatchResultDTO:
+        """Выполняет matching и возвращает результат.
+
+        :param allowed_slots: Доменные слоты специалиста, которые были отфильтрованы по его
+        индивидуальным правилам доступности. То есть, по рабочему расписанию с учетом исключений;
+        :return: DTO-объект со списком SlotDTO, которые совпали с предпочитаемыми клиентом слотами."""
         raise NotImplementedError
