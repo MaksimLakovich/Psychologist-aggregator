@@ -33,7 +33,7 @@ class DateAvailabilityException(AbsAvailabilityException):
 
 
 class TimeAvailabilityException(AbsAvailabilityException):
-    """Переопределение рабочих окон конкретного дня (сокращенный или особый день).
+    """Полностью переопределяет рабочие окна специалиста для конкретного дня (сокращенный или особый день).
     Пример: 31 декабря: 09:00–15:00."""
 
     def __init__(self, *, day: date, time_windows: Iterable[Tuple[time, time]]) -> None:

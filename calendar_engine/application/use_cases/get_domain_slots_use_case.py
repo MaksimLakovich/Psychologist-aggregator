@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 from django.utils.timezone import make_aware, now
 
 from calendar_engine.application.use_cases.base import AbsUseCase
-from calendar_engine.constants import DOMAIN_TIME_POLICY
+from calendar_engine.constants import DAYS_AHEAD, DOMAIN_TIME_POLICY
 
 
 class GetDomainSlotsUseCase(AbsUseCase):
@@ -23,8 +23,6 @@ class GetDomainSlotsUseCase(AbsUseCase):
         }
     """
 
-    DAYS_AHEAD = 7
-
     def __init__(self, *, timezone):
         if timezone is None:
             raise ValueError("timezone обязателен для генерации доменных слотов")
@@ -41,7 +39,7 @@ class GetDomainSlotsUseCase(AbsUseCase):
 
         # ШАГ 2: Генерируем доменные слоты для КАЛЕНДАРНОГО ДНЯ клиента.
         # Запускаем цикл по последовательности чисел (DAYS_AHEAD: 7 дней): 0, 1, 2, 3, 4, 5, 6
-        for day_offset in range(self.DAYS_AHEAD):
+        for day_offset in range(DAYS_AHEAD):
             day = today + timedelta(days=day_offset)
 
             day_slots: List[str] = []
