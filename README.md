@@ -377,14 +377,16 @@
 
 
 - Список сущностей (моделей):
-  - `TimeStampedModel`: это абстрактная базовая модель для дальнейшего создания *created_at* и *updated_at* во всех моделях приложения при необходимости.
-  - `CalendarEvent`: событие календаря.
-  - `RecurrenceRule`: правила повторений.
-  - `TimeSlot`: временной слот события.
-  - `EventParticipant`: участник события.
-  - `SlotParticipant`: участник конкретного слота (если отличается от события).
-  - `AvailabilityRule`: правила доступности: рабочее расписание.
-  - `AvailabilityException`: исключения из расписания.
+  - `TimeStampedModel`: это абстрактная базовая модель для дальнейшего создания *created_at* и *updated_at* во всех моделях приложения при необходимости
+  - `CalendarEvent`: событие календаря
+  - `RecurrenceRule`: правила повторений
+  - `TimeSlot`: временной слот события
+  - `EventParticipant`: участник события
+  - `SlotParticipant`: участник конкретного слота (если отличается от события)
+  - `AvailabilityRule`: правила доступности: рабочее расписание
+  - `AvailabilityRuleTimeWindow`: временное окно доступности внутри рабочего дня из AvailabilityRule
+  - `AvailabilityException`: исключения из расписания
+  - `AvailabilityExceptionTimeWindow`: переопределенное временное окно доступности внутри рабочего дня из AvailabilityException
 
 - Структура связей:
     ```python
