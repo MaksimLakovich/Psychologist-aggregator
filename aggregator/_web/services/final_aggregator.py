@@ -2,6 +2,7 @@ from aggregator._web.services.basic_filter_service import match_psychologists
 from aggregator._web.services.scoring import apply_final_ordering
 from calendar_engine.application.factories.generate_and_match_factory import \
     build_generate_and_match_use_case
+from calendar_engine.application.mappers.preferred_slots_mapper import map_preferred_slots_to_domain
 from users.models import PsychologistProfile
 
 
@@ -29,7 +30,10 @@ class PsychologistAggregatorService:
         # Шаг 1: Первичная фильтрация (topics, methods, age, gender и считает коэффициенты topic_score, method_score)
         psychologists_qs = match_psychologists(self.client_profile)
 
-        selected_slots = self.client_profile.preferred_slots  # Получаем выбранные предпочитаемые слоты
+        # Получаем выбранные предпочитаемые слоты
+        # (preferred_slots нужно адаптировать в доменный формат matcher-а чтоб не было ошибки)
+        raw_selected_slots = self.client_profile.preferred_slots
+        selected_slots = map_preferred_slots_to_domain(raw_selected_slots)
 
         # Шаг 2: Если нет предпочтений по времени - просто применяем финальный scoring для итогового ранжирования
         if not self.client_profile.has_time_preferences or not selected_slots:
@@ -45,7 +49,7 @@ class PsychologistAggregatorService:
                 for ps in ordered_by_scoring_qs
             }
         # Шаг 3: Если есть предпочтения по времени - формируем окно генерации (с date_from по date_to)
-        slot_dates = [slot.date() for slot in selected_slots]
+        slot_dates = [day for day, _ in selected_slots]
         date_from = min(slot_dates)
         date_to = max(slot_dates)
 
