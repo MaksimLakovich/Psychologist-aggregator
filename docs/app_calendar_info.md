@@ -204,8 +204,9 @@ calendar_engine/
     │    │    └── filter_and_match_availability.py    # Use-case для генерации и matching доступных слотов специалиста
     │    │
     │    ├── mappers/
-    │    │    ├── rule_mapper.py          # Адаптирует django-объект AvailabilityRule / AvailabilityRuleTimeWindow в доменное правило доступности AbsAvailabilityRule (WeeklyAvailabilityRule) для factories
-    │    │    └── exception_mapper.py     # Адаптирует django-объект AvailabilityException / AvailabilityExceptionTimeWindow в доменное правило доступности AbsAvailabilityException (DateAvailabilityException / DateAvailabilityException) для factories
+    │    │    ├── rule_mapper.py               # Адаптирует django-объект AvailabilityRule / AvailabilityRuleTimeWindow в доменное правило доступности AbsAvailabilityRule (WeeklyAvailabilityRule) для factories
+    │    │    ├── exception_mapper.py          # Адаптирует django-объект AvailabilityException / AvailabilityExceptionTimeWindow в доменное правило доступности AbsAvailabilityException (DateAvailabilityException / DateAvailabilityException) для factories
+    │    │    └── preferred_slots_mapper.py    # Адаптирует preferred_slots из БД в доменный формат matcher-а
     │    │    
     │    └── factories/
     │         └── generate_and_match_factory.py       # 💡 ИТОГОВЫЙ ПОДБОР СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - этот модуль использует use-cases, передает на вход "СПЕЦИАЛИСТА + ВЫБРАННЫЕ КЛИЕНТОМ "СЛОТЫ" и запускает ПОДБОР
@@ -920,8 +921,9 @@ calendar_engine/application/use_cases/
 
 ```bash
 calendar_engine/application/mappers/
-├── rule_mapper.py         # Адаптирует django-объект AvailabilityRule / AvailabilityRuleTimeWindow в доменное правило доступности AbsAvailabilityRule (WeeklyAvailabilityRule) для factories
-└── exception_mapper.py    # Адаптирует django-объект AvailabilityException / AvailabilityExceptionTimeWindow в доменное правило доступности AbsAvailabilityException (DateAvailabilityException / DateAvailabilityException) для factories
+├── rule_mapper.py               # Адаптирует django-объект AvailabilityRule / AvailabilityRuleTimeWindow в доменное правило доступности AbsAvailabilityRule (WeeklyAvailabilityRule) для factories
+├── exception_mapper.py          # Адаптирует django-объект AvailabilityException / AvailabilityExceptionTimeWindow в доменное правило доступности AbsAvailabilityException (DateAvailabilityException / DateAvailabilityException) для factories
+└── preferred_slots_mapper.py    # Адаптирует preferred_slots из БД в доменный формат matcher-а
 ```
 
 ---
@@ -966,13 +968,37 @@ calendar_engine/application/mappers/
 
 ---
 
+### `preferred_slots_mapper.py`
+
+| Класс                             | Описание                                                      |
+|-----------------------------------|---------------------------------------------------------------|
+| `map_preferred_slots_to_domain()` | Адаптирует preferred_slots из БД в доменный формат matcher-а. |
+
+---
+
 ## 3️⃣ application/factories/
 
 ### 🎯 Цель слоя:
 
-- Берет специалиста (**psychologist**)
-- Берет слоты, которые выбрал клиент (**selected_slots**)
-- Запускает GenerateAndMatchAvailabilityUseCase и возвращает результат **MatchResultDTO** + флаг **has_match** (true/false)
+[//]: # (- Берет специалиста &#40;**psychologist**&#41;)
+
+[//]: # (- Берет слоты, которые выбрал клиент &#40;**selected_slots**&#41;)
+
+[//]: # (- Запускает GenerateAndMatchAvailabilityUseCase и возвращает результат **MatchResultDTO** + флаг **has_match** &#40;true/false&#41;)
+
+
+1. Фабрика НЕ содержит бизнес-логики и НЕ делает вычислений.
+2. Ее ответственность - склеить зависимости:
+   - ✅ Она должна:
+     - Получить django-модели (AvailabilityRule, AvailabilityException); 
+     - Адаптировать их в доменные объекты через mapper-ы; 
+     - Собрать корректный matcher; 
+     - Вернуть полностью готовый use-case. 
+   - ❌ Фабрика не должна:
+     - генерировать слоты;
+     - фильтровать слоты;
+     - проверять пересечения;
+     - знать про slot_duration / break и т.п.
 
 ```bash
 calendar_engine/application/factories/
