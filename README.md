@@ -406,11 +406,15 @@
             # критично для курсов, переносов, аналитики
   
     AppUser 1───* AvailabilityRule
+    AvailabilityRule 1───* AvailabilityRuleTimeWindow
     AvailabilityRule 1───* AvailabilityException
+    AvailabilityException 1───* AvailabilityExceptionTimeWindow
     AppUser 1───* AvailabilityException
         # Пояснение:
-            # AvailabilityRule: базовое рабочее расписание
+            # AvailabilityRule: базовое рабочее расписание 
+            # AvailabilityRuleTimeWindow: доступные рабочие окна внутри AvailabilityRule (например, с 07 до 11 и потом с 16 до 22)
             # AvailabilityException: привязано к рабочему расписанию; может быть глобальным (отпуск, больничный)
+            # AvailabilityExceptionTimeWindow: переопределенные рабочие окна внутри AvailabilityException
             # availability никогда не равно бронированию
     ```
 
