@@ -2,7 +2,8 @@ from aggregator._web.services.basic_filter_service import match_psychologists
 from aggregator._web.services.scoring import apply_final_ordering
 from calendar_engine.application.factories.generate_and_match_factory import \
     build_generate_and_match_use_case
-from calendar_engine.application.mappers.preferred_slots_mapper import map_preferred_slots_to_domain
+from calendar_engine.application.mappers.preferred_slots_mapper import \
+    map_preferred_slots_to_domain
 from users.models import PsychologistProfile
 
 
