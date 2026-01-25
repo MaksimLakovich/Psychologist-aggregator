@@ -28,7 +28,7 @@ def map_exceptions_to_domain(exceptions: Iterable[AvailabilityException]) -> Lis
         - диапазоны из БД разворачиваются в набор исключений по дням;
         - никакой бизнес-логики здесь нет - только адаптация."""
 
-    domain_exceptions = []
+    domain_exceptions: list = []
 
     for exception in exceptions:
         for day in _iter_days(exception.exception_start, exception.exception_end):
