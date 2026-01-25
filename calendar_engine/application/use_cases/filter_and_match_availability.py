@@ -1,7 +1,9 @@
 from typing import Iterable
+
 from calendar_engine.application.use_cases.base import AbsUseCase
-from calendar_engine.domain.availability.get_user_slots import AvailabilitySlotFilter
 from calendar_engine.domain.availability.dto import SlotDTO
+from calendar_engine.domain.availability.get_user_slots import \
+    AvailabilitySlotFilter
 from calendar_engine.domain.matching.base import AbsSlotMatcher
 from calendar_engine.domain.matching.dto import MatchResultDTO
 

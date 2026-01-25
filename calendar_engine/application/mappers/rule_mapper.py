@@ -1,9 +1,9 @@
-from typing import List, Tuple
 from datetime import time
+from typing import List, Tuple
 
-from calendar_engine.domain.availability.user_rules import WeeklyAvailabilityRule
+from calendar_engine.domain.availability.user_rules import \
+    WeeklyAvailabilityRule
 from calendar_engine.models import AvailabilityRule
-
 
 TimeWindow = Tuple[time, time]
 

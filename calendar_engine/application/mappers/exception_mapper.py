@@ -1,10 +1,9 @@
-from datetime import timedelta
+from datetime import date, time, timedelta
 from typing import Iterable, List, Tuple
-from datetime import date, time
 
-from calendar_engine.domain.availability.user_exceptions import DateAvailabilityException, TimeAvailabilityException
+from calendar_engine.domain.availability.user_exceptions import (
+    DateAvailabilityException, TimeAvailabilityException)
 from calendar_engine.models import AvailabilityException
-
 
 TimeWindow = Tuple[time, time]
 
