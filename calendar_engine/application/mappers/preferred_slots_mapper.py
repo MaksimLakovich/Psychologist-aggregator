@@ -1,4 +1,4 @@
-from datetime import datetime, date, time
+from datetime import date, datetime, time
 from typing import Iterable, List, Tuple
 
 SelectedSlotKey = Tuple[date, time]
