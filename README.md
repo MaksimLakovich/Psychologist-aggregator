@@ -377,14 +377,16 @@
 
 
 - Список сущностей (моделей):
-  - `TimeStampedModel`: это абстрактная базовая модель для дальнейшего создания *created_at* и *updated_at* во всех моделях приложения при необходимости.
-  - `CalendarEvent`: событие календаря.
-  - `RecurrenceRule`: правила повторений.
-  - `TimeSlot`: временной слот события.
-  - `EventParticipant`: участник события.
-  - `SlotParticipant`: участник конкретного слота (если отличается от события).
-  - `AvailabilityRule`: правила доступности: рабочее расписание.
-  - `AvailabilityException`: исключения из расписания.
+  - `TimeStampedModel`: это абстрактная базовая модель для дальнейшего создания *created_at* и *updated_at* во всех моделях приложения при необходимости
+  - `CalendarEvent`: событие календаря
+  - `RecurrenceRule`: правила повторений
+  - `TimeSlot`: временной слот события
+  - `EventParticipant`: участник события
+  - `SlotParticipant`: участник конкретного слота (если отличается от события)
+  - `AvailabilityRule`: правила доступности: рабочее расписание
+  - `AvailabilityRuleTimeWindow`: временное окно доступности внутри рабочего дня из AvailabilityRule
+  - `AvailabilityException`: исключения из расписания
+  - `AvailabilityExceptionTimeWindow`: переопределенное временное окно доступности внутри рабочего дня из AvailabilityException
 
 - Структура связей:
     ```python
@@ -404,11 +406,15 @@
             # критично для курсов, переносов, аналитики
   
     AppUser 1───* AvailabilityRule
+    AvailabilityRule 1───* AvailabilityRuleTimeWindow
     AvailabilityRule 1───* AvailabilityException
+    AvailabilityException 1───* AvailabilityExceptionTimeWindow
     AppUser 1───* AvailabilityException
         # Пояснение:
-            # AvailabilityRule: базовое рабочее расписание
+            # AvailabilityRule: базовое рабочее расписание 
+            # AvailabilityRuleTimeWindow: доступные рабочие окна внутри AvailabilityRule (например, с 07 до 11 и потом с 16 до 22)
             # AvailabilityException: привязано к рабочему расписанию; может быть глобальным (отпуск, больничный)
+            # AvailabilityExceptionTimeWindow: переопределенные рабочие окна внутри AvailabilityException
             # availability никогда не равно бронированию
     ```
 
