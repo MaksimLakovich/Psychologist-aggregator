@@ -650,6 +650,20 @@ class AvailabilityException(TimeStampedModel):
         verbose_name="Тип исключения",
         help_text="Укажите тип исключения (полностью недоступен или изменение текущего рабочего правила",
     )
+    override_slot_duration = models.PositiveSmallIntegerField(
+        default=60,
+        null=True,
+        blank=True,
+        verbose_name="Продолжительность 1 сессии согласно исключения (минуты)",
+        help_text="Укажите продолжительность 1 сессии согласно исключения (минуты)",
+    )
+    override_break_between_sessions = models.PositiveSmallIntegerField(
+        default=0,
+        null=True,
+        blank=True,
+        verbose_name="Перерыв между сессиями согласно исключения (минуты)",
+        help_text="Укажите перерыв между сессиями согласно исключения (минуты)",
+    )
     is_active = models.BooleanField(
         default=True,
         null=False,
@@ -693,20 +707,6 @@ class AvailabilityExceptionTimeWindow(TimeStampedModel):
         blank=True,
         verbose_name="Новое окончание временного окна согласно исключения",
         help_text="Укажите новое окончание временного окна согласно исключения",
-    )
-    override_slot_duration = models.PositiveSmallIntegerField(
-        default=60,
-        null=True,
-        blank=True,
-        verbose_name="Продолжительность 1 сессии согласно исключения (минуты)",
-        help_text="Укажите продолжительность 1 сессии согласно исключения (минуты)",
-    )
-    override_break_between_sessions = models.PositiveSmallIntegerField(
-        default=0,
-        null=True,
-        blank=True,
-        verbose_name="Перерыв между сессиями согласно исключения (минуты)",
-        help_text="Укажите перерыв между сессиями согласно исключения (минуты)",
     )
 
     def clean(self):
