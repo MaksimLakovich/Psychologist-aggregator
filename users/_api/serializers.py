@@ -1,5 +1,3 @@
-from itertools import count
-
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.db import transaction
@@ -12,8 +10,10 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from timezone_field.rest_framework import TimeZoneSerializerField
 
-from calendar_engine.models import AvailabilityException, AvailabilityRule, AvailabilityRuleTimeWindow, \
-    AvailabilityExceptionTimeWindow
+from calendar_engine.models import (AvailabilityException,
+                                    AvailabilityExceptionTimeWindow,
+                                    AvailabilityRule,
+                                    AvailabilityRuleTimeWindow)
 from users.constants import GENDER_CHOICES
 from users.mixins.creator_mixin import CreatorMixin
 from users.models import (AppUser, ClientProfile, Education, Method,
