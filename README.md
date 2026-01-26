@@ -405,7 +405,7 @@
             # позволяет разный состав участников по слотам
             # критично для курсов, переносов, аналитики
   
-    AppUser 1───* AvailabilityRule
+    AppUser 1───1 AvailabilityRule
     AvailabilityRule 1───* AvailabilityRuleTimeWindow
     AvailabilityRule 1───* AvailabilityException
     AvailabilityException 1───* AvailabilityExceptionTimeWindow

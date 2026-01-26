@@ -8,13 +8,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4,5,6],
+      "slot_duration": 50,
+      "break_between_sessions": 10,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 1,
+    "fields": {
+      "rule": 1,
       "start_time": "00:00:00",
       "end_time": "23:59:00",
-      "slot_duration_minutes": 50,
-      "break_minutes": 10,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -26,13 +35,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4,5,6],
+      "slot_duration": 50,
+      "break_between_sessions": 10,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 2,
+    "fields": {
+      "rule": 2,
       "start_time": "00:00:00",
       "end_time": "23:59:00",
-      "slot_duration_minutes": 50,
-      "break_minutes": 10,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -44,13 +62,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4,5,6],
+      "slot_duration": 50,
+      "break_between_sessions": 10,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 3,
+    "fields": {
+      "rule": 3,
       "start_time": "00:00:00",
       "end_time": "23:59:00",
-      "slot_duration_minutes": 50,
-      "break_minutes": 10,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -62,13 +89,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4,5,6],
+      "slot_duration": 50,
+      "break_between_sessions": 10,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 4,
+    "fields": {
+      "rule": 4,
       "start_time": "00:00:00",
       "end_time": "23:59:00",
-      "slot_duration_minutes": 50,
-      "break_minutes": 10,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -80,13 +116,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4,5,6],
+      "slot_duration": 50,
+      "break_between_sessions": 10,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 5,
+    "fields": {
+      "rule": 5,
       "start_time": "00:00:00",
       "end_time": "23:59:00",
-      "slot_duration_minutes": 50,
-      "break_minutes": 10,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -98,13 +143,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4],
+      "slot_duration": 50,
+      "break_between_sessions": 10,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 6,
+    "fields": {
+      "rule": 6,
       "start_time": "09:00:00",
       "end_time": "18:00:00",
-      "slot_duration_minutes": 50,
-      "break_minutes": 10,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -116,13 +170,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4],
+      "slot_duration": 50,
+      "break_between_sessions": 10,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 7,
+    "fields": {
+      "rule": 7,
       "start_time": "09:00:00",
       "end_time": "18:00:00",
-      "slot_duration_minutes": 50,
-      "break_minutes": 10,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -134,13 +197,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4],
+      "slot_duration": 50,
+      "break_between_sessions": 10,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 8,
+    "fields": {
+      "rule": 8,
       "start_time": "09:00:00",
       "end_time": "18:00:00",
-      "slot_duration_minutes": 50,
-      "break_minutes": 10,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -152,13 +224,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4],
+      "slot_duration": 50,
+      "break_between_sessions": 10,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 9,
+    "fields": {
+      "rule": 9,
       "start_time": "09:00:00",
       "end_time": "18:00:00",
-      "slot_duration_minutes": 50,
-      "break_minutes": 10,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -170,13 +251,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4],
+      "slot_duration": 50,
+      "break_between_sessions": 10,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 10,
+    "fields": {
+      "rule": 10,
       "start_time": "09:00:00",
       "end_time": "18:00:00",
-      "slot_duration_minutes": 50,
-      "break_minutes": 10,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -188,13 +278,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [5,6],
+      "slot_duration": 60,
+      "break_between_sessions": 0,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 11,
+    "fields": {
+      "rule": 11,
       "start_time": "09:00:00",
       "end_time": "21:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -206,13 +305,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [5,6],
+      "slot_duration": 60,
+      "break_between_sessions": 0,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 12,
+    "fields": {
+      "rule": 12,
       "start_time": "09:00:00",
       "end_time": "21:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -224,13 +332,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [5,6],
+      "slot_duration": 60,
+      "break_between_sessions": 0,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 13,
+    "fields": {
+      "rule": 13,
       "start_time": "09:00:00",
       "end_time": "21:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -242,13 +359,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [5,6],
+      "slot_duration": 60,
+      "break_between_sessions": 0,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 14,
+    "fields": {
+      "rule": 14,
       "start_time": "09:00:00",
       "end_time": "21:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -260,13 +386,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [5,6],
+      "slot_duration": 60,
+      "break_between_sessions": 0,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 15,
+    "fields": {
+      "rule": 15,
       "start_time": "09:00:00",
       "end_time": "21:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -278,13 +413,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4],
+      "slot_duration": 60,
+      "break_between_sessions": 0,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 16,
+    "fields": {
+      "rule": 16,
       "start_time": "16:00:00",
       "end_time": "23:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -296,13 +440,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4],
+      "slot_duration": 60,
+      "break_between_sessions": 0,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 17,
+    "fields": {
+      "rule": 17,
       "start_time": "16:00:00",
       "end_time": "23:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -314,13 +467,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,2,4,6],
+      "slot_duration": 120,
+      "break_between_sessions": 20,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 18,
+    "fields": {
+      "rule": 18,
       "start_time": "09:00:00",
       "end_time": "16:00:00",
-      "slot_duration_minutes": 120,
-      "break_minutes": 20,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -332,13 +494,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,2,4,6],
+      "slot_duration": 120,
+      "break_between_sessions": 20,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 19,
+    "fields": {
+      "rule": 19,
       "start_time": "09:00:00",
       "end_time": "16:00:00",
-      "slot_duration_minutes": 120,
-      "break_minutes": 20,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -350,13 +521,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [1,3,5,6],
+      "slot_duration": 120,
+      "break_between_sessions": 20,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 20,
+    "fields": {
+      "rule": 20,
       "start_time": "12:00:00",
       "end_time": "23:00:00",
-      "slot_duration_minutes": 120,
-      "break_minutes": 20,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -368,13 +548,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [5,6],
+      "slot_duration": 60,
+      "break_between_sessions": 0,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 21,
+    "fields": {
+      "rule": 21,
       "start_time": "09:00:00",
       "end_time": "21:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -386,13 +575,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [5,6],
+      "slot_duration": 60,
+      "break_between_sessions": 0,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 22,
+    "fields": {
+      "rule": 22,
       "start_time": "09:00:00",
       "end_time": "21:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -404,13 +602,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [5,6],
+      "slot_duration": 60,
+      "break_between_sessions": 0,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 23,
+    "fields": {
+      "rule": 23,
       "start_time": "09:00:00",
       "end_time": "21:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -422,13 +629,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [5,6],
+      "slot_duration": 60,
+      "break_between_sessions": 0,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 24,
+    "fields": {
+      "rule": 24,
       "start_time": "09:00:00",
       "end_time": "21:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -440,16 +656,24 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [5,6],
-      "start_time": "09:00:00",
-      "end_time": "21:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
+      "slot_duration": 60,
+      "break_between_sessions": 0,
       "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
-
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 25,
+    "fields": {
+      "rule": 25,
+      "start_time": "09:00:00",
+      "end_time": "21:00:00",
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
   {
     "model": "calendar_engine.availabilityrule",
     "pk": 26,
@@ -459,13 +683,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4],
+      "slot_duration": 60,
+      "break_between_sessions": 0,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 26,
+    "fields": {
+      "rule": 26,
       "start_time": "16:00:00",
       "end_time": "23:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -477,13 +710,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4],
+      "slot_duration": 60,
+      "break_between_sessions": 0,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 27,
+    "fields": {
+      "rule": 27,
       "start_time": "16:00:00",
       "end_time": "23:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -495,13 +737,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4],
+      "slot_duration": 60,
+      "break_between_sessions": 0,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 28,
+    "fields": {
+      "rule": 28,
       "start_time": "16:00:00",
       "end_time": "23:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -513,13 +764,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4],
+      "slot_duration": 60,
+      "break_between_sessions": 0,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 29,
+    "fields": {
+      "rule": 29,
       "start_time": "16:00:00",
       "end_time": "23:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -531,16 +791,24 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4],
-      "start_time": "16:00:00",
-      "end_time": "23:00:00",
-      "slot_duration_minutes": 60,
-      "break_minutes": 0,
+      "slot_duration": 60,
+      "break_between_sessions": 0,
       "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
-
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 30,
+    "fields": {
+      "rule": 30,
+      "start_time": "16:00:00",
+      "end_time": "23:00:00",
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
   {
     "model": "calendar_engine.availabilityrule",
     "pk": 31,
@@ -550,13 +818,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,2,4,6],
+      "slot_duration": 120,
+      "break_between_sessions": 20,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 31,
+    "fields": {
+      "rule": 31,
       "start_time": "09:00:00",
       "end_time": "16:00:00",
-      "slot_duration_minutes": 120,
-      "break_minutes": 20,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -568,13 +845,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,2,4,6],
+      "slot_duration": 120,
+      "break_between_sessions": 20,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 32,
+    "fields": {
+      "rule": 32,
       "start_time": "09:00:00",
       "end_time": "16:00:00",
-      "slot_duration_minutes": 120,
-      "break_minutes": 20,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -586,13 +872,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,2,4,6],
+      "slot_duration": 120,
+      "break_between_sessions": 20,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 33,
+    "fields": {
+      "rule": 33,
       "start_time": "09:00:00",
       "end_time": "16:00:00",
-      "slot_duration_minutes": 120,
-      "break_minutes": 20,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -604,13 +899,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,2,4,6],
+      "slot_duration": 120,
+      "break_between_sessions": 20,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 34,
+    "fields": {
+      "rule": 34,
       "start_time": "09:00:00",
       "end_time": "16:00:00",
-      "slot_duration_minutes": 120,
-      "break_minutes": 20,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -622,16 +926,24 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,2,4,6],
-      "start_time": "09:00:00",
-      "end_time": "16:00:00",
-      "slot_duration_minutes": 120,
-      "break_minutes": 20,
+      "slot_duration": 120,
+      "break_between_sessions": 20,
       "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
-
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 35,
+    "fields": {
+      "rule": 35,
+      "start_time": "09:00:00",
+      "end_time": "16:00:00",
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
   {
     "model": "calendar_engine.availabilityrule",
     "pk": 36,
@@ -641,13 +953,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [1,3,5,6],
+      "slot_duration": 120,
+      "break_between_sessions": 20,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 36,
+    "fields": {
+      "rule": 36,
       "start_time": "12:00:00",
       "end_time": "23:00:00",
-      "slot_duration_minutes": 120,
-      "break_minutes": 20,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -659,13 +980,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [1,3,5,6],
+      "slot_duration": 120,
+      "break_between_sessions": 20,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 37,
+    "fields": {
+      "rule": 37,
       "start_time": "12:00:00",
       "end_time": "23:00:00",
-      "slot_duration_minutes": 120,
-      "break_minutes": 20,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -677,13 +1007,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [1,3,5,6],
+      "slot_duration": 120,
+      "break_between_sessions": 20,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 38,
+    "fields": {
+      "rule": 38,
       "start_time": "12:00:00",
       "end_time": "23:00:00",
-      "slot_duration_minutes": 120,
-      "break_minutes": 20,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -695,13 +1034,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [1,3,5,6],
+      "slot_duration": 120,
+      "break_between_sessions": 20,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 39,
+    "fields": {
+      "rule": 39,
       "start_time": "12:00:00",
       "end_time": "23:00:00",
-      "slot_duration_minutes": 120,
-      "break_minutes": 20,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   },
   {
@@ -713,13 +1061,22 @@
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [1,3,5,6],
+      "slot_duration": 120,
+      "break_between_sessions": 20,
+      "is_active": true,
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 40,
+    "fields": {
+      "rule": 40,
       "start_time": "12:00:00",
       "end_time": "23:00:00",
-      "slot_duration_minutes": 120,
-      "break_minutes": 20,
-      "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   }
 ]

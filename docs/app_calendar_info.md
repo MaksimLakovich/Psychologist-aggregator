@@ -468,15 +468,17 @@ calendar_engine/
 9. Модель `AvailabilityException`:  
    Исключения из правил доступности специалиста (отпуск, болезнь, выходной)
 
-| Поле                  | Тип                 | Описание                                        |
-|-----------------------|---------------------|-------------------------------------------------|
-| `creator`             | FK(AppUser)         | Пользователь                                    |
-| `rule`                | FK(AvailabilityRule) | Правило для которого устанавливается исключение |
-| `exception_start`     | Date                | Дата старта действия исключения                 |
-| `exception_end`       | Date                | Дата окончания действия исключения              |
-| `reason`              | CharField(choices)  | Выбор причины                                   |
-| `exception_type`      | CharField(choices)  | Тип исключения: unavailable / override          |
-| `is_active`           | Boolean             | Признак действия исключения                     |
+| Поле                              | Тип                 | Описание                                                |
+|-----------------------------------|---------------------|---------------------------------------------------------|
+| `creator`                         | FK(AppUser)         | Пользователь                                            |
+| `rule`                            | FK(AvailabilityRule) | Правило для которого устанавливается исключение         |
+| `exception_start`                 | Date                | Дата старта действия исключения                         |
+| `exception_end`                   | Date                | Дата окончания действия исключения                      |
+| `reason`                          | CharField(choices)  | Выбор причины                                           |
+| `exception_type`                  | CharField(choices)  | Тип исключения: unavailable / override                  |
+| `override_slot_duration`          | Time                | Продолжительность 1 сессии согласно исключения (минуты) |
+| `override_break_between_sessions` | Time                | Перерыв между сессиями согласно исключения (минуты)     |
+| `is_active`                       | Boolean             | Признак действия исключения                             |
 
 10. Модель `AvailabilityExceptionTimeWindow`:  
    Переопределенное временное окно доступности внутри рабочего дня из AvailabilityException (например, "с 09:00 до 18:00").
@@ -486,8 +488,6 @@ calendar_engine/
 | `exception`                       | FK(AvailabilityException) | Исключение для которого устанавливается временное окно доступности |
 | `override_start_time`             | Date                      | Новое начало временного окна согласно исключения                  |
 | `override_end_time`               | Date                      | Новое окончание временного окна согласно исключения               |
-| `override_slot_duration`          | Time                      | Продолжительность 1 сессии согласно исключения (минуты)           |
-| `override_break_between_sessions` | Time                      | Перерыв между сессиями согласно исключения (минуты)               |
 
 ---
 
