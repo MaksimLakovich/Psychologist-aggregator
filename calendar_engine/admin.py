@@ -76,18 +76,6 @@ class SlotParticipantAdmin(admin.ModelAdmin):
     raw_id_fields = ("slot", "user",)
 
 
-@admin.register(AvailabilityRule)
-class AvailabilityRuleAdmin(CreatorAndReadonlyFields):
-    """Настройка отображения модели AvailabilityRule в админке."""
-
-    list_display = (
-        "id", "creator", "rule_start", "rule_end", "weekdays", "slot_duration", "break_between_sessions", "is_active"
-    )
-    list_filter = ("is_active",)
-    search_fields = ("creator__email", "creator__last_name")
-    ordering = ("creator__email", "-created_at")
-
-
 @admin.register(AvailabilityRuleTimeWindow)
 class AvailabilityRuleTimeWindowAdmin(admin.ModelAdmin):
     """Настройка отображения модели AvailabilityRuleTimeWindow в админке."""
@@ -98,16 +86,28 @@ class AvailabilityRuleTimeWindowAdmin(admin.ModelAdmin):
     ordering = ("rule", "start_time", "-created_at")
 
 
-@admin.register(AvailabilityException)
-class AvailabilityExceptionAdmin(CreatorAndReadonlyFields):
-    """Настройка отображения модели AvailabilityException в админке."""
+class RuleTimeWindowInline(admin.TabularInline):
+    """Канонический способ для того чтоб потом в админке AvailabilityRuleAdmin вывести данные из связанной модели
+    о временных окнах данного правила:
+     - просмотр временных окон;
+     - редактирование/создание новых временных окон в правиле."""
+    model = AvailabilityRuleTimeWindow
+    extra = 0
+    min_num = 1
+    fields = ("start_time", "end_time")
+
+
+@admin.register(AvailabilityRule)
+class AvailabilityRuleAdmin(CreatorAndReadonlyFields):
+    """Настройка отображения модели AvailabilityRule в админке."""
 
     list_display = (
-        "id", "creator", "rule", "exception_start", "exception_end", "reason", "exception_type", "is_active"
+        "id", "creator", "rule_start", "rule_end", "weekdays", "slot_duration", "break_between_sessions", "is_active"
     )
-    list_filter = ("is_active", "reason", "exception_type")
-    search_fields = ("rule__creator__email", "creator__email", "creator__last_name")
+    list_filter = ("is_active",)
+    search_fields = ("creator__email", "creator__last_name")
     ordering = ("creator__email", "-created_at")
+    inlines = (RuleTimeWindowInline,)
 
 
 @admin.register(AvailabilityExceptionTimeWindow)
@@ -118,3 +118,36 @@ class AvailabilityExceptionTimeWindowAdmin(admin.ModelAdmin):
     list_filter = ("exception__is_active",)
     search_fields = ("exception__creator__email", "exception__creator__last_name")
     ordering = ("exception", "override_start_time", "-created_at")
+
+
+class ExceptionTimeWindowInline(admin.TabularInline):
+    """Канонический способ для того чтоб потом в админке AvailabilityExceptionAdmin вывести данные из связанной модели
+    о временных окнах данного исключения:
+     - просмотр временных окон;
+     - редактирование/создание новых временных окон в исключении."""
+    model = AvailabilityExceptionTimeWindow
+    extra = 0
+    min_num = 1
+    fields = ("override_start_time", "override_end_time")
+
+
+@admin.register(AvailabilityException)
+class AvailabilityExceptionAdmin(CreatorAndReadonlyFields):
+    """Настройка отображения модели AvailabilityException в админке."""
+
+    list_display = (
+        "id",
+        "creator",
+        "rule",
+        "exception_start",
+        "exception_end",
+        "reason",
+        "exception_type",
+        "override_slot_duration",
+        "override_break_between_sessions",
+        "is_active",
+    )
+    list_filter = ("is_active", "reason", "exception_type")
+    search_fields = ("rule__creator__email", "creator__email", "creator__last_name")
+    ordering = ("creator__email", "-created_at")
+    inlines = (ExceptionTimeWindowInline,)

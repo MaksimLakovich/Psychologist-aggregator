@@ -427,6 +427,22 @@ class AvailabilityRuleListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsPsychologistOrAdmin]
     serializer_class = AvailabilityRuleSerializer
 
+    def get_queryset(self):
+        """Возвращает правила доступности текущего пользователя. По умолчанию - только активное правило."""
+        user = self.request.user
+        include_archived = self.request.query_params.get("include_archived")
+
+        queryset = (
+            AvailabilityRule.objects
+            .filter(creator=user)
+            .prefetch_related("time_windows")
+        )
+
+        if include_archived not in ("true", "1", "yes"):
+            queryset = queryset.filter(is_active=True)
+
+        return queryset.order_by("-created_at")
+
     @transaction.atomic  # Отвечает за то, чтоб итоговое сохранение произошло только при успешном завершении всех шагов
     def perform_create(self, serializer):
         """Метод для создания нового рабочего расписания.
@@ -448,18 +464,6 @@ class AvailabilityRuleListCreateView(generics.ListCreateAPIView):
             is_active=True,
         )
 
-    def get_queryset(self):
-        """Возвращает правила доступности текущего пользователя. По умолчанию - только активное правило."""
-        user = self.request.user
-        include_archived = self.request.query_params.get("include_archived")
-
-        queryset = AvailabilityRule.objects.filter(creator=user)
-
-        if include_archived not in ("true", "1", "yes"):
-            queryset = queryset.filter(is_active=True)
-
-        return queryset.order_by("-created_at")
-
 
 class AvailabilityRuleDeactivateView(APIView):
     """Класс-контроллер на основе APIView для явного "закрытия" рабочего расписания специалиста.
@@ -468,7 +472,7 @@ class AvailabilityRuleDeactivateView(APIView):
         - по умолчанию возвращает только активное правило (is_active=True)
         - soft-delete: вместо DESTROY-запроса (устанавливаем is_active=False)."""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsPsychologistOrAdmin]
 
     def patch(self, request, *args, **kwargs):
         """Soft-delete для явного "закрытия" рабочего расписания специалиста: помечаем is_active=False."""
@@ -505,6 +509,23 @@ class AvailabilityExceptionListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsPsychologistOrAdmin]
     serializer_class = AvailabilityExceptionSerializer
 
+    def get_queryset(self):
+        """Возвращает исключения из рабочего расписания. По умолчанию - только активные исключения."""
+        user = self.request.user
+        include_archived = self.request.query_params.get("include_archived")
+
+        queryset = (
+            AvailabilityException.objects
+            .filter(creator=user)
+            .select_related("rule")
+            .prefetch_related("time_windows")
+        )
+
+        if include_archived not in ("true", "1", "yes"):
+            queryset = queryset.filter(is_active=True)
+
+        return queryset.order_by("-created_at")
+
     @transaction.atomic
     def perform_create(self, serializer):
         """Метод для создания нового исключения в рабочем расписании.
@@ -529,18 +550,6 @@ class AvailabilityExceptionListCreateView(generics.ListCreateAPIView):
             rule=rule,
             is_active=True,
         )
-
-    def get_queryset(self):
-        """Возвращает исключения из рабочего расписания. По умолчанию - только активные исключения."""
-        user = self.request.user
-        include_archived = self.request.query_params.get("include_archived")
-
-        queryset = AvailabilityException.objects.filter(creator=user)
-
-        if include_archived not in ["true", "1", "yes"]:
-            queryset = queryset.filter(is_active=True)
-
-        return queryset.order_by("-created_at")
 
 
 class AvailabilityExceptionDeactivateView(APIView):

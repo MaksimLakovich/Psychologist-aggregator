@@ -285,7 +285,9 @@
 
 
 - Рабочее расписание специалиста (правило рабочего времени / исключения):
-  - `AvailabilityRuleSerializer` - создание рабочего расписания психолога
+  - `AvailabilityRuleTimeWindowSerializer` - временное окно доступности специалиста внутри рабочего дня в AvailabilityRule (например, "с 09:00 до 18:00")
+  - `AvailabilityRuleSerializer` - рабочее расписание специалиста (правило доступности, например: Пн-Пт, с набором рабочих окон внутри дня)
+  - `AvailabilityExceptionTimeWindowSerializer` - переопределенное временное окно доступности внутри рабочего дня из AvailabilityException
   - `AvailabilityExceptionSerializer` - исключение из рабочего расписания психолога
 
 

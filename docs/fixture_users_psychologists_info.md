@@ -121,7 +121,7 @@ python manage.py loaddata fixtures/users_ps_education.json
 python manage.py loaddata fixtures/users_ps_availability_rule.json
 ```
 
-### Пример записи `AvailabilityRule`
+### Пример записи `AvailabilityRule + AvailabilityRuleTimeWindow`
 ```json
 [
   {
@@ -133,13 +133,22 @@ python manage.py loaddata fixtures/users_ps_availability_rule.json
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4,5,6],
-      "start_time": "00:00:00",
-      "end_time": "00:00:00",
-      "slot_duration_minutes": 50,
-      "break_minutes": 10,
+      "slot_duration": 50,
+      "break_between_sessions": 10,
       "is_active": true,
-      "created_at": "2026-01-20T12:00:00.000000+03:00",
-      "updated_at": "2026-01-20T12:00:00.000000+03:00"
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "calendar_engine.availabilityruletimewindow",
+    "pk": 1,
+    "fields": {
+      "rule": 1,
+      "start_time": "00:00:00",
+      "end_time": "23:59:00",
+      "created_at": "2026-01-20T12:00:00.000Z",
+      "updated_at": "2026-01-20T12:00:00.000Z"
     }
   }
 ]

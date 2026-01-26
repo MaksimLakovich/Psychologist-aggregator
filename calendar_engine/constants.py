@@ -87,11 +87,13 @@ AVAILABILITY_EXCEPTION_CHOICES = [
     ("day_off", "Выходной"),
     ("vacation", "Отпуск"),
     ("sick_leave", "Больничный"),
+    ("short_day", "Сокращенный день"),
+    ("other", "Другое"),
 ]
 
 EXCEPTION_TYPE_CHOICES = [
     ("unavailable", "Полностью недоступен"),
-    ("override", "Частичное переопределение")
+    ("override", "Частичное переопределение"),
 ]
 
 # ====== ДЛЯ ДОМЕННОЙ ПОЛИТИКИ ======
