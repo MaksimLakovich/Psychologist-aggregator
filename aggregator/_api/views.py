@@ -13,6 +13,8 @@ from aggregator._web.services.final_aggregator import \
 from aggregator._web.services.topic_type_mapping import \
     CLIENT_TO_TOPIC_TYPE_MAP
 from aggregator.paginators import PsychologistCatalogPagination
+from calendar_engine.application.mappers.match_result_mapper import \
+    map_match_result_to_dict
 from users.models import Education, PsychologistProfile
 from users.permissions import IsProfileOwnerOrAdminMixin
 
@@ -167,7 +169,7 @@ class MatchPsychologistsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
                 "matched_topics": matched_topics_data,
                 "timezone": str(ps.user.timezone) if ps.user.timezone else None,
                 "schedule": (
-                    availability.to_dict()
+                    map_match_result_to_dict(availability)
                     if availability
                     else {"status": "no_match"}
                 ),
