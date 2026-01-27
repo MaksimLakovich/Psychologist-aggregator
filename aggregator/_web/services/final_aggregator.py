@@ -1,10 +1,14 @@
+from django.utils.timezone import now
+
 from aggregator._web.services.basic_filter_service import match_psychologists
 from aggregator._web.services.scoring import apply_final_ordering
 from calendar_engine.application.factories.generate_and_match_factory import \
     build_generate_and_match_use_case
 from calendar_engine.application.mappers.preferred_slots_mapper import \
     map_preferred_slots_to_domain
-from users.models import PsychologistProfile
+from calendar_engine.constants import DAYS_AHEAD
+from calendar_engine.domain.availability.domain_slot_generator import \
+    DomainSlotGenerator
 
 
 class PsychologistAggregatorService:
@@ -49,10 +53,19 @@ class PsychologistAggregatorService:
                 }
                 for ps in ordered_by_scoring_qs
             }
-        # Шаг 3: Если есть предпочтения по времени - формируем окно генерации (с date_from по date_to)
-        slot_dates = [day for day, _ in selected_slots]
-        date_from = min(slot_dates)
-        date_to = max(slot_dates)
+        # Шаг 3: Генерируем все возможные доменные временные слоты по правилам домена
+        # Получаем текущее время в timezone КЛИЕНТА, где astimezone(self.timezone) - это метод, который
+        # говорит: "И пересчитай это время для моего часового пояса".
+        tz = getattr(self.client_profile.user, "timezone", None)
+        current_time = now().astimezone(tz) if tz else now()
+        today = current_time.date()
+
+        # Генерируем доменные временные слоты
+        generator = DomainSlotGenerator()
+        domain_slots = generator.generate_domain_slots(
+            date_from=today,
+            days_ahead=DAYS_AHEAD,
+        )
 
         # Шаг 4: Финальный агрегированный результат с учетом временными слотами
         aggregated = {}  # Хранит итоговые данные (ТОЛЬКО психологи, которые: прошли проф фильтрацию + проверку слотов
@@ -72,8 +85,7 @@ class PsychologistAggregatorService:
 
             # Выполняем расчет слотов: смотрим расписание, применяем исключения, сравниваем с selected_slots
             match_result = use_case.execute(
-                date_from=date_from,
-                date_to=date_to,
+                domain_slots=domain_slots,
             )
 
             if not match_result.has_match:
@@ -104,7 +116,7 @@ class PsychologistAggregatorService:
         # Django не теряет аннотации topic_score, method_score потому что они уже ранее вычислены в match_psychologists
 
         ordered_psychologists = apply_final_ordering(
-            PsychologistProfile.objects.filter(id__in=aggregated.keys())
+            psychologists_qs.filter(id__in=aggregated.keys())
         )
 
         return {
