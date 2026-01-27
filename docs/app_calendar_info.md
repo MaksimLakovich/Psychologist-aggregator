@@ -206,7 +206,8 @@ calendar_engine/
     │    ├── mappers/
     │    │    ├── rule_mapper.py               # Адаптирует django-объект AvailabilityRule / AvailabilityRuleTimeWindow в доменное правило доступности AbsAvailabilityRule (WeeklyAvailabilityRule) для factories
     │    │    ├── exception_mapper.py          # Адаптирует django-объект AvailabilityException / AvailabilityExceptionTimeWindow в доменное правило доступности AbsAvailabilityException (DateAvailabilityException / DateAvailabilityException) для factories
-    │    │    └── preferred_slots_mapper.py    # Адаптирует preferred_slots из БД в доменный формат matcher-а
+    │    │    ├── preferred_slots_mapper.py    # Адаптирует preferred_slots из БД в доменный формат matcher-а
+    │    │    └── match_result_mapper.py       # Адаптирует MatchResultDTO в JSON-совместимый формат для API, потому что web-слой НЕ работает с доменными DTO напрямую
     │    │    
     │    └── factories/
     │         └── generate_and_match_factory.py       # 💡 ИТОГОВЫЙ ПОДБОР СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - этот модуль использует use-cases, передает на вход "СПЕЦИАЛИСТА + ВЫБРАННЫЕ КЛИЕНТОМ "СЛОТЫ" и запускает ПОДБОР
@@ -923,7 +924,8 @@ calendar_engine/application/use_cases/
 calendar_engine/application/mappers/
 ├── rule_mapper.py               # Адаптирует django-объект AvailabilityRule / AvailabilityRuleTimeWindow в доменное правило доступности AbsAvailabilityRule (WeeklyAvailabilityRule) для factories
 ├── exception_mapper.py          # Адаптирует django-объект AvailabilityException / AvailabilityExceptionTimeWindow в доменное правило доступности AbsAvailabilityException (DateAvailabilityException / DateAvailabilityException) для factories
-└── preferred_slots_mapper.py    # Адаптирует preferred_slots из БД в доменный формат matcher-а
+├── preferred_slots_mapper.py    # Адаптирует preferred_slots из БД в доменный формат matcher-а
+└── match_result_mapper.py       # Адаптирует MatchResultDTO в JSON-совместимый формат для API, потому что web-слой НЕ работает с доменными DTO напрямую
 ```
 
 ---
@@ -973,6 +975,14 @@ calendar_engine/application/mappers/
 | Класс                             | Описание                                                      |
 |-----------------------------------|---------------------------------------------------------------|
 | `map_preferred_slots_to_domain()` | Адаптирует preferred_slots из БД в доменный формат matcher-а. |
+
+---
+
+### `match_result_mapper.py`
+
+| Класс                        | Описание                                                                                                               |
+|------------------------------|------------------------------------------------------------------------------------------------------------------------|
+| `map_match_result_to_dict()` | Адаптирует MatchResultDTO в JSON-совместимый формат для API, потому что web-слой НЕ работает с доменными DTO напрямую. |
 
 ---
 
