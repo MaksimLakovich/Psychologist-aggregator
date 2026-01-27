@@ -2,10 +2,8 @@ from calendar_engine.domain.matching.dto import MatchResultDTO
 
 
 def map_match_result_to_dict(result: MatchResultDTO) -> dict:
-    """
-    Адаптирует MatchResultDTO в JSON-совместимый формат для API.
-    Web-слой НЕ работает с доменными DTO напрямую.
-    """
+    """Адаптирует MatchResultDTO в JSON-совместимый формат для API.
+    Потому что web-слой НЕ работает с доменными DTO напрямую."""
     return {
         "status": "matched" if result.has_match else "no_match",
         "matched_slots": [
