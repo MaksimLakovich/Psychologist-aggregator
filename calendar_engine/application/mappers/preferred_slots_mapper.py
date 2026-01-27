@@ -1,9 +1,9 @@
 from datetime import date, datetime, time
 from typing import Iterable, List, Tuple, Union
 
-SelectedSlotKey = Tuple[date, time]
-
 RawSlot = Union[str, datetime]
+
+SelectedSlotKey = Tuple[date, time]
 
 
 def map_preferred_slots_to_domain(preferred_slots: Iterable[RawSlot]) -> List[SelectedSlotKey]:
@@ -13,7 +13,7 @@ def map_preferred_slots_to_domain(preferred_slots: Iterable[RawSlot]) -> List[Se
         1) Поддерживаемые форматы входных данных:
             - datetime (основной runtime-кейс);
             - str в ISO-формате (legacy / миграции / тесты).
-        2) В БД слоты хранятся как строки datetime: "2026-01-22 19:00:00+03;
+        2) В БД слоты хранятся как строки datetime: "2026-01-22 19:00:00+03";
         3) end_time здесь не используется;
         4) шаг слота и длительность определяются доменной time_policy.
     """
