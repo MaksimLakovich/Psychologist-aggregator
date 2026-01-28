@@ -38,6 +38,25 @@ export function initMatchPsychologists() {
                         </div>
                     `;
                     container.appendChild(wrap);
+
+                } else {
+
+                    // remaining === 0
+
+                    const wrap = document.createElement("div");
+                    wrap.className = "avatar avatar-placeholder";
+
+                    wrap.innerHTML = `
+                        <div class="relative font-medium text-pink-500 bg-white
+                            rounded-full border-2 border-white p-0 text-center max-w-xl">
+                            <span>
+                                К сожалению, по заданным параметрам нет подходящих психологов.
+                                Измените параметры подбора
+                            </span>
+                        </div>
+                    `;
+                    container.appendChild(wrap);
+
                 }
 
                 // Показать топ-5 специалистов
