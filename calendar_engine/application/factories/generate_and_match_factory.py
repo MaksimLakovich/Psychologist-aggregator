@@ -1,7 +1,7 @@
-from datetime import date, time
+from datetime import date, time, tzinfo
 from typing import Iterable, Optional, Tuple
 from zoneinfo import ZoneInfo
-from datetime import tzinfo
+
 from calendar_engine.application.mappers.exception_mapper import \
     map_exceptions_to_domain
 from calendar_engine.application.mappers.rule_mapper import map_rule_to_domain
