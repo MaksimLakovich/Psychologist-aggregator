@@ -1,6 +1,7 @@
 from datetime import date, time
-from typing import Iterable, Optional
-
+from typing import Iterable, Optional, Tuple
+from zoneinfo import ZoneInfo
+from datetime import tzinfo
 from calendar_engine.application.mappers.exception_mapper import \
     map_exceptions_to_domain
 from calendar_engine.application.mappers.rule_mapper import map_rule_to_domain
@@ -11,15 +12,15 @@ from calendar_engine.domain.availability.get_user_slots import \
 from calendar_engine.domain.matching.matcher import SelectedSlotsMatcher
 from calendar_engine.models import AvailabilityException, AvailabilityRule
 
-# Тип ключа выбранного пользователем доменного слота:
-# (day, start_time)
-SlotKey = tuple[date, time]
+# Тип ключа выбранного пользователем доменного слота: (day, start_time)
+# matcher работает ТОЛЬКО с этим типом
+SlotKey = Tuple[date, time]
 
 
 def build_generate_and_match_use_case(
     *,
     psychologist,
-    selected_slots: Iterable[SlotKey],
+    selected_slots: Iterable,  # iterable[datetime] (aware)
 ) -> Optional[FilterAndMatchSlotsUseCase]:
     """Собирает application use-case фильтрации и matching доменных временных слотов для конкретного специалиста.
 
@@ -76,12 +77,35 @@ def build_generate_and_match_use_case(
         exceptions=domain_exceptions,
     )
 
-    # 5) Matcher по выбранным пользователем доменным слотам
+    # 5) Нормализация timezone специалиста. Это важно для того, чтоб выбранный предпочитаемый слот в TZ клиента
+    # корректно вписывался в рабочее расписание (рабочие окна) в TZ специалиста
+    rule_tz = rule.timezone
+
+    if isinstance(rule_tz, str):
+        psychologist_tz = ZoneInfo(rule_tz)
+    elif isinstance(rule_tz, tzinfo):
+        psychologist_tz = rule_tz
+    else:
+        raise TypeError(
+            f"Неподдерживаемый тип часового пояса в AvailabilityRule.timezone: {type(rule_tz)!r}"
+        )
+
+    normalized_selected_slots: set[SlotKey] = set()
+
+    for dt in selected_slots:
+        # dt - timezone-aware datetime (из mapper-а)
+        localized_dt = dt.astimezone(psychologist_tz)
+
+        normalized_selected_slots.add(
+            (localized_dt.date(), localized_dt.time())
+        )
+
+    # 6) Matcher по выбранным пользователем доменным слотам (чистый, без TZ-логики)
     matcher = SelectedSlotsMatcher(
-        selected_slots=selected_slots,
+        selected_slots=normalized_selected_slots,
     )
 
-    # 6) Финальная сборка use-case
+    # 7) Финальная сборка use-case
     return FilterAndMatchSlotsUseCase(
         slot_filter=slot_filter,
         matcher=matcher,
