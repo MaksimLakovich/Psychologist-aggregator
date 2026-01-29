@@ -95,16 +95,32 @@ export function initTimeSlotsPicker({
 
             // Ищем или создаем элемент бейджа
             let badge = btn.querySelector(".ts-badge");
+
             if (count > 0) {
                 if (!badge) {
+                    // ПОЯВЛЕНИЕ - используем кастомную анимацию для беэджа из custom.css
                     badge = document.createElement("span");
-                    badge.className = "ts-badge absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-pink-500 text-white text-[10px] font-bold rounded-full border-2 border-white";
+                    badge.className = "ts-badge ts-badge-animate absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-pink-500 text-white text-[10px] font-bold rounded-full border-2 border-white";
                     btn.classList.add("relative"); // Чтобы позиционировать бейдж
                     btn.appendChild(badge);
                 }
-                badge.textContent = count;
-            } else if (badge) {
-                badge.remove();
+
+                // ОБНОВЛЕНИЕ ЦИФРЫ - используем кастомную анимацию для беэджа из custom.css
+                if (badge.textContent !== String(count)) {
+                    badge.textContent = count;
+                    badge.classList.remove("ts-badge-animate");
+                    void badge.offsetWidth;
+                    badge.classList.add("ts-badge-animate");
+                }
+            } else if (badge && !badge.classList.contains("ts-badge-out")) {
+                // ПЛАВНОЕ УДАЛЕНИЕ - используем кастомную анимацию для беэджа из custom.css
+                badge.classList.remove("ts-badge-animate");
+                badge.classList.add("ts-badge-out");
+
+                // Ждем окончания анимации (200ms) и только потом удаляем из DOM
+                badge.addEventListener("animationend", () => {
+                    badge.remove();
+                }, { once: true });
             }
         });
     }
