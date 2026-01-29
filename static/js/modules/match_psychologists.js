@@ -4,7 +4,7 @@ import { pluralizeRu } from "../utils/pluralize_ru.js";
 export function initMatchPsychologists() {
 
     /**
-     * ===== Функция для управления состоянием кнопки "ДАЛЕЕ" =====
+     * ===== 1) Функция для управления состоянием кнопки "ДАЛЕЕ" =====
      * ===== Кнопка активна, только если найдено больше 0 специалистов =====
      */
     function toggleSubmitButton(count) {
@@ -15,7 +15,7 @@ export function initMatchPsychologists() {
     }
 
     /**
-     * ===== Функция для автоматического запуска процесса ФИЛЬТРАЦИИ СПЕЦИАЛИСТА и генерации набора АВАТАР =====
+     * ===== 2) Функция для автоматического запуска процесса ФИЛЬТРАЦИИ СПЕЦИАЛИСТА и генерации набора АВАТАР =====
      */
     function updatePsychologistAvatars() {
         fetch("/aggregator/api/match-psychologists/")
