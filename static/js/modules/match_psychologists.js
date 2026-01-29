@@ -32,7 +32,7 @@ export function initMatchPsychologists() {
                     wrap.className = "avatar avatar-placeholder";
 
                     wrap.innerHTML = `
-                        <div class="relative font-medium text-gray-500 bg-white inline-flex w-auto
+                        <div class="relative font-medium tracking-wide text-gray-500 bg-white inline-flex w-auto
                             rounded-full border-2 border-white items-center justify-center max-w-xs p-2">
                             <span><strong>${remaining}</strong> ${word} могут вам подойти</span>
                         </div>
@@ -47,7 +47,7 @@ export function initMatchPsychologists() {
                     wrap.className = "avatar avatar-placeholder";
 
                     wrap.innerHTML = `
-                        <div class="relative font-medium text-pink-500 bg-white
+                        <div class="relative text-pink-500 bg-white font-bold tracking-wide
                             rounded-full border-2 border-white p-0 text-center max-w-xl">
                             <span>
                                 К сожалению, по заданным параметрам нет подходящих психологов.
