@@ -214,10 +214,14 @@ export function initTimeSlotsPicker({
             btn.type = "button";
             btn.dataset.value = isoString;
             btn.textContent = formatTimeLabel(isoString);
-            btn.className = slotBtnClass;
+
+            // Тут добавляем стиль, чтобы слоты выделялись на сером фоне
+            // Также добавляем transition для плавности наведения
+            btn.className = slotBtnClass + " border border-gray-200 transition-all duration-200 shadow-sm";
 
             const ts = toTimestamp(isoString);
 
+            // Тут выделение НЕ доступных слотов в прошлом
             if (isoString <= nowIso) {
                 btn.disabled = true;
                 btn.classList.add(
@@ -226,29 +230,44 @@ export function initTimeSlotsPicker({
                     "line-through",
                     "cursor-not-allowed"
                 );
-            } else if (ts !== null && selectedTsSet.has(ts)) {
+            // Тут легкое выделение при наведении на еще НЕ выбранные слоты
+            } else {
                 btn.classList.add(
-                    "bg-indigo-500",
-                    "text-white",
-                    "hover:bg-indigo-900"
+                    "hover:bg-indigo-100",
+                    "hover:border-indigo-100",
+                    "text-gray-700"
                 );
             }
 
+            // Тут стиль при выборе слота и при снятии выбора со слота
             btn.addEventListener("click", () => {
                 if (btn.disabled || ts === null) return;
 
                 if (selectedTsSet.has(ts)) {
                     selectedTsSet.delete(ts);
+
                     btn.classList.remove(
                         "bg-indigo-500",
                         "text-white",
+                        "border-indigo-500",
                         "hover:bg-indigo-900"
                     );
+                    btn.classList.add(
+                        "hover:bg-indigo-50",
+                        "hover:border-indigo-300"
+                    );
+
                 } else {
                     selectedTsSet.add(ts);
+                    btn.classList.remove(
+                        "hover:bg-indigo-50",
+                        "hover:border-indigo-300"
+                    );
                     btn.classList.add(
                         "bg-indigo-500",
-                        "text-white"
+                        "text-white",
+                        "border-indigo-500",
+                        "hover:bg-indigo-900"
                     );
                 }
                 syncHiddenInputs(); // Тут вызовется updateDayBadges (бейджей со счетчиком)

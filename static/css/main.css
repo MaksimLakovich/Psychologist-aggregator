@@ -3536,6 +3536,12 @@ input:checked + .toggle-bg {
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
+.shadow-sm {
+  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
 .shadow-indigo-300 {
   --tw-shadow-color: #B4C6FC;
   --tw-shadow: var(--tw-shadow-colored);
@@ -3715,6 +3721,16 @@ input:checked + .toggle-bg {
   border-color: rgb(180 198 252 / var(--tw-border-opacity, 1));
 }
 
+.hover\:border-indigo-50:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(240 245 255 / var(--tw-border-opacity, 1));
+}
+
+.hover\:border-indigo-100:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(229 237 255 / var(--tw-border-opacity, 1));
+}
+
 .hover\:\!bg-primary-800:hover {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(157 23 77 / var(--tw-bg-opacity, 1)) !important;
@@ -3818,6 +3834,11 @@ input:checked + .toggle-bg {
 .hover\:bg-indigo-600:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(88 80 236 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-pink-900:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(117 26 61 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:bg-gradient-to-br:hover {
