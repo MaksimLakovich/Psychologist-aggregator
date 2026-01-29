@@ -3,6 +3,20 @@ import { pluralizeRu } from "../utils/pluralize_ru.js";
 
 export function initMatchPsychologists() {
 
+    /**
+     * ===== Функция для управления состоянием кнопки "ДАЛЕЕ" =====
+     * ===== Кнопка активна, только если найдено больше 0 специалистов =====
+     */
+    function toggleSubmitButton(count) {
+        const btn = document.getElementById("btn-submit-filters");
+        if (!btn) return;
+
+        btn.disabled = (count === 0);
+    }
+
+    /**
+     * ===== Функция для автоматического запуска процесса ФИЛЬТРАЦИИ СПЕЦИАЛИСТА и генерации набора АВАТАР =====
+     */
     function updatePsychologistAvatars() {
         fetch("/aggregator/api/match-psychologists/")
             .then(response => response.json())
@@ -13,16 +27,19 @@ export function initMatchPsychologists() {
                 container.innerHTML = "";
 
                 const items = data.items || [];
-                const topFive = items.slice(0, 5);
 
                 // placeholder "N специалистов"
-                // const remaining = items.length - topFive.length;
-                const remaining = items.length;
+                const count = items.length;
 
-                if (remaining > 0) {
+                // СРАЗУ ОБНОВЛЯЕМ СОСТОЯНИЕ КНОПКИ
+                toggleSubmitButton(count);
+
+                const topFive = items.slice(0, 5);
+
+                if (count > 0) {
 
                     const word = pluralizeRu(
-                        remaining,
+                        count,
                         "психолог",
                         "психолога",
                         "психологов"
@@ -34,15 +51,14 @@ export function initMatchPsychologists() {
                     wrap.innerHTML = `
                         <div class="relative font-medium tracking-wide text-gray-500 bg-white inline-flex w-auto
                             rounded-full border-2 border-white items-center justify-center max-w-xs p-2">
-                            <span><strong>${remaining}</strong> ${word} могут вам подойти</span>
+                            <span><strong>${count}</strong> ${word} могут вам подойти</span>
                         </div>
                     `;
                     container.appendChild(wrap);
 
                 } else {
 
-                    // remaining === 0
-
+                    // Если не найдено ни одного подходящего специалиста (count === 0)
                     const wrap = document.createElement("div");
                     wrap.className = "avatar avatar-placeholder";
 
@@ -69,16 +85,17 @@ export function initMatchPsychologists() {
 
                     container.appendChild(img);
                 });
-
-
             })
-            .catch(err => console.error("Ошибка загрузки психологов:", err));
+            .catch(err => {
+                console.error("Ошибка загрузки психологов:", err);
+                // В случае ошибки API на всякий случай блокируем кнопку, чтобы избежать перехода в пустоту
+                toggleSubmitButton(0);
+            });
     }
 
     // запуск при загрузке
     updatePsychologistAvatars();
 
-    // при любом autosave
+    // при любом autosave (событие из других модулей)
     document.addEventListener(CLIENT_PROFILE_UPDATED, updatePsychologistAvatars);
-
 }
