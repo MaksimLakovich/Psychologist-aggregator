@@ -94,12 +94,12 @@ export function initTimeSlotsPicker({
             }).length;
 
             // Ищем или создаем элемент бейджа
-            let badge = btn.querySelector('.ts-badge');
+            let badge = btn.querySelector(".ts-badge");
             if (count > 0) {
                 if (!badge) {
-                    badge = document.createElement('span');
-                    badge.className = 'ts-badge absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full border-2 border-white';
-                    btn.classList.add('relative'); // Чтобы позиционировать бейдж
+                    badge = document.createElement("span");
+                    badge.className = "ts-badge absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-pink-500 text-white text-[10px] font-bold rounded-full border-2 border-white";
+                    btn.classList.add("relative"); // Чтобы позиционировать бейдж
                     btn.appendChild(badge);
                 }
                 badge.textContent = count;
@@ -165,7 +165,7 @@ export function initTimeSlotsPicker({
             const btn = document.createElement("button");
             btn.type = "button";
             btn.dataset.value = day;
-            btn.className = dayBtnClass + " relative"; // Добавили relative для бейджа с счетчиком выбранных слотов
+            btn.className = dayBtnClass + "relative"; // Добавили relative для бейджа с счетчиком выбранных слотов
 
             const { weekday, dayMonth } = formatDayLabel(day);
 
