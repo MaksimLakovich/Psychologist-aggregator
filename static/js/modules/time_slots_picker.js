@@ -221,7 +221,10 @@ export function initTimeSlotsPicker({
 
             const ts = toTimestamp(isoString);
 
-            // Тут выделение НЕ доступных слотов в прошлом
+            // 1. Сначала определяем БАЗОВОЕ состояние слота (выбран он или нет)
+            const isSelected = ts !== null && selectedTsSet.has(ts);
+
+            // Стиль для НЕДОСТУПНЫХ слотов в прошлом
             if (isoString <= nowIso) {
                 btn.disabled = true;
                 btn.classList.add(
@@ -233,13 +236,28 @@ export function initTimeSlotsPicker({
             // Тут легкое выделение при наведении на еще НЕ выбранные слоты
             } else {
                 btn.classList.add(
-                    "hover:bg-indigo-100",
-                    "hover:border-indigo-100",
                     "text-gray-700"
                 );
+
+                if (isSelected) {
+                    // Если слот выбран изначально (при загрузке страницы)
+                    btn.classList.add(
+                        "bg-indigo-500",
+                        "text-white",
+                        "border-indigo-500",
+                        "hover:bg-indigo-900"
+                    );
+                } else {
+                    // ВОТ ТУТ: Добавляем bg-white только тем, кто доступен и НЕ выбран
+                    btn.classList.add(
+                        "bg-white",
+                        "hover:bg-indigo-50",
+                        "hover:border-indigo-300"
+                    );
+                }
             }
 
-            // Тут стиль при выборе слота и при снятии выбора со слота
+            // 2. Логика КЛИКА (стиль при выборе слота и при снятии выбора со слота)
             btn.addEventListener("click", () => {
                 if (btn.disabled || ts === null) return;
 
@@ -253,6 +271,7 @@ export function initTimeSlotsPicker({
                         "hover:bg-indigo-900"
                     );
                     btn.classList.add(
+                        "bg-white",
                         "hover:bg-indigo-50",
                         "hover:border-indigo-300"
                     );
@@ -260,6 +279,7 @@ export function initTimeSlotsPicker({
                 } else {
                     selectedTsSet.add(ts);
                     btn.classList.remove(
+                        "bg-white",
                         "hover:bg-indigo-50",
                         "hover:border-indigo-300"
                     );
