@@ -181,7 +181,7 @@ export function initTimeSlotsPicker({
             const btn = document.createElement("button");
             btn.type = "button";
             btn.dataset.value = day;
-            btn.className = dayBtnClass + "relative"; // Добавили relative для бейджа с счетчиком выбранных слотов
+            btn.className = dayBtnClass + " relative"; // Добавили relative (важно с пробелом в начале) для бейджа с счетчиком выбранных слотов
 
             const { weekday, dayMonth } = formatDayLabel(day);
 
