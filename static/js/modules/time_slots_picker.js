@@ -251,8 +251,7 @@ export function initTimeSlotsPicker({
                     // ВОТ ТУТ: Добавляем bg-white только тем, кто доступен и НЕ выбран
                     btn.classList.add(
                         "bg-white",
-                        "hover:bg-indigo-50",
-                        "hover:border-indigo-300"
+                        "hover:bg-indigo-50"
                     );
                 }
             }
@@ -272,16 +271,14 @@ export function initTimeSlotsPicker({
                     );
                     btn.classList.add(
                         "bg-white",
-                        "hover:bg-indigo-50",
-                        "hover:border-indigo-300"
+                        "hover:bg-indigo-50"
                     );
 
                 } else {
                     selectedTsSet.add(ts);
                     btn.classList.remove(
                         "bg-white",
-                        "hover:bg-indigo-50",
-                        "hover:border-indigo-300"
+                        "hover:bg-indigo-50"
                     );
                     btn.classList.add(
                         "bg-indigo-500",
