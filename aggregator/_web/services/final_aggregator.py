@@ -6,7 +6,7 @@ from calendar_engine.application.factories.generate_and_match_factory import \
     build_generate_and_match_use_case
 from calendar_engine.application.mappers.preferred_slots_mapper import \
     map_preferred_slots_to_domain
-from calendar_engine.constants import DAYS_AHEAD
+from calendar_engine.constants import DAYS_AHEAD_FOR_SPECIALIST
 from calendar_engine.domain.availability.domain_slot_generator import \
     DomainSlotGenerator
 
@@ -64,7 +64,7 @@ class PsychologistAggregatorService:
         generator = DomainSlotGenerator()
         domain_slots = generator.generate_domain_slots(
             date_from=today,
-            days_ahead=DAYS_AHEAD,
+            days_ahead=DAYS_AHEAD_FOR_SPECIALIST,
         )
 
         # Шаг 4: Финальный агрегированный результат с учетом временными слотами
