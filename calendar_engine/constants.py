@@ -103,4 +103,5 @@ DOMAIN_TIME_POLICY = DomainTimePolicy(
     slot_duration_minutes=60,
 )
 
-DAYS_AHEAD = 7
+DAYS_AHEAD_FOR_CLIENT = 7
+DAYS_AHEAD_FOR_SPECIALIST = 8

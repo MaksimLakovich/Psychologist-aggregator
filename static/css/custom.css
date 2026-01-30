@@ -40,7 +40,47 @@
     font-size: 1.125rem;
 }
 
+
 /* ===== СТИЛЬ ДЛЯ ЭЛЕМЕНТОВ ПОД ФОТО ПСИХОЛОГА ЧТОБ ОНИ БЫЛИ ПО ЦЕНТРУ ПОД ФОТО ===== */
 .ps-header-clone {
     text-align: center;
+}
+
+
+/* ===== АНИМАЦИЯ ДЛЯ БЕЙДЖА СО СЧЕТЧИКОМ ВЫБРАННЫХ СЛОТОВ ===== */
+
+/* Часть 1: анимация появления */
+@keyframes pop-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.2); /* Легкий "отскок" для живости */
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.ts-badge-animate {
+  animation: pop-in 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+
+/* Часть 2: анимация исчезновения */
+@keyframes pop-out {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+.ts-badge-out {
+  animation: pop-out 0.2s ease-in forwards;
 }
