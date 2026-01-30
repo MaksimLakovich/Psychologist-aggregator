@@ -9,6 +9,7 @@
  * - отображение ранее выбранных preferred_slots
  * - toggle (add / remove) на уровне UI
  * - disable слотов в прошлом
+ * - показывает счетчик выбранных слотов на днях
  *
  * НЕ отвечает за:
  * - autosave preferred_slots
@@ -62,6 +63,9 @@ export function initTimeSlotsPicker({
     const dayBtnClass = daysRow.dataset.btnClass;
     const slotBtnClass = slotsGrid.dataset.btnClass;
 
+    // ДЛЯ СЧЕТЧИКА ВЫБРАННЫХ СЛОТОВ: Глобальное хранилище данных после загрузки (чтобы считать бейджи)
+    let cachedSlotsByDay = {};
+
     function syncHiddenInputs() {
         hiddenInputsWrap.innerHTML = "";
         selectedTsSet.forEach(ts => {
@@ -71,21 +75,70 @@ export function initTimeSlotsPicker({
             input.value = new Date(ts).toISOString();
             hiddenInputsWrap.appendChild(input);
         });
+        // Каждый раз, когда меняется выбор, обновляем цифры на кнопках дней
+        updateDayBadges();
+    }
+
+    /**
+     * СЧЕТЧИК ВЫБРАННЫХ СЛОТОВ: Функция обновления счетчиков (бейджей) на кнопках дней
+     */
+    function updateDayBadges() {
+        Object.keys(cachedSlotsByDay).forEach(day => {
+            const btn = daysRow.querySelector(`button[data-value="${day}"]`);
+            if (!btn) return;
+
+            // Считаем сколько слотов этого дня есть в selectedTsSet
+            const count = cachedSlotsByDay[day].filter(iso => {
+                const ts = toTimestamp(iso);
+                return selectedTsSet.has(ts);
+            }).length;
+
+            // Ищем или создаем элемент бейджа
+            let badge = btn.querySelector(".ts-badge");
+
+            if (count > 0) {
+                if (!badge) {
+                    // ПОЯВЛЕНИЕ - используем кастомную анимацию для беэджа из custom.css
+                    badge = document.createElement("span");
+                    badge.className = "ts-badge ts-badge-animate absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-pink-500 text-white text-[10px] font-bold rounded-full border-2 border-white";
+                    btn.classList.add("relative"); // Чтобы позиционировать бейдж
+                    btn.appendChild(badge);
+                }
+
+                // ОБНОВЛЕНИЕ ЦИФРЫ - используем кастомную анимацию для беэджа из custom.css
+                if (badge.textContent !== String(count)) {
+                    badge.textContent = count;
+                    badge.classList.remove("ts-badge-animate");
+                    void badge.offsetWidth;
+                    badge.classList.add("ts-badge-animate");
+                }
+            } else if (badge && !badge.classList.contains("ts-badge-out")) {
+                // ПЛАВНОЕ УДАЛЕНИЕ - используем кастомную анимацию для беэджа из custom.css
+                badge.classList.remove("ts-badge-animate");
+                badge.classList.add("ts-badge-out");
+
+                // Ждем окончания анимации (200ms) и только потом удаляем из DOM
+                badge.addEventListener("animationend", () => {
+                    badge.remove();
+                }, { once: true });
+            }
+        });
     }
 
     fetch(apiUrl, {
         headers: { "X-Requested-With": "XMLHttpRequest" },
         credentials: "same-origin",
     })
-        .then(r => r.json())
-        .then(data => {
-            renderDaysAndSlots({
-                slotsByDay: data.slots,
-                // ВАЖНО: Передаем текущее время пользователя (nowIso) из его профиля а не сервера, чтоб потом
-                // деактивировать слоты в прошлом (делаем недоступным к выбору)
-                nowIso: data.now_iso,
-            });
+    .then(r => r.json())
+    .then(data => {
+        cachedSlotsByDay = data.slots; // Сохраняем для пересчета
+        renderDaysAndSlots({
+            slotsByDay: data.slots,
+            // ВАЖНО: Передаем текущее время пользователя (nowIso) из его профиля а не сервера, чтоб потом
+            // деактивировать слоты в прошлом (делаем недоступным к выбору)
+            nowIso: data.now_iso,
         });
+    });
 
     /**
      * Рендер дней + логика переключения
@@ -128,7 +181,7 @@ export function initTimeSlotsPicker({
             const btn = document.createElement("button");
             btn.type = "button";
             btn.dataset.value = day;
-            btn.className = dayBtnClass;
+            btn.className = dayBtnClass + " relative"; // Добавили relative (важно с пробелом в начале) для бейджа с счетчиком выбранных слотов
 
             const { weekday, dayMonth } = formatDayLabel(day);
 
@@ -143,6 +196,8 @@ export function initTimeSlotsPicker({
 
         // Первичная активация - текущий день активен по умолчанию
         setActiveDay(days[0]);
+        // Инициализация бейджей со счетчиком при первой загрузке
+        updateDayBadges();
     }
 
     /**
@@ -159,10 +214,17 @@ export function initTimeSlotsPicker({
             btn.type = "button";
             btn.dataset.value = isoString;
             btn.textContent = formatTimeLabel(isoString);
-            btn.className = slotBtnClass;
+
+            // Тут добавляем стиль, чтобы слоты выделялись на сером фоне
+            // Также добавляем transition для плавности наведения
+            btn.className = slotBtnClass + " border border-gray-200 transition-all duration-200 shadow-sm";
 
             const ts = toTimestamp(isoString);
 
+            // 1. Сначала определяем БАЗОВОЕ состояние слота (выбран он или нет)
+            const isSelected = ts !== null && selectedTsSet.has(ts);
+
+            // Стиль для НЕДОСТУПНЫХ слотов в прошлом
             if (isoString <= nowIso) {
                 btn.disabled = true;
                 btn.classList.add(
@@ -171,56 +233,64 @@ export function initTimeSlotsPicker({
                     "line-through",
                     "cursor-not-allowed"
                 );
-            } else if (ts !== null && selectedTsSet.has(ts)) {
+            // Тут легкое выделение при наведении на еще НЕ выбранные слоты
+            } else {
                 btn.classList.add(
-                    "bg-indigo-500",
-                    "text-white",
-                    "border-indigo-100",
-                    "hover:bg-indigo-900"
+                    "text-gray-700"
                 );
+
+                if (isSelected) {
+                    // Если слот выбран изначально (при загрузке страницы)
+                    btn.classList.add(
+                        "bg-indigo-500",
+                        "text-white",
+                        "border-indigo-500",
+                        "hover:bg-indigo-900"
+                    );
+                } else {
+                    // ВОТ ТУТ: Добавляем bg-white только тем, кто доступен и НЕ выбран
+                    btn.classList.add(
+                        "bg-white",
+                        "hover:bg-indigo-50"
+                    );
+                }
             }
 
+            // 2. Логика КЛИКА (стиль при выборе слота и при снятии выбора со слота)
             btn.addEventListener("click", () => {
                 if (btn.disabled || ts === null) return;
 
-                const isActive = selectedTsSet.has(ts);
-
-                if (isActive) {
+                if (selectedTsSet.has(ts)) {
                     selectedTsSet.delete(ts);
+
                     btn.classList.remove(
                         "bg-indigo-500",
                         "text-white",
-                        "border-indigo-100",
+                        "border-indigo-500",
                         "hover:bg-indigo-900"
                     );
                     btn.classList.add(
                         "bg-white",
-                        "text-gray-700",
-                        "border-gray-300",
-                        "hover:bg-gray-50"
+                        "hover:bg-indigo-50"
                     );
+
                 } else {
                     selectedTsSet.add(ts);
+                    btn.classList.remove(
+                        "bg-white",
+                        "hover:bg-indigo-50"
+                    );
                     btn.classList.add(
                         "bg-indigo-500",
                         "text-white",
-                        "border-indigo-100",
+                        "border-indigo-500",
                         "hover:bg-indigo-900"
                     );
-                    btn.classList.remove(
-                        "bg-white",
-                        "text-gray-700",
-                        "border-gray-300",
-                        "hover:bg-gray-50"
-                    );
                 }
-
-                syncHiddenInputs();
+                syncHiddenInputs(); // Тут вызовется updateDayBadges (бейджей со счетчиком)
             });
 
             slotsGrid.appendChild(btn);
         });
-
-        syncHiddenInputs();
     }
 }

@@ -215,7 +215,10 @@ function updateNavigationState() {
 function renderPsychologistCard(ps) {
     const container = document.getElementById("psychologist-card");
     if (!container || !ps) return;
+
     const staticUrl = container.dataset.staticUrl;
+    // Получаем URL из атрибута в home_client_choice_psychologist.html (data-back-url="{% url 'core:personal-questions' %}")
+    const backUrl = container.dataset.backUrl; // ПОЛУЧАЕМ НАШ URL ИЗ АТРИБУТА
 
     // HELPERS
 
@@ -525,11 +528,18 @@ function renderPsychologistCard(ps) {
                     </p>
                     <button
                         type="submit"
-                        class="mt-6 w-full px-10 py-3.5 rounded-xl bg-indigo-700 text-xl text-white font-medium
-                               hover:bg-indigo-900 transition shadow"
+                        class="mt-6 w-full px-10 py-3.5 rounded-xl bg-indigo-700 text-xl text-white
+                            font-extrabold tracking-wide
+                            hover:bg-indigo-900 transition shadow"
                     >
                         Выбрать время сессии
                     </button>
+                    <div class="pt-6">
+                        <a href="${backUrl}"
+                           class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-200 text-xl text-white font-extrabold tracking-wide hover:bg-indigo-300 transition">
+                            Назад
+                        </a>
+                    </div>
                 </div>
             </div>
 

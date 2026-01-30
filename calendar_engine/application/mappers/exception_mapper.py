@@ -44,7 +44,7 @@ def map_exceptions_to_domain(exceptions: Iterable[AvailabilityException]) -> Lis
             # Особый день с переопределенными окнами
             elif exception.exception_type == "override":
                 time_windows: List[TimeWindow] = [
-                    (window.start_time, window.end_time)
+                    (window.override_start_time, window.override_end_time)
                     for window in exception.time_windows.all()
                 ]
 
