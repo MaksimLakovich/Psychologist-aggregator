@@ -80,7 +80,7 @@ function scrollToTopThen(callback) {
     requestAnimationFrame(check);
 }
 
-// 5) Функция для форматирование слота под "31 января в 05:00"
+// 5) Функция для БЛИЖАЙШЕГО ВРЕМЕНИ и форматирование слота под "31 января в 05:00"
 function formatNearestSlot(slot) {
     if (!slot) return null;
 
@@ -148,7 +148,7 @@ function renderScheduleList(schedule = []) {
 
         return `
             <div class="mt-3">
-                <div class="text-base font-medium text-gray-700">${dayLabel}</div>
+                <div class="text-base font-semibold text-gray-700">${dayLabel}</div>
                 <div class="mt-2 flex flex-wrap gap-2">${times}</div>
             </div>
         `;
@@ -530,7 +530,7 @@ function renderPsychologistCard(ps) {
 
                     </div>
 
-                    <!-- Nearest slot (stub) -->
+                    <!-- Nearest slot -->
                     <div class="pb-7">
                         <div class="gap-0 rounded-xl bg-transparent p-0 pb-2">
                             <div class="inline-flex items-center gap-1">
