@@ -6,19 +6,18 @@ const PAGE_SIZE = 10;
 let selectedPsychologistId = null;
 
 
-// Вспомогательная функция для хранения состояния страницы выбора (при обновлении браузер)
+/* ============================================================================
+ * ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+ * ========================================================================== */
+
+
+// 1) Функция для хранения состояния страницы выбора (при обновлении браузер)
 function isPageReload() {
     const nav = performance.getEntriesByType("navigation")[0];
     return nav && nav.type === "reload";
 }
 
-export function initPsychologistsChoice() {
-    fetchPsychologists();
-    initNavigation();
-}
-
-
-// Вспомогательная функция для кнопки СВЕРНУТЬ / РАЗВЕРНУТЬ (биография)
+// 2) Функция для кнопки СВЕРНУТЬ / РАЗВЕРНУТЬ (биография)
 window.toggleBiography = function (btn) {
     const wrapper = btn.previousElementSibling;
     if (!wrapper) return;
@@ -38,8 +37,7 @@ window.toggleBiography = function (btn) {
     }
 };
 
-
-// Вспомогательная функция для кнопки СВЕРНУТЬ / РАЗВЕРНУТЬ (образование)
+// 3) Функция для кнопки СВЕРНУТЬ / РАЗВЕРНУТЬ (образование)
 window.toggleEducation = function (btn) {
     const list = btn.previousElementSibling;
     if (!list) return;
@@ -50,8 +48,7 @@ window.toggleEducation = function (btn) {
     btn.textContent = isCollapsed ? "Показать меньше" : "Показать больше";
 };
 
-
-// Вспомогательная функция для автоматической прокрутки к началу страницы при переключении между карточками психологов
+// 4) Функция для автоматической прокрутки к началу страницы при переключении между карточками психологов
 function scrollToTopThen(callback) {
     window.scrollTo({
         top: 0,
@@ -81,6 +78,17 @@ function scrollToTopThen(callback) {
     };
 
     requestAnimationFrame(check);
+}
+
+
+/* ============================================================================
+ * ИНИЦИАЛИЗАЦИЯ
+ * ========================================================================== */
+
+
+export function initPsychologistsChoice() {
+    fetchPsychologists();
+    initNavigation();
 }
 
 
@@ -313,7 +321,6 @@ function renderPsychologistCard(ps) {
             </ul>
         `;
     };
-
 
     // 4) Подключаю pluralize_ru.js и рассчитываем правильное окончание для слова ГОД
     const word = pluralizeRu(
