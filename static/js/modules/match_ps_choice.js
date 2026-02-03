@@ -80,6 +80,95 @@ function scrollToTopThen(callback) {
     requestAnimationFrame(check);
 }
 
+// 5) Функция для форматирование слота под "31 января в 05:00"
+function formatNearestSlot(slot) {
+    if (!slot) return null;
+
+    // Предпочитаем start_iso, т.к. уже с учетом TZ клиента
+    let dateObj = null;
+    if (slot.start_iso) {
+        dateObj = new Date(slot.start_iso);
+    } else if (slot.day && slot.start_time) {
+        dateObj = new Date(`${slot.day}T${slot.start_time}`);
+    }
+
+    if (!dateObj || Number.isNaN(dateObj.getTime())) return null;
+
+    const datePart = new Intl.DateTimeFormat("ru-RU", {
+        day: "numeric",
+        month: "long",
+    }).format(dateObj);
+
+    const timePart = new Intl.DateTimeFormat("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit",
+    }).format(dateObj);
+
+    return `${datePart} в ${timePart}`;
+}
+
+// 5) Функция для создания РАСПИСАНИЯ
+function groupScheduleByDay(schedule = []) {
+    const groups = {};
+    schedule.forEach(slot => {
+        const day = slot.day;
+        if (!day) return;
+        if (!groups[day]) groups[day] = [];
+        groups[day].push(slot);
+    });
+    return groups;
+}
+
+// 6) Функция для визуала вывода расписания
+function renderScheduleList(schedule = []) {
+    if (!schedule.length) {
+        return `<p class="text-gray-500 text-sm mt-2">Нет доступных слотов</p>`;
+    }
+
+    const grouped = groupScheduleByDay(schedule);
+    const days = Object.keys(grouped).sort();
+
+    return days.map(day => {
+        const dateObj = new Date(`${day}T00:00:00`);
+        const dayLabel = Number.isNaN(dateObj.getTime())
+            ? day
+            : new Intl.DateTimeFormat("ru-RU", {
+                day: "numeric",
+                month: "long",
+            }).format(dateObj);
+
+        const times = grouped[day]
+            .sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""))
+            .map(slot => `
+                <span class="rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700">
+                    ${slot.start_time}
+                </span>
+            `)
+            .join("");
+
+        return `
+            <div class="mt-3">
+                <div class="text-base font-medium text-gray-700">${dayLabel}</div>
+                <div class="mt-2 flex flex-wrap gap-2">${times}</div>
+            </div>
+        `;
+    }).join("");
+}
+
+// 7) Функция для формирования БЛИЖАЙШЕГО ВРЕМЕНИ
+function updateNearestSlotUI(nearestSlotText) {
+    const nearestSlotEl = document.getElementById("ps-nearest-slot");
+    if (!nearestSlotEl) return;
+
+    nearestSlotEl.textContent = nearestSlotText || "Нет доступных слотов";
+}
+
+function updateScheduleUI(schedule) {
+    const scheduleEl = document.getElementById("psychologist-schedule-list");
+    if (!scheduleEl) return;
+    scheduleEl.innerHTML = renderScheduleList(schedule);
+}
+
 
 /* ============================================================================
  * ИНИЦИАЛИЗАЦИЯ
@@ -340,6 +429,32 @@ function renderPsychologistCard(ps) {
     // 6) Убираем копейки
     const priceValue = Number(ps.price.value).toFixed(0);
 
+    // 7) Подгружаем РАСПИСАНИЕ и БЛИЖАЙШЕЕ ВРЕМЯ для выбранного специалиста
+    const currentPsId = ps.id;
+    container.dataset.psId = String(currentPsId);
+
+    fetch(`/users/api/psychologists/${currentPsId}/schedule/`)
+        .then(response => response.json())
+        .then(data => {
+            // Защита от гонок: если карточка уже переключена на другого психолога — игнорируем
+            if (container.dataset.psId !== String(currentPsId)) return;
+
+            if (!data || data.status !== "ok") {
+                updateNearestSlotUI("Нет доступных слотов");
+                updateScheduleUI([]);
+                return;
+            }
+
+            const nearestText = formatNearestSlot(data.nearest_slot);
+            updateNearestSlotUI(nearestText || "Нет доступных слотов");
+            updateScheduleUI(data.schedule || []);
+        })
+        .catch(() => {
+            if (container.dataset.psId !== String(currentPsId)) return;
+            updateNearestSlotUI("Нет доступных слотов");
+            updateScheduleUI([]);
+        });
+
 
     // HTML-ШАБЛОН
     container.innerHTML = `
@@ -428,7 +543,7 @@ function renderPsychologistCard(ps) {
                                     class="mt-0 text-lg font-semibold text-indigo-700 hover:text-indigo-800 transition cursor-pointer"
                                     onclick="document.getElementById('psychologist-schedule')?.scrollIntoView({behavior: 'smooth'})"
                                 >
-                                    20 декабря в 21:00
+                                    <span id="ps-nearest-slot">Загружаем...</span>
                                 </p>
                             </div>
                         </div>
@@ -514,6 +629,7 @@ function renderPsychologistCard(ps) {
                         <p class="text-lg text-gray-700 leading-relaxed overflow-hidden transition-all mt-2">
                             Часовой пояс: ${ps.timezone || "не указан"}
                         </p>
+                        <div id="psychologist-schedule-list" class="mt-2"></div>
                     </div>
 
                 </div>

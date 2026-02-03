@@ -9,7 +9,7 @@ from calendar_engine.domain.matching.dto import MatchResultDTO
 
 
 class FilterAndMatchSlotsUseCase(AbsUseCase):
-    """Use-case фильтрации и matching доменных временных слотов.
+    """Use-case фильтрации и matching предпочитаемых клиентом слотов с доступными слотами специалиста.
 
     Прикладной сценарий:
         1) принять все возможные доменные слоты (сгенерированные по правилам домена);
