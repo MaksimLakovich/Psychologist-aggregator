@@ -99,15 +99,19 @@ function formatNearestSlot(slot) {
         month: "long",
     }).format(dateObj);
 
+    const weekdayShort = new Intl.DateTimeFormat("ru-RU", {
+        weekday: "short",
+    }).format(dateObj).toLowerCase();
+
     const timePart = new Intl.DateTimeFormat("ru-RU", {
         hour: "2-digit",
         minute: "2-digit",
     }).format(dateObj);
 
-    return `${datePart} в ${timePart}`;
+    return `${datePart} в ${timePart} (${weekdayShort})`;
 }
 
-// 5) Функция для создания РАСПИСАНИЯ
+// 6) Функция для создания РАСПИСАНИЯ
 function groupScheduleByDay(schedule = []) {
     const groups = {};
     schedule.forEach(slot => {
@@ -119,7 +123,7 @@ function groupScheduleByDay(schedule = []) {
     return groups;
 }
 
-// 6) Функция для визуала вывода расписания
+// 7) Функция для визуала вывода расписания
 function renderScheduleList(schedule = []) {
     if (!schedule.length) {
         return `<p class="text-gray-500 text-sm mt-2">Нет доступных слотов</p>`;
@@ -136,26 +140,31 @@ function renderScheduleList(schedule = []) {
                 day: "numeric",
                 month: "long",
             }).format(dateObj);
+        const weekdayLong = Number.isNaN(dateObj.getTime())
+            ? ""
+            : new Intl.DateTimeFormat("ru-RU", {
+                weekday: "long",
+            }).format(dateObj).toLowerCase();
 
         const times = grouped[day]
             .sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""))
             .map(slot => `
-                <span class="rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700">
+                <span class="rounded-full bg-indigo-100 px-3 py-1 text-base font-medium text-indigo-700">
                     ${slot.start_time}
                 </span>
             `)
             .join("");
 
         return `
-            <div class="mt-3">
-                <div class="text-base font-semibold text-gray-700">${dayLabel}</div>
+            <div class="mt-3 py-1">
+                <div class="text-lg font-semibold text-gray-700">${dayLabel}${weekdayLong ? ` (${weekdayLong})` : ""}</div>
                 <div class="mt-2 flex flex-wrap gap-2">${times}</div>
             </div>
         `;
     }).join("");
 }
 
-// 7) Функция для формирования БЛИЖАЙШЕГО ВРЕМЕНИ
+// 8) Функция для формирования БЛИЖАЙШЕГО ВРЕМЕНИ
 function updateNearestSlotUI(nearestSlotText) {
     const nearestSlotEl = document.getElementById("ps-nearest-slot");
     if (!nearestSlotEl) return;
