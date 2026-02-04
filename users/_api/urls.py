@@ -12,7 +12,8 @@ from users._api.views import (AppUserRetrieveUpdateView,
                               EducationListCreateView,
                               EducationRetrieveUpdateDestroyView,
                               EmailVerificationView, GetDomainSlotsAjaxView,
-                              LogoutAPIView, MethodDetailView, MethodListView,
+                              GetSpecialistScheduleAjaxView, LogoutAPIView,
+                              MethodDetailView, MethodListView,
                               PasswordResetConfirmView, PasswordResetView,
                               PsychologistProfileRetrieveUpdateView,
                               PublicPsychologistProfileRetrieveView,
@@ -106,6 +107,11 @@ urlpatterns = [
     ),
     path("save-preferred-slots/", SavePreferredSlotsAjaxView.as_view(), name="save-preferred-slots"),
 
-    # AJAX-запрос (fetch) на создание и отображение всех возможных доменных слотов на html-страницах
+    # AJAX-запрос (fetch) на создание и отображение временных слотов и расписания на html-страницах
     path("get-domain-slots/", GetDomainSlotsAjaxView.as_view(), name="get-domain-slots"),
+    path(
+        "psychologists/<int:profile_id>/schedule/",
+        GetSpecialistScheduleAjaxView.as_view(),
+        name="get-psychologist-schedule"
+    ),
 ]

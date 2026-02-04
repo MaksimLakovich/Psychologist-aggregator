@@ -1,3 +1,6 @@
+from datetime import datetime, tzinfo
+from zoneinfo import ZoneInfo
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
 from django.db import transaction
@@ -17,6 +20,8 @@ from rest_framework_simplejwt.token_blacklist.models import (BlacklistedToken,
                                                              OutstandingToken)
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from calendar_engine.application.factories.generate_specialist_schedule_factory import \
+    build_generate_specialist_schedule_use_case
 from calendar_engine.application.use_cases.get_domain_slots_use_case import \
     GetDomainSlotsUseCase
 from calendar_engine.models import AvailabilityException, AvailabilityRule
@@ -932,6 +937,111 @@ class GetDomainSlotsAjaxView(LoginRequiredMixin, View):
                 "status": "ok",
                 "now_iso": result["now_iso"],
                 "slots": result["slots"],
+            },
+            status=200,
+        )
+
+
+class GetSpecialistScheduleAjaxView(LoginRequiredMixin, View):
+    """Возвращает клиенту на UI в карточке конкретного специалиста актуальное расписание данного специалиста:
+        - ближайший доступный слот;
+        - все доступные слоты в блоке "Расписание".
+    Все слоты ОТОБРАЖЕНЫ в TZ КЛИЕНТА.
+    Read-only эндпоинт только для показа доступных слотов из расписания специалиста, без сохранения в БД."""
+
+    def get(self, request, *args, **kwargs):
+        """Получить расписание специалиста (доступные слоты) в TZ клиента."""
+        user = request.user
+        profile_id = kwargs["profile_id"]
+        # Эта вьюха берет profile_id из kwargs и далее использует specialist_profile.user, поэтому нужно
+        # использовать get_object_or_404() и передавать именно объект дальше.
+        specialist_profile = get_object_or_404(PsychologistProfile, pk=profile_id)
+
+        def normalize_tz(tz_value):
+            """Безопасный fallback на 'timezone=None'.
+            Просто 'ZoneInfo(str(specialist_profile.user.timezone))' превратит None в 'None' и выбросит исключение.
+            Поэтому нужна безопасная ветка: если timezone None - fallback на now() без astimezone."""
+            if tz_value is None:
+                return None
+            if isinstance(tz_value, tzinfo):
+                return tz_value
+            return ZoneInfo(str(tz_value))
+
+        client_tz = normalize_tz(getattr(user, "timezone", None))
+        specialist_tz = normalize_tz(getattr(specialist_profile.user, "timezone", None)) or client_tz
+
+        use_case = build_generate_specialist_schedule_use_case(
+            specialist_profile=specialist_profile,
+        )
+
+        if use_case is None:
+            return JsonResponse(
+                {
+                    "status": "ok",
+                    "nearest_slot": None,
+                    "schedule": [],
+                },
+                status=200,
+            )
+
+        slots = use_case.execute()
+
+        # ВАЖНО: кроме сгенерированного расписания нам необходимо передать на фронт еще текущее время
+        # клиента (now_iso_client) и текущее время специалиста (now_iso_specialist), потому что определять
+        # его по времени сервера неправильно. Так как клиент/специалист в настройках своего профиля
+        # указывает свой timezone и он может отличаться от сервера (путешествует например).
+        # ОБОСНОВАНИЕ: полезно для отладки и тестирования.
+        now_client = now().astimezone(client_tz) if client_tz else now()
+        now_specialist = now().astimezone(specialist_tz) if specialist_tz else now()
+
+        # Use-case генерирует слоты в TZ специалиста, но ответ должен быть в TZ клиента.
+        # Изначально отправляется raw SlotDTO, так что клиент увидит время специалиста.
+        # Нужна конвертация: локализовать (day+start_time) в TZ специалиста и перевести в TZ клиента,
+        # затем отдать ISO/строку.
+        schedule = []
+
+        for slot in slots:
+            if specialist_tz:
+                slot_start_spec = datetime.combine(slot.day, slot.start, tzinfo=specialist_tz)
+                slot_end_spec = datetime.combine(slot.day, slot.end, tzinfo=specialist_tz)
+            else:
+                slot_start_spec = datetime.combine(slot.day, slot.start)
+                slot_end_spec = datetime.combine(slot.day, slot.end)
+
+            if slot_start_spec < now_specialist:
+                continue
+
+            slot_start_client = (
+                slot_start_spec.astimezone(client_tz)
+                if client_tz
+                else slot_start_spec
+            )
+            slot_end_client = (
+                slot_end_spec.astimezone(client_tz)
+                if client_tz
+                else slot_end_spec
+            )
+
+            # schedule возвращает как SlotDTO, который не JSON‑serializable поэтому нужен перевод в ISO datetime
+            schedule.append(
+                {
+                    "day": slot_start_client.date().isoformat(),
+                    "start_time": slot_start_client.strftime("%H:%M"),
+                    "end_time": slot_end_client.strftime("%H:%M"),
+                    "start_iso": slot_start_client.isoformat(),
+                    "end_iso": slot_end_client.isoformat(),
+                }
+            )
+
+        nearest_slot = schedule[0] if schedule else None
+
+        return JsonResponse(
+            {
+                "status": "ok",
+                "now_iso_client": now_client.isoformat(),
+                "now_iso_specialist": now_specialist.isoformat(),
+                "nearest_slot": nearest_slot,
+                "schedule": schedule,
             },
             status=200,
         )
