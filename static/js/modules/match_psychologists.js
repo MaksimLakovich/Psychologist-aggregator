@@ -12,6 +12,14 @@ export function initMatchPsychologists() {
         if (!btn) return;
 
         btn.disabled = (count === 0);
+
+        // Также управляем ссылкой перехода на шаг "Выбор психолога" - если 0 специалистов то тоже нельзя дальше идти
+        const stepLink = document.getElementById("step-choice-psychologist-link");
+        if (stepLink) {
+            const isDisabled = (count === 0);
+            stepLink.setAttribute("aria-disabled", String(isDisabled));
+            stepLink.classList.toggle("pointer-events-none", isDisabled);
+        }
     }
 
     /**
