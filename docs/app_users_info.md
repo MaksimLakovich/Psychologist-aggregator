@@ -326,17 +326,18 @@
 
 #### 2) AJAX-запрос (fetch) на специальный API-endpoint
 
-| № | Название контроллера              | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                                                                                                                                  | Используемые модели           |
-|---|-----------------------------------|------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
-| 1 | **SaveHasPreferencesAjaxView**    | `View`                 | Моментальное сохранение значения has_preferences выбранного клиентом на html-странице                                                                                                             | `ClientProfile` + справочники |
-| 2 | **SavePreferredMethodsAjaxView**  | `View`                 | Моментальное сохранение выбранных клиентом методов в preferred_methods на html-странице                                                                                                           | `ClientProfile` + справочники |
-| 3 | **SavePreferredTopicTypeAjaxView** | `View`                 | Моментальное сохранение значения preferred_topic_type выбранного клиентом на html-странице                                                                                                        | `ClientProfile` + справочники |
-| 4 | **SaveRequestedTopicsAjaxView**   | `View`                 | Моментальное сохранение выбранных клиентом тем в requested_topics на html-странице                                                                                                                | `ClientProfile` + справочники |
-| 5 | **SavePreferredGenderAjaxView**   | `View`                 | Моментальное сохранение выбранных клиентом значений в preferred_ps_gender на html-страницах                                                                                                       | `ClientProfile` + справочники |
-| 6 | **SavePreferredAgeAjaxView**      | `View`                 | Моментальное сохранение выбранных клиентом значений в preferred_ps_age на html-страницах                                                                                                          | `ClientProfile` + справочники |
-| 7 | **SaveHasTimePreferencesAjaxView** | `View`                 | Моментальное сохранение значения has_time_preferences выбранного клиентом на html-странице                                                                                                        | `ClientProfile` + справочники |
-| 8 | **SavePreferredSlotsAjaxView**    | `View`                 | Моментальное сохранение выбранных клиентом значений в preferred_slots на html-странице                                                                                                            | `ClientProfile` + справочники |
-| 9 | **GetDomainSlotsAjaxView**        | `View`                 | Возвращает клиенту на UI все возможные доменные временные слоты (общее правило домена). <br/> Read-only эндпоинт только для показа возможных слотов на странице пользователя, без сохранения в БД | Без использования БД          |
+| №  | Название контроллера              | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                                                                                                                                 | Используемые модели          |
+|----|-----------------------------------|------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
+| 1  | **SaveHasPreferencesAjaxView**    | `View`                 | Моментальное сохранение значения has_preferences выбранного клиентом на html-странице                                                                                                            | `ClientProfile` + справочники |
+| 2  | **SavePreferredMethodsAjaxView**  | `View`                 | Моментальное сохранение выбранных клиентом методов в preferred_methods на html-странице                                                                                                          | `ClientProfile` + справочники |
+| 3  | **SavePreferredTopicTypeAjaxView** | `View`                 | Моментальное сохранение значения preferred_topic_type выбранного клиентом на html-странице                                                                                                       | `ClientProfile` + справочники |
+| 4  | **SaveRequestedTopicsAjaxView**   | `View`                 | Моментальное сохранение выбранных клиентом тем в requested_topics на html-странице                                                                                                               | `ClientProfile` + справочники |
+| 5  | **SavePreferredGenderAjaxView**   | `View`                 | Моментальное сохранение выбранных клиентом значений в preferred_ps_gender на html-страницах                                                                                                      | `ClientProfile` + справочники |
+| 6  | **SavePreferredAgeAjaxView**      | `View`                 | Моментальное сохранение выбранных клиентом значений в preferred_ps_age на html-страницах                                                                                                         | `ClientProfile` + справочники |
+| 7  | **SaveHasTimePreferencesAjaxView** | `View`                 | Моментальное сохранение значения has_time_preferences выбранного клиентом на html-странице                                                                                                       | `ClientProfile` + справочники |
+| 8  | **SavePreferredSlotsAjaxView**    | `View`                 | Моментальное сохранение выбранных клиентом значений в preferred_slots на html-странице                                                                                                           | `ClientProfile` + справочники |
+| 9  | **GetDomainSlotsAjaxView**        | `View`                 | Возвращает клиенту на UI все возможные доменные временные слоты (общее правило домена). <br/> Read-only эндпоинт только для показа возможных слотов на странице пользователя, без сохранения в БД | Без использования БД         |
+| 10 | **GetSpecialistScheduleAjaxView** | `View`                 | Возвращает клиенту на UI в карточке конкретного специалиста актуальное расписание данного специалиста: <br/> 1) ближайший доступный слот; <br/> 2) все доступные слоты в блоке "Расписание"      | Без использования БД         |
 
 
 ### 3. МАРШРУТЫ (РОУТЫ)
@@ -376,17 +377,18 @@
 
 #### 2) AJAX-запросы (fetch) на моментальное сохранение указанных клиентом на html-страницах данных в БД
 
-| № | Эндпоинт                               | HTTP-методы | Описание функционала                                                                        |
-|---|----------------------------------------|-------------|---------------------------------------------------------------------------------------------|
-| 1 | `/users/api/save-has-preferences/`     | `POST`      | Моментальное сохранение значения has_preferences выбранного клиентом на html-страницах      |
-| 2 | `/users/api/save-preferred-methods/`   | `POST`      | Моментальное сохранение выбранных клиентом методов в preferred_methods на html-страницах    |
-| 3 | `/users/api/save-preferred-topic-type/` | `POST`      | Моментальное сохранение значения preferred_topic_type выбранного клиентом на html-страницах |
-| 4 | `/users/api/save-requested-topics/`    | `POST`      | Моментальное сохранение выбранных клиентом тем в requested_topics на html-страницах         |
-| 5 | `/users/api/save-preferred-gender/`    | `POST`      | Моментальное сохранение выбранных клиентом значений в preferred_ps_gender на html-страницах |
-| 6 | `/users/api/save-preferred-age/`       | `POST`      | Моментальное сохранение выбранных клиентом значений в preferred_ps_age на html-страницах    |
-| 7 | `/users/api/save-has-time-preferences/` | `POST`      | Моментальное сохранение значения has_time_preferences выбранного клиентом на html-страницах |
-| 8 | `/users/api/save-preferred-slots/`     | `POST`      | Моментальное сохранение выбранных клиентом значений в preferred_slots на html-страницах     |
-| 9 | `/users/api/get-domain-slots/`         | `GET`       | Показать все возможные доменные временные слоты на ближайшие N-дней                         |
+| №  | Эндпоинт                                              | HTTP-методы | Описание функционала                                                                       |
+|----|-------------------------------------------------------|------------|--------------------------------------------------------------------------------------------|
+| 1  | `/users/api/save-has-preferences/`                    | `POST`     | Моментальное сохранение значения has_preferences выбранного клиентом на html-страницах     |
+| 2  | `/users/api/save-preferred-methods/`                  | `POST`     | Моментальное сохранение выбранных клиентом методов в preferred_methods на html-страницах   |
+| 3  | `/users/api/save-preferred-topic-type/`               | `POST`     | Моментальное сохранение значения preferred_topic_type выбранного клиентом на html-страницах |
+| 4  | `/users/api/save-requested-topics/`                   | `POST`     | Моментальное сохранение выбранных клиентом тем в requested_topics на html-страницах        |
+| 5  | `/users/api/save-preferred-gender/`                   | `POST`     | Моментальное сохранение выбранных клиентом значений в preferred_ps_gender на html-страницах |
+| 6  | `/users/api/save-preferred-age/`                      | `POST`     | Моментальное сохранение выбранных клиентом значений в preferred_ps_age на html-страницах   |
+| 7  | `/users/api/save-has-time-preferences/`               | `POST`     | Моментальное сохранение значения has_time_preferences выбранного клиентом на html-страницах |
+| 8  | `/users/api/save-preferred-slots/`                    | `POST`     | Моментальное сохранение выбранных клиентом значений в preferred_slots на html-страницах    |
+| 9  | `/users/api/get-domain-slots/`                        | `GET`      | Показать все возможные доменные временные слоты на ближайшие N-дней                        |
+| 10 | `/users/api/psychologists/<int:profile_id>/schedule/` | `GET`      | Показать расписание специалиста (доступное время для записи)                               |
 
 ---
 
