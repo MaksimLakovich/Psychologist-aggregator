@@ -13,6 +13,7 @@ import { initMatchPsychologists } from "../modules/match_psychologists.js";
 import { initAutosaveHasTimePreferences } from "../modules/autosave_has_time_preferences.js";
 import { initTimeSlotsPicker } from "../modules/time_slots_picker.js";
 import { initAutosavePreferredSlots } from "../modules/autosave_preferred_slots.js";
+import { initCheckRequestedTopics } from "../modules/check_requested_topics.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     // безопасно получаем опции из контейнера (data-attributes) - для METHOD
@@ -68,6 +69,9 @@ document.addEventListener("DOMContentLoaded", () => {
         saveUrl: topicsSaveUrl,
         csrfToken: topicsCsrfToken || window.CSRF_TOKEN,
     });
+
+    // 5.1 УВЕДОМЛЕНИЕ В ВИДЕ ПЛАШКИ - проверка наличия хотя бы 1 выбранной ТЕМЫ перед переходом дальше
+    initCheckRequestedTopics();
 
     // 6. Логика работы переключателя ИЛИ/ИЛИ (кнопка: "Все равно" / "Есть пожелания" где показываем набор предпочтения для выбора или нет)
     initToggleGroup({
