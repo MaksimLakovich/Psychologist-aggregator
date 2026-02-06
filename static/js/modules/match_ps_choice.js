@@ -123,7 +123,45 @@ function groupScheduleByDay(schedule = []) {
     return groups;
 }
 
-// 7) Функция для применения стилей для СЛОТОВ в расписании
+// 7) Функция для формирования СТИЛЕЙ для слотов
+function getSlotKey(slot) {
+    return slot.start_iso || `${slot.day}T${slot.start_time}`;
+}
+
+function getSlotButtonClass(isSelected) {
+    const baseClasses = [
+        "rounded-full",
+        "px-3",
+        "py-2",
+        "text-sm",
+        "font-medium",
+        "border",
+        "transition-all",
+        "duration-200",
+    ];
+    const selectedClasses = [
+        "bg-indigo-500",
+        "text-white",
+        "border-indigo-500",
+        "hover:bg-indigo-900",
+    ];
+    const idleClasses = [
+        "bg-indigo-100",
+        "text-gray-500",
+        "border-indigo-100",
+        "hover:bg-indigo-200",
+    ];
+    return [
+        ...baseClasses,
+        ...(isSelected ? selectedClasses : idleClasses),
+    ].join(" ");
+}
+
+function applySlotButtonState(btn, isSelected) {
+    btn.className = getSlotButtonClass(isSelected);
+}
+
+// 8) Функция для применения стилей для СЛОТОВ в расписании
 function renderScheduleList(schedule = [], selectedSlotKey = null) {
     if (!schedule.length) {
         return `<p class="text-gray-500 text-sm mt-2">Нет доступных слотов</p>`;
@@ -149,34 +187,9 @@ function renderScheduleList(schedule = [], selectedSlotKey = null) {
         const times = grouped[day]
             .sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""))
             .map(slot => {
-                const slotKey = slot.start_iso || `${slot.day}T${slot.start_time}`;
+                const slotKey = getSlotKey(slot);
                 const isSelected = selectedSlotKey && slotKey === selectedSlotKey;
-                const baseClasses = [
-                    "rounded-full",
-                    "px-3",
-                    "py-1",
-                    "text-base",
-                    "font-medium",
-                    "border",
-                    "transition-all",
-                    "duration-200",
-                ];
-                const selectedClasses = [
-                    "bg-indigo-500",
-                    "text-white",
-                    "border-indigo-500",
-                    "hover:bg-indigo-900",
-                ];
-                const idleClasses = [
-                    "bg-white",
-                    "text-indigo-500",
-                    "border-indigo-200",
-                    "hover:bg-indigo-50",
-                ];
-                const className = [
-                    ...baseClasses,
-                    ...(isSelected ? selectedClasses : idleClasses),
-                ].join(" ");
+                const className = getSlotButtonClass(isSelected);
 
                 return `
                     <button
@@ -574,37 +587,12 @@ function renderPsychologistCard(ps) {
                     selectedSlotKey = newKey;
 
                     scheduleEl.querySelectorAll("button[data-slot-key]").forEach(el => {
-                        el.classList.remove(
-                            "bg-indigo-500",
-                            "text-white",
-                            "border-indigo-500",
-                            "hover:bg-indigo-900"
-                        );
-                        el.classList.add(
-                            "bg-white",
-                            "text-indigo-700",
-                            "border-indigo-200",
-                            "hover:bg-indigo-50"
-                        );
+                        applySlotButtonState(el, false);
                     });
 
-                    btn.classList.remove(
-                        "bg-white",
-                        "text-indigo-700",
-                        "border-indigo-200",
-                        "hover:bg-indigo-50"
-                    );
-                    btn.classList.add(
-                        "bg-indigo-500",
-                        "text-white",
-                        "border-indigo-500",
-                        "hover:bg-indigo-900"
-                    );
+                    applySlotButtonState(btn, true);
 
-                    const slotObj = schedule.find(slot => {
-                        const key = slot.start_iso || `${slot.day}T${slot.start_time}`;
-                        return key === newKey;
-                    });
+                    const slotObj = schedule.find(slot => getSlotKey(slot) === newKey);
                     updateChooseButton(formatSelectedSlotLabel(slotObj));
                     setSelectedAppointmentSlot(currentPsId, slotObj);
                 };
