@@ -55,7 +55,7 @@ function scrollToTopThen(callback) {
         behavior: "smooth",
     });
 
-    // Ждем пока автоматический scroll вверх реально завершится
+    // ждем пока автоматический scroll вверх реально завершится
     let lastY = window.scrollY;
     let sameCount = 0;
 
@@ -80,11 +80,11 @@ function scrollToTopThen(callback) {
     requestAnimationFrame(check);
 }
 
-// 5) Функция для БЛИЖАЙШЕГО ВРЕМЕНИ и форматирование слота под "31 января в 05:00"
+// 5) Функция для форматирование СЛОТА под "31 января в 05:00" в блоке "БЛИЖАЙШЕЕ ВРЕМЯ"
 function formatNearestSlot(slot) {
     if (!slot) return null;
 
-    // Предпочитаем start_iso, т.к. уже с учетом TZ клиента
+    // предпочитаем start_iso, т.к. уже с учетом TZ клиента
     let dateObj = null;
     if (slot.start_iso) {
         dateObj = new Date(slot.start_iso);
@@ -111,7 +111,7 @@ function formatNearestSlot(slot) {
     return `${datePart} в ${timePart} (${weekdayShort})`;
 }
 
-// 6) Функция для создания РАСПИСАНИЯ
+// 6) Функция для группировки СЛОТОВ для вывода в блоке РАСПИСАНИЕ
 function groupScheduleByDay(schedule = []) {
     const groups = {};
     schedule.forEach(slot => {
@@ -123,8 +123,8 @@ function groupScheduleByDay(schedule = []) {
     return groups;
 }
 
-// 7) Функция для визуала вывода расписания
-function renderScheduleList(schedule = []) {
+// 7) Функция для применения стилей для СЛОТОВ в расписании
+function renderScheduleList(schedule = [], selectedSlotKey = null) {
     if (!schedule.length) {
         return `<p class="text-gray-500 text-sm mt-2">Нет доступных слотов</p>`;
     }
@@ -148,11 +148,49 @@ function renderScheduleList(schedule = []) {
 
         const times = grouped[day]
             .sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""))
-            .map(slot => `
-                <span class="rounded-full bg-indigo-100 px-3 py-1 text-base font-medium text-indigo-700">
-                    ${slot.start_time}
-                </span>
-            `)
+            .map(slot => {
+                const slotKey = slot.start_iso || `${slot.day}T${slot.start_time}`;
+                const isSelected = selectedSlotKey && slotKey === selectedSlotKey;
+                const baseClasses = [
+                    "rounded-full",
+                    "px-3",
+                    "py-1",
+                    "text-base",
+                    "font-medium",
+                    "border",
+                    "transition-all",
+                    "duration-200",
+                ];
+                const selectedClasses = [
+                    "bg-indigo-500",
+                    "text-white",
+                    "border-indigo-500",
+                    "hover:bg-indigo-900",
+                ];
+                const idleClasses = [
+                    "bg-white",
+                    "text-indigo-500",
+                    "border-indigo-200",
+                    "hover:bg-indigo-50",
+                ];
+                const className = [
+                    ...baseClasses,
+                    ...(isSelected ? selectedClasses : idleClasses),
+                ].join(" ");
+
+                return `
+                    <button
+                        type="button"
+                        class="${className}"
+                        data-slot-key="${slotKey}"
+                        data-day="${slot.day || ""}"
+                        data-start-time="${slot.start_time || ""}"
+                        data-start-iso="${slot.start_iso || ""}"
+                    >
+                        ${slot.start_time}
+                    </button>
+                `;
+            })
             .join("");
 
         return `
@@ -164,7 +202,7 @@ function renderScheduleList(schedule = []) {
     }).join("");
 }
 
-// 8) Функция для формирования БЛИЖАЙШЕГО ВРЕМЕНИ
+// 8) Функции для обновления значений в БЛИЖАЙШЕЕ ВРЕМЯ и в РАСПИСАНИИ
 function updateNearestSlotUI(nearestSlotText) {
     const nearestSlotEl = document.getElementById("ps-nearest-slot");
     if (!nearestSlotEl) return;
@@ -172,10 +210,67 @@ function updateNearestSlotUI(nearestSlotText) {
     nearestSlotEl.textContent = nearestSlotText || "Нет доступных слотов";
 }
 
-function updateScheduleUI(schedule) {
+function updateScheduleUI(schedule, selectedSlotKey = null) {
     const scheduleEl = document.getElementById("psychologist-schedule-list");
     if (!scheduleEl) return;
-    scheduleEl.innerHTML = renderScheduleList(schedule);
+    scheduleEl.innerHTML = renderScheduleList(schedule, selectedSlotKey);
+}
+
+const SELECTED_APPOINTMENT_SLOT_KEY = "selectedAppointmentSlot";
+
+function setSelectedAppointmentSlot(psId, slot) {
+    if (!slot) {
+        sessionStorage.removeItem(SELECTED_APPOINTMENT_SLOT_KEY);
+        return;
+    }
+    sessionStorage.setItem(
+        SELECTED_APPOINTMENT_SLOT_KEY,
+        JSON.stringify({
+            psychologistId: String(psId),
+            slot,
+        })
+    );
+}
+
+// 9) Вспомогательная функция
+function formatSelectedSlotLabel(slot) {
+    if (!slot) return null;
+    let dateObj = null;
+    if (slot.start_iso) {
+        dateObj = new Date(slot.start_iso);
+    } else if (slot.day && slot.start_time) {
+        dateObj = new Date(`${slot.day}T${slot.start_time}`);
+    }
+    if (!dateObj || Number.isNaN(dateObj.getTime())) return null;
+
+    const datePart = new Intl.DateTimeFormat("ru-RU", {
+        day: "numeric",
+        month: "long",
+    }).format(dateObj);
+
+    const timePart = new Intl.DateTimeFormat("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit",
+    }).format(dateObj);
+
+    return `${datePart} ${timePart}`;
+}
+
+// 10) Функция для формирования подписи в КНОПКЕ "Выбрать время сессии" на "Выбрать 9 февраля 18:00"
+function updateChooseButton(selectedSlotLabel) {
+    const btn = document.querySelector("[data-choose-session-btn]");
+    if (!btn) return;
+    if (selectedSlotLabel) {
+        btn.disabled = false;
+        btn.textContent = `Выбрать ${selectedSlotLabel}`;
+        btn.classList.remove("bg-gray-300", "text-gray-500", "cursor-not-allowed");
+        btn.classList.add("bg-indigo-500", "text-white", "hover:bg-indigo-900");
+    } else {
+        btn.disabled = true;
+        btn.textContent = "Выбрать время сессии";
+        btn.classList.add("bg-gray-300", "text-gray-500", "cursor-not-allowed");
+        btn.classList.remove("bg-indigo-500", "text-white", "hover:bg-indigo-900");
+    }
 }
 
 
@@ -185,6 +280,8 @@ function updateScheduleUI(schedule) {
 
 
 export function initPsychologistsChoice() {
+    // При заходе на страницу сбрасываем выбранный слот
+    sessionStorage.removeItem(SELECTED_APPOINTMENT_SLOT_KEY);
     fetchPsychologists();
     initNavigation();
 }
@@ -435,35 +532,90 @@ function renderPsychologistCard(ps) {
         ? "Парная сессия · 1,5 часа"
         : "Индивидуальная сессия · 50 минут";
 
-    // 6) Убираем копейки
+    // 6) Убираем копейки в стоимости сессии
     const priceValue = Number(ps.price.value).toFixed(0);
 
     // 7) Подгружаем РАСПИСАНИЕ и БЛИЖАЙШЕЕ ВРЕМЯ для выбранного специалиста
     const currentPsId = ps.id;
     container.dataset.psId = String(currentPsId);
+    let selectedSlotKey = null;
+
+    // Сбрасываем выбор при переключении на другого специалиста
+    updateChooseButton(null);
+    setSelectedAppointmentSlot(currentPsId, null);
 
     fetch(`/users/api/psychologists/${currentPsId}/schedule/`)
         .then(response => response.json())
         .then(data => {
-            // Защита от гонок: если карточка уже переключена на другого психолога — игнорируем
+            // Защита от гонок: если карточка уже переключена на другого психолога - игнорируем
             if (container.dataset.psId !== String(currentPsId)) return;
 
             if (!data || data.status !== "ok") {
                 updateNearestSlotUI("Нет доступных слотов");
-                updateScheduleUI([]);
+                updateScheduleUI([], null);
+                updateChooseButton(null);
                 return;
             }
 
+            const schedule = data.schedule || [];
             const nearestText = formatNearestSlot(data.nearest_slot);
             updateNearestSlotUI(nearestText || "Нет доступных слотов");
-            updateScheduleUI(data.schedule || []);
+            updateScheduleUI(schedule, selectedSlotKey);
+
+            const scheduleEl = document.getElementById("psychologist-schedule-list");
+            if (scheduleEl) {
+                scheduleEl.onclick = event => {
+                    const btn = event.target.closest("button[data-slot-key]");
+                    if (!btn) return;
+
+                    const newKey = btn.dataset.slotKey;
+                    if (!newKey) return;
+
+                    selectedSlotKey = newKey;
+
+                    scheduleEl.querySelectorAll("button[data-slot-key]").forEach(el => {
+                        el.classList.remove(
+                            "bg-indigo-500",
+                            "text-white",
+                            "border-indigo-500",
+                            "hover:bg-indigo-900"
+                        );
+                        el.classList.add(
+                            "bg-white",
+                            "text-indigo-700",
+                            "border-indigo-200",
+                            "hover:bg-indigo-50"
+                        );
+                    });
+
+                    btn.classList.remove(
+                        "bg-white",
+                        "text-indigo-700",
+                        "border-indigo-200",
+                        "hover:bg-indigo-50"
+                    );
+                    btn.classList.add(
+                        "bg-indigo-500",
+                        "text-white",
+                        "border-indigo-500",
+                        "hover:bg-indigo-900"
+                    );
+
+                    const slotObj = schedule.find(slot => {
+                        const key = slot.start_iso || `${slot.day}T${slot.start_time}`;
+                        return key === newKey;
+                    });
+                    updateChooseButton(formatSelectedSlotLabel(slotObj));
+                    setSelectedAppointmentSlot(currentPsId, slotObj);
+                };
+            }
         })
         .catch(() => {
             if (container.dataset.psId !== String(currentPsId)) return;
             updateNearestSlotUI("Нет доступных слотов");
-            updateScheduleUI([]);
+            updateScheduleUI([], null);
+            updateChooseButton(null);
         });
-
 
     // HTML-ШАБЛОН
     container.innerHTML = `
@@ -636,7 +788,7 @@ function renderPsychologistCard(ps) {
                             Расписание
                         </h3>
                         <p class="text-lg text-gray-700 leading-relaxed overflow-hidden transition-all mt-2">
-                            Часовой пояс: ${ps.timezone || "не указан"}
+                            Часовой пояс: {{request.user.timezone}}
                         </p>
                         <div id="psychologist-schedule-list" class="mt-2"></div>
                     </div>
@@ -660,9 +812,10 @@ function renderPsychologistCard(ps) {
                     </p>
                     <button
                         type="submit"
-                        class="mt-6 w-full px-10 py-3.5 rounded-xl bg-indigo-700 text-xl text-white
-                            font-extrabold tracking-wide
-                            hover:bg-indigo-900 transition shadow"
+                        class="mt-6 w-full px-10 py-3.5 rounded-xl bg-gray-300 text-xl text-gray-500
+                            font-extrabold tracking-wide cursor-not-allowed transition shadow"
+                        data-choose-session-btn
+                        disabled
                     >
                         Выбрать время сессии
                     </button>
