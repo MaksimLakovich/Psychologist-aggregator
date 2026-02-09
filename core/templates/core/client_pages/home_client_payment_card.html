@@ -105,9 +105,13 @@
                                 dark:border-gray-700 dark:bg-gray-800 lg:max-w-xl">
 
                                     <!-- Блок с инфо: психолог, слот, добавление карты и подтверждение -->
+                                    <!-- ДЛЯ ИНФО: у нас add_appointment_payment.js формирует данные полностью в JS, поэтому -->
+                                    <!-- просто использовать Django‑теги внутри html-шаблонна в js не работает. Поэтому правильный путь: -->
+                                    <!-- пробросить timezone в dataset (data-client-timezone) и потом уже использовать в JS. -->
                                     <div
                                             id="payment-psychologist-summary"
                                             class="mb-1 pb-4"
+                                            data-client-timezone="{{ request.user.timezone|default_if_none:'' }}"
                                     ></div>
 
                                     <!-- Картинки платежных систем -->
