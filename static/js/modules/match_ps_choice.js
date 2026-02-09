@@ -1,5 +1,6 @@
 import { pluralizeRu } from "../utils/pluralize_ru.js";
 
+// Глобальное состояние страницы (список психологов + пагинация + выбранный психолог)
 let psychologists = [];
 let currentOffset = 0;
 const PAGE_SIZE = 10;
@@ -12,6 +13,7 @@ let selectedPsychologistId = null;
 
 
 // 1) Функция для хранения состояния страницы выбора (при обновлении браузер)
+// Проверяем, была ли страница перезагружена (для восстановления выбранного психолога)
 function isPageReload() {
     const nav = performance.getEntriesByType("navigation")[0];
     return nav && nav.type === "reload";
@@ -48,7 +50,8 @@ window.toggleEducation = function (btn) {
     btn.textContent = isCollapsed ? "Показать меньше" : "Показать больше";
 };
 
-// 4) Функция для автоматической прокрутки к началу страницы при переключении между карточками психологов
+// 4) Функция для автоматической прокрутки к началу страницы при переключении между карточками специалистов
+// Плавно скроллим наверх и ждём завершения скролла, затем выполняем callback
 function scrollToTopThen(callback) {
     window.scrollTo({
         top: 0,
@@ -80,7 +83,7 @@ function scrollToTopThen(callback) {
     requestAnimationFrame(check);
 }
 
-// 5) Функция для
+// 5) Функция для преобразования слота в Date (берем start_iso или day+start_time)
 function getSlotDateObj(slot) {
     if (!slot) return null;
     if (slot.start_iso) {
@@ -94,7 +97,7 @@ function getSlotDateObj(slot) {
     return null;
 }
 
-// 6) Функция для
+// 6) Функция для форматирования даты/времени/день недели в TZ клиента
 function formatSlotParts(slot, timeZone) {
     const dateObj = getSlotDateObj(slot);
     if (!dateObj) return null;
@@ -131,7 +134,7 @@ function formatNearestSlot(slot, timeZone) {
     return `${parts.datePart} в ${parts.timePart} (${parts.weekdayShort})`;
 }
 
-// 8) Функция для группировки СЛОТОВ для вывода в блоке РАСПИСАНИЕ
+// 8) Функция для группировки СЛОТОВ по ДНЯМ для вывода в блоке РАСПИСАНИЕ
 function groupScheduleByDay(schedule = []) {
     const groups = {};
     schedule.forEach(slot => {
@@ -143,11 +146,12 @@ function groupScheduleByDay(schedule = []) {
     return groups;
 }
 
-// 9) Функция для формирования СТИЛЕЙ для слотов
+// 9) Функция для генерации ключа слота (нужен для сравнения выбранного слота)
 function getSlotKey(slot) {
     return slot.start_iso || `${slot.day}T${slot.start_time}`;
 }
 
+// 10) Возвращаем CSS‑класс кнопки слота в зависимости от выбранности
 function getSlotButtonClass(isSelected) {
     const baseClasses = [
         "rounded-full",
@@ -177,11 +181,12 @@ function getSlotButtonClass(isSelected) {
     ].join(" ");
 }
 
+// 11) Применяем визуальное состояние к кнопке слота
 function applySlotButtonState(btn, isSelected) {
     btn.className = getSlotButtonClass(isSelected);
 }
 
-// 10) Функция для применения стилей для СЛОТОВ в расписании
+// 12) Рендерим HTML блока "Расписание" (группировка по дням + кнопки слотов)
 function renderScheduleList(schedule = [], selectedSlotKey = null) {
     if (!schedule.length) {
         return `<p class="text-gray-500 text-sm mt-2">Нет доступных слотов</p>`;
@@ -235,7 +240,7 @@ function renderScheduleList(schedule = [], selectedSlotKey = null) {
     }).join("");
 }
 
-// 11) Функции для обновления значений в БЛИЖАЙШЕЕ ВРЕМЯ и в РАСПИСАНИИ
+// 13) Обновляем строку "Ближайшая запись"
 function updateNearestSlotUI(nearestSlotText) {
     const nearestSlotEl = document.getElementById("ps-nearest-slot");
     if (!nearestSlotEl) return;
@@ -243,14 +248,17 @@ function updateNearestSlotUI(nearestSlotText) {
     nearestSlotEl.textContent = nearestSlotText || "Нет доступных слотов";
 }
 
+// 14) Обновляем блок расписания
 function updateScheduleUI(schedule, selectedSlotKey = null) {
     const scheduleEl = document.getElementById("psychologist-schedule-list");
     if (!scheduleEl) return;
     scheduleEl.innerHTML = renderScheduleList(schedule, selectedSlotKey);
 }
 
+// 15) Ключ в sessionStorage для выбранного слота (переход на оплату)
 const SELECTED_APPOINTMENT_SLOT_KEY = "selectedAppointmentSlot";
 
+// 16) Сохраняем выбранный слот в sessionStorage (для страницы оплаты)
 function setSelectedAppointmentSlot(psId, slot) {
     if (!slot) {
         sessionStorage.removeItem(SELECTED_APPOINTMENT_SLOT_KEY);
@@ -265,14 +273,14 @@ function setSelectedAppointmentSlot(psId, slot) {
     );
 }
 
-// 12) Функция для формата выбранного слота
+// 17) Функция для формата выбранного слота для подписи на кнопке ("Выбрать 11 февраля 10:00")
 function formatSelectedSlotLabel(slot, timeZone) {
     const parts = formatSlotParts(slot, timeZone);
     if (!parts) return null;
     return `${parts.datePart} ${parts.timePart}`;
 }
 
-// 13) Функция для формирования подписи в КНОПКЕ "Выбрать время сессии" на "Выбрать 9 февраля 18:00"
+// 18) Функция для управления активностью и формирования подписи в КНОПКЕ: "Выбрать время сессии"
 function updateChooseButton(selectedSlotLabel) {
     const btn = document.querySelector("[data-choose-session-btn]");
     if (!btn) return;
@@ -291,7 +299,7 @@ function updateChooseButton(selectedSlotLabel) {
     }
 }
 
-// 14) Функция для управления АКТИВНО/НЕАКТИВНО в блоке "ШАГИ" чтоб нельзя было перейти на страницу "Запись" без выбранного слота
+// 19) Функция для управления АКТИВНО/НЕАКТИВНО в блоке "ШАГИ" чтоб нельзя было перейти на страницу "Запись" без выбранного слота
 function updatePaymentStepLink(isEnabled) {
     const link = document.querySelector("[data-payment-step-link]");
     if (!link) return;
@@ -318,7 +326,7 @@ function updatePaymentStepLink(isEnabled) {
 
 
 export function initPsychologistsChoice() {
-    // При заходе на страницу сбрасываем выбранный слот
+    // При заходе на страницу сбрасываем выбранный слот и блокируем переход на оплату
     sessionStorage.removeItem(SELECTED_APPOINTMENT_SLOT_KEY);
     updatePaymentStepLink(false);
     fetchPsychologists();
@@ -326,7 +334,7 @@ export function initPsychologistsChoice() {
 }
 
 
-// ===== ШАГ 1: ЗАГРУЗКА ДАННЫХ =====
+// ===== ШАГ 1: ЗАГРУЗКА ДАННЫХ (получаем список психологов по фильтрам) =====
 function fetchPsychologists() {
     fetch("/aggregator/api/match-psychologists/")
         .then(response => response.json())

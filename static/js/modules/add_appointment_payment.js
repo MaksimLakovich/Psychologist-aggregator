@@ -6,14 +6,14 @@ import { pluralizeRu } from "../utils/pluralize_ru.js";
  * ========================================================================== */
 
 
-// 1) Логика отображения PRICE в зависимости от "individual/couple"
+// 1) Формируем подпись типа сессии по типу (индивидуальная/парная)
 export function formatSessionLabel(sessionType) {
     return sessionType === "couple"
         ? "Сессия · 1,5 часа"
         : "Сессия · 50 минут";
 }
 
-// 2) Убираем копейки и формируем цену с указанием валюты
+// 2) Убираем копейки и формируем цену с валютой
 export function formatPrice(price) {
     return `${Number(price.value).toFixed(0)} ${price.currency}`;
 }
@@ -21,18 +21,21 @@ export function formatPrice(price) {
 
 /* ============================================================================
  * ИНИЦИАЛИЗАЦИЯ
- * Загрузка данных: инфо психолога (имя, стоимость), бронируемый слот, добавление карты и подтверждение
+ * Загрузка данных: инфо специалиста (имя, стоимость), бронируемый слот, добавление карты и подтверждение
  * ========================================================================== */
 
 
+// ===== Константы для API и хранения состояния =====
 const API_URL = "/aggregator/api/match-psychologists/";
 const STORAGE_KEY = "selectedPsychologistId";
 const SELECTED_APPOINTMENT_SLOT_KEY = "selectedAppointmentSlot";
 
+// Главная точка входа: получает выбранного специалиста и выбранный слот
 export async function initAddAppointmentAndPaymentCard() {
     const selectedId = sessionStorage.getItem(STORAGE_KEY);
     let selectedSlot = null;
 
+    // Читаем выбранный слот из sessionStorage
     try {
         const rawSlot = sessionStorage.getItem(SELECTED_APPOINTMENT_SLOT_KEY);
         if (rawSlot) {
@@ -45,11 +48,13 @@ export async function initAddAppointmentAndPaymentCard() {
         console.warn("Не удалось прочитать выбранный слот:", error);
     }
 
+    // Если психолог не выбран - нечего отображать
     if (!selectedId) {
         console.warn("Психолог не выбран");
         return;
     }
 
+    // Загружаем список специалиста и находим выбранного по id
     try {
         const response = await fetch(API_URL);
         const data = await response.json();
@@ -70,7 +75,8 @@ export async function initAddAppointmentAndPaymentCard() {
     }
 }
 
-// 2) Функция для получения инфо по выбранному слоту в карточке специалиста
+// 3) Функция для получения инфо по выбранному слоту в карточке специалиста
+// Преобразуем слот в Date (берем start_iso или day+start_time)
 function getSlotDateObj(slot) {
     if (!slot) return null;
     if (slot.start_iso) {
@@ -84,7 +90,8 @@ function getSlotDateObj(slot) {
     return null;
 }
 
-// 3) Функция для формирования инфо по выбранному СЛОТУ (например: "Дата и время: 9 февраля 18:00 (понедельник)")
+// 4) Формируем строку даты/времени слота с учетом TZ клиента
+// Формируем инфо по выбранному СЛОТУ (например: "Дата и время: 9 февраля 18:00 (понедельник)")
 function formatAppointmentSlot(slot, timeZone) {
     if (!slot) return "Слот не выбран";
 
@@ -113,11 +120,12 @@ function formatAppointmentSlot(slot, timeZone) {
     return `${datePart} ${timePart} (${weekdayLong})`;
 }
 
-// 4) Функция для формирования HTML-шаблона
+// 5) Рендерим HTML блока подтверждения записи и оплаты
 function renderAddAppointmentAndPaymentCard(ps, selectedSlot) {
     const container = document.getElementById("payment-psychologist-summary");
     if (!container) return;
 
+    // Часовой пояс клиента из data-атрибута шаблона
     const clientTimezone = container.dataset.clientTimezone || undefined;
     const sessionLabel = formatSessionLabel(ps.session_type);
     const priceLabel = formatPrice(ps.price);
