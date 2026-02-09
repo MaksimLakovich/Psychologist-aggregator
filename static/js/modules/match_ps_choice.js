@@ -343,17 +343,24 @@ function fetchPsychologists() {
             psychologists = data.items || [];
             if (!psychologists.length) return;
 
-            let selectedId = null;
-
-            if (isPageReload()) {
-                selectedId = sessionStorage.getItem("selectedPsychologistId");
+            // Если пришли после новой/повторной фильтрации/подбора - то сбрасываем выбранного ранее психолога
+            const cardContainer = document.getElementById("psychologist-card");
+            const shouldReset = cardContainer?.dataset.resetChoice === "1";
+            if (shouldReset) {
+                sessionStorage.removeItem("selectedPsychologistId");
+                cardContainer.dataset.resetChoice = "0";
             }
+
+            // В остальных случаях пытаемся восстановить последний выбранный психолог
+            let selectedId = sessionStorage.getItem("selectedPsychologistId");
 
             const selected =
                 psychologists.find(ps => String(ps.id) === selectedId) ||
                 psychologists[0];
 
             selectedPsychologistId = selected.id;
+            // Синхронизируем выбранного психолога с sessionStorage (важно при новом подборе)
+            sessionStorage.setItem("selectedPsychologistId", selectedPsychologistId);
 
             renderAvatars();
 

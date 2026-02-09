@@ -20,6 +20,13 @@ class ClientChoicePsychologistPageView(LoginRequiredMixin, FormView):
         - dict: словарь со всеми данными, доступными внутри HTML-шаблона."""
         context = super().get_context_data(**kwargs)
 
+        # Если это новая повторная фильтрация/подбор - то сбрасываем выбор психолога на странице.
+        # Понимание, что это новая фильтрация мы получаем в "reset_choice_psychologist" из view_personal_questions.py
+        context["reset_choice_psychologist"] = self.request.session.pop(
+            "reset_choice_psychologist",
+            False,
+        )
+
         context["title_home_page_view"] = "Психологи онлайн на Опора — поиск и подбор психолога"
 
         return context
