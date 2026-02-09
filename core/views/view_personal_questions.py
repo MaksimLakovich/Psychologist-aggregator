@@ -166,4 +166,9 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
 
         profile.save()
 
+        # Маркер: что после новой фильтрации на странице выбора психолога нужно стартовать с АВЫ первого,
+        # то есть нужно будет сбрасывать запоминание карточки последнего психолога, которое есть при просмотре
+        # детальной инфо на след странице и выборе слота для записи
+        self.request.session["reset_choice_psychologist"] = True
+
         return super().form_valid(form)
