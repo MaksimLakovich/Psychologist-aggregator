@@ -80,38 +80,58 @@ function scrollToTopThen(callback) {
     requestAnimationFrame(check);
 }
 
-// 5) Функция для форматирование СЛОТА под "31 января в 05:00" в блоке "БЛИЖАЙШЕЕ ВРЕМЯ"
-function formatNearestSlot(slot) {
+// 5) Функция для
+function getSlotDateObj(slot) {
     if (!slot) return null;
-
-    // предпочитаем start_iso, т.к. уже с учетом TZ клиента
-    let dateObj = null;
     if (slot.start_iso) {
-        dateObj = new Date(slot.start_iso);
-    } else if (slot.day && slot.start_time) {
-        dateObj = new Date(`${slot.day}T${slot.start_time}`);
+        const dateObj = new Date(slot.start_iso);
+        return Number.isNaN(dateObj.getTime()) ? null : dateObj;
     }
+    if (slot.day && slot.start_time) {
+        const dateObj = new Date(`${slot.day}T${slot.start_time}`);
+        return Number.isNaN(dateObj.getTime()) ? null : dateObj;
+    }
+    return null;
+}
 
-    if (!dateObj || Number.isNaN(dateObj.getTime())) return null;
+// 6) Функция для
+function formatSlotParts(slot, timeZone) {
+    const dateObj = getSlotDateObj(slot);
+    if (!dateObj) return null;
 
     const datePart = new Intl.DateTimeFormat("ru-RU", {
         day: "numeric",
         month: "long",
+        timeZone,
     }).format(dateObj);
-
-    const weekdayShort = new Intl.DateTimeFormat("ru-RU", {
-        weekday: "short",
-    }).format(dateObj).toLowerCase();
 
     const timePart = new Intl.DateTimeFormat("ru-RU", {
         hour: "2-digit",
         minute: "2-digit",
+        timeZone,
     }).format(dateObj);
 
-    return `${datePart} в ${timePart} (${weekdayShort})`;
+    const weekdayShort = new Intl.DateTimeFormat("ru-RU", {
+        weekday: "short",
+        timeZone,
+    }).format(dateObj).toLowerCase();
+
+    const weekdayLong = new Intl.DateTimeFormat("ru-RU", {
+        weekday: "long",
+        timeZone,
+    }).format(dateObj).toLowerCase();
+
+    return { datePart, timePart, weekdayShort, weekdayLong };
 }
 
-// 6) Функция для группировки СЛОТОВ для вывода в блоке РАСПИСАНИЕ
+// 7) Функция для форматирование СЛОТА под "31 января в 05:00" в блоке "БЛИЖАЙШЕЕ ВРЕМЯ"
+function formatNearestSlot(slot, timeZone) {
+    const parts = formatSlotParts(slot, timeZone);
+    if (!parts) return null;
+    return `${parts.datePart} в ${parts.timePart} (${parts.weekdayShort})`;
+}
+
+// 8) Функция для группировки СЛОТОВ для вывода в блоке РАСПИСАНИЕ
 function groupScheduleByDay(schedule = []) {
     const groups = {};
     schedule.forEach(slot => {
@@ -123,7 +143,7 @@ function groupScheduleByDay(schedule = []) {
     return groups;
 }
 
-// 7) Функция для формирования СТИЛЕЙ для слотов
+// 9) Функция для формирования СТИЛЕЙ для слотов
 function getSlotKey(slot) {
     return slot.start_iso || `${slot.day}T${slot.start_time}`;
 }
@@ -161,7 +181,7 @@ function applySlotButtonState(btn, isSelected) {
     btn.className = getSlotButtonClass(isSelected);
 }
 
-// 8) Функция для применения стилей для СЛОТОВ в расписании
+// 10) Функция для применения стилей для СЛОТОВ в расписании
 function renderScheduleList(schedule = [], selectedSlotKey = null) {
     if (!schedule.length) {
         return `<p class="text-gray-500 text-sm mt-2">Нет доступных слотов</p>`;
@@ -215,7 +235,7 @@ function renderScheduleList(schedule = [], selectedSlotKey = null) {
     }).join("");
 }
 
-// 8) Функции для обновления значений в БЛИЖАЙШЕЕ ВРЕМЯ и в РАСПИСАНИИ
+// 11) Функции для обновления значений в БЛИЖАЙШЕЕ ВРЕМЯ и в РАСПИСАНИИ
 function updateNearestSlotUI(nearestSlotText) {
     const nearestSlotEl = document.getElementById("ps-nearest-slot");
     if (!nearestSlotEl) return;
@@ -245,31 +265,14 @@ function setSelectedAppointmentSlot(psId, slot) {
     );
 }
 
-// 9) Функция для формата выбранного слота
-function formatSelectedSlotLabel(slot) {
-    if (!slot) return null;
-    let dateObj = null;
-    if (slot.start_iso) {
-        dateObj = new Date(slot.start_iso);
-    } else if (slot.day && slot.start_time) {
-        dateObj = new Date(`${slot.day}T${slot.start_time}`);
-    }
-    if (!dateObj || Number.isNaN(dateObj.getTime())) return null;
-
-    const datePart = new Intl.DateTimeFormat("ru-RU", {
-        day: "numeric",
-        month: "long",
-    }).format(dateObj);
-
-    const timePart = new Intl.DateTimeFormat("ru-RU", {
-        hour: "2-digit",
-        minute: "2-digit",
-    }).format(dateObj);
-
-    return `${datePart} ${timePart}`;
+// 12) Функция для формата выбранного слота
+function formatSelectedSlotLabel(slot, timeZone) {
+    const parts = formatSlotParts(slot, timeZone);
+    if (!parts) return null;
+    return `${parts.datePart} ${parts.timePart}`;
 }
 
-// 10) Функция для формирования подписи в КНОПКЕ "Выбрать время сессии" на "Выбрать 9 февраля 18:00"
+// 13) Функция для формирования подписи в КНОПКЕ "Выбрать время сессии" на "Выбрать 9 февраля 18:00"
 function updateChooseButton(selectedSlotLabel) {
     const btn = document.querySelector("[data-choose-session-btn]");
     if (!btn) return;
@@ -288,7 +291,7 @@ function updateChooseButton(selectedSlotLabel) {
     }
 }
 
-// 11) Функция для управления АКТИВНО/НЕАКТИВНО в блоке "ШАГИ" чтоб нельзя было перейти на страницу "Запись" без выбранного слота
+// 14) Функция для управления АКТИВНО/НЕАКТИВНО в блоке "ШАГИ" чтоб нельзя было перейти на страницу "Запись" без выбранного слота
 function updatePaymentStepLink(isEnabled) {
     const link = document.querySelector("[data-payment-step-link]");
     if (!link) return;
@@ -596,7 +599,7 @@ function renderPsychologistCard(ps) {
             }
 
             const schedule = data.schedule || [];
-            const nearestText = formatNearestSlot(data.nearest_slot);
+            const nearestText = formatNearestSlot(data.nearest_slot, clientTimezone);
             updateNearestSlotUI(nearestText || "Нет доступных слотов");
             updateScheduleUI(schedule, selectedSlotKey);
 
@@ -618,7 +621,7 @@ function renderPsychologistCard(ps) {
                     applySlotButtonState(btn, true);
 
                     const slotObj = schedule.find(slot => getSlotKey(slot) === newKey);
-                    updateChooseButton(formatSelectedSlotLabel(slotObj));
+                    updateChooseButton(formatSelectedSlotLabel(slotObj, clientTimezone));
                     setSelectedAppointmentSlot(currentPsId, slotObj);
                 };
             }
