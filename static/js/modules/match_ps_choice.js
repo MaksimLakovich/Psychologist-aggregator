@@ -775,9 +775,17 @@ function renderPsychologistCard(ps) {
                         <h3 class="text-xl font-semibold text-gray-900">
                             Расписание
                         </h3>
-                        <p class="text-lg text-gray-700 leading-relaxed overflow-hidden transition-all mt-2">
-                            Часовой пояс: {{request.user.timezone}}
-                        </p>
+                        <div class="flex items-center gap-1 mt-2">
+                            <img
+                                src="${staticUrl}images/psychologist_profile/time-zone.svg"
+                                alt="time_icon"
+                                aria-hidden="true"
+                                class="w-5 h-5"
+                            />
+                            <p class="text-lg text-gray-700 leading-relaxed">
+                                Часовой пояс: {{request.user.timezone}}
+                            </p>
+                        </div>
                         <div id="psychologist-schedule-list" class="mt-2"></div>
                     </div>
 
