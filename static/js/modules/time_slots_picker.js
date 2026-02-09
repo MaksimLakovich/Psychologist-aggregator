@@ -49,6 +49,8 @@ export function initTimeSlotsPicker({
     const container = document.querySelector(containerSelector);
     if (!container) return;
 
+    let nowTs = null; // Добавил новый параметр nowTs для реализации авто‑очистки в БД ранее выбранных слотов в прошлом при загрузке
+
     // КАНОНИЧЕСКОЕ ХРАНЕНИЕ - timestamps
     const selectedTsSet = new Set(
         initialSelectedSlots
@@ -79,6 +81,10 @@ export function initTimeSlotsPicker({
         updateDayBadges();
     }
 
+    function notifyPreferredSlotsChanged() {
+        container.dispatchEvent(new CustomEvent("preferred_slots:changed"));
+    }
+
     /**
      * СЧЕТЧИК ВЫБРАННЫХ СЛОТОВ: Функция обновления счетчиков (бейджей) на кнопках дней
      */
@@ -90,6 +96,8 @@ export function initTimeSlotsPicker({
             // Считаем сколько слотов этого дня есть в selectedTsSet
             const count = cachedSlotsByDay[day].filter(iso => {
                 const ts = toTimestamp(iso);
+                if (ts === null) return false;
+                if (nowTs !== null && ts <= nowTs) return false; // проверяем наличие слотов в прошлом (ts <= nowTs)
                 return selectedTsSet.has(ts);
             }).length;
 
@@ -132,6 +140,23 @@ export function initTimeSlotsPicker({
     .then(r => r.json())
     .then(data => {
         cachedSlotsByDay = data.slots; // Сохраняем для пересчета
+        nowTs = toTimestamp(data.now_iso); // Фиксируем текущее время
+
+        // ЗАПУСКАЕМ процесс проверки слотов в прошло и их удаление из БД
+        let removedPast = false;
+        if (nowTs !== null) {
+            selectedTsSet.forEach(ts => {
+                if (ts <= nowTs) {
+                    selectedTsSet.delete(ts);
+                    removedPast = true;
+                }
+            });
+        }
+        if (removedPast) {
+            syncHiddenInputs();
+            notifyPreferredSlotsChanged();
+        }
+
         renderDaysAndSlots({
             slotsByDay: data.slots,
             // ВАЖНО: Передаем текущее время пользователя (nowIso) из его профиля а не сервера, чтоб потом
@@ -224,15 +249,26 @@ export function initTimeSlotsPicker({
             // 1. Сначала определяем БАЗОВОЕ состояние слота (выбран он или нет)
             const isSelected = ts !== null && selectedTsSet.has(ts);
 
+            const isPast = nowTs !== null && ts !== null && ts <= nowTs; // признак "в прошлом"
+
             // Стиль для НЕДОСТУПНЫХ слотов в прошлом
-            if (isoString <= nowIso) {
-                btn.disabled = true;
-                btn.classList.add(
-                    "bg-gray-100",
-                    "text-gray-400",
-                    "line-through",
-                    "cursor-not-allowed"
-                );
+            if (isPast) {
+                if (isSelected) {
+                    btn.classList.add(
+                        "bg-gray-200",
+                        "text-gray-500",
+                        "line-through",
+                        "border-gray-300"
+                    );
+                } else {
+                    btn.disabled = true;
+                    btn.classList.add(
+                        "bg-gray-100",
+                        "text-gray-400",
+                        "line-through",
+                        "cursor-not-allowed"
+                    );
+                }
             // Тут легкое выделение при наведении на еще НЕ выбранные слоты
             } else {
                 btn.classList.add(
@@ -269,10 +305,27 @@ export function initTimeSlotsPicker({
                         "border-indigo-500",
                         "hover:bg-indigo-900"
                     );
-                    btn.classList.add(
-                        "bg-white",
-                        "hover:bg-indigo-50"
+                    btn.classList.remove(
+                        "bg-gray-200",
+                        "text-gray-500",
+                        "line-through",
+                        "border-gray-300"
                     );
+
+                    if (nowTs !== null && ts <= nowTs) {
+                        btn.disabled = true;
+                        btn.classList.add(
+                            "bg-gray-100",
+                            "text-gray-400",
+                            "line-through",
+                            "cursor-not-allowed"
+                        );
+                    } else {
+                        btn.classList.add(
+                            "bg-white",
+                            "hover:bg-indigo-50"
+                        );
+                    }
 
                 } else {
                     selectedTsSet.add(ts);
@@ -288,6 +341,7 @@ export function initTimeSlotsPicker({
                     );
                 }
                 syncHiddenInputs(); // Тут вызовется updateDayBadges (бейджей со счетчиком)
+                notifyPreferredSlotsChanged();
             });
 
             slotsGrid.appendChild(btn);

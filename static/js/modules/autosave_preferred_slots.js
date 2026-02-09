@@ -96,6 +96,12 @@ export function initAutosavePreferredSlots({
         debouncedSave();
     });
 
+    // Реагируем на изменения состояния, что происходят без клика (например, очистка слотов которые стали в ПРОШЛОМ)
+    container.addEventListener("preferred_slots:changed", () => {
+        if (container.dataset.initializing === "true") return;
+        doSaveIfChanged();
+    });
+
     lastSavedSlots = collectSlotsSet();
 
     console.log("initAutosavePreferredSlots: initialized (state-based)");
