@@ -70,46 +70,59 @@ export async function initAddAppointmentAndPaymentCard() {
     }
 }
 
-// 1) Функция для формирования инфо по выбранному СЛОТУ (например: "Дата и время: 9 февраля 18:00 (понедельник)")
-function formatAppointmentSlot(slot) {
+// 2) Функция для получения инфо по выбранному слоту в карточке специалиста
+function getSlotDateObj(slot) {
+    if (!slot) return null;
+    if (slot.start_iso) {
+        const dateObj = new Date(slot.start_iso);
+        return Number.isNaN(dateObj.getTime()) ? null : dateObj;
+    }
+    if (slot.day && slot.start_time) {
+        const dateObj = new Date(`${slot.day}T${slot.start_time}`);
+        return Number.isNaN(dateObj.getTime()) ? null : dateObj;
+    }
+    return null;
+}
+
+// 3) Функция для формирования инфо по выбранному СЛОТУ (например: "Дата и время: 9 февраля 18:00 (понедельник)")
+function formatAppointmentSlot(slot, timeZone) {
     if (!slot) return "Слот не выбран";
 
-    let dateObj = null;
-    if (slot.start_iso) {
-        dateObj = new Date(slot.start_iso);
-    } else if (slot.day && slot.start_time) {
-        dateObj = new Date(`${slot.day}T${slot.start_time}`);
-    }
-    if (!dateObj || Number.isNaN(dateObj.getTime())) {
+    const dateObj = getSlotDateObj(slot);
+    if (!dateObj) {
         return "Слот не выбран";
     }
 
     const datePart = new Intl.DateTimeFormat("ru-RU", {
         day: "numeric",
         month: "long",
+        timeZone,
     }).format(dateObj);
 
     const timePart = new Intl.DateTimeFormat("ru-RU", {
         hour: "2-digit",
         minute: "2-digit",
+        timeZone,
     }).format(dateObj);
 
     const weekdayLong = new Intl.DateTimeFormat("ru-RU", {
         weekday: "long",
+        timeZone,
     }).format(dateObj).toLowerCase();
 
     return `${datePart} ${timePart} (${weekdayLong})`;
 }
 
-// 2) Функция для формирования HTML-шаблона
+// 4) Функция для формирования HTML-шаблона
 function renderAddAppointmentAndPaymentCard(ps, selectedSlot) {
     const container = document.getElementById("payment-psychologist-summary");
     if (!container) return;
 
+    const clientTimezone = container.dataset.clientTimezone || undefined;
     const sessionLabel = formatSessionLabel(ps.session_type);
     const priceLabel = formatPrice(ps.price);
 
-    const slotLabel = formatAppointmentSlot(selectedSlot);
+    const slotLabel = formatAppointmentSlot(selectedSlot, clientTimezone);
 
     container.innerHTML = `
         <div class="flex flex-col items-center text-center gap-4 pb-0">
