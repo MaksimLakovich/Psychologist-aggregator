@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.utils.timezone import now
 
 from aggregator._web.services.basic_filter_service import match_psychologists
@@ -35,10 +37,31 @@ class PsychologistAggregatorService:
         # Шаг 1: Первичная фильтрация (topics, methods, age, gender и считает коэффициенты topic_score, method_score)
         psychologists_qs = match_psychologists(self.client_profile)
 
+        # Получаем текущее время в timezone КЛИЕНТА, где astimezone(self.timezone) - это метод, который
+        # говорит: "И пересчитай это время для моего часового пояса".
+        tz = getattr(self.client_profile.user, "timezone", None)
+        current_time = now().astimezone(tz) if tz else now()
+
         # Получаем выбранные предпочитаемые слоты
         # (preferred_slots нужно адаптировать в доменный формат matcher-а чтоб не было ошибки)
         raw_selected_slots = self.client_profile.preferred_slots
-        selected_slots = map_preferred_slots_to_domain(raw_selected_slots)
+        filtered_selected_slots = []
+
+        for raw_value in raw_selected_slots:
+            if isinstance(raw_value, datetime):
+                dt = raw_value
+            elif isinstance(raw_value, str):
+                dt = datetime.fromisoformat(raw_value)
+            else:
+                continue
+
+            if dt.tzinfo is None:
+                continue
+
+            if dt > current_time:
+                filtered_selected_slots.append(raw_value)
+
+        selected_slots = map_preferred_slots_to_domain(filtered_selected_slots)
 
         # Шаг 2: Если нет предпочтений по времени - просто применяем финальный scoring для итогового ранжирования
         if not self.client_profile.has_time_preferences or not selected_slots:
@@ -54,10 +77,6 @@ class PsychologistAggregatorService:
                 for ps in ordered_by_scoring_qs
             }
         # Шаг 3: Генерируем все возможные доменные временные слоты по правилам домена
-        # Получаем текущее время в timezone КЛИЕНТА, где astimezone(self.timezone) - это метод, который
-        # говорит: "И пересчитай это время для моего часового пояса".
-        tz = getattr(self.client_profile.user, "timezone", None)
-        current_time = now().astimezone(tz) if tz else now()
         today = current_time.date()
 
         # Генерируем доменные временные слоты
