@@ -245,7 +245,7 @@ function setSelectedAppointmentSlot(psId, slot) {
     );
 }
 
-// 9) Вспомогательная функция
+// 9) Функция для формата выбранного слота
 function formatSelectedSlotLabel(slot) {
     if (!slot) return null;
     let dateObj = null;
@@ -278,11 +278,33 @@ function updateChooseButton(selectedSlotLabel) {
         btn.textContent = `Выбрать ${selectedSlotLabel}`;
         btn.classList.remove("bg-gray-300", "text-gray-500", "cursor-not-allowed");
         btn.classList.add("bg-indigo-500", "text-white", "hover:bg-indigo-900");
+        updatePaymentStepLink(true);
     } else {
         btn.disabled = true;
         btn.textContent = "Выбрать время сессии";
         btn.classList.add("bg-gray-300", "text-gray-500", "cursor-not-allowed");
         btn.classList.remove("bg-indigo-500", "text-white", "hover:bg-indigo-900");
+        updatePaymentStepLink(false);
+    }
+}
+
+// 11) Функция для управления АКТИВНО/НЕАКТИВНО в блоке "ШАГИ" чтоб нельзя было перейти на страницу "Запись" без выбранного слота
+function updatePaymentStepLink(isEnabled) {
+    const link = document.querySelector("[data-payment-step-link]");
+    if (!link) return;
+
+    if (!link.dataset.href) {
+        link.dataset.href = link.getAttribute("href") || "";
+    }
+
+    if (isEnabled) {
+        link.setAttribute("href", link.dataset.href);
+        link.classList.remove("pointer-events-none", "opacity-50");
+        link.setAttribute("aria-disabled", "false");
+    } else {
+        link.setAttribute("href", "#");
+        link.classList.add("pointer-events-none", "opacity-50");
+        link.setAttribute("aria-disabled", "true");
     }
 }
 
@@ -295,6 +317,7 @@ function updateChooseButton(selectedSlotLabel) {
 export function initPsychologistsChoice() {
     // При заходе на страницу сбрасываем выбранный слот
     sessionStorage.removeItem(SELECTED_APPOINTMENT_SLOT_KEY);
+    updatePaymentStepLink(false);
     fetchPsychologists();
     initNavigation();
 }
@@ -433,6 +456,8 @@ function renderPsychologistCard(ps) {
     if (!container || !ps) return;
 
     const staticUrl = container.dataset.staticUrl;
+    // Получаем из Django проброшенный timezone в dataset для использования в JS при рендере тут карточки специалиста
+    const clientTimezone = container.dataset.clientTimezone || "не указан";
     // Получаем URL из атрибута в home_client_choice_psychologist.html (data-back-url="{% url 'core:personal-questions' %}")
     const backUrl = container.dataset.backUrl; // ПОЛУЧАЕМ НАШ URL ИЗ АТРИБУТА
 
@@ -783,7 +808,7 @@ function renderPsychologistCard(ps) {
                                 class="w-5 h-5"
                             />
                             <p class="text-lg text-gray-700 leading-relaxed">
-                                Часовой пояс: {{request.user.timezone}}
+                                Часовой пояс: ${clientTimezone}
                             </p>
                         </div>
                         <div id="psychologist-schedule-list" class="mt-2"></div>
