@@ -1,3 +1,5 @@
+from datetime import time
+
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.db import transaction
@@ -803,8 +805,15 @@ class AvailabilityRuleTimeWindowSerializer(serializers.ModelSerializer):
                 "Параметры start_time и end_time обязательны при создании рабочего правила"
             )
 
-        if start_time and end_time and start_time >= end_time:
-            raise ValidationError("Параметр start_time должен быть меньше end_time")
+        if start_time and end_time:
+
+            if start_time == end_time and start_time != time(0, 0):
+                raise ValidationError(
+                    "Параметры start_time и end_time могут совпадать только для 24/7 (00:00–00:00)"
+                )
+
+            elif start_time > end_time:
+                raise ValidationError("Параметр start_time должен быть меньше end_time")
 
         return attrs
 
@@ -933,8 +942,15 @@ class AvailabilityExceptionTimeWindowSerializer(serializers.ModelSerializer):
                 "Параметры override_start_time и override_end_time обязательны при 'exception_type = override'"
             )
 
-        if override_start_time and override_end_time and override_start_time >= override_end_time:
-            raise ValidationError("Параметр override_start_time должен быть меньше override_end_time")
+        if override_start_time and override_end_time:
+
+            if override_start_time == override_end_time and override_start_time != time(0, 0):
+                raise ValidationError(
+                    "Параметры override_start_time и override_end_time могут совпадать только для 24/7 (00:00–00:00)"
+                )
+
+            elif override_start_time > override_end_time:
+                raise ValidationError("Параметр override_start_time должен быть меньше override_end_time")
 
         return attrs
 
