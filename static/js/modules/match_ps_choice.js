@@ -187,15 +187,16 @@ function applySlotButtonState(btn, isSelected) {
 }
 
 // 12) Рендерим HTML блока "Расписание" (группировка по дням + кнопки слотов)
-function renderScheduleList(schedule = [], selectedSlotKey = null) {
+function renderScheduleList(schedule = [], selectedSlotKey = null, daysToShow = null) {
     if (!schedule.length) {
         return `<p class="text-gray-500 text-sm mt-2">Нет доступных слотов</p>`;
     }
 
     const grouped = groupScheduleByDay(schedule);
     const days = Object.keys(grouped).sort();
+    const visibleDays = daysToShow ? days.slice(0, daysToShow) : days;
 
-    return days.map(day => {
+    return visibleDays.map(day => {
         const dateObj = new Date(`${day}T00:00:00`);
         const dayLabel = Number.isNaN(dateObj.getTime())
             ? day
@@ -249,16 +250,31 @@ function updateNearestSlotUI(nearestSlotText) {
 }
 
 // 14) Обновляем блок расписания
-function updateScheduleUI(schedule, selectedSlotKey = null) {
+function updateScheduleUI(schedule, selectedSlotKey = null, daysToShow = null) {
     const scheduleEl = document.getElementById("psychologist-schedule-list");
     if (!scheduleEl) return;
-    scheduleEl.innerHTML = renderScheduleList(schedule, selectedSlotKey);
+    scheduleEl.innerHTML = renderScheduleList(schedule, selectedSlotKey, daysToShow);
 }
 
-// 15) Ключ в sessionStorage для выбранного слота (переход на оплату)
+// 15) Функция для кнопки СВЕРНУТЬ / РАЗВЕРНУТЬ (расписание - ДНИ / СЛОТЫ)
+function createScheduleToggleButton() {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "mt-3 italic text-sm font-medium text-indigo-500 hover:text-indigo-900";
+    btn.dataset.state = "collapsed";
+    btn.textContent = "Показать больше";
+    return btn;
+}
+
+function updateScheduleToggleButton(btn, isExpanded) {
+    btn.dataset.state = isExpanded ? "expanded" : "collapsed";
+    btn.textContent = isExpanded ? "Показать меньше" : "Показать больше";
+}
+
+// 16) Ключ в sessionStorage для выбранного слота (переход на оплату)
 const SELECTED_APPOINTMENT_SLOT_KEY = "selectedAppointmentSlot";
 
-// 16) Сохраняем выбранный слот в sessionStorage (для страницы оплаты)
+// 17) Сохраняем выбранный слот в sessionStorage (для страницы оплаты)
 function setSelectedAppointmentSlot(psId, slot) {
     if (!slot) {
         sessionStorage.removeItem(SELECTED_APPOINTMENT_SLOT_KEY);
@@ -273,14 +289,14 @@ function setSelectedAppointmentSlot(psId, slot) {
     );
 }
 
-// 17) Функция для формата выбранного слота для подписи на кнопке ("Выбрать 11 февраля 10:00")
+// 18) Функция для формата выбранного слота для подписи на кнопке ("Выбрать 11 февраля 10:00")
 function formatSelectedSlotLabel(slot, timeZone) {
     const parts = formatSlotParts(slot, timeZone);
     if (!parts) return null;
     return `${parts.datePart} ${parts.timePart}`;
 }
 
-// 18) Функция для управления активностью и формирования подписи в КНОПКЕ: "Выбрать время сессии"
+// 19) Функция для управления активностью и формирования подписи в КНОПКЕ: "Выбрать время сессии"
 function updateChooseButton(selectedSlotLabel) {
     const btn = document.querySelector("[data-choose-session-btn]");
     if (!btn) return;
@@ -299,7 +315,7 @@ function updateChooseButton(selectedSlotLabel) {
     }
 }
 
-// 19) Функция для управления АКТИВНО/НЕАКТИВНО в блоке "ШАГИ" чтоб нельзя было перейти на страницу "Запись" без выбранного слота
+// 20) Функция для управления АКТИВНО/НЕАКТИВНО в блоке "ШАГИ" чтоб нельзя было перейти на страницу "Запись" без выбранного слота
 function updatePaymentStepLink(isEnabled) {
     const link = document.querySelector("[data-payment-step-link]");
     if (!link) return;
@@ -616,10 +632,38 @@ function renderPsychologistCard(ps) {
             const schedule = data.schedule || [];
             const nearestText = formatNearestSlot(data.nearest_slot, clientTimezone);
             updateNearestSlotUI(nearestText || "Нет доступных слотов");
-            updateScheduleUI(schedule, selectedSlotKey);
+
+            const grouped = groupScheduleByDay(schedule);
+            const allDays = Object.keys(grouped).sort();
+            const defaultVisibleDays = 3;
+            let isExpanded = false;
+
+            updateScheduleUI(schedule, selectedSlotKey, defaultVisibleDays);
 
             const scheduleEl = document.getElementById("psychologist-schedule-list");
             if (scheduleEl) {
+                // Кнопка "Показать больше/меньше" для расписания
+                let toggleBtn = document.getElementById("schedule-toggle-btn");
+                if (toggleBtn) {
+                    toggleBtn.remove();
+                }
+
+                if (allDays.length > defaultVisibleDays) {
+                    toggleBtn = createScheduleToggleButton();
+                    toggleBtn.id = "schedule-toggle-btn";
+                    scheduleEl.after(toggleBtn);
+
+                    toggleBtn.addEventListener("click", () => {
+                        isExpanded = !isExpanded;
+                        updateScheduleToggleButton(toggleBtn, isExpanded);
+                        updateScheduleUI(
+                            schedule,
+                            selectedSlotKey,
+                            isExpanded ? null : defaultVisibleDays
+                        );
+                    });
+                }
+
                 scheduleEl.onclick = event => {
                     const btn = event.target.closest("button[data-slot-key]");
                     if (!btn) return;
