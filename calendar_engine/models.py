@@ -1,4 +1,5 @@
 import uuid
+from datetime import time
 
 from django.conf import settings
 from django.contrib.postgres.constraints import ExclusionConstraint
@@ -589,8 +590,18 @@ class AvailabilityRuleTimeWindow(TimeStampedModel):
     )
 
     def clean(self):
-        if self.start_time >= self.end_time:
-            raise ValidationError("start_time должен быть меньше end_time")
+        """Метод валидации для двух сценариев:
+            1) 'start_time = end_time': круглосуточный рабочий график;
+            2) 'start_time > end_time': проверка, что время начала не может быть раньше, чем время окончания."""
+        if self.start_time == self.end_time and self.start_time != time(0, 0):
+            raise ValidationError(
+                "start_time и end_time могут совпадать только для 24/7 (00:00–00:00)"
+            )
+
+        elif self.start_time > self.end_time:
+            raise ValidationError(
+                "start_time должен быть меньше end_time"
+            )
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
@@ -710,8 +721,20 @@ class AvailabilityExceptionTimeWindow(TimeStampedModel):
     )
 
     def clean(self):
-        if self.override_start_time >= self.override_end_time:
-            raise ValidationError("override_start_time должен быть меньше override_end_time")
+        """Метод валидации для двух сценариев:
+            1) 'override_start_time = override_end_time': круглосуточный рабочий график;
+            2) 'override_start_time > override_end_time': проверка, что время начала не может быть раньше,
+                чем время окончания."""
+        if self.override_start_time and self.override_end_time:
+
+            if (self.override_start_time == self.override_end_time
+                    and self.override_start_time != time(0, 0)):
+                raise ValidationError(
+                    "override_start_time и override_end_time могут совпадать только для 24/7 (00:00-00:00)"
+                )
+
+            elif self.override_start_time > self.override_end_time:
+                raise ValidationError("override_start_time должен быть меньше override_end_time")
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
