@@ -1,4 +1,4 @@
-from datetime import datetime, tzinfo
+from datetime import datetime, timedelta, tzinfo
 from zoneinfo import ZoneInfo
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -1007,6 +1007,11 @@ class GetSpecialistScheduleAjaxView(LoginRequiredMixin, View):
             else:
                 slot_start_spec = datetime.combine(slot.day, slot.start)
                 slot_end_spec = datetime.combine(slot.day, slot.end)
+
+            # Если слот пересекает полночь (например, 23:00–00:00), конец нужно сдвигать на следующий день,
+            # так как 00:00 это уже +1
+            if slot.end <= slot.start:
+                slot_end_spec += timedelta(days=1)
 
             if slot_start_spec < now_specialist:
                 continue
