@@ -2145,6 +2145,10 @@ input:checked + .toggle-bg {
   max-height: 70vh;
 }
 
+.max-h-\[85vh\] {
+  max-height: 85vh;
+}
+
 .min-h-\[48px\] {
   min-height: 48px;
 }
