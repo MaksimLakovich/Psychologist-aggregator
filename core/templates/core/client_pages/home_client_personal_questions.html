@@ -148,7 +148,7 @@
 
                         <!-- ВСПЛЫВАЮЩЕЕ УВЕДОМЛЕНИЕ: если не выбрана ни одна тема о том, что нужно выбрать мин 1 тему -->
                         <div id="topics-required-alert"
-                             class="hidden w-full max-w-[70%] text-center text-lg font-semibold tracking-wide
+                             class="{% if form.errors.requested_topics %}w-full{% else %}hidden w-full{% endif %} max-w-[70%] text-center text-lg font-semibold tracking-wide
                              rounded-lg border border-pink-200 bg-pink-100 px-4 py-4 text-pink-700">
                             Пожалуйста, отметьте хотя бы одну тему
                         </div>
