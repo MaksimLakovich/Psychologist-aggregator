@@ -146,7 +146,7 @@ python manage.py loaddata fixtures/users_ps_availability_rule.json
     "fields": {
       "rule": 1,
       "start_time": "00:00:00",
-      "end_time": "23:59:00",
+      "end_time": "00:00:00",
       "created_at": "2026-01-20T12:00:00.000Z",
       "updated_at": "2026-01-20T12:00:00.000Z"
     }
