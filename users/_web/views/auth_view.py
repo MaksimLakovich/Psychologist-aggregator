@@ -11,7 +11,9 @@ from django.utils.http import urlsafe_base64_decode
 from django.views import View
 from django.views.generic.edit import FormView
 from django_ratelimit.decorators import ratelimit
-from users._web.forms.auth_form import AppUserLoginForm, AppUserRegistrationForm
+
+from users._web.forms.auth_form import (AppUserLoginForm,
+                                        AppUserRegistrationForm)
 from users.models import AppUser, ClientProfile, UserRole
 from users.services.send_verification_email import send_verification_email
 
