@@ -3813,6 +3813,10 @@ input:checked + .toggle-bg {
   background-color: rgb(31 41 55 / 0.7);
 }
 
+.dark\:bg-transparent:is(.dark *) {
+  background-color: transparent;
+}
+
 .dark\:text-blue-500:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(63 131 248 / var(--tw-text-opacity, 1));
