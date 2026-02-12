@@ -216,11 +216,15 @@
 │    │    │    └── ...
 │    │    ├── views/
 │    │    │    ├── auth_view.py                      # Login / Logout / Register
+│    │    │    ├── ratelimit_view.py                 # django-ratelimit: тут красивая обработка ошибок 403/429. Отображает понятную страницу для случаев превышения лимитов запросов.
 │    │    │    └── ...
 │    │    └── urls.py                         # Роуты для web-страниц
 │    ├── templates/                   # HTML-шаблоны
 │    │    └── users/
-│    │          ├── login_page.html   # Страница входа
+│    │          ├── login_page.html             # Страница входа
+│    │          ├── register_page.html          # Страница регистрации
+│    │          ├── verify_email_result.html    # Страница для отображения результата верификации email в посте по uid/token
+│    │          ├── ratelimited.html            # Страница для красивой обработки ошибок 403/429 в django-ratelimit
 │    │          └── ...
 │    ├── migrations/
 │    ├── services/                    # Сервисные вспомогательные функции

@@ -1,0 +1,52 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %} {{ title_verify_email_view|default:"Подтверждение email" }} {% endblock %}
+
+{% block content %}
+
+{% block extra_style %}
+<style>
+    body {
+        background-image: url('{% static "images/background/background-login.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+</style>
+{% endblock %}
+
+<section class="bg-tranceparent dark:bg-gray-900">
+    <div class="flex flex-col items-center px-6 pt-16 pb-8 mx-auto lg:pt-20 lg:pb-10">
+
+        <div class="w-full bg-transparent rounded-lg sm:max-w-md xl:p-0 dark:bg-gray-800">
+            <div class="p-6 space-y-4 sm:p-8">
+
+                <h1 class="text-xl font-bold leading-tight tracking-wide text-gray-700 md:text-3xl dark:text-white">
+                    Подтверждение email
+                </h1>
+
+                {% if status == "success" %}
+                <div class="p-3 text-sm text-green-700 bg-green-50 rounded-md">
+                    {{ message|linebreaksbr }}
+                </div>
+                {% else %}
+                <div class="p-3 text-sm text-red-700 bg-red-50 rounded-md">
+                    {{ message|linebreaksbr }}
+                </div>
+                {% endif %}
+
+                <a href="{% url 'users:web:login-page' %}"
+                   class="w-full text-center text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4
+                   focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-base px-6 py-3 block">
+                    Перейти к входу
+                </a>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

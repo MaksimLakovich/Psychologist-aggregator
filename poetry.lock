@@ -186,6 +186,18 @@ phonenumbers = ["phonenumbers (>=7.0.2)"]
 phonenumberslite = ["phonenumberslite (>=7.0.2)"]
 
 [[package]]
+name = "django-ratelimit"
+version = "4.1.0"
+description = "Cache-based rate-limiting for Django."
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "django-ratelimit-4.1.0.tar.gz", hash = "sha256:555943b283045b917ad59f196829530d63be2a39adb72788d985b90c81ba808b"},
+    {file = "django_ratelimit-4.1.0-py2.py3-none-any.whl", hash = "sha256:d047a31cf94d83ef1465d7543ca66c6fc16695559b5f8d814d1b51df15110b92"},
+]
+
+[[package]]
 name = "django-timezone-field"
 version = "7.1"
 description = "A Django app providing DB, form, and REST framework fields for zoneinfo and pytz timezone objects."
@@ -863,4 +875,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<4.0"
-content-hash = "b66485e557fccc4f95a9c706a5158d516f2500c82249554b0dc10b9ae6b273e1"
+content-hash = "e306365d477d40b2324bdbf4b41e8a3f020623af253248a812b6395cb3989812"
