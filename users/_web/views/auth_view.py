@@ -52,7 +52,7 @@ class RegisterPageView(FormView):
 
             messages.info(
                 self.request,
-                "Если аккаунт с таким email существует, мы отправили инструкцию для подтверждения.",
+                "Мы отправили инструкцию для подтверждения регистрации.\nПожалуйста, проверьте вашу почту.",
             )
             return super().form_valid(form)
 
@@ -82,7 +82,7 @@ class RegisterPageView(FormView):
         send_verification_email(user, url_name="users:web:verify-email")
         messages.info(
             self.request,
-            "Если аккаунт с таким email существует, мы отправили инструкцию для подтверждения.",
+            "Мы отправили инструкцию для подтверждения регистрации.\nПожалуйста, проверьте вашу почту.",
         )
         return super().form_valid(form)
 
@@ -128,6 +128,7 @@ class VerifyEmailView(View):
         return render(self.request, self.template_name, context)
 
 
+@method_decorator(ratelimit(key="ip", rate="5/m", block=True), name="post")
 class LoginPageView(LoginView):
     """Класс-контроллер на основе auth.views для входа ранее зарегистрированного пользователя в систему."""
 

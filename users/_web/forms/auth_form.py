@@ -1,5 +1,7 @@
 from django import forms
+from django.contrib.auth import authenticate
 from django.contrib.auth.forms import AuthenticationForm
+from django.core.exceptions import ValidationError
 
 from users.models import AppUser
 
@@ -144,6 +146,28 @@ class AppUserLoginForm(AuthenticationForm):
             }
         ),
     )
+
+    def clean(self):
+        """Кастомная обработка авторизации для вывода понятного сообщения при is_active=False.
+        То есть, когда пользователь зарегистрировался, не подтвердил почту, но пытается выполнить вход, то мы
+        выводим понятное сообщение о том, что нужно сделать."""
+        username = self.cleaned_data.get("username")
+        password = self.cleaned_data.get("password")
+
+        if username is not None and password:
+            self.user_cache = authenticate(self.request, username=username, password=password)
+
+            if self.user_cache is None:
+                user = AppUser.objects.filter(email=username).first()
+                if user and user.check_password(password) and not user.is_active:
+                    raise ValidationError(
+                        "Пожалуйста, проверьте почту и завершите подтверждение регистрации."
+                    )
+                raise self.get_invalid_login_error()
+
+            self.confirm_login_allowed(self.user_cache)
+
+        return self.cleaned_data
 
 
 # class UserProfileEditForm(forms.ModelForm):

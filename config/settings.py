@@ -81,9 +81,14 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django_ratelimit.middleware.RatelimitMiddleware',  # важно для работы users/_web/views/ratelimit_view.py
 ]
 
 ROOT_URLCONF = 'config.urls'
+
+# Красивая обработка 403 Forbidden и 429
+# Пользовательская страница для случаев превышения лимитов запросов (django-ratelimit)
+RATELIMIT_VIEW = "users._web.views.ratelimit_view.ratelimited_view"
 
 TEMPLATES = [
     {

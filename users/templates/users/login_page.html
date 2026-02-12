@@ -34,8 +34,8 @@
                 {% if messages %}
                 <div class="space-y-2">
                     {% for message in messages %}
-                    <div class="p-3 text-sm text-gray-700 bg-gray-50 rounded-md">
-                        {{ message }}
+                    <div class="p-3 text-center text-base tracking-wide text-pink-700 bg-pink-50 rounded-lg">
+                        {{ message|linebreaksbr }}
                     </div>
                     {% endfor %}
                 </div>
@@ -43,7 +43,7 @@
 
                 <!-- Общие ошибки -->
                 {% if form.non_field_errors %}
-                <div class="p-3 text-sm text-red-700 bg-red-50 rounded-md">
+                <div class="p-3 text-center text-base tracking-wide text-pink-700 bg-pink-50 rounded-lg">
                     {% for err in form.non_field_errors %}
                     {{ err }}{% if not forloop.last %}<br>{% endif %}
                     {% endfor %}
