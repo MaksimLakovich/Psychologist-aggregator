@@ -234,8 +234,8 @@ CSRF_TRUSTED_ORIGINS = [
 # Запрещаем доступ для всех подряд (оставляем только из списка выше)
 CORS_ALLOW_ALL_ORIGINS = False
 
-# FRONT_BASE_URL должен указывать туда, где будет обрабатываться подтверждение, даже если это API
-FRONT_BASE_URL = os.getenv('FRONT_BASE_URL', 'http://127.0.0.1:8000/api')
+# FRONT_BASE_URL должен указывать на домен, а конкретный маршрут задается в send_verification_email()
+FRONT_BASE_URL = os.getenv('FRONT_BASE_URL', 'http://127.0.0.1:8000')
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.yandex.ru'
