@@ -68,6 +68,8 @@ class RegisterPageView(FormView):
             user = AppUser.objects.create_user(
                 email=email,
                 password=password,
+                first_name=form.cleaned_data["first_name"],
+                age=form.cleaned_data["age"],
                 role=role_obj,
                 is_active=False,
             )

@@ -84,21 +84,6 @@
                         {% endif %}
                     </div>
 
-                    <!-- Last name -->
-                    <div>
-                        <label for="{{ form.last_name.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                            {{ form.last_name.label }}
-                        </label>
-                        {{ form.last_name }}
-
-                        {% if form.last_name.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
-                            {{ form.last_name.errors.0 }}
-                        </p>
-                        {% endif %}
-                    </div>
-
                     <!-- Age -->
                     <div>
                         <label for="{{ form.age.id_for_label }}"

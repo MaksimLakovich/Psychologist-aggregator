@@ -9,7 +9,7 @@ class AppUserRegistrationForm(forms.ModelForm):
 
     # Шаг 1: Объявляем немодельные поля (их нужно описать явно перед Meta)
     password1 = forms.CharField(
-        label="Пароль",
+        label="Придумайте пароль",
         strip=False,
         widget=forms.PasswordInput(
             attrs={
@@ -24,7 +24,7 @@ class AppUserRegistrationForm(forms.ModelForm):
         ),
     )
     password2 = forms.CharField(
-        label="Повтор пароля",
+        label="Повторите пароль",
         strip=False,
         widget=forms.PasswordInput(
             attrs={
@@ -42,7 +42,7 @@ class AppUserRegistrationForm(forms.ModelForm):
     # Шаг 2: Объявляем поля из модели данных
     class Meta:
         model = AppUser
-        fields = ("email",)
+        fields = ("email", "first_name", "age")
         widgets = {
             "email": forms.EmailInput(
                 attrs={
@@ -53,6 +53,29 @@ class AppUserRegistrationForm(forms.ModelForm):
                         "dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
                     ),
                     "autocomplete": "email",
+                }
+            ),
+            "first_name": forms.TextInput(
+                attrs={
+                    "placeholder": "Укажите ваше имя",
+                    "class": (
+                        "bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg "
+                        "focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
+                        "dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                    ),
+                    "autocomplete": "given-name",
+                }
+            ),
+            "age": forms.NumberInput(
+                attrs={
+                    "placeholder": "Укажите ваш возраст",
+                    "class": (
+                        "bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg "
+                        "focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
+                        "dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                    ),
+                    "min": 18,
+                    "max": 120,
                 }
             ),
         }
