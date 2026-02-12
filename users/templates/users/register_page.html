@@ -1,0 +1,169 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %} {{ title_register_page_view|default:"Регистрация" }} {% endblock %}
+
+{% block content %}
+
+{% block extra_style %}
+<style>
+    body {
+        background-image: url('{% static "images/background/background-login.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed; /* красиво фиксирует фон */
+    }
+</style>
+{% endblock %}
+
+<section class="bg-tranceparent dark:bg-gray-900">
+    <div class="flex flex-col items-center px-6 pt-16 pb-8 mx-auto lg:pt-20 lg:pb-10">
+
+        <div class="w-full bg-transparent rounded-lg sm:max-w-md xl:p-0 dark:bg-gray-800">
+            <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
+
+                <h1 class="text-xl font-bold leading-tight tracking-wide text-gray-700 md:text-3xl dark:text-white">
+                    Регистрация
+                </h1>
+                <p class="text-sm text-gray-400 dark:text-gray-400">
+                    Для тех, у кого ещё нет аккаунта
+                </p>
+
+                {% if messages %}
+                <div class="space-y-2">
+                    {% for message in messages %}
+                    <div class="p-3 text-sm text-gray-700 bg-gray-50 rounded-md">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Общие ошибки -->
+                {% if form.non_field_errors %}
+                <div class="p-3 text-sm text-red-700 bg-red-50 rounded-md">
+                    {% for err in form.non_field_errors %}
+                    {{ err }}{% if not forloop.last %}<br>{% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+
+                <form class="space-y-4 md:space-y-6" method="post">
+                    {% csrf_token %}
+
+                    <!-- Email -->
+                    <div>
+                        <label for="{{ form.email.id_for_label }}"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ form.email.label }}
+                        </label>
+                        {{ form.email }}
+
+                        {% if form.email.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                            {{ form.email.errors.0 }}
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    <!-- First name -->
+                    <div>
+                        <label for="{{ form.first_name.id_for_label }}"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ form.first_name.label }}
+                        </label>
+                        {{ form.first_name }}
+
+                        {% if form.first_name.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                            {{ form.first_name.errors.0 }}
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Last name -->
+                    <div>
+                        <label for="{{ form.last_name.id_for_label }}"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ form.last_name.label }}
+                        </label>
+                        {{ form.last_name }}
+
+                        {% if form.last_name.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                            {{ form.last_name.errors.0 }}
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Age -->
+                    <div>
+                        <label for="{{ form.age.id_for_label }}"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ form.age.label }}
+                        </label>
+                        {{ form.age }}
+
+                        {% if form.age.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                            {{ form.age.errors.0 }}
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label for="{{ form.password1.id_for_label }}"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ form.password1.label }}
+                        </label>
+                        {{ form.password1 }}
+
+                        {% if form.password1.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                            {{ form.password1.errors.0 }}
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.password2.id_for_label }}"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ form.password2.label }}
+                        </label>
+                        {{ form.password2 }}
+
+                        {% if form.password2.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                            {{ form.password2.errors.0 }}
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Confirm register  -->
+
+                    <button type="submit"
+                            class="w-full text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4 focus:outline-none
+                            focus:ring-primary-300 font-medium rounded-lg text-base px-6 py-3 text-center
+                            dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                        Зарегистрироваться
+                    </button>
+
+                    <p class="text-sm font-light text-gray-500 dark:text-gray-400">
+                        Есть аккаунт?
+                        <a href="{% url 'users:web:login-page' %}"
+                           class="font-medium text-indigo-700 hover:underline dark:text-primary-500">
+                            Войти в аккаунт
+                        </a>
+                    </p>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

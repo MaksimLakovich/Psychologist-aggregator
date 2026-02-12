@@ -24,12 +24,22 @@
         <div class="w-full bg-transparent rounded-lg sm:max-w-md xl:p-0 dark:bg-gray-800">
             <div class="p-6 space-y-6 sm:p-8">
 
-                <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-700 md:text-2xl dark:text-white">
-                    Введите email и пароль
+                <h1 class="text-xl font-bold leading-tight tracking-wide text-gray-700 md:text-3xl dark:text-white">
+                    Вход
                 </h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
+                <p class="text-sm text-gray-400 dark:text-gray-400">
                     Для тех, у кого уже есть аккаунт
                 </p>
+
+                {% if messages %}
+                <div class="space-y-2">
+                    {% for message in messages %}
+                    <div class="p-3 text-sm text-gray-700 bg-gray-50 rounded-md">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
 
                 <!-- Общие ошибки -->
                 {% if form.non_field_errors %}
@@ -101,7 +111,8 @@
 
                     <p class="text-sm font-light text-gray-500 dark:text-gray-400">
                         Нет аккаунта?
-                        <a href="#" class="font-medium text-indigo-700 hover:underline dark:text-primary-500">
+                        <a href="{% url 'users:web:register-page' %}"
+                           class="font-medium text-indigo-700 hover:underline dark:text-primary-500">
                             Создать аккаунт
                         </a>
                     </p>
