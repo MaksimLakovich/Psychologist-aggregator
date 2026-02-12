@@ -246,6 +246,12 @@ EMAIL_HOST_USER = os.getenv('YANDEX_EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('YANDEX_EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+# Срок действия ссылки для подтверждения регистрации из send_verification_email()
+# Ссылка валидируется через default_token_generator.
+# Срок действия берется из настройки PASSWORD_RESET_TIMEOUT (в секундах).
+# Если ее нет в settings.py, то Django использует дефолт 259200 секунд (3 дня).
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 24  # 24 часа
+
 LOGOUT_REDIRECT_URL = 'core:start-page'
 
 # LOGIN_URL = 'core:home-page'
