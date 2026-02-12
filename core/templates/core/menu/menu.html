@@ -18,11 +18,28 @@
                 <img src="{% static 'images/menu/back-icon.svg' %}" class="hover:text-gray-900" alt="Back_icon"/>
                 <span>Назад</span>
             </a>
-            <a href="#"
-               class="flex items-center gap-1.5 text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4 focus:ring-primary-300
-               font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:bg-primary-600
-               dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">
-               Вход для психолога
+        </nav>
+    </div>
+
+</header>
+
+
+<!--МЕНЮ НА СТРАНИЦЕ "РЕГИСТРАЦИЯ" ДЛЯ НЕАВТОРИЗОВАННОГО ПОЛЬЗОВАТЕЛЯ-->
+{% elif menu_variant == "register" %}
+<header class="bg-white shadow p-4">
+
+    <div class="mx-auto max-w-7xl px-4 py-1 flex justify-between items-center">
+        <a href="{% url 'core:start-page' %}" class="flex mr-4">
+            <img src="{% static 'images/logo/opora-logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo_icon"/>
+            <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
+        </a>
+        <nav class="flex items-center gap-6 text-gray-700">
+            <a href="{% url 'core:start-page' %}"
+               class="flex items-center gap-1 text-gray-800 dark:text-white hover:bg-gray-50 focus:ring-4 focus:ring-gray-300
+               font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:hover:bg-gray-700
+               focus:outline-none dark:focus:ring-gray-800">
+                <img src="{% static 'images/menu/back-icon.svg' %}" class="hover:text-gray-900" alt="Back_icon"/>
+                <span>Назад</span>
             </a>
         </nav>
     </div>
@@ -116,7 +133,7 @@
                    focus:outline-none dark:focus:ring-gray-800">
                     Войти
                 </a>
-                <a href="#"
+                <a href="{% url 'users:web:register-page' %}"
                    class="text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4 focus:ring-primary-300
                    font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:bg-primary-600
                    dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">

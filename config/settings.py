@@ -81,9 +81,14 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django_ratelimit.middleware.RatelimitMiddleware',  # важно для работы users/_web/views/ratelimit_view.py
 ]
 
 ROOT_URLCONF = 'config.urls'
+
+# Красивая обработка 403 Forbidden и 429
+# Пользовательская страница для случаев превышения лимитов запросов (django-ratelimit)
+RATELIMIT_VIEW = "users._web.views.ratelimit_view.ratelimited_view"
 
 TEMPLATES = [
     {
@@ -234,8 +239,8 @@ CSRF_TRUSTED_ORIGINS = [
 # Запрещаем доступ для всех подряд (оставляем только из списка выше)
 CORS_ALLOW_ALL_ORIGINS = False
 
-# FRONT_BASE_URL должен указывать туда, где будет обрабатываться подтверждение, даже если это API
-FRONT_BASE_URL = os.getenv('FRONT_BASE_URL', 'http://127.0.0.1:8000/api')
+# FRONT_BASE_URL должен указывать на домен, а конкретный маршрут задается в send_verification_email()
+FRONT_BASE_URL = os.getenv('FRONT_BASE_URL', 'http://127.0.0.1:8000')
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.yandex.ru'
@@ -245,6 +250,12 @@ EMAIL_USE_SSL = True
 EMAIL_HOST_USER = os.getenv('YANDEX_EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('YANDEX_EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# Срок действия ссылки для подтверждения регистрации из send_verification_email()
+# Ссылка валидируется через default_token_generator.
+# Срок действия берется из настройки PASSWORD_RESET_TIMEOUT (в секундах).
+# Если ее нет в settings.py, то Django использует дефолт 259200 секунд (3 дня).
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 24  # 24 часа
 
 LOGOUT_REDIRECT_URL = 'core:start-page'
 
