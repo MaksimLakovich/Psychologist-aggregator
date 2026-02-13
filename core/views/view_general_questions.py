@@ -22,7 +22,7 @@ class ClientGeneralQuestionsPageView(LoginRequiredMixin, FormView):
             "first_name": user.first_name,
             "email": user.email,  # просто показываем, так как в форме (disabled=True)
             "age": user.age,
-            "timezone": user.timezone,
+            "timezone": user.timezone or None,
             "therapy_experience": profile.therapy_experience,
         }
 
