@@ -49,8 +49,10 @@
 Это дает лучший результат, если страница длиннее экрана. -->
 {% block extra_style %}{% endblock %}
 
+
 <!-- Подключение подшаблона с меню (верхняя часть с навигацией) -->
 {% include 'core/menu/menu.html' %}
+
 
 <!-- Подключение основного контента страницы -->
 <main class="flex-1">
@@ -58,12 +60,22 @@
     {% endblock %}
 </main>
 
+
 <!-- Футер -->
+{% if menu_variant == "login" %}
+<footer></footer>
+
+{% elif menu_variant == "register" %}
+<footer></footer>
+
+{% else %}
 <footer class="bg-gray-100 py-6">
     <div class="mx-auto max-w-7xl px-4 text-center text-gray-500 text-sm">
         © ОПОРА. Все права защищены.
     </div>
 </footer>
+
+{% endif %}
 
 </body>
 
