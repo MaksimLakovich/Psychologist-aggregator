@@ -3680,6 +3680,11 @@ input:checked + .toggle-bg {
   background-color: rgb(190 24 93 / var(--tw-bg-opacity, 1));
 }
 
+.hover\:bg-indigo-600:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(88 80 236 / var(--tw-bg-opacity, 1));
+}
+
 .hover\:text-blue-600:hover {
   --tw-text-opacity: 1;
   color: rgb(28 100 242 / var(--tw-text-opacity, 1));
@@ -3703,6 +3708,11 @@ input:checked + .toggle-bg {
 .hover\:text-indigo-900:hover {
   --tw-text-opacity: 1;
   color: rgb(54 47 120 / var(--tw-text-opacity, 1));
+}
+
+.hover\:text-white:hover {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
 }
 
 .hover\:underline:hover {
@@ -3794,6 +3804,11 @@ input:checked + .toggle-bg {
 .focus\:ring-primary-600:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(219 39 119 / var(--tw-ring-opacity, 1));
+}
+
+.focus\:ring-indigo-300:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(180 198 252 / var(--tw-ring-opacity, 1));
 }
 
 .disabled\:cursor-not-allowed:disabled {
@@ -4027,6 +4042,11 @@ input:checked + .toggle-bg {
 .dark\:hover\:bg-primary-700:hover:is(.dark *) {
   --tw-bg-opacity: 1;
   background-color: rgb(190 24 93 / var(--tw-bg-opacity, 1));
+}
+
+.dark\:hover\:bg-indigo-800:hover:is(.dark *) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(66 56 157 / var(--tw-bg-opacity, 1));
 }
 
 .dark\:hover\:text-blue-500:hover:is(.dark *) {
