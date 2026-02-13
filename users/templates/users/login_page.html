@@ -6,128 +6,199 @@
 
 {% block content %}
 
-{% block extra_style %}
-<style>
-    body {
-        background-image: url('{% static "images/background/background-login.jpg" %}');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed; /* красиво фиксирует фон */
-    }
-</style>
-{% endblock %}
 
-<section class="bg-tranceparent dark:bg-gray-900">
-    <div class="flex flex-col items-center px-6 pt-16 pb-8 mx-auto lg:pt-20 lg:pb-10">
-
-        <div class="w-full bg-transparent rounded-lg sm:max-w-md xl:p-0 dark:bg-gray-800">
-            <div class="p-6 space-y-6 sm:p-8">
-
-                <h1 class="text-xl font-bold leading-tight tracking-wide text-gray-700 md:text-3xl dark:text-white">
-                    Вход
-                </h1>
-                <p class="text-sm text-gray-400 dark:text-gray-400">
-                    Для тех, у кого уже есть аккаунт
-                </p>
-
-                {% if messages %}
-                <div class="space-y-2">
-                    {% for message in messages %}
-                    {% if "success" in message.tags %}
-                    <div class="p-3 text-center text-base tracking-wide text-green-700 bg-green-50 rounded-lg">
-                        {{ message|linebreaksbr }}
-                    </div>
-                    {% else %}
-                    <div class="p-3 text-center text-base tracking-wide text-pink-700 bg-pink-50 rounded-lg">
-                        {{ message|linebreaksbr }}
-                    </div>
-                    {% endif %}
-                    {% endfor %}
-                </div>
-                {% endif %}
-
-                <!-- Общие ошибки -->
-                {% if form.non_field_errors %}
-                <div class="p-3 text-center text-base tracking-wide text-pink-700 bg-pink-50 rounded-lg">
-                    {% for err in form.non_field_errors %}
-                    {{ err }}{% if not forloop.last %}<br>{% endif %}
-                    {% endfor %}
-                </div>
-                {% endif %}
+<section class="bg-white dark:bg-gray-900 min-h-screen flex flex-col md:flex-row">
 
 
-                <form class="space-y-4 md:space-y-6" method="post">
-                    {% csrf_token %}
+    <!-- ========== ЛЕВАЯ ЧАСТЬ ДЛЯ АВТОРИЗАЦИИ ========== -->
 
-                    <!-- Username -->
-                    <div>
-                        <label for="{{ form.username.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                            {{ form.username.label }}
-                        </label>
-                        {{ form.username }}
+    <div class="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12 md:p-16 bg-white dark:bg-gray-900 order-1">
 
-                        {% if form.username.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
-                            {{ form.username.errors.0 }}
-                        </p>
-                        {% endif %}
-                    </div>
-
-                    <!-- Password -->
-                    <div>
-                        <label for="{{ form.password.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                            {{ form.password.label }}
-                        </label>
-                        {{ form.password }}
-
-                        {% if form.password.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
-                            {{ form.password.errors.0 }}
-                        </p>
-                        {% endif %}
-                    </div>
-
-                    <!-- Remember + Forgot -->
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-start">
-                            <div class="flex items-center h-5">
-                                <input id="remember" name="remember" type="checkbox"
-                                       class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3
-                              focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600">
-                            </div>
-                            <label for="remember" class="ml-3 text-sm text-gray-500 dark:text-gray-300">
-                                Запомнить меня
-                            </label>
-                        </div>
-                        <a href="#"
-                           class="text-sm font-medium text-indigo-700 hover:underline dark:text-primary-500">
-                            Забыли пароль?
-                        </a>
-                    </div>
-
-                    <button type="submit"
-                            class="w-full text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4 focus:outline-none
-                         focus:ring-primary-300 font-medium rounded-lg text-base px-6 py-3 text-center
-                         dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-                        Войти
-                    </button>
-
-                    <p class="text-sm font-light text-gray-500 dark:text-gray-400">
-                        Нет аккаунта?
-                        <a href="{% url 'users:web:register-page' %}"
-                           class="font-medium text-indigo-700 hover:underline dark:text-primary-500">
-                            Создать аккаунт
-                        </a>
-                    </p>
-                </form>
-
-            </div>
+        <div class="mx-auto max-w-7xl px-4 py-1 flex justify-between items-center">
+            <a href="{% url 'core:start-page' %}" class="flex mr-4">
+                <img src="{% static 'images/logo/opora-logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo_icon"/>
+                <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
+            </a>
+            <nav class="flex items-center gap-6 text-gray-700">
+                <a href="{% url 'core:start-page' %}"
+                   class="flex items-center gap-1 text-gray-800 dark:text-white hover:bg-gray-50 focus:ring-4 focus:ring-gray-300
+               font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:hover:bg-gray-700
+               focus:outline-none dark:focus:ring-gray-800">
+                    <img src="{% static 'images/menu/back-icon.svg' %}" class="hover:text-gray-900" alt="Back_icon"/>
+                    <span>Назад</span>
+                </a>
+            </nav>
         </div>
 
+        <div class="w-full max-w-md">
+            <h1 class="text-xl font-bold leading-tight tracking-wide text-gray-700 md:text-3xl dark:text-white">
+                Добро пожаловать
+            </h1>
+            <p class="text-sm text-gray-400 dark:text-gray-400 mb-6">
+                Вход для тех, у кого уже есть аккаунт
+            </p>
+
+            <!-- ВРЕМЕННАЯ ЗАГЛУШКИ - будущий блок для входа через аккаунт GOOGLE / APPLE -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <button type="button"
+                        class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                    <svg class="w-5 h-5 mr-2" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g clip-path="url(#clip0_123_456)">
+                            <path d="M20.3082 10.0825C20.3082 9.38257 20.2457 8.70752 20.1282 8.0575H10.5308V11.8325H16.0232C15.7907 13.125 15.0607 14.225 13.9782 14.9625V17.55H17.2657C19.1882 15.7475 20.3082 13.0825 20.3082 10.0825Z"
+                                  fill="#4285F4"/>
+                            <path d="M10.5307 20.0001C13.2782 20.0001 15.5882 19.0926 17.2682 17.5501L13.9807 14.9626C13.0682 15.5801 11.9057 15.9426 10.5332 15.9426C7.8807 15.9426 5.6357 14.1501 4.8332 11.7301H1.4357V14.3651C3.1232 17.7151 6.5882 20.0001 10.5307 20.0001Z"
+                                  fill="#34A853"/>
+                            <path d="M4.83067 11.73C4.62317 11.105 4.50567 10.4375 4.50567 9.75C4.50567 9.0625 4.62317 8.395 4.83067 7.77V5.135H1.43317C0.750669 6.495 0.363169 8.07 0.363169 9.75C0.363169 11.43 0.750669 13.005 1.43317 14.365L4.83067 11.73Z"
+                                  fill="#FBBC05"/>
+                            <path d="M10.5307 3.5575C12.0232 3.5575 13.3607 4.07001 14.4157 5.08001L17.3332 2.1625C15.5832 0.530006 13.2732 0 10.5307 0C6.5882 0 3.1232 2.285 1.4357 5.635L4.8332 8.27C5.6357 5.85 7.8807 3.5575 10.5307 3.5575Z"
+                                  fill="#EB4335"/>
+                        </g>
+                    </svg>
+                    Войти с Google
+                </button>
+                <button type="button"
+                        class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                    <svg class="w-5 h-5 mr-2 text-gray-900 dark:text-white" fill="currentColor" viewBox="0 0 24 24"
+                         aria-hidden="true">
+                        <path d="M17.2025 15.6562C16.8925 16.109 16.4825 16.697 15.9862 17.417C15.4212 18.237 14.9375 18.91 14.5362 19.435C14.0012 20.142 13.5675 20.495 13.235 20.495C13.0912 20.495 12.8712 20.442 12.5738 20.337C12.2775 20.231 11.9362 20.179 11.5512 20.179C11.1662 20.179 10.825 20.231 10.5288 20.337C10.2312 20.442 10.0112 20.495 9.86875 20.495C9.535 20.495 9.09125 20.133 8.53625 19.408C8.16375 18.916 7.69625 18.257 7.135 17.432C5.68875 15.342 4.96625 13.435 4.96625 11.711C4.96625 10.287 5.485 9.068 6.5225 8.055C7.38875 7.218 8.47375 6.8 9.7775 6.8C10.1975 6.8 10.6625 6.883 11.1712 7.049C11.68 7.215 12.0838 7.298 12.3838 7.298C12.6375 7.298 13.0025 7.227 13.48 7.085C13.9575 6.942 14.4175 6.871 14.8612 6.871C16.4275 6.871 17.6838 7.424 18.63 8.531C17.7562 9.066 17.32 9.947 17.32 11.174C17.32 12.222 17.5962 13.111 18.1488 13.841C18.5775 14.398 19.1412 14.83 19.8412 15.138C19.7012 15.536 19.5088 15.961 19.2625 16.413C18.6675 17.534 17.9812 18.282 17.2025 15.6562ZM13.8362 2.766C13.8362 3.656 13.5138 4.516 12.8688 5.346C12.2612 6.131 11.4588 6.523 10.4625 6.523C10.435 6.523 10.395 6.522 10.3425 6.519C10.29 6.516 10.2462 6.514 10.2113 6.512C10.2113 5.567 10.575 4.654 11.3025 3.774C11.9562 2.973 12.805 2.531 13.8488 2.531C13.8588 2.613 13.8638 2.691 13.8638 2.766H13.8362Z"/>
+                    </svg>
+                    Войти с Apple
+                </button>
+            </div>
+
+            <div class="flex items-center mb-6">
+                <div class="w-full h-px bg-gray-200 dark:bg-gray-700"></div>
+                <span class="px-4 text-gray-500 text-sm">или</span>
+                <div class="w-full h-px bg-gray-200 dark:bg-gray-700"></div>
+            </div>
+
+            <!-- УВЕДОМЛЕНИЯ -->
+            {% if messages %}
+            <div class="space-y-2">
+                {% for message in messages %}
+                {% if "success" in message.tags %}
+                <div class="p-3 text-center text-base tracking-wide text-green-700 bg-green-50 rounded-lg">
+                    {{ message|linebreaksbr }}
+                </div>
+                {% else %}
+                <div class="p-3 text-center text-base tracking-wide text-pink-700 bg-pink-50 rounded-lg">
+                    {{ message|linebreaksbr }}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- ОБЩИЕ ОШИБКИ -->
+            {% if form.non_field_errors %}
+            <div class="p-3 text-center text-base tracking-wide text-pink-700 bg-pink-50 rounded-lg">
+                {% for err in form.non_field_errors %}
+                {{ err }}{% if not forloop.last %}<br>{% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- ФОРМА ДЛЯ АВТОРИЗАЦИИ -->
+            <form class="space-y-4 md:space-y-6" method="post">
+                {% csrf_token %}
+
+                <!-- Username -->
+                <div>
+                    <label for="{{ form.username.id_for_label }}"
+                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        {{ form.username.label }}
+                    </label>
+                    {{ form.username }}
+
+                    {% if form.username.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        {{ form.username.errors.0 }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label for="{{ form.password.id_for_label }}"
+                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        {{ form.password.label }}
+                    </label>
+                    {{ form.password }}
+
+                    {% if form.password.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        {{ form.password.errors.0 }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Remember + Forgot -->
+                <div class="flex items-center justify-between pb-12">
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="remember" name="remember" type="checkbox"
+                                   class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3
+                              focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600">
+                        </div>
+                        <label for="remember" class="ml-3 text-sm text-gray-500 dark:text-gray-300">
+                            Запомнить меня
+                        </label>
+                    </div>
+                    <a href="#"
+                       class="text-sm font-medium text-indigo-700 hover:underline dark:text-primary-500">
+                        Забыли пароль?
+                    </a>
+                </div>
+
+                <button type="submit"
+                        class="w-full text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4 focus:outline-none
+                         focus:ring-primary-300 font-medium rounded-lg text-base px-6 py-3 text-center
+                         dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                    Войти
+                </button>
+
+                <p class="text-sm font-light text-gray-500 dark:text-gray-400">
+                    Нет аккаунта?
+                    <a href="{% url 'users:web:register-page' %}"
+                       class="font-medium text-indigo-700 hover:underline dark:text-primary-500">
+                        Создать аккаунт
+                    </a>
+                </p>
+            </form>
+        </div>
     </div>
+
+
+    <!-- ========== ПРАВАЯ ЧАСТЬ С ЛОЗУНГОМ И АВАМИ ========== -->
+
+    <div class="w-full md:w-1/2 bg-indigo-700 p-8 sm:p-12 md:p-16 flex flex-col justify-center items-start text-white order-2">
+
+        <h2 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
+            Сервис, созданный психологами
+        </h2>
+
+        <p class="text-lg text-blue-100 mb-8 max-w-lg">
+            «Психотерапия — это искусство возможного. В работе для нас важно сохранять индивидуальный подход и гибкость в заданных рамках процесса»
+        </p>
+
+        <div class="flex items-center gap-4">
+            <div class="flex -space-x-4">
+                <img class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"
+                     src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="">
+                <img class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"
+                     src="https://flowbite.com/docs/images/people/profile-picture-2.jpg" alt="">
+                <img class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"
+                     src="https://flowbite.com/docs/images/people/profile-picture-3.jpg" alt="">
+                <img class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"
+                     src="https://flowbite.com/docs/images/people/profile-picture-4.jpg" alt="">
+            </div>
+            <div class="text-white font-medium">
+                В команде <span class="font-bold">15.7k</span> профессионалов
+            </div>
+        </div>
+    </div>
+
+
 </section>
 
 {% endblock %}

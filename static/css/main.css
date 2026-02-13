@@ -3105,6 +3105,10 @@ input:checked + .toggle-bg {
   padding-bottom: 0.25rem;
 }
 
+.pb-12 {
+  padding-bottom: 3rem;
+}
+
 .text-center {
   text-align: center;
 }
