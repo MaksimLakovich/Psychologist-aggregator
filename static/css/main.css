@@ -2189,6 +2189,10 @@ input:checked + .toggle-bg {
   height: 1px;
 }
 
+.h-14 {
+  height: 3.5rem;
+}
+
 .max-h-\[70vh\] {
   max-height: 70vh;
 }
@@ -2275,6 +2279,14 @@ input:checked + .toggle-bg {
 
 .w-full {
   width: 100%;
+}
+
+.w-6 {
+  width: 1.5rem;
+}
+
+.w-14 {
+  width: 3.5rem;
 }
 
 .max-w-2xl {
@@ -4192,8 +4204,16 @@ input:checked + .toggle-bg {
     height: 100vh;
   }
 
+  .md\:h-16 {
+    height: 4rem;
+  }
+
   .md\:w-1\/2 {
     width: 50%;
+  }
+
+  .md\:w-16 {
+    width: 4rem;
   }
 
   .md\:flex-1 {

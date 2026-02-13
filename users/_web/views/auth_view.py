@@ -14,7 +14,7 @@ from django_ratelimit.decorators import ratelimit
 
 from users._web.forms.auth_form import (AppUserLoginForm,
                                         AppUserRegistrationForm)
-from users.models import AppUser, ClientProfile, UserRole
+from users.models import AppUser, ClientProfile, PsychologistProfile, UserRole
 from users.services.send_verification_email import send_verification_email
 
 
@@ -134,11 +134,21 @@ class LoginPageView(LoginView):
         2) В текущей реализации передаем:
             - Заголовок страницы (title)
             - Тип страницы для выбора подходящего меню для данный страницы
+            - Количество верифицированных психологов и рандомно 10 аватарок для показа статистики на странице входа
         3) Возвращает:
             - dict: словарь со всеми данными, доступными внутри HTML-шаблона."""
         context = super().get_context_data(**kwargs)
         context["title_login_page_view"] = "Вход в личный кабинет сервиса ОПОРА"
         context["menu_variant"] = "login"
+        context["verified_psychologists_count"] = PsychologistProfile.objects.filter(
+            is_verified=True
+        ).count()
+        context["verified_psychologist_avatars"] = (
+            PsychologistProfile.objects.filter(is_verified=True)
+            .exclude(photo="")
+            .exclude(photo__isnull=True)
+            .order_by("?")[:10]
+        )
         return context
 
     def get_success_url(self):
