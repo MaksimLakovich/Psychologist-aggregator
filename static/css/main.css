@@ -2053,6 +2053,10 @@ input:checked + .toggle-bg {
   margin-bottom: 2rem;
 }
 
+.mb-16 {
+  margin-bottom: 4rem;
+}
+
 .\!block {
   display: block !important;
 }
@@ -4082,6 +4086,19 @@ input:checked + .toggle-bg {
     padding: 3rem;
   }
 
+  .sm\:p-1 {
+    padding: 0.25rem;
+  }
+
+  .sm\:p-4 {
+    padding: 1rem;
+  }
+
+  .sm\:px-12 {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+
   .sm\:text-5xl {
     font-size: 3rem;
     line-height: 1;
@@ -4090,6 +4107,11 @@ input:checked + .toggle-bg {
   .sm\:text-sm {
     font-size: 0.875rem;
     line-height: 1.25rem;
+  }
+
+  .sm\:text-4xl {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
   }
 }
 
@@ -4172,6 +4194,14 @@ input:checked + .toggle-bg {
     padding: 4rem;
   }
 
+  .md\:p-1 {
+    padding: 0.25rem;
+  }
+
+  .md\:p-4 {
+    padding: 1rem;
+  }
+
   .md\:py-0 {
     padding-top: 0px;
     padding-bottom: 0px;
@@ -4180,6 +4210,11 @@ input:checked + .toggle-bg {
   .md\:py-6 {
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
+  }
+
+  .md\:px-16 {
+    padding-left: 4rem;
+    padding-right: 4rem;
   }
 
   .md\:pl-6 {
