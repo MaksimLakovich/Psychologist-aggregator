@@ -34,9 +34,15 @@
                 {% if messages %}
                 <div class="space-y-2">
                     {% for message in messages %}
+                    {% if "success" in message.tags %}
+                    <div class="p-3 text-center text-base tracking-wide text-green-700 bg-green-50 rounded-lg">
+                        {{ message|linebreaksbr }}
+                    </div>
+                    {% else %}
                     <div class="p-3 text-center text-base tracking-wide text-pink-700 bg-pink-50 rounded-lg">
                         {{ message|linebreaksbr }}
                     </div>
+                    {% endif %}
                     {% endfor %}
                 </div>
                 {% endif %}

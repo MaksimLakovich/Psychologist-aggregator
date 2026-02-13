@@ -8,7 +8,7 @@ class ClientGeneralQuestionsForm(forms.Form):
     """Кастомная форма для страницы *Общие вопросы*. Форма объединяет данные из двух моделей: AppUser и ClientProfile.
     Основная логика:
         - При GET форма получает initial-значения из связанных моделей, чтобы пользователь сразу видел
-         уже заполненные данные.
+         уже заполненные данные (кроме timezone где мы изначально устанавливаем пусто).
         - При POST форма валидирует и сохраняет обновленные данные.
         - Email здесь отображается только для чтения (нельзя изменить), так как изменение email реализуем
         отдельно в *Мой профиль*."""
@@ -47,11 +47,26 @@ class ClientGeneralQuestionsForm(forms.Form):
     )
     timezone = TimeZoneFormField(
         required=True,
+        # Чтоб на web-странице поле timezone не заполнялось по умолчанию первым initial-значением
+        # из связанного справочника (было Africa/Abidjan)
+        initial=None,
         widget=forms.Select(attrs={
             "class": "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
                      "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm",
         })
     )
+
+    def __init__(self, *args, **kwargs):
+        """Добавляем дефолтное значение в справочник 'TIMEZONE' и выводим сразу его на web-странице пользователя."""
+        super().__init__(*args, **kwargs)
+
+        # Добавляем пустой вариант в начало списка часовых поясов
+        timezone_choices = list(self.fields["timezone"].choices)
+        if not timezone_choices or timezone_choices[0][0] != "":
+            self.fields["timezone"].choices = [
+                ("", "Выберите часовой пояс"),
+                *timezone_choices,
+            ]
 
     def save(self, user):
         """Сохранение данных формы в модели AppUser и ClientProfile.
