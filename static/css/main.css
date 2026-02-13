@@ -2065,6 +2065,10 @@ input:checked + .toggle-bg {
   margin-bottom: 3rem;
 }
 
+.mb-10 {
+  margin-bottom: 2.5rem;
+}
+
 .\!block {
   display: block !important;
 }
@@ -3127,6 +3131,10 @@ input:checked + .toggle-bg {
 
 .pt-14 {
   padding-top: 3.5rem;
+}
+
+.pt-8 {
+  padding-top: 2rem;
 }
 
 .text-center {
@@ -4243,6 +4251,18 @@ input:checked + .toggle-bg {
 
   .md\:pt-5 {
     padding-top: 1.25rem;
+  }
+
+  .md\:pt-0 {
+    padding-top: 0px;
+  }
+
+  .md\:pt-24 {
+    padding-top: 6rem;
+  }
+
+  .md\:pt-28 {
+    padding-top: 7rem;
   }
 
   .md\:text-2xl {
