@@ -2069,6 +2069,10 @@ input:checked + .toggle-bg {
   margin-bottom: 2.5rem;
 }
 
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
 .\!block {
   display: block !important;
 }
@@ -4168,6 +4172,18 @@ input:checked + .toggle-bg {
     margin-top: 0px;
   }
 
+  .md\:mb-12 {
+    margin-bottom: 3rem;
+  }
+
+  .md\:mb-8 {
+    margin-bottom: 2rem;
+  }
+
+  .md\:mb-10 {
+    margin-bottom: 2.5rem;
+  }
+
   .md\:block {
     display: block;
   }
@@ -4263,6 +4279,10 @@ input:checked + .toggle-bg {
 
   .md\:pt-28 {
     padding-top: 7rem;
+  }
+
+  .md\:pb-12 {
+    padding-bottom: 3rem;
   }
 
   .md\:text-2xl {
