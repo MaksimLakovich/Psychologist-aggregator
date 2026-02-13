@@ -4196,6 +4196,10 @@ input:checked + .toggle-bg {
     margin-bottom: 2.5rem;
   }
 
+  .md\:-mt-8 {
+    margin-top: -2rem;
+  }
+
   .md\:block {
     display: block;
   }

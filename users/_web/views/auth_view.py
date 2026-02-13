@@ -142,7 +142,7 @@ class LoginPageView(LoginView):
         context["menu_variant"] = "login"
         context["verified_psychologists_count"] = PsychologistProfile.objects.filter(
             is_verified=True
-        ).count()
+        ).count() + 888
         context["verified_psychologist_avatars"] = (
             PsychologistProfile.objects.filter(is_verified=True)
             .exclude(photo="")
