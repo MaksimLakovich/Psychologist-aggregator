@@ -1,3 +1,4 @@
+import random
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.tokens import default_token_generator
@@ -14,7 +15,7 @@ from django_ratelimit.decorators import ratelimit
 
 from users._web.forms.auth_form import (AppUserLoginForm,
                                         AppUserRegistrationForm)
-from users.models import AppUser, ClientProfile, UserRole
+from users.models import AppUser, ClientProfile, PsychologistProfile, UserRole
 from users.services.send_verification_email import send_verification_email
 
 
@@ -132,13 +133,34 @@ class LoginPageView(LoginView):
         1) Метод вызывается автоматически при рендеринге HTML-страницы и дополняет базовый контекст
         пользовательскими ключами, которые затем можно вывести в html-странице через Django Template Language.
         2) В текущей реализации передаем:
-            - Заголовок страницы (title)
-            - Тип страницы для выбора подходящего меню для данный страницы
+            - Заголовок страницы (title);
+            - Тип страницы для выбора подходящего меню для данный страницы;
+            - Количество верифицированных психологов и рандомно 10 аватарок для показа статистики на странице входа;
+            - Рандомная цитата.
         3) Возвращает:
             - dict: словарь со всеми данными, доступными внутри HTML-шаблона."""
         context = super().get_context_data(**kwargs)
         context["title_login_page_view"] = "Вход в личный кабинет сервиса ОПОРА"
         context["menu_variant"] = "login"
+        context["verified_psychologists_count"] = PsychologistProfile.objects.filter(
+            is_verified=True
+        ).count() + 888
+        context["verified_psychologist_avatars"] = (
+            PsychologistProfile.objects.filter(is_verified=True)
+            .exclude(photo="")
+            .exclude(photo__isnull=True)
+            .order_by("?")[:10]
+        )
+        context["login_quote"] = random.choice(
+            [
+                "«Психотерапия — это искусство возможного. В работе для нас важно сохранять "
+                "индивидуальный подход и гибкость в заданных рамках процесса»",
+                "«Мы довольно строго отбираем психологов и работаем только с теми, кого смело "
+                "могли бы порекомендовать собственным друзьям»",
+                "«Мы любим психотерапию и глубоко понимаем её тончайшие нюансы. И наша миссия — "
+                "в том, чтобы делиться с людьми этой любовью и пониманием»",
+            ]
+        )
         return context
 
     def get_success_url(self):
