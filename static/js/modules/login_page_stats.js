@@ -1,5 +1,9 @@
 import { pluralizeRu } from "../utils/pluralize_ru.js";
 
+//-------------------------------------------------------------
+// Формирование ТЕКСТА со счетчиком АКТИВНЫХ специалистов для страницы login_page.html
+//-------------------------------------------------------------
+
 const statsEl = document.getElementById("verified-psychologists-text");
 if (statsEl) {
   const count = Number(statsEl.dataset.count || 0);
