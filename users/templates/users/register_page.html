@@ -15,7 +15,7 @@
     <div class="w-full md:w-1/2 flex flex-col p-4 sm:p-12 md:p-4 bg-indigo-700 dark:bg-indigo-700 md:order-1 order-2">
 
         <!-- ========== ЛОГО (ЛЕВАЯ КОЛОНКА) ========== -->
-        <div class="w-full max-w-md flex items-center justify-between pb-1">
+        <div class="w-full max-w-md hidden md:flex items-center justify-between pb-1">
             <a href="{% url 'core:start-page' %}" class="flex mr-4">
                 <img src="{% static 'images/logo/opora-logo-white.svg' %}" class="w-12 h-auto mr-0" alt="Logo_icon"/>
                 <span class="text-5xl font-extrabold tracking-tight text-white sm:text-5xl">ОПОРА</span>
@@ -23,10 +23,10 @@
         </div>
 
         <!-- ========== Иллюстрация ========== -->
-        <div class="lg:col-span-6 lg:block relative">
+        <div class="flex-1 flex items-center justify-center">
             <img src="{% static 'images/register_page/authentication-form.svg' %}"
                  alt="Психологи"
-                 class="w-full h-auto">
+                 class="w-3/5 h-auto">
         </div>
     </div>
 
@@ -41,13 +41,15 @@
                 <img src="{% static 'images/logo/opora-logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo_icon"/>
                 <span class="text-5xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
             </a>
-            <a href="{% url 'core:start-page' %}"
-               class="flex items-center gap-1 text-indigo-700 hover:bg-gray-100 focus:ring-4 focus:ring-indigo-300
-               font-medium rounded-lg text-base px-4 md:px-5 py-2 md:py-3 dark:hover:bg-indigo-800
-               focus:outline-none">
-                <img src="{% static 'images/menu/back-icon.svg' %}" class="hover:text-white" alt="Back_icon"/>
-                <span>Назад</span>
-            </a>
+            <div class="w-full hidden md:flex justify-end">
+                <a href="{% url 'core:start-page' %}"
+                   class="flex items-center gap-1 text-indigo-700 hover:bg-gray-100 focus:ring-4 focus:ring-indigo-300
+                   font-medium rounded-lg text-base px-4 md:px-5 py-2 md:py-3 dark:hover:bg-indigo-800
+                   focus:outline-none">
+                    <img src="{% static 'images/menu/back-icon.svg' %}" class="hover:text-white" alt="Back_icon"/>
+                    <span>Назад</span>
+                </a>
+            </div>
         </div>
 
         <!-- ========== РЕГИСТРАЦИЯ ========== -->
