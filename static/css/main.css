@@ -4646,6 +4646,10 @@ input:checked + .toggle-bg {
     padding-top: 8rem;
   }
 
+  .md\:pb-1 {
+    padding-bottom: 0.25rem;
+  }
+
   .md\:text-2xl {
     font-size: 1.5rem;
     line-height: 2rem;

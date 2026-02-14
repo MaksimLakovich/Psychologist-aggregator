@@ -58,7 +58,7 @@
                 <h1 class="text-2xl text-center font-extrabold leading-tight tracking-wide text-gray-700 md:text-4xl dark:text-white">
                     Регистрация
                 </h1>
-                <p class="text-sm text-center text-gray-400 dark:text-gray-400 pt-2">
+                <p class="text-sm text-center text-gray-400 dark:text-gray-400 pt-2 mb-6 md:mb-12">
                     Для тех, у кого ещё нет аккаунта
                 </p>
 
@@ -83,7 +83,7 @@
                 {% endif %}
 
                 <!-- ФОРМА ДЛЯ РЕГИСТРАЦИИ -->
-                <form class="space-y-4 md:space-y-6 py-6" method="post">
+                <form class="space-y-4 md:space-y-6" method="post">
                     {% csrf_token %}
 
                     <!-- Email -->
