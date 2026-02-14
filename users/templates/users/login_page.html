@@ -15,7 +15,7 @@
     <div class="w-full md:w-1/2 flex flex-col items-center p-4 sm:p-12 md:p-4 bg-white dark:bg-gray-900 order-1">
 
         <!-- ========== ЛОГО (ЛЕВАЯ КОЛОНКА) ========== -->
-        <div class="w-full max-w-md flex justify-between items-center pb-1">
+        <div class="w-full max-w-md flex items-center pb-1">
             <a href="{% url 'core:start-page' %}" class="flex mr-4">
                 <img src="{% static 'images/logo/opora-logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo_icon"/>
                 <span class="text-5xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
@@ -166,37 +166,39 @@
 
     <!-- ========== ПРАВАЯ ЧАСТЬ С ЛОЗУНГОМ И АВАМИ ========== -->
 
-    <div class="w-full md:w-1/2 bg-indigo-700 p-8 sm:p-12 md:p-16 flex flex-col justify-center items-start text-white order-2 md:-mt-48">
+    <div class="w-full md:w-1/2 flex flex-col p-4 sm:p-12 md:p-4 bg-indigo-700 dark:bg-indigo-700 order-2">
 
         <!-- ========== КНОПКА НАЗАД (ПРАВАЯ КОЛОНКА) ========== -->
-        <div class="w-full flex justify-end mb-6">
+        <div class="w-full flex justify-end pb-1">
             <a href="{% url 'core:start-page' %}"
-               class="flex items-center gap-1 text-white hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300
-               font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 dark:hover:bg-indigo-800
+               class="flex items-center gap-1 text-gray-500 hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300
+               font-medium rounded-lg text-base px-4 md:px-5 py-2 md:py-3 dark:hover:bg-indigo-800
                focus:outline-none">
                 <img src="{% static 'images/menu/back-icon.svg' %}" class="hover:text-white" alt="Back_icon"/>
                 <span>Назад</span>
             </a>
         </div>
 
-        <h2 class="text-4xl md:text-5xl font-extrabold mb-4 md:mb-8 leading-tight">
-            Сервис, созданный психологами
-        </h2>
+        <div class="w-full flex-1 flex mx-1 md:mx-8 text-white">
+            <h2 class="text-4xl md:text-5xl font-extrabold mb-4 md:mb-8 leading-tight">
+                Сервис, созданный психологами
+            </h2>
 
-        <p class="text-lg text-blue-100 mb-4 md:mb-16 max-w-lg">
-            {{ login_quote }}
-        </p>
+            <p class="text-lg text-blue-100 mb-4 md:mb-16 max-w-lg">
+                {{ login_quote }}
+            </p>
 
-        <div class="flex flex-col gap-3">
-            <div class="flex -space-x-4">
-                {% for profile in verified_psychologist_avatars %}
-                <img class="w-14 h-14 border-2 border-white rounded-full dark:border-gray-800"
-                     src="{{ profile.photo.url }}" alt="Психолог">
-                {% endfor %}
-            </div>
-            <div class="text-white font-medium"
-                 id="verified-psychologists-text"
-                 data-count="{{ verified_psychologists_count }}">
+            <div class="flex flex-col gap-3">
+                <div class="flex -space-x-4">
+                    {% for profile in verified_psychologist_avatars %}
+                    <img class="w-14 h-14 border-2 border-white rounded-full dark:border-gray-800"
+                         src="{{ profile.photo.url }}" alt="Психолог">
+                    {% endfor %}
+                </div>
+                <div class="text-white font-medium"
+                     id="verified-psychologists-text"
+                     data-count="{{ verified_psychologists_count }}">
+                </div>
             </div>
         </div>
     </div>
