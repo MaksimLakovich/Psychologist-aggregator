@@ -6,13 +6,24 @@
 
 {% block content %}
 
+{% block extra_style %}
+<style>
+    body {
+        background-image: url('{% static "images/background/background-login.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed; /* красиво фиксирует фон */
+    }
+</style>
+{% endblock %}
 
-<section class="bg-white dark:bg-gray-900 min-h-screen flex flex-col md:flex-row">
+<section class="bg-tranceparent dark:bg-gray-900 min-h-screen flex flex-col md:flex-row">
 
 
     <!-- ========== ЛЕВАЯ ЧАСТЬ ДЛЯ АВТОРИЗАЦИИ ========== -->
 
-    <div class="w-full md:w-1/2 flex flex-col items-center p-4 sm:p-12 md:p-4 bg-white dark:bg-gray-900 order-1">
+    <div class="w-full md:w-1/2 flex flex-col items-center p-4 sm:p-12 md:p-4 dark:bg-gray-900 order-1">
 
         <!-- ========== ЛОГО (ЛЕВАЯ КОЛОНКА) ========== -->
         <div class="w-full max-w-md flex items-center justify-between pb-1">
