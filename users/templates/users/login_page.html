@@ -6,17 +6,6 @@
 
 {% block content %}
 
-{% block extra_style %}
-<style>
-    body {
-        background-image: url('{% static "images/background/background-login.jpg" %}');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed; /* красиво фиксирует фон */
-    }
-</style>
-{% endblock %}
 
 <section class="bg-tranceparent dark:bg-gray-900 min-h-screen flex flex-col md:flex-row">
 
@@ -32,7 +21,7 @@
                 <span class="text-5xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
             </a>
             <a href="{% url 'core:start-page' %}"
-               class="md:hidden flex items-center gap-1 text-gray-500 hover:bg-gray-50 focus:ring-4 focus:ring-gray-300
+               class="md:hidden flex items-center gap-1 text-indigo-700 hover:bg-gray-50 focus:ring-4 focus:ring-gray-300
                font-medium rounded-lg text-base px-4 py-2 focus:outline-none">
                 <img src="{% static 'images/menu/back-icon.svg' %}" class="hover:text-gray-900" alt="Back_icon"/>
                 <span>Назад</span>
@@ -188,10 +177,10 @@
         <!-- ========== КНОПКА НАЗАД (ПРАВАЯ КОЛОНКА) ========== -->
         <div class="w-full hidden md:flex justify-end pb-1">
             <a href="{% url 'core:start-page' %}"
-               class="flex items-center gap-1 text-gray-500 hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300
+               class="flex items-center gap-1 text-white hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300
                font-medium rounded-lg text-base px-4 md:px-5 py-2 md:py-3 dark:hover:bg-indigo-800
                focus:outline-none">
-                <img src="{% static 'images/menu/back-icon.svg' %}" class="hover:text-white" alt="Back_icon"/>
+                <img src="{% static 'images/menu/back-icon-white.svg' %}" class="hover:text-white" alt="Back_icon"/>
                 <span>Назад</span>
             </a>
         </div>

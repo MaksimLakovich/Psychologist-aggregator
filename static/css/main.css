@@ -4196,6 +4196,10 @@ input:checked + .toggle-bg {
     margin-top: 2rem;
   }
 
+  .sm\:hidden {
+    display: none;
+  }
+
   .sm\:max-w-md {
     max-width: 28rem;
   }
