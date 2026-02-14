@@ -24,7 +24,15 @@
 
         <!-- Текст -->
         <div class="lg:col-span-6 flex flex-col justify-center">
-            <h1 class="text-5xl font-extrabold tracking-tight text-grey-900 sm:text-5xl">
+            <h1
+                    id="login-gradient-title"
+                    data-gradient-colors='["#5145CD","#6C2BD9","#6875F5"]'
+                    data-gradient-speed="16"
+                    data-gradient-direction="horizontal"
+                    data-gradient-pause-on-hover="false"
+                    data-gradient-yoyo="true"
+
+                    class="text-5xl font-extrabold tracking-tight text-grey-900 sm:text-5xl">
                 {{ header_start_page_view }}
             </h1>
 
@@ -204,5 +212,7 @@
     </div>
 
 </section>
+
+<script type="module" src="{% static 'js/modules/gradient_text.js' %}"></script>
 
 {% endblock %}
