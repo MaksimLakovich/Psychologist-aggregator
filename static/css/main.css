@@ -2073,6 +2073,10 @@ input:checked + .toggle-bg {
   margin-bottom: 1rem;
 }
 
+.mb-60 {
+  margin-bottom: 15rem;
+}
+
 .\!block {
   display: block !important;
 }
@@ -3151,6 +3155,10 @@ input:checked + .toggle-bg {
 
 .pt-8 {
   padding-top: 2rem;
+}
+
+.pb-10 {
+  padding-bottom: 2.5rem;
 }
 
 .text-center {
@@ -4256,6 +4264,10 @@ input:checked + .toggle-bg {
     margin-bottom: 12rem;
   }
 
+  .md\:mt-48 {
+    margin-top: 12rem;
+  }
+
   .md\:block {
     display: block;
   }
@@ -4320,6 +4332,10 @@ input:checked + .toggle-bg {
 
   .md\:p-4 {
     padding: 1rem;
+  }
+
+  .md\:p-40 {
+    padding: 10rem;
   }
 
   .md\:py-0 {
