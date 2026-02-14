@@ -6,31 +6,73 @@
 
 {% block content %}
 
-{% block extra_style %}
-<style>
-    body {
-        background-image: url('{% static "images/background/background-login.jpg" %}');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed; /* красиво фиксирует фон */
-    }
-</style>
-{% endblock %}
 
-<section class="bg-tranceparent dark:bg-gray-900">
-    <div class="flex flex-col items-center px-6 pt-16 pb-8 mx-auto lg:pt-20 lg:pb-10">
+<section class="bg-tranceparent dark:bg-gray-900 min-h-screen flex flex-col md:flex-row">
 
-        <div class="w-full bg-transparent rounded-lg sm:max-w-md xl:p-0 dark:bg-gray-800">
-            <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
 
-                <h1 class="text-xl font-bold leading-tight tracking-wide text-gray-700 md:text-3xl dark:text-white">
+    <!-- ========== ЛЕВАЯ ЧАСТЬ ========== -->
+
+    <div class="w-full md:w-1/2 flex flex-col p-4 sm:p-12 md:p-4 bg-indigo-700 dark:bg-indigo-700 md:order-1 order-2">
+
+        <!-- ========== ЛОГО (ЛЕВАЯ КОЛОНКА) ========== -->
+        <div class="w-full max-w-md hidden md:flex items-center justify-between pb-1 mx-auto">
+            <a href="{% url 'core:start-page' %}" class="flex mr-4">
+                <img src="{% static 'images/logo/opora-logo-white.svg' %}" class="w-12 h-auto mr-0" alt="Logo_icon"/>
+                <span class="text-5xl font-extrabold tracking-tight text-white sm:text-5xl">ОПОРА</span>
+            </a>
+        </div>
+
+        <!-- ========== Иллюстрация ========== -->
+        <div class="flex-1 flex items-center justify-center">
+            <img src="{% static 'images/register_page/authentication-form.svg' %}"
+                 alt="Психологи"
+                 class="w-1/2 h-auto">
+        </div>
+    </div>
+
+
+    <!-- ========== ПРАВАЯ ЧАСТЬ ДЛЯ РЕГИСТРАЦИИИ ========== -->
+
+    <div class="w-full md:w-1/2 flex flex-col items-center p-4 sm:p-12 md:p-4 dark:bg-gray-900 md:order-2 order-1">
+
+        <!-- ========== КНОПКА НАЗАД (ПРАВАЯ КОЛОНКА) ========== -->
+        <div class="w-full pb-1">
+            <div class="w-full max-w-md mx-auto flex items-center justify-between md:hidden">
+                <a href="{% url 'core:start-page' %}" class="flex mr-4">
+                    <img src="{% static 'images/logo/opora-logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo_icon"/>
+                    <span class="text-5xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
+                </a>
+                <a href="{% url 'core:start-page' %}"
+                   class="flex items-center gap-1 text-indigo-700 hover:bg-gray-100 focus:ring-4 focus:ring-indigo-300
+                   font-medium rounded-lg text-base px-4 py-2 focus:outline-none">
+                    <img src="{% static 'images/menu/back-icon.svg' %}" class="hover:text-white" alt="Back_icon"/>
+                    <span>Назад</span>
+                </a>
+            </div>
+            <div class="w-full hidden md:flex">
+                <div class="w-full max-w-md mx-auto flex justify-end">
+                    <a href="{% url 'core:start-page' %}"
+                       class="flex items-center gap-1 text-indigo-700 hover:bg-gray-100 focus:ring-4 focus:ring-indigo-300
+                       font-medium rounded-lg text-base px-4 md:px-5 py-2 md:py-3 dark:hover:bg-indigo-800
+                       focus:outline-none">
+                        <img src="{% static 'images/menu/back-icon.svg' %}" class="hover:text-white" alt="Back_icon"/>
+                        <span>Назад</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== РЕГИСТРАЦИЯ ========== -->
+        <div class="w-full flex-1 flex pt-8 md:pt-28">
+            <div class="w-full max-w-md mx-auto">
+                <h1 class="text-2xl text-center font-extrabold leading-tight tracking-wide text-zinc-400 md:text-4xl dark:text-white">
                     Регистрация
                 </h1>
-                <p class="text-sm text-gray-400 dark:text-gray-400">
+                <p class="text-sm text-center text-zinc-300 dark:text-gray-400 pt-2 mb-6 md:mb-12">
                     Для тех, у кого ещё нет аккаунта
                 </p>
 
+                <!-- УВЕДОМЛЕНИЯ -->
                 {% if messages %}
                 <div class="space-y-2">
                     {% for message in messages %}
@@ -41,16 +83,16 @@
                 </div>
                 {% endif %}
 
-                <!-- Общие ошибки -->
+                <!-- ОБЩИЕ ОШИБКИ -->
                 {% if form.non_field_errors %}
-                <div class="p-3 text-sm text-red-700 bg-red-50 rounded-md">
+                <div class="p-3 text-center text-base tracking-wide text-pink-700 bg-pink-50 rounded-lg">
                     {% for err in form.non_field_errors %}
                     {{ err }}{% if not forloop.last %}<br>{% endif %}
                     {% endfor %}
                 </div>
                 {% endif %}
 
-
+                <!-- ФОРМА ДЛЯ РЕГИСТРАЦИИ -->
                 <form class="space-y-4 md:space-y-6" method="post">
                     {% csrf_token %}
 
@@ -137,7 +179,7 @@
                         Зарегистрироваться
                     </button>
 
-                    <p class="text-sm font-light text-gray-500 dark:text-gray-400">
+                    <p class="text-sm font-light text-gray-500 dark:text-gray-400 pb-12">
                         Есть аккаунт?
                         <a href="{% url 'users:web:login-page' %}"
                            class="font-medium text-indigo-700 hover:underline dark:text-primary-500">
@@ -149,6 +191,8 @@
             </div>
         </div>
     </div>
+
+
 </section>
 
 {% endblock %}

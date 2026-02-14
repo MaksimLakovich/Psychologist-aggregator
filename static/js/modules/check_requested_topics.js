@@ -5,7 +5,7 @@
 export function initCheckRequestedTopics() {
     const topicsRequiredAlert = document.getElementById("topics-required-alert");
     const stepChoiceLink = document.getElementById("step-choice-psychologist-link");
-    const formEl = document.querySelector("form");
+    const formEl = document.getElementById("personal-questions-form");
     const submitBtn = document.getElementById("btn-submit-filters");
     const topicsContainer = document.getElementById("topics-container");
     const preferredTopicTypeInput = document.getElementById("input-preferred-topic-type");
