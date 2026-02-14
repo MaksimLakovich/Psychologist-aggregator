@@ -175,20 +175,26 @@
     <div class="w-full md:w-1/2 flex flex-col p-4 sm:p-12 md:p-4 bg-indigo-700 dark:bg-indigo-700 order-2">
 
         <!-- ========== КНОПКА НАЗАД (ПРАВАЯ КОЛОНКА) ========== -->
-        <div class="w-full hidden md:flex justify-end pb-1">
-            <a href="{% url 'core:start-page' %}"
-               class="flex items-center gap-1 text-white hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300
-               font-medium rounded-lg text-base px-4 md:px-5 py-2 md:py-3 dark:hover:bg-indigo-800
-               focus:outline-none">
-                <img src="{% static 'images/menu/back-icon-white.svg' %}" class="hover:text-white" alt="Back_icon"/>
-                <span>Назад</span>
-            </a>
+        <div class="w-full hidden md:flex pb-1">
+            <div class="w-full max-w-md mx-auto flex justify-end">
+                <a href="{% url 'core:start-page' %}"
+                   class="flex items-center gap-1 text-white hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300
+                   font-medium rounded-lg text-base px-4 md:px-5 py-2 md:py-3 dark:hover:bg-indigo-800
+                   focus:outline-none">
+                    <img src="{% static 'images/menu/back-icon-white.svg' %}" class="hover:text-white" alt="Back_icon"/>
+                    <span>Назад</span>
+                </a>
+            </div>
         </div>
 
         <!-- ========== ИНФО ПРАВОЙ ЧАСТИ ========== -->
-        <div class="flex-1 flex flex-col mx-1 md:mx-16 md:pt-56 text-white">
-            <h2 class="text-4xl md:text-5xl font-extrabold mb-4 md:mb-8 leading-tight">
-                Сервис, созданный психологами
+        <div class="flex-1 flex flex-col md:pt-56 text-white
+            px-4 sm:px-10 md:px-114 lg:px-20 xl:px-36">
+
+            <h2 class="font-extrabold mb-4 md:mb-8 leading-tight text-2xl md:text-5xl">
+                <span class="inline md:block">Сервис,</span>
+                <span class="inline md:block">созданный</span>
+                <span class="inline md:block">психологами</span>
             </h2>
 
             <p class="text-lg text-blue-100 mb-4 md:mb-16 max-w-lg">

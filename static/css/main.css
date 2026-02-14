@@ -4251,6 +4251,16 @@ input:checked + .toggle-bg {
     padding-right: 3rem;
   }
 
+  .sm\:px-6 {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .sm\:px-10 {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+
   .sm\:pt-12 {
     padding-top: 3rem;
   }
@@ -4337,6 +4347,16 @@ input:checked + .toggle-bg {
   .md\:mx-12 {
     margin-left: 3rem;
     margin-right: 3rem;
+  }
+
+  .md\:mx-0 {
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+
+  .md\:mx-48 {
+    margin-left: 12rem;
+    margin-right: 12rem;
   }
 
   .md\:mt-0 {
@@ -4523,6 +4543,11 @@ input:checked + .toggle-bg {
     padding-right: 1.25rem;
   }
 
+  .md\:px-10 {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+
   .md\:pl-6 {
     padding-left: 1.5rem;
   }
@@ -4573,6 +4598,10 @@ input:checked + .toggle-bg {
 
   .md\:pt-56 {
     padding-top: 14rem;
+  }
+
+  .md\:pt-64 {
+    padding-top: 16rem;
   }
 
   .md\:text-2xl {
@@ -4703,6 +4732,16 @@ input:checked + .toggle-bg {
     padding-right: 0px;
   }
 
+  .lg\:px-16 {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+
+  .lg\:px-20 {
+    padding-left: 5rem;
+    padding-right: 5rem;
+  }
+
   .lg\:pb-10 {
     padding-bottom: 2.5rem;
   }
@@ -4727,6 +4766,21 @@ input:checked + .toggle-bg {
 
   .xl\:p-0 {
     padding: 0px;
+  }
+
+  .xl\:px-20 {
+    padding-left: 5rem;
+    padding-right: 5rem;
+  }
+
+  .xl\:px-24 {
+    padding-left: 6rem;
+    padding-right: 6rem;
+  }
+
+  .xl\:px-36 {
+    padding-left: 9rem;
+    padding-right: 9rem;
   }
 }
 
