@@ -16,12 +16,13 @@ from django_ratelimit.decorators import ratelimit
 
 from users._web.forms.auth_form import (AppUserLoginForm,
                                         AppUserRegistrationForm)
+from users.mixins.anonymous_only_mixin import AnonymousOnlyMixin
 from users.models import AppUser, ClientProfile, PsychologistProfile, UserRole
 from users.services.send_verification_email import send_verification_email
 
 
 @method_decorator(ratelimit(key="ip", rate="5/m", block=True), name="post")
-class RegisterPageView(FormView):
+class RegisterPageView(AnonymousOnlyMixin, FormView):
     """Класс-контроллер для регистрации нового пользователя в системе."""
 
     form_class = AppUserRegistrationForm
@@ -90,7 +91,7 @@ class RegisterPageView(FormView):
 
 
 @method_decorator(ratelimit(key="ip", rate="10/m", block=True), name="get")
-class VerifyEmailView(View):
+class VerifyEmailView(AnonymousOnlyMixin, View):
     """Класс-контроллер для верификации email по uid/token и активации пользователя после регистрации."""
 
     def get(self, request, *args, **kwargs):
@@ -122,7 +123,7 @@ class VerifyEmailView(View):
 
 
 @method_decorator(ratelimit(key="ip", rate="5/m", block=True), name="post")
-class LoginPageView(LoginView):
+class LoginPageView(AnonymousOnlyMixin, LoginView):
     """Класс-контроллер на основе auth.views для входа ранее зарегистрированного пользователя в систему."""
 
     form_class = AppUserLoginForm
@@ -173,54 +174,3 @@ class LoginPageView(LoginView):
         """Автоматический вход пользователя после успешной аутентификации."""
         login(self.request, form.get_user())
         return super().form_valid(form)
-
-
-# class CustomEditProfileView(LoginRequiredMixin, UpdateView):
-#     """Представление для редактирования профиля зарегистрированного пользователя (user_profile_edit.html)."""
-#
-#     model = UserCustomer
-#     form_class = UserProfileEditForm
-#     template_name = "users/user_profile_edit.html"
-#     success_url = reverse_lazy("catalog:home_page")  # Редирект после изменения данных
-#
-#     def get_object(self, queryset=None):
-#         """Возвращаем текущего пользователя, чтобы редактировать только свой профиль."""
-#         return self.request.user
-#
-#     def form_valid(self, form):
-#         """Сохранение изменений профиля пользователя и запрос отправки уведомления на почту."""
-#         # Этот вариант более чистый / профессиональны по сравнению с тем, как я реализовывал раньше в
-#         # CustomRegisterView для "send_welcome_email"
-#         # 1) Django сам вызывает form.save() поэтому та строка по сути лишняя
-#         # 2) "self.object" - это уже и есть сохраненный пользователь (т.е. user)
-#         response = super().form_valid(form)
-#         self.send_info_email(self.object)
-#         return response
-#
-#     def send_info_email(self, user):
-#         """Отправка письма пользователю после успешного изменения данных в его профиле."""
-#
-#         subject = "Изменение данных пользователя в магазине Skystore!"
-#         message = "Ваши данные были изменены."
-#
-#         from_email = os.getenv("YANDEX_EMAIL_HOST_USER")
-#         if not from_email:
-#             raise ValueError(
-#                 "Переменная окружения YANDEX_EMAIL_HOST_USER не загружена!"
-#             )
-#         recipient_list = [user.email]
-#         send_mail(
-#             subject=subject,
-#             message=message,
-#             from_email=from_email,
-#             recipient_list=recipient_list,
-#             fail_silently=False,
-#         )
-#
-#
-# class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
-#     """Представление для изменения пароля пользователя (change_password.html)."""
-#
-#     form_class = UserPasswordChangeForm
-#     template_name = "users/change_password.html"
-#     success_url = reverse_lazy("catalog:home_page")  # Редирект после изменения пароля
