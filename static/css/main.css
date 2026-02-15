@@ -2337,6 +2337,14 @@ input:checked + .toggle-bg {
   width: 75%;
 }
 
+.w-2\/3 {
+  width: 66.666667%;
+}
+
+.w-2\/5 {
+  width: 40%;
+}
+
 .max-w-2xl {
   max-width: 42rem;
 }
@@ -2988,6 +2996,10 @@ input:checked + .toggle-bg {
   background-color: rgb(75 85 99 / var(--tw-bg-opacity, 1));
 }
 
+.bg-indigo-700\/50 {
+  background-color: rgb(81 69 205 / 0.5);
+}
+
 .object-contain {
   -o-object-fit: contain;
      object-fit: contain;
@@ -3250,6 +3262,22 @@ input:checked + .toggle-bg {
 
 .pt-40 {
   padding-top: 10rem;
+}
+
+.pb-36 {
+  padding-bottom: 9rem;
+}
+
+.pb-48 {
+  padding-bottom: 12rem;
+}
+
+.pt-48 {
+  padding-top: 12rem;
+}
+
+.pb-28 {
+  padding-bottom: 7rem;
 }
 
 .text-center {
