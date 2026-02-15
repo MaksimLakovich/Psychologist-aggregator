@@ -2,13 +2,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import FormView
 
-from core.forms.form_payment_card import ClientAddPaymentCardForm
+from core.forms.client.specialist_matching.form_payment_card import ClientAddPaymentCardForm
 
 
 class ClientAddPaymentCardPageView(LoginRequiredMixin, FormView):
     """Контроллер на основе FormView для отображения страницы *Завершение записи и добавление платежной карты*."""
 
-    template_name = "core/client_pages/home_client_payment_card.html"
+    template_name = "core/client_pages/specialist_matching/home_client_payment_card.html"
     form_class = ClientAddPaymentCardForm
     success_url = reverse_lazy("core:payment-card")  # TODO: Заменить позже, когда создам след страницу
 

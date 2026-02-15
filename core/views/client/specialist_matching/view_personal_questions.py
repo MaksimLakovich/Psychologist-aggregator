@@ -3,14 +3,14 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormView
 
-from core.forms.form_personal_questions import ClientPersonalQuestionsForm
+from core.forms.client.specialist_matching.form_personal_questions import ClientPersonalQuestionsForm
 from users.models import ClientProfile, Method, Topic
 
 
 class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
     """Контроллер на основе FormView для отображения страницы *Персональные вопросы* - предпочтения клиента."""
 
-    template_name = "core/client_pages/home_client_personal_questions.html"
+    template_name = "core/client_pages/specialist_matching/home_client_personal_questions.html"
     form_class = ClientPersonalQuestionsForm
     success_url = reverse_lazy("core:choice-psychologist")
 
