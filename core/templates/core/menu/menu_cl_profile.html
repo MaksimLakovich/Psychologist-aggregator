@@ -32,7 +32,7 @@
     <!-- ======= МЕНЮ ======= -->
     <!-- Фон и граница окна с меню -->
     <div
-            class="hidden z-50 mt-4 w-auto min-w-[17rem] border-1 border-gray-700 list-none
+            class="hidden z-50 mt-4 w-auto min-w-[22rem] border-1 border-gray-700 list-none
             md:backdrop-blur-sm backdrop-blur-md rounded-3xl divide-y-2 divide-indigo-100
             shadow-2xl shadow-indigo-500/70 dark:bg-gray-700 dark:divide-gray-600"
             id="dropdown">
@@ -43,11 +43,12 @@
             <li>
                 <a href="#"
                    class="group flex items-center gap-4 py-2 px-2 sm:px-3 md:px-4 text-lg rounded-xl
-                   transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                   transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700
+                   dark:hover:bg-gray-600 dark:hover:text-white">
                     <img src="{% static 'images/menu/my-profile.svg' %}"
                          alt="profile"
                          class="transition-transform duration-200 group-hover:scale-110">
-                    <span class="transition-transform duration-200 group-hover:scale-105">Мой профиль</span>
+                    <span class="whitespace-nowrap transition-transform duration-200 group-hover:scale-105">Мой профиль</span>
                 </a>
             </li>
         </ul>
@@ -57,21 +58,23 @@
             <li>
                 <a href="#"
                    class="group flex items-center gap-4 py-2 px-2 sm:px-3 md:px-4 text-lg rounded-xl
-                   transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                   transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700
+                   dark:hover:bg-gray-600 dark:hover:text-white">
                     <img src="{% static 'images/menu/search-user.svg' %}"
                          alt="search"
                          class="transition-transform duration-200 group-hover:scale-110">
-                    <span class="transition-transform duration-200 group-hover:scale-105">Подобрать психолога</span>
+                    <span class="whitespace-nowrap transition-transform duration-200 group-hover:scale-105">Подобрать психолога</span>
                 </a>
             </li>
             <li>
                 <a href="#"
                    class="group flex items-center gap-4 py-2 px-2 sm:px-3 md:px-4 text-lg rounded-xl
-                   transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                   transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700
+                   dark:hover:bg-gray-600 dark:hover:text-white">
                     <img src="{% static 'images/menu/catalog-users.svg' %}"
                          alt="catalog"
                          class="transition-transform duration-200 group-hover:scale-110">
-                    <span class="transition-transform duration-200 group-hover:scale-105">Каталог психологов</span>
+                    <span class="whitespace-nowrap transition-transform duration-200 group-hover:scale-105">Каталог психологов</span>
                 </a>
             </li>
         </ul>
@@ -81,21 +84,23 @@
             <li>
                 <a href="#"
                    class="group flex items-center gap-4 py-2 px-2 sm:px-3 md:px-4 text-lg rounded-xl
-                   transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                   transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700
+                   dark:hover:bg-gray-600 dark:hover:text-white">
                     <img src="{% static 'images/menu/support_service.svg' %}"
                          alt="support"
                          class="transition-transform duration-200 group-hover:scale-110">
-                    <span class="transition-transform duration-200 group-hover:scale-105">Служба поддержки</span>
+                    <span class="whitespace-nowrap transition-transform duration-200 group-hover:scale-105">Служба поддержки</span>
                 </a>
             </li>
             <li>
                 <a href="#"
                    class="group flex items-center gap-4 py-2 px-2 sm:px-3 md:px-4 text-lg rounded-xl
-                   transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                   transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700
+                   dark:hover:bg-gray-600 dark:hover:text-white">
                     <img src="{% static 'images/menu/question-answer.svg' %}"
                          alt="answers"
                          class="transition-transform duration-200 group-hover:scale-110">
-                    <span class="transition-transform duration-200 group-hover:scale-105">Вопросы-ответы</span>
+                    <span class="whitespace-nowrap transition-transform duration-200 group-hover:scale-105">Вопросы-ответы</span>
                 </a>
             </li>
         </ul>
@@ -108,11 +113,12 @@
                     {% csrf_token %}
                     <button type="submit"
                             class="group gap-4 w-full flex items-center py-2 px-2 sm:px-3 md:px-4 text-lg rounded-xl
-                            transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                            transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700
+                            dark:hover:bg-gray-600 dark:hover:text-white">
                         <img src="{% static 'images/menu/logout.svg' %}"
                              alt="logout"
                              class="transition-transform duration-200 group-hover:scale-110">
-                        <span class="transition-transform duration-200 group-hover:scale-105">Выйти</span>
+                        <span class="whitespace-nowrap transition-transform duration-200 group-hover:scale-105">Выйти</span>
                     </button>
                 </form>
             </li>
