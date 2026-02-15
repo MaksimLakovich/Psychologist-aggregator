@@ -1,19 +1,23 @@
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMultiAlternatives
+from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
 
-def send_password_reset_email(user):
-    """Отправляет письмо со ссылкой для восстановления пароля (HTML + текстовая версия)."""
+def send_password_reset_email(user, url_name="users:api:password-reset-confirm"):
+    """Метод отправки email пользователю со ссылкой для восстановления пароля (HTML + текстовая версия):
+        - по умолчанию функция отправляет ссылку на API-эндпоинт (url_name="users:api:password-reset-confirm");
+        - для WEB-потока мы передаем url_name="users:web:password-reset-confirm" во вью."""
 
     # Генерирую зашифрованный ID пользователя
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     # Генерирую уникальный токен для подтверждения (работает как пароль на одноразовую ссылку)
     token = default_token_generator.make_token(user)
     # Строю ссылку для сброса пароля
-    reset_url = f"{settings.FRONT_BASE_URL}/users/password-reset-confirm/?uid={uid}&token={token}"
+    path = reverse(url_name)
+    reset_url = f"{settings.FRONT_BASE_URL}{path}?uid={uid}&token={token}"
 
     subject = "Восстановление пароля"
     from_email = settings.DEFAULT_FROM_EMAIL  # Отправитель в письме
