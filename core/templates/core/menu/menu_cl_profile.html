@@ -12,7 +12,7 @@
             active:scale-95 transition-all duration-150
             dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700">
 
-        <span class="sr-only">Открыть меню пользователя</span>
+        <span class="sr-only">Open menu</span>
 
         <!-- Имя пользователя -->
         <span class="text-lg font-medium tracking-wide md:text-xl">
@@ -41,7 +41,7 @@
         <ul class="px-1 sm:px-2 md:px-3 py-2 font-medium tracking-wide text-slate-700 dark:text-gray-400"
             aria-labelledby="dropdown">
             <li>
-                <a href="#"
+                <a href="{% url 'core:client-account' %}"
                    class="group flex items-center gap-4 py-2 px-2 sm:px-3 md:px-4 text-lg rounded-xl
                    transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700
                    dark:hover:bg-gray-600 dark:hover:text-white">
@@ -56,7 +56,7 @@
         <ul class="px-1 sm:px-2 md:px-3 py-2 font-medium tracking-wide text-slate-700 dark:text-gray-400"
             aria-labelledby="dropdown">
             <li>
-                <a href="#"
+                <a href="{% url 'core:general-questions' %}"
                    class="group flex items-center gap-4 py-2 px-2 sm:px-3 md:px-4 text-lg rounded-xl
                    transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700
                    dark:hover:bg-gray-600 dark:hover:text-white">

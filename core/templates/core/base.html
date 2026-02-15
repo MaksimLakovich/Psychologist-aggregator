@@ -52,6 +52,7 @@
 
 <!-- Подключение подшаблона с меню (верхняя часть с навигацией) -->
 {% if profile_type == "client" %}
+    {% include 'core/menu/menu.html' %}
 {% else %}
     {% include 'core/menu/menu.html' %}
 {% endif %}
