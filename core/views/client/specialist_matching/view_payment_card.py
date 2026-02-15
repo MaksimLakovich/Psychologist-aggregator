@@ -2,7 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import FormView
 
-from core.forms.form_payment_card import ClientAddPaymentCardForm
+from core.forms.client.specialist_matching.form_payment_card import ClientAddPaymentCardForm
 
 
 class ClientAddPaymentCardPageView(LoginRequiredMixin, FormView):

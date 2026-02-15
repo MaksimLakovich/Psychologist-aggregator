@@ -2,7 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import FormView
 
-from core.forms.form_general_questions import ClientGeneralQuestionsForm
+from core.forms.client.specialist_matching.form_general_questions import ClientGeneralQuestionsForm
 
 
 class ClientGeneralQuestionsPageView(LoginRequiredMixin, FormView):
