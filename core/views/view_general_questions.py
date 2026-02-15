@@ -8,7 +8,7 @@ from core.forms.form_general_questions import ClientGeneralQuestionsForm
 class ClientGeneralQuestionsPageView(LoginRequiredMixin, FormView):
     """Контроллер на основе FormView для отображения страницы *Общие вопросы*."""
 
-    template_name = "core/client_pages/home_client_general_questions.html"
+    template_name = "core/client_pages/specialist_matching/home_client_general_questions.html"
     form_class = ClientGeneralQuestionsForm
     success_url = reverse_lazy("core:personal-questions")
 

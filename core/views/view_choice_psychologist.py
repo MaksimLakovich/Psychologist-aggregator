@@ -8,7 +8,7 @@ from core.forms.form_choice_psychologist import ClientChoicePsychologistForm
 class ClientChoicePsychologistPageView(LoginRequiredMixin, FormView):
     """Контроллер на основе FormView для отображения страницы *Выбор психолога*."""
 
-    template_name = "core/client_pages/home_client_choice_psychologist.html"
+    template_name = "core/client_pages/specialist_matching/home_client_choice_psychologist.html"
     form_class = ClientChoicePsychologistForm
     success_url = reverse_lazy("core:payment-card")
 

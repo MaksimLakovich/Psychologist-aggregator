@@ -51,8 +51,10 @@
 
 
 <!-- Подключение подшаблона с меню (верхняя часть с навигацией) -->
-{% include 'core/menu/menu.html' %}
-
+{% if profile_type == "client" %}
+{% else %}
+    {% include 'core/menu/menu.html' %}
+{% endif %}
 
 <!-- Подключение основного контента страницы -->
 <main class="flex-1">
@@ -64,18 +66,16 @@
 <!-- Футер -->
 {% if menu_variant == "login" %}
 <footer></footer>
-
 {% elif menu_variant == "register" %}
 <footer></footer>
-
 {% else %}
 <footer class="bg-gray-100 py-6">
     <div class="mx-auto max-w-7xl px-4 text-center text-gray-500 text-sm">
         © ОПОРА. Все права защищены.
     </div>
 </footer>
-
 {% endif %}
+
 
 </body>
 
