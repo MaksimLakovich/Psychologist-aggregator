@@ -7,7 +7,9 @@ from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.views.generic.edit import FormView
 from django_ratelimit.decorators import ratelimit
-from users._web.forms.reset_password_form import PasswordResetConfirmForm, PasswordResetRequestForm
+
+from users._web.forms.reset_password_form import (PasswordResetConfirmForm,
+                                                  PasswordResetRequestForm)
 from users.mixins.anonymous_only_mixin import AnonymousOnlyMixin
 from users.models import AppUser
 from users.services.send_password_reset_email import send_password_reset_email
