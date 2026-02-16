@@ -2718,6 +2718,18 @@ input:checked + .toggle-bg {
   margin-left: calc(-1rem * calc(1 - var(--tw-space-x-reverse)));
 }
 
+.space-y-0 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0px * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0px * var(--tw-space-y-reverse));
+}
+
+.space-y-1 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
+}
+
 .divide-y > :not([hidden]) ~ :not([hidden]) {
   --tw-divide-y-reverse: 0;
   border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
@@ -3166,6 +3178,10 @@ input:checked + .toggle-bg {
 
 .bg-indigo-700\/95 {
   background-color: rgb(81 69 205 / 0.95);
+}
+
+.stroke-red-100 {
+  stroke: #FDE8E8;
 }
 
 .object-contain {
@@ -4145,6 +4161,10 @@ input:checked + .toggle-bg {
 
 .hover\:bg-indigo-400\/25:hover {
   background-color: rgb(141 162 251 / 0.25);
+}
+
+.hover\:stroke-red-100:hover {
+  stroke: #FDE8E8;
 }
 
 .hover\:text-blue-600:hover {

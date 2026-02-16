@@ -15,7 +15,7 @@
 
 {% elif user.is_authenticated and user.role_id == 2 %}
 
-<!-- 1) Вариант С боковой НАВИГАЦИЕЙ для личного кабинета -->
+<!-- 1. Вариант с боковой НАВИГАЦИЕЙ для личного кабинета -->
 {% if profile_type == "client" %}
 
 <header class="bg-white p-4">
@@ -30,10 +30,21 @@
 
                 </div>
 
-                <div class="flex items-center lg:order-2 gap-1">
-                    <!-- Подключаем кнопку МОЙ ПРОФИЛЬ в меню -->
-                    {% include 'core/menu/menu_cl_profile.html' %}
-
+                <div class="flex items-center">
+                    <!-- Кнопка НАЗАД на стартовую страницу -->
+                    <a href="{% url 'core:start-page' %}"
+                       class="flex items-center gap-2 px-3 py-2 mr-1 rounded-lg
+                       text-slate-700 hover:text-indigo-700 hover:bg-gray-100
+                       text-lg font-medium tracking-wide md:text-xl
+                       active:scale-95 transition-all duration-150
+                       dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700">
+                        <img
+                                src="{% static 'images/menu/back-icon.svg' %}"
+                                alt="Back_icon"
+                                class="w-7 h-7"
+                        />
+                        <span>Назад</span>
+                    </a>
                 </div>
 
             </div>
@@ -41,7 +52,7 @@
     </div>
 </header>
 
-<!-- 2) Вариант БЕЗ боковой навигации - только с верхним МЕНЮ и ЛОГО -->
+<!-- 2. Вариант БЕЗ боковой навигации - только с верхним МЕНЮ и ЛОГО -->
 {% else %}
 <header class="bg-white shadow p-4">
     <div class="mx-auto max-w-7xl px-4 py-1">
