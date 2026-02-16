@@ -14,10 +14,11 @@
 <!-- ======= АВТОРИЗОВАННЫЙ КЛИЕНТ ======= -->
 
 {% elif user.is_authenticated and user.role_id == 2 %}
-<header class="bg-white shadow p-4">
 
-    <!-- 1) Вариант С боковой НАВИГАЦИЕЙ для личного кабинета -->
-    {% if profile_type == "client" %}
+<!-- 1) Вариант С боковой НАВИГАЦИЕЙ для личного кабинета -->
+{% if profile_type == "client" %}
+
+<header class="bg-white p-4">
     <div>
         {% include 'core/side_navigation/navigation_client.html' %}
     </div>
@@ -38,9 +39,11 @@
             </div>
         </nav>
     </div>
+</header>
 
-    <!-- 2) Вариант БЕЗ боковой навигации - только с верхним МЕНЮ и ЛОГО -->
-    {% else %}
+<!-- 2) Вариант БЕЗ боковой навигации - только с верхним МЕНЮ и ЛОГО -->
+{% else %}
+<header class="bg-white shadow p-4">
     <div class="mx-auto max-w-7xl px-4 py-1">
         <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800">
             <div class="flex flex-wrap justify-between items-center">
@@ -60,10 +63,9 @@
             </div>
         </nav>
     </div>
-
-    {% endif %}
-
 </header>
+
+{% endif %}
 
 
 <!-- ======= АВТОРИЗОВАННЫЙ ПСИХОЛОГ / АДМИН ======= -->
