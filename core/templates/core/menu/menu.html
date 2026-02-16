@@ -19,15 +19,12 @@
 {% if profile_type == "client" %}
 
 <header class="bg-white p-4">
-    <div>
-        {% include 'core/side_navigation/navigation_client.html' %}
-    </div>
     <div class="mx-auto max-w-7xl px-4 py-1">
         <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800">
             <div class="flex flex-wrap justify-between items-center">
 
                 <div class="flex justify-start items-center">
-
+                    {% include 'core/side_navigation/navigation_client.html' %}
                 </div>
 
                 <div class="flex items-center">
