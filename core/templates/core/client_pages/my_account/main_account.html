@@ -1,0 +1,107 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %} {{ title_client_account_view|default:"ОПОРА" }} {% endblock %}
+
+{% block content %}
+
+
+<!-- Блок приветствия "С чем поможет психолог?" -->
+<section class="bg-white py-16">
+
+    <div>
+        <h1 class="text-center text-4xl font-extrabold tracking-tight text-grey-900 sm:text-5xl">
+            С чем <span class="uppercase text-indigo-700">поможет</span> психолог?
+        </h1>
+    </div>
+
+    <!-- СЕТКА 3 КОЛОНКИ -->
+    <div class="mx-auto max-w-screen-xl px-4 py-16 grid grid-cols-1 md:grid-cols-3 gap-x-20 gap-y-10">
+
+
+        <!-- ЭЛЕМЕНТ 1 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/start_page/couple-dancing-music-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm] max-w-sm">
+                Наладить гармоничные отношения с близкими людьми
+            </h3>
+        </div>
+
+        <!-- ЭЛЕМЕНТ 2 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/start_page/woman-earth-hugging-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm] max-w-sm">
+                Справиться со стрессом, тревогой и страхом
+            </h3>
+        </div>
+
+        <!-- ЭЛЕМЕНТ 3 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/start_page/man-review-stars-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm] max-w-sm">
+                Принять себя и повысить самооценку
+            </h3>
+        </div>
+
+    </div>
+
+        <!-- СЕТКА 3 КОЛОНКИ -->
+    <div class="mx-auto max-w-screen-xl px-4 py-16 grid grid-cols-1 md:grid-cols-3 gap-x-20 gap-y-10">
+
+        <!-- ЭЛЕМЕНТ 4 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/start_page/woman-mindfulness-yoga-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm]">
+                Научиться говорить «нет» и отстаивать личные границы
+            </h3>
+        </div>
+
+        <!-- ЭЛЕМЕНТ 5 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/start_page/woman-rocket-flying-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm]">
+                Пережить перемены: переезд, расставание, потеря работы
+            </h3>
+        </div>
+
+        <!-- ЭЛЕМЕНТ 6 -->
+        <div class="flex flex-col items-center justify-start text-center">
+            <img
+                src="{% static 'images/start_page/man-question-marks-dark.png' %}"
+                alt="Психологи"
+                class="w-56 h-56 object-contain bg-transparent rounded-md filter grayscale hover:grayscale-0 transition"
+            >
+            <h3 class="text-xl font-semibold text-gray-900 mt-[1.5cm]">
+                Понять, почему на работе проблемы и нет мотивации
+            </h3>
+        </div>
+
+    </div>
+
+
+</section>
+
+<script type="module" src="{% static 'js/modules/gradient_text.js' %}"></script>
+
+{% endblock %}

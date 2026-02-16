@@ -50,12 +50,9 @@
 {% block extra_style %}{% endblock %}
 
 
-<!-- Подключение подшаблона с меню (верхняя часть с навигацией) -->
-{% if profile_type == "client" %}
-    {% include 'core/menu/menu.html' %}
-{% else %}
-    {% include 'core/menu/menu.html' %}
-{% endif %}
+<!-- Подключение подшаблонов с ЛОГО + МЕНЮ + БОКОВАЯ НАВИГАЦИЯ -->
+{% include 'core/menu/menu.html' %}
+
 
 <!-- Подключение основного контента страницы -->
 <main class="flex-1">
