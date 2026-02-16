@@ -2373,6 +2373,34 @@ input:checked + .toggle-bg {
   min-width: 22rem;
 }
 
+.min-w-\[4rem\] {
+  min-width: 4rem;
+}
+
+.min-w-\[12rem\] {
+  min-width: 12rem;
+}
+
+.min-w-\[14rem\] {
+  min-width: 14rem;
+}
+
+.min-w-\[8rem\] {
+  min-width: 8rem;
+}
+
+.min-w-\[16rem\] {
+  min-width: 16rem;
+}
+
+.min-w-80 {
+  min-width: 20rem;
+}
+
+.min-w-64 {
+  min-width: 16rem;
+}
+
 .max-w-2xl {
   max-width: 42rem;
 }
@@ -3087,6 +3115,21 @@ input:checked + .toggle-bg {
 .bg-primary-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(252 231 243 / var(--tw-bg-opacity, 1));
+}
+
+.bg-slate-400 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(148 163 184 / var(--tw-bg-opacity, 1));
+}
+
+.bg-sky-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(186 230 253 / var(--tw-bg-opacity, 1));
+}
+
+.bg-slate-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(241 245 249 / var(--tw-bg-opacity, 1));
 }
 
 .object-contain {
