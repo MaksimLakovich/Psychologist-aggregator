@@ -2,12 +2,15 @@ from django.urls import path
 
 from core.apps import CoreConfig
 from core.views.client.my_account.main_account_page import ClientAccountView
-from core.views.start_view import StartPageView
 from core.views.client.specialist_matching.view_choice_psychologist import \
     ClientChoicePsychologistPageView
-from core.views.client.specialist_matching.view_general_questions import ClientGeneralQuestionsPageView
-from core.views.client.specialist_matching.view_payment_card import ClientAddPaymentCardPageView
-from core.views.client.specialist_matching.view_personal_questions import ClientPersonalQuestionsPageView
+from core.views.client.specialist_matching.view_general_questions import \
+    ClientGeneralQuestionsPageView
+from core.views.client.specialist_matching.view_payment_card import \
+    ClientAddPaymentCardPageView
+from core.views.client.specialist_matching.view_personal_questions import \
+    ClientPersonalQuestionsPageView
+from core.views.start_view import StartPageView
 
 app_name = CoreConfig.name
 
