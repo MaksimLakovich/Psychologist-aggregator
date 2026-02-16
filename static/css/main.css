@@ -3209,6 +3209,10 @@ input:checked + .toggle-bg {
   background-color: currentColor;
 }
 
+.bg-slate-100\/80 {
+  background-color: rgb(241 245 249 / 0.8);
+}
+
 .stroke-red-100 {
   stroke: #FDE8E8;
 }
@@ -3799,6 +3803,11 @@ input:checked + .toggle-bg {
 .text-slate-700 {
   --tw-text-opacity: 1;
   color: rgb(51 65 85 / var(--tw-text-opacity, 1));
+}
+
+.text-slate-900 {
+  --tw-text-opacity: 1;
+  color: rgb(15 23 42 / var(--tw-text-opacity, 1));
 }
 
 .line-through {

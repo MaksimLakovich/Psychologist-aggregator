@@ -22,6 +22,7 @@
        class="bg-indigo-700/95 fixed top-0 left-0 z-40 w-64 h-[calc(100vh-70px)] transition-transform -translate-x-full sm:translate-x-0"
        aria-label="Sidenav">
 
+
     <!-- ПУНКТЫ МЕНЮ -->
     <div class="overflow-y-auto py-5 px-3 h-[calc(100vh-70px)] border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700">
 
@@ -32,10 +33,12 @@
         </a>
 
 
-        <ul class="space-y-2">
+        <ul class="space-y-2 text-xl font-normal text-gray-900">
             <li>
                 <a href="{% url 'core:client-account' %}"
-                   class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                   data-nav-item
+                   data-nav-key="client-account"
+                   class="flex items-center p-2 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                     <svg aria-hidden="true"
                          class="w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                          fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -48,7 +51,9 @@
             <li>
                 <button type="button"
                         data-collapse-group="client-nav"
-                        class="flex items-center p-2 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100
+                        data-nav-group-button
+                        data-nav-group="psychologist"
+                        class="flex items-center p-2 w-full rounded-lg transition duration-75 group hover:bg-gray-100
                         dark:text-white dark:hover:bg-gray-700"
                         aria-controls="dropdown-psychologist" data-collapse-toggle="dropdown-psychologist">
                     <svg aria-hidden="true"
@@ -72,13 +77,19 @@
                 <ul id="dropdown-psychologist" class="hidden py-2 space-y-2">
                     <li>
                         <a href="{% url 'core:general-questions' %}"
-                           class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                           data-nav-item
+                           data-nav-key="psychologist-match"
+                           data-nav-parent-group="psychologist"
+                           class="flex items-center p-2 pl-11 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
                             Подобрать и записаться
                         </a>
                     </li>
                     <li>
                         <a href="#"
-                           class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                           data-nav-item
+                           data-nav-key="psychologist-catalog"
+                           data-nav-parent-group="psychologist"
+                           class="flex items-center p-2 pl-11 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
                             Каталог
                         </a>
                     </li>
@@ -87,7 +98,9 @@
             <li>
                 <button type="button"
                         data-collapse-group="client-nav"
-                        class="flex items-center p-2 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                        data-nav-group-button
+                        data-nav-group="session"
+                        class="flex items-center p-2 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                         aria-controls="dropdown-session" data-collapse-toggle="dropdown-session">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
@@ -109,13 +122,19 @@
                 <ul id="dropdown-session" class="hidden py-2 space-y-2">
                     <li>
                         <a href="#"
-                           class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                           data-nav-item
+                           data-nav-key="session-planned"
+                           data-nav-parent-group="session"
+                           class="flex items-center p-2 pl-11 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
                             Запланированные
                         </a>
                     </li>
                     <li>
                         <a href="#"
-                           class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                           data-nav-item
+                           data-nav-key="session-archive"
+                           data-nav-parent-group="session"
+                           class="flex items-center p-2 pl-11 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
                             Архив
                         </a>
                     </li>
@@ -123,7 +142,9 @@
             </li>
             <li>
                 <a href="#"
-                   class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                   data-nav-item
+                   data-nav-key="notifications"
+                   class="flex items-center p-2 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                          fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -142,7 +163,9 @@
             <li>
                 <button type="button"
                         data-collapse-group="client-nav"
-                        class="flex items-center p-2 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                        data-nav-group-button
+                        data-nav-group="auth"
+                        class="flex items-center p-2 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                         aria-controls="dropdown-authentication" data-collapse-toggle="dropdown-authentication">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
@@ -161,22 +184,33 @@
                               clip-rule="evenodd"></path>
                     </svg>
                 </button>
-                <ul id="dropdown-authentication" class="hidden py-2 space-y-2">
+                <ul
+                        id="dropdown-authentication"
+                        class="hidden py-2 space-y-2">
                     <li>
                         <a href="#"
-                           class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                           data-nav-item
+                           data-nav-key="profile-edit"
+                           data-nav-parent-group="auth"
+                           class="flex items-center p-2 pl-11 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
                             Редактировать профиль
                         </a>
                     </li>
                     <li>
                         <a href="#"
-                           class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                           data-nav-item
+                           data-nav-key="email-change"
+                           data-nav-parent-group="auth"
+                           class="flex items-center p-2 pl-11 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
                             Изменить email
                         </a>
                     </li>
                     <li>
                         <a href="#"
-                           class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                           data-nav-item
+                           data-nav-key="password-change"
+                           data-nav-parent-group="auth"
+                           class="flex items-center p-2 pl-11 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
                             Изменить пароль
                         </a>
                     </li>
@@ -188,6 +222,8 @@
         <ul class="pt-5 mt-5 space-y-2 border-t border-gray-200 dark:border-gray-700">
             <li>
                 <a href="#"
+                   data-nav-item
+                   data-nav-key="courses"
                    class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -203,6 +239,8 @@
             </li>
             <li>
                 <a href="#"
+                   data-nav-item
+                   data-nav-key="tests"
                    class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -222,6 +260,8 @@
         <ul class="pt-5 mt-5 space-y-2 border-t border-gray-200 dark:border-gray-700">
             <li>
                 <a href="#"
+                   data-nav-item
+                   data-nav-key="faq"
                    class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -237,6 +277,8 @@
             </li>
             <li>
                 <a href="#"
+                   data-nav-item
+                   data-nav-key="support"
                    class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
