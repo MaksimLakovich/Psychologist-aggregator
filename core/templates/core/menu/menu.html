@@ -38,11 +38,14 @@
                        text-lg font-medium tracking-wide md:text-xl
                        active:scale-95 transition-all duration-150
                        dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700">
-                        <img
-                                src="{% static 'images/menu/back-icon.svg' %}"
-                                alt="Back_icon"
-                                class="w-7 h-7"
-                        />
+                        <span
+                                class="w-7 h-7 bg-current inline-block"
+                                aria-hidden="true"
+                                style="
+                                -webkit-mask: url('{% static "images/menu/back-icon.svg" %}') no-repeat center / contain;
+                                mask: url('{% static "images/menu/back-icon.svg" %}') no-repeat center / contain;
+                                ">
+                        </span>
                         <span>Назад</span>
                     </a>
                 </div>
