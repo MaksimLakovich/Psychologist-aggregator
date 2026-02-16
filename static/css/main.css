@@ -2269,6 +2269,14 @@ input:checked + .toggle-bg {
   height: calc(100vh - 88px);
 }
 
+.h-\[calc\(100vh-72px\)\] {
+  height: calc(100vh - 72px);
+}
+
+.h-\[calc\(100vh-70px\)\] {
+  height: calc(100vh - 70px);
+}
+
 .max-h-\[70vh\] {
   max-height: 70vh;
 }
@@ -2975,6 +2983,11 @@ input:checked + .toggle-bg {
 .border-gray-700 {
   --tw-border-opacity: 1;
   border-color: rgb(55 65 81 / var(--tw-border-opacity, 1));
+}
+
+.border-gray-900 {
+  --tw-border-opacity: 1;
+  border-color: rgb(17 24 39 / var(--tw-border-opacity, 1));
 }
 
 .\!bg-gray-50 {

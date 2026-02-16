@@ -19,11 +19,11 @@
 <!-- ======= МЕНЮ ======= -->
 <!-- Фон и граница окна с меню -->
 <aside id="default-sidebar"
-       class="bg-indigo-700/95 fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
+       class="bg-indigo-700/95 fixed top-0 left-0 z-40 w-64 h-[calc(100vh-70px)] transition-transform -translate-x-full sm:translate-x-0"
        aria-label="Sidenav">
 
     <!-- ПУНКТЫ МЕНЮ -->
-    <div class="overflow-y-auto py-5 px-3 h-full border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+    <div class="overflow-y-auto py-5 px-3 h-[calc(100vh-70px)] border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700">
 
         <a href="{% url 'core:start-page' %}" class="flex mr-4">
             <img src="{% static 'images/side_navigation/opora-base.png' %}"
@@ -47,6 +47,7 @@
             </li>
             <li>
                 <button type="button"
+                        data-collapse-group="client-nav"
                         class="flex items-center p-2 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100
                         dark:text-white dark:hover:bg-gray-700"
                         aria-controls="dropdown-psychologist" data-collapse-toggle="dropdown-psychologist">
@@ -85,6 +86,7 @@
             </li>
             <li>
                 <button type="button"
+                        data-collapse-group="client-nav"
                         class="flex items-center p-2 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                         aria-controls="dropdown-session" data-collapse-toggle="dropdown-session">
                     <svg aria-hidden="true"
@@ -139,6 +141,7 @@
             </li>
             <li>
                 <button type="button"
+                        data-collapse-group="client-nav"
                         class="flex items-center p-2 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                         aria-controls="dropdown-authentication" data-collapse-toggle="dropdown-authentication">
                     <svg aria-hidden="true"
@@ -273,3 +276,5 @@
     </div>
 
 </aside>
+
+<script type="module" src="{% static 'js/modules/navigation_client_accordion.js' %}"></script>
