@@ -1,0 +1,299 @@
+{% load static %}
+
+
+<!-- ======= КНОПКА для открытия/закрытия меню ======= -->
+<button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar"
+        type="button"
+        class="inline-flex items-center px-3 py-2 mr-1 text-sm text-gray-500 rounded-lg sm:hidden
+        text-slate-700 hover:text-indigo-700 hover:bg-gray-100 text-lg font-medium tracking-wide md:text-xl
+        active:scale-95 transition-all duration-150
+        dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
+    <span class="sr-only">Open sidebar</span>
+    <svg class="w-7 h-7" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+        <path clip-rule="evenodd" fill-rule="evenodd"
+              d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
+    </svg>
+</button>
+
+
+<!-- ======= МЕНЮ ======= -->
+
+<!-- ФОН и ГРАНИЦА окна с меню -->
+<aside id="default-sidebar"
+       class="border-1 border-gray-700 list-none dark:bg-gray-800 dark:border-gray-700
+       md:backdrop-blur-sm backdrop-blur-md shadow-2xl shadow-indigo-500/70
+       fixed top-0 left-0 z-40 w-80 h-screen transition-transform -translate-x-full sm:translate-x-0"
+       aria-label="Sidenav">
+
+
+    <!-- Окно навигации -->
+    <div class="overflow-y-auto py-5 px-3 h-screen">
+        {% with nav_item_classes="group flex items-center p-2 text-base md:text-lg font-medium tracking-wide text-slate-700 rounded-xl transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700 active:scale-95 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white" %}
+        {% with nav_sub_item_classes="group flex items-center p-2 pl-11 w-full text-base md:text-lg font-medium tracking-wide text-slate-700 rounded-xl transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700 active:scale-95 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white" %}
+        {% with nav_group_button_classes="group flex items-center p-2 w-full text-base md:text-lg font-medium tracking-wide text-slate-700 rounded-xl transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700 active:scale-95 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white" %}
+
+        <!-- ЛОГО -->
+        <a href="{% url 'core:start-page' %}" class="flex mr-4">
+            <img src="{% static 'images/menu/opora-base.png' %}"
+                 alt="Side logo"
+                 class="-mt-10">
+        </a>
+
+        <!-- ГРУППЫ / ПУНКТЫ -->
+        <ul class="space-y-2">
+            <li>
+                <a href="{% url 'core:client-account' %}"
+                   data-nav-item
+                   data-nav-key="client-account"
+                   class="{{ nav_item_classes }} {% if current_sidebar_key == 'client-account' %}bg-gray-300/25 !text-indigo-700{% endif %}"
+                   {% if current_sidebar_key == 'client-account' %}data-nav-active-server="1" aria-current="page"{% endif %}>
+                    <img src="{% static 'images/menu/my-account.svg' %}"
+                         alt="account"
+                         class="transition-transform duration-200 group-hover:scale-110">
+                    <span class="ml-3 transition-transform duration-200 group-hover:scale-105 origin-left">Главная</span>
+                </a>
+            </li>
+            <li>
+                <button type="button"
+                        data-collapse-group="client-nav"
+                        data-nav-group-button
+                        data-nav-group="session"
+                        class="{{ nav_group_button_classes }}"
+                        aria-controls="dropdown-session">
+                    <img src="{% static 'images/menu/calendar.svg' %}"
+                         alt="calendar"
+                         class="transition-transform duration-200 group-hover:scale-110">
+                    <span class="flex-1 ml-3 text-left whitespace-nowrap transition-transform duration-200 group-hover:scale-105 origin-left">
+                        Календарь сессий
+                    </span>
+                    <svg aria-hidden="true" data-nav-chevron class="w-6 h-6 transition-transform duration-200 group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd"
+                              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                              clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+                <ul id="dropdown-session"
+                    class="space-y-2 overflow-hidden transition-all duration-300 ease-out transform max-h-0 opacity-0 -translate-y-1 pointer-events-none">
+                    <li>
+                        <a href="#"
+                           data-nav-item
+                           data-nav-key="session-planned"
+                           data-nav-parent-group="session"
+                           class="{{ nav_sub_item_classes }}">
+                            <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Запланированные</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#"
+                           data-nav-item
+                           data-nav-key="session-archive"
+                           data-nav-parent-group="session"
+                           class="{{ nav_sub_item_classes }}">
+                            <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Архив</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <button type="button"
+                        data-collapse-group="client-nav"
+                        data-nav-group-button
+                        data-nav-group="psychologist"
+                        class="{{ nav_group_button_classes }}"
+                        aria-controls="dropdown-psychologist">
+                    <img src="{% static 'images/menu/search-user.svg' %}"
+                         alt="search"
+                         class="transition-transform duration-200 group-hover:scale-110">
+                    <span class="flex-1 ml-3 text-left whitespace-nowrap transition-transform duration-200 group-hover:scale-105 origin-left">
+                        Наши психологи
+                    </span>
+                    <svg aria-hidden="true" data-nav-chevron class="w-6 h-6 transition-transform duration-200 group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd"
+                              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                              clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+                <ul id="dropdown-psychologist"
+                    class="space-y-2 overflow-hidden transition-all duration-300 ease-out transform max-h-0 opacity-0 -translate-y-1 pointer-events-none">
+                    <li>
+                        <a href="{% url 'core:general-questions' %}"
+                           data-nav-item
+                           data-nav-key="psychologist-match"
+                           data-nav-parent-group="psychologist"
+                           class="{{ nav_sub_item_classes }}">
+                            <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Подобрать и записаться</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#"
+                           data-nav-item
+                           data-nav-key="psychologist-catalog"
+                           data-nav-parent-group="psychologist"
+                           class="{{ nav_sub_item_classes }}">
+                            <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Каталог</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#"
+                   data-nav-item
+                   data-nav-key="notifications"
+                   class="{{ nav_item_classes }}">
+                    <img src="{% static 'images/menu/notifications.svg' %}"
+                         alt="notification"
+                         class="transition-transform duration-200 group-hover:scale-110">
+                    <span class="flex-1 ml-3 whitespace-nowrap transition-transform duration-200 group-hover:scale-105 origin-left">
+                        Уведомления
+                    </span>
+                    <span class="inline-flex flex-shrink-0 justify-center items-center mr-px
+                    w-5 h-5 text-xs font-semibold rounded-full text-indigo-100 bg-indigo-600
+                    transition-transform duration-200 group-hover:scale-110
+                    dark:bg-primary-200 dark:text-primary-800">
+                        6
+                    </span>
+                </a>
+            </li>
+            <li>
+                <button type="button"
+                        data-collapse-group="client-nav"
+                        data-nav-group-button
+                        data-nav-group="auth"
+                        class="{{ nav_group_button_classes }}"
+                        aria-controls="dropdown-authentication">
+                    <img src="{% static 'images/menu/my-profile.svg' %}"
+                         alt="profile"
+                         class="transition-transform duration-200 group-hover:scale-110">
+                    <span class="flex-1 ml-3 text-left whitespace-nowrap transition-transform duration-200 group-hover:scale-105 origin-left">
+                        Мои данные
+                    </span>
+                    <svg aria-hidden="true" data-nav-chevron class="w-6 h-6 transition-transform duration-200 group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd"
+                              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                              clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+                <ul
+                        id="dropdown-authentication"
+                        class="space-y-2 overflow-hidden transition-all duration-300 ease-out transform max-h-0 opacity-0 -translate-y-1 pointer-events-none">
+                    <li>
+                        <a href="#"
+                           data-nav-item
+                           data-nav-key="profile-edit"
+                           data-nav-parent-group="auth"
+                           class="{{ nav_sub_item_classes }}">
+                            <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Редактировать профиль</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#"
+                           data-nav-item
+                           data-nav-key="email-change"
+                           data-nav-parent-group="auth"
+                           class="{{ nav_sub_item_classes }}">
+                            <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Изменить email</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#"
+                           data-nav-item
+                           data-nav-key="password-change"
+                           data-nav-parent-group="auth"
+                           class="{{ nav_sub_item_classes }}">
+                            <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Изменить пароль</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+
+        <ul class="pt-5 mt-5 space-y-2 border-t border-gray-200 dark:border-gray-700">
+            <li>
+                <a href="#"
+                   data-nav-item
+                   data-nav-key="courses"
+                   class="{{ nav_item_classes }}">
+                    <img src="{% static 'images/menu/webinar.svg' %}"
+                         alt="webinar"
+                         class="transition-transform duration-200 group-hover:scale-110">
+                    <span class="ml-3 transition-transform duration-200 group-hover:scale-105 origin-left">
+                        Курсы и вебинары
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="#"
+                   data-nav-item
+                   data-nav-key="tests"
+                   class="{{ nav_item_classes }}">
+                    <img src="{% static 'images/menu/test.svg' %}"
+                         alt="test"
+                         class="transition-transform duration-200 group-hover:scale-110">
+                    <span class="ml-3 transition-transform duration-200 group-hover:scale-105 origin-left">
+                        Тесты
+                    </span>
+                </a>
+            </li>
+        </ul>
+
+
+        <ul class="pt-5 mt-5 space-y-2 border-t border-gray-200 dark:border-gray-700">
+            <li>
+                <a href="#"
+                   data-nav-item
+                   data-nav-key="faq"
+                   class="{{ nav_item_classes }}">
+                    <img src="{% static 'images/menu/question-answer.svg' %}"
+                         alt="answers"
+                         class="transition-transform duration-200 group-hover:scale-110">
+                    <span class="ml-3 transition-transform duration-200 group-hover:scale-105 origin-left">
+                        Вопросы-ответы
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="#"
+                   data-nav-item
+                   data-nav-key="support"
+                   class="{{ nav_item_classes }}">
+                    <img src="{% static 'images/menu/support_service.svg' %}"
+                         alt="support"
+                         class="transition-transform duration-200 group-hover:scale-110">
+                    <span class="ml-3 transition-transform duration-200 group-hover:scale-105 origin-left">
+                        Служба поддержки
+                    </span>
+                </a>
+            </li>
+        </ul>
+
+
+        <ul class="pt-5 mt-5 space-y-2 border-t border-gray-200 dark:border-gray-700">
+            <li>
+                <form method="post" action="{% url 'users:web:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="{{ nav_item_classes }} w-full">
+                        <img src="{% static 'images/menu/logout.svg' %}"
+                             alt="logout"
+                             class="transition-transform duration-200 group-hover:scale-110">
+                        <span class="ml-3 transition-transform duration-200 group-hover:scale-105 origin-left">
+                        Выйти
+                    </span>
+                    </button>
+                </form>
+            </li>
+        </ul>
+
+
+    </div>
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
+
+</aside>
+
+<script type="module" src="{% static 'js/modules/navigation_client_accordion.js' %}"></script>
