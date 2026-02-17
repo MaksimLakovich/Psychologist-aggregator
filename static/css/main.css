@@ -3877,6 +3877,11 @@ input:checked + .toggle-bg {
   color: rgb(141 162 251 / var(--tw-text-opacity, 1));
 }
 
+.\!text-indigo-700 {
+  --tw-text-opacity: 1 !important;
+  color: rgb(81 69 205 / var(--tw-text-opacity, 1)) !important;
+}
+
 .line-through {
   text-decoration-line: line-through;
 }
