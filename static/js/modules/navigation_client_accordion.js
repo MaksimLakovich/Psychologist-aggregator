@@ -117,6 +117,14 @@ function syncNavItemStateFromStorage() {
 }
 
 /**
+ * Находит пункт, который сервер пометил активным для текущего маршрута.
+ * Такой пункт имеет приоритет над состоянием из sessionStorage.
+ */
+function getServerActiveNavItem() {
+  return document.querySelector("a[data-nav-item][data-nav-active-server='1']");
+}
+
+/**
  * Закрывает все панели групп, кроме указанной
  */
 function closeOtherPanels(currentButton) {
@@ -164,7 +172,13 @@ function initAccordion() {
 function initNavItemHighlighting() {
   if (navItems.length === 0) return;
 
-  syncNavItemStateFromStorage();
+  const serverActiveItem = getServerActiveNavItem();
+  if (serverActiveItem) {
+    setActiveNavItem(serverActiveItem);
+    setStoredNavKey(serverActiveItem.dataset.navKey);
+  } else {
+    syncNavItemStateFromStorage();
+  }
 
   navItems.forEach((item) => {
     item.addEventListener("click", () => {

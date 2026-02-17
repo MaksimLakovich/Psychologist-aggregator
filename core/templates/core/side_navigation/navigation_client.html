@@ -44,7 +44,8 @@
                 <a href="{% url 'core:client-account' %}"
                    data-nav-item
                    data-nav-key="client-account"
-                   class="{{ nav_item_classes }}">
+                   class="{{ nav_item_classes }} {% if current_sidebar_key == 'client-account' %}bg-slate-100/80 text-slate-900 font-medium{% endif %}"
+                   {% if current_sidebar_key == 'client-account' %}data-nav-active-server="1" aria-current="page"{% endif %}>
                     <svg aria-hidden="true"
                          class="w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                          fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

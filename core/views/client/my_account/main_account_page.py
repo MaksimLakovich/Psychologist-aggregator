@@ -20,4 +20,6 @@ class ClientAccountView(TemplateView):
         context = super().get_context_data(**kwargs)
         context["title_client_account_view"] = "Мой кабинет на ОПОРА"
         context["profile_type"] = "client"
+        # Активный пункт боковой навигации для серверной подсветки (route-based).
+        context["current_sidebar_key"] = "client-account"
         return context
