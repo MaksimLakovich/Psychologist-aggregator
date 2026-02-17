@@ -20,7 +20,7 @@
 
 <!-- ФОН и ГРАНИЦА окна с меню -->
 <aside id="default-sidebar"
-       class="bg-indigo-700 border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700
+       class="bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700
        fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
        aria-label="Sidenav">
 
@@ -31,14 +31,14 @@
         {% with nav_sub_item_classes="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-xl transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" %}
         {% with nav_group_button_classes="flex items-center p-2 w-full text-base font-normal text-gray-900 rounded-xl transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" %}
 
-        <!-- Лого -->
+        <!-- ЛОГО -->
         <a href="{% url 'core:start-page' %}" class="flex mr-4">
             <img src="{% static 'images/side_navigation/opora-base.png' %}"
                  alt="Side logo"
                  class="-mt-6">
         </a>
 
-        <!-- Пункты -->
+        <!-- ГРУППЫ / ПУНКТЫ -->
         <ul class="space-y-2">
             <li>
                 <a href="{% url 'core:client-account' %}"
