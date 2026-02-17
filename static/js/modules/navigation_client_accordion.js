@@ -20,6 +20,23 @@ groupPanelById.forEach((_, panelId) => {
 });
 
 /**
+ * Синхронизирует визуальное состояние кнопки группы с состоянием панели.
+ * - aria-expanded: для доступности.
+ * - rotate-180 на стрелке: для визуальной индикации раскрытия.
+ *
+ * @param {HTMLButtonElement} button - Кнопка группы.
+ * @param {boolean} isOpen - true, если панель раскрыта.
+ */
+function setGroupButtonState(button, isOpen) {
+  button.setAttribute("aria-expanded", String(isOpen));
+
+  const chevron = button.querySelector("[data-nav-chevron]");
+  if (!chevron) return;
+
+  chevron.classList.toggle("rotate-180", isOpen);
+}
+
+/**
  * Закрывает все группы, кроме выбранной кнопки.
  *
  * @param {HTMLButtonElement} currentButton - Кнопка группы, которую не нужно закрывать.
@@ -33,6 +50,7 @@ function closeOtherPanels(currentButton) {
     if (!panel) return;
 
     panel.classList.add("hidden");
+    setGroupButtonState(button, false);
   });
 }
 
@@ -43,6 +61,14 @@ function closeOtherPanels(currentButton) {
  */
 function initAccordion() {
   if (groupButtons.length === 0) return;
+
+  // Синхронизируем начальное состояние стрелок, если часть панелей открыта на сервере.
+  groupButtons.forEach((button) => {
+    const panelId = button.getAttribute("aria-controls");
+    const panel = groupPanelById.get(panelId);
+    if (!panel) return;
+    setGroupButtonState(button, !panel.classList.contains("hidden"));
+  });
 
   groupButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -55,8 +81,10 @@ function initAccordion() {
 
       if (shouldOpen) {
         panel.classList.remove("hidden");
+        setGroupButtonState(button, true);
       } else {
         panel.classList.add("hidden");
+        setGroupButtonState(button, false);
       }
     });
   });
