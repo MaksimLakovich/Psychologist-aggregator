@@ -20,13 +20,13 @@
 
 <!-- ФОН и ГРАНИЦА окна с меню -->
 <aside id="default-sidebar"
-       class="bg-indigo-700 border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-br-3xl
-       fixed top-0 left-0 z-40 w-64 h-[calc(100vh-70px)] transition-transform -translate-x-full sm:translate-x-0"
+       class="bg-indigo-700 border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700
+       fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
        aria-label="Sidenav">
 
 
     <!-- Окно навигации -->
-    <div class="overflow-y-auto py-5 px-3 h-[calc(100vh-70px)]">
+    <div class="overflow-y-auto py-5 px-3 h-screen">
         {% with nav_item_classes="flex items-center p-2 text-base font-normal text-gray-900 rounded-xl transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" %}
         {% with nav_sub_item_classes="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-xl transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" %}
         {% with nav_group_button_classes="flex items-center p-2 w-full text-base font-normal text-gray-900 rounded-xl transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" %}
