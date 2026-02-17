@@ -14,10 +14,33 @@ const groupButtons = Array.from(
 
 /** Быстрый доступ к панелям групп по id из aria-controls. */
 const groupPanelById = new Map(groupButtons.map((button) => [button.getAttribute("aria-controls"), null]));
+const OPEN_PANEL_CLASSES = ["max-h-80", "opacity-100", "translate-y-0", "pointer-events-auto", "py-2"];
+const CLOSED_PANEL_CLASSES = ["max-h-0", "opacity-0", "-translate-y-1", "pointer-events-none"];
 
 groupPanelById.forEach((_, panelId) => {
   groupPanelById.set(panelId, document.getElementById(panelId));
 });
+
+/**
+ * Проверяет, открыта ли панель по текущему набору классов.
+ *
+ * @param {HTMLElement} panel - Панель группы.
+ * @returns {boolean} true, если панель в состоянии "открыто".
+ */
+function isPanelOpen(panel) {
+  return panel.classList.contains("max-h-80");
+}
+
+/**
+ * Переключает панель в состояние открыто/закрыто с плавной анимацией.
+ *
+ * @param {HTMLElement} panel - Панель группы.
+ * @param {boolean} isOpen - true для открытия, false для закрытия.
+ */
+function setPanelState(panel, isOpen) {
+  panel.classList.remove(...OPEN_PANEL_CLASSES, ...CLOSED_PANEL_CLASSES);
+  panel.classList.add(...(isOpen ? OPEN_PANEL_CLASSES : CLOSED_PANEL_CLASSES));
+}
 
 /**
  * Синхронизирует визуальное состояние кнопки группы с состоянием панели.
@@ -49,7 +72,7 @@ function closeOtherPanels(currentButton) {
     const panel = groupPanelById.get(panelId);
     if (!panel) return;
 
-    panel.classList.add("hidden");
+    setPanelState(panel, false);
     setGroupButtonState(button, false);
   });
 }
@@ -67,7 +90,9 @@ function initAccordion() {
     const panelId = button.getAttribute("aria-controls");
     const panel = groupPanelById.get(panelId);
     if (!panel) return;
-    setGroupButtonState(button, !panel.classList.contains("hidden"));
+    const opened = isPanelOpen(panel);
+    setPanelState(panel, opened);
+    setGroupButtonState(button, opened);
   });
 
   groupButtons.forEach((button) => {
@@ -76,16 +101,11 @@ function initAccordion() {
       const panel = groupPanelById.get(panelId);
       if (!panel) return;
 
-      const shouldOpen = panel.classList.contains("hidden");
+      const shouldOpen = !isPanelOpen(panel);
       closeOtherPanels(button);
 
-      if (shouldOpen) {
-        panel.classList.remove("hidden");
-        setGroupButtonState(button, true);
-      } else {
-        panel.classList.add("hidden");
-        setGroupButtonState(button, false);
-      }
+      setPanelState(panel, shouldOpen);
+      setGroupButtonState(button, shouldOpen);
     });
   });
 }
