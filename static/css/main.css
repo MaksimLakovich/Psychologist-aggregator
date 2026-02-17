@@ -3213,6 +3213,18 @@ input:checked + .toggle-bg {
   background-color: rgb(241 245 249 / 0.8);
 }
 
+.bg-blue-700\/95 {
+  background-color: rgb(26 86 219 / 0.95);
+}
+
+.bg-gray-700\/95 {
+  background-color: rgb(55 65 81 / 0.95);
+}
+
+.bg-indigo-500\/95 {
+  background-color: rgb(104 117 245 / 0.95);
+}
+
 .stroke-red-100 {
   stroke: #FDE8E8;
 }
@@ -3808,6 +3820,11 @@ input:checked + .toggle-bg {
 .text-slate-900 {
   --tw-text-opacity: 1;
   color: rgb(15 23 42 / var(--tw-text-opacity, 1));
+}
+
+.text-indigo-400 {
+  --tw-text-opacity: 1;
+  color: rgb(141 162 251 / var(--tw-text-opacity, 1));
 }
 
 .line-through {
@@ -4573,6 +4590,11 @@ input:checked + .toggle-bg {
 .dark\:text-primary-800:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(157 23 77 / var(--tw-text-opacity, 1));
+}
+
+.dark\:text-indigo-400:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(141 162 251 / var(--tw-text-opacity, 1));
 }
 
 .dark\:placeholder-gray-400:is(.dark *)::-moz-placeholder {

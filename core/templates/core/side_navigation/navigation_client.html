@@ -17,28 +17,32 @@
 
 
 <!-- ======= МЕНЮ ======= -->
-<!-- Фон и граница окна с меню -->
+
+<!-- ФОН и ГРАНИЦА окна с меню -->
 <aside id="default-sidebar"
-       class="bg-indigo-700/95 fixed top-0 left-0 z-40 w-64 h-[calc(100vh-70px)] transition-transform -translate-x-full sm:translate-x-0"
+       class="bg-indigo-700 border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700
+       fixed top-0 left-0 z-40 w-64 h-[calc(100vh-70px)] transition-transform -translate-x-full sm:translate-x-0"
        aria-label="Sidenav">
 
 
-    <!-- ПУНКТЫ МЕНЮ -->
-    <div class="overflow-y-auto py-5 px-3 h-[calc(100vh-70px)] border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+    <!-- Окно навигации -->
+    <div class="overflow-y-auto py-5 px-3 h-[calc(100vh-70px)]">
+        {% with nav_item_classes="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" nav_sub_item_classes="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" nav_group_button_classes="flex items-center p-2 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" %}
 
+        <!-- Лого -->
         <a href="{% url 'core:start-page' %}" class="flex mr-4">
             <img src="{% static 'images/side_navigation/opora-base.png' %}"
                  alt="Side logo"
                  class="-mt-6">
         </a>
 
-
-        <ul class="space-y-2 text-xl font-normal text-gray-900">
+        <!-- Пункты -->
+        <ul class="space-y-2">
             <li>
                 <a href="{% url 'core:client-account' %}"
                    data-nav-item
                    data-nav-key="client-account"
-                   class="flex items-center p-2 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                   class="{{ nav_item_classes }}">
                     <svg aria-hidden="true"
                          class="w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                          fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -53,8 +57,7 @@
                         data-collapse-group="client-nav"
                         data-nav-group-button
                         data-nav-group="psychologist"
-                        class="flex items-center p-2 w-full rounded-lg transition duration-75 group hover:bg-gray-100
-                        dark:text-white dark:hover:bg-gray-700"
+                        class="{{ nav_group_button_classes }}"
                         aria-controls="dropdown-psychologist" data-collapse-toggle="dropdown-psychologist">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 group-hover:text-gray-900
@@ -80,7 +83,7 @@
                            data-nav-item
                            data-nav-key="psychologist-match"
                            data-nav-parent-group="psychologist"
-                           class="flex items-center p-2 pl-11 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                           class="{{ nav_sub_item_classes }}">
                             Подобрать и записаться
                         </a>
                     </li>
@@ -89,7 +92,7 @@
                            data-nav-item
                            data-nav-key="psychologist-catalog"
                            data-nav-parent-group="psychologist"
-                           class="flex items-center p-2 pl-11 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                           class="{{ nav_sub_item_classes }}">
                             Каталог
                         </a>
                     </li>
@@ -100,7 +103,7 @@
                         data-collapse-group="client-nav"
                         data-nav-group-button
                         data-nav-group="session"
-                        class="flex items-center p-2 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                        class="{{ nav_group_button_classes }}"
                         aria-controls="dropdown-session" data-collapse-toggle="dropdown-session">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
@@ -125,7 +128,7 @@
                            data-nav-item
                            data-nav-key="session-planned"
                            data-nav-parent-group="session"
-                           class="flex items-center p-2 pl-11 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                           class="{{ nav_sub_item_classes }}">
                             Запланированные
                         </a>
                     </li>
@@ -134,7 +137,7 @@
                            data-nav-item
                            data-nav-key="session-archive"
                            data-nav-parent-group="session"
-                           class="flex items-center p-2 pl-11 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                           class="{{ nav_sub_item_classes }}">
                             Архив
                         </a>
                     </li>
@@ -144,7 +147,7 @@
                 <a href="#"
                    data-nav-item
                    data-nav-key="notifications"
-                   class="flex items-center p-2 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                   class="{{ nav_item_classes }}">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                          fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -165,7 +168,7 @@
                         data-collapse-group="client-nav"
                         data-nav-group-button
                         data-nav-group="auth"
-                        class="flex items-center p-2 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                        class="{{ nav_group_button_classes }}"
                         aria-controls="dropdown-authentication" data-collapse-toggle="dropdown-authentication">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
@@ -192,7 +195,7 @@
                            data-nav-item
                            data-nav-key="profile-edit"
                            data-nav-parent-group="auth"
-                           class="flex items-center p-2 pl-11 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                           class="{{ nav_sub_item_classes }}">
                             Редактировать профиль
                         </a>
                     </li>
@@ -201,7 +204,7 @@
                            data-nav-item
                            data-nav-key="email-change"
                            data-nav-parent-group="auth"
-                           class="flex items-center p-2 pl-11 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                           class="{{ nav_sub_item_classes }}">
                             Изменить email
                         </a>
                     </li>
@@ -210,7 +213,7 @@
                            data-nav-item
                            data-nav-key="password-change"
                            data-nav-parent-group="auth"
-                           class="flex items-center p-2 pl-11 w-full rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                           class="{{ nav_sub_item_classes }}">
                             Изменить пароль
                         </a>
                     </li>
@@ -224,7 +227,7 @@
                 <a href="#"
                    data-nav-item
                    data-nav-key="courses"
-                   class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group">
+                   class="{{ nav_item_classes }}">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                          fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -241,7 +244,7 @@
                 <a href="#"
                    data-nav-item
                    data-nav-key="tests"
-                   class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group">
+                   class="{{ nav_item_classes }}">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                          fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -262,7 +265,7 @@
                 <a href="#"
                    data-nav-item
                    data-nav-key="faq"
-                   class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group">
+                   class="{{ nav_item_classes }}">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                          fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -279,7 +282,7 @@
                 <a href="#"
                    data-nav-item
                    data-nav-key="support"
-                   class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group">
+                   class="{{ nav_item_classes }}">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                          fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -300,7 +303,7 @@
                 <form method="post" action="{% url 'users:web:logout' %}">
                     {% csrf_token %}
                     <button type="submit"
-                            class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group">
+                            class="{{ nav_item_classes }} w-full">
                         <svg aria-hidden="true"
                              class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                              fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -316,6 +319,7 @@
 
 
     </div>
+    {% endwith %}
 
 </aside>
 
