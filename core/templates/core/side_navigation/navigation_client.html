@@ -27,7 +27,9 @@
 
     <!-- Окно навигации -->
     <div class="overflow-y-auto py-5 px-3 h-[calc(100vh-70px)]">
-        {% with nav_item_classes="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" nav_sub_item_classes="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" nav_group_button_classes="flex items-center p-2 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" %}
+        {% with nav_item_classes="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" %}
+        {% with nav_sub_item_classes="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" %}
+        {% with nav_group_button_classes="flex items-center p-2 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" %}
 
         <!-- Лого -->
         <a href="{% url 'core:start-page' %}" class="flex mr-4">
@@ -58,7 +60,7 @@
                         data-nav-group-button
                         data-nav-group="psychologist"
                         class="{{ nav_group_button_classes }}"
-                        aria-controls="dropdown-psychologist" data-collapse-toggle="dropdown-psychologist">
+                        aria-controls="dropdown-psychologist">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 group-hover:text-gray-900
                          dark:text-gray-400 dark:group-hover:text-white"
@@ -104,7 +106,7 @@
                         data-nav-group-button
                         data-nav-group="session"
                         class="{{ nav_group_button_classes }}"
-                        aria-controls="dropdown-session" data-collapse-toggle="dropdown-session">
+                        aria-controls="dropdown-session">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
                          fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -169,7 +171,7 @@
                         data-nav-group-button
                         data-nav-group="auth"
                         class="{{ nav_group_button_classes }}"
-                        aria-controls="dropdown-authentication" data-collapse-toggle="dropdown-authentication">
+                        aria-controls="dropdown-authentication">
                     <svg aria-hidden="true"
                          class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
                          fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -319,6 +321,8 @@
 
 
     </div>
+    {% endwith %}
+    {% endwith %}
     {% endwith %}
 
 </aside>
