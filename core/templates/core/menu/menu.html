@@ -1,20 +1,62 @@
 {% load static %}
 
 
-<!--НЕТ МЕНЮ НА СТРАНИЦЕ "ВОЙТИ"-->
+<!-- ======= НЕТ МЕНЮ НА СТРАНИЦЕ "ВОЙТИ" ======= -->
 {% if menu_variant == "login" %}
 <header></header>
 
 
-<!--НЕТ МЕНЮ НА СТРАНИЦЕ "РЕГИСТРАЦИЯ"-->
+<!-- ======= НЕТ МЕНЮ НА СТРАНИЦЕ "РЕГИСТРАЦИЯ" ======= -->
 {% elif menu_variant == "register" %}
 <header></header>
 
 
-<!--МЕНЮ ДЛЯ АВТОРИЗОВАННОГО КЛИЕНТА-->
-{% elif user.is_authenticated and user.role_id == 2 %}
-<header class="bg-white shadow p-4">
+<!-- ======= АВТОРИЗОВАННЫЙ КЛИЕНТ ======= -->
 
+{% elif user.is_authenticated and user.role_id == 2 %}
+
+<!-- 1. Вариант с боковой НАВИГАЦИЕЙ для личного кабинета -->
+{% if profile_type == "client" %}
+
+<header class="bg-white p-4">
+    <div class="mx-auto max-w-7xl px-4 py-1">
+        <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800">
+            <div class="flex flex-wrap justify-between items-center">
+
+                <div class="flex justify-start items-center">
+                    {% include 'core/side_navigation/navigation_client.html' %}
+                </div>
+
+                <div class="flex items-center">
+                    <!-- Кнопка НАЗАД на стартовую страницу -->
+                    <a href="{% url 'core:start-page' %}"
+                       class="flex items-center gap-2 px-3 py-2 mr-1 rounded-lg
+                       text-slate-700 hover:text-indigo-700 hover:bg-gray-100
+                       text-lg font-medium tracking-wide md:text-xl
+                       active:scale-95 transition-all duration-150
+                       dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700">
+                        <span
+                                class="w-7 h-7 bg-current inline-block"
+                                aria-hidden="true"
+                                style="
+                                -webkit-mask: url('{% static "images/menu/back-icon.svg" %}') no-repeat center / contain;
+                                mask: url('{% static "images/menu/back-icon.svg" %}') no-repeat center / contain;
+                                ">
+                        </span>
+                        <span>
+                            Назад
+                        </span>
+                    </a>
+                </div>
+
+            </div>
+        </nav>
+    </div>
+</header>
+
+<!-- 2. Вариант БЕЗ боковой навигации - только с верхним МЕНЮ и ЛОГО -->
+{% else %}
+<header class="bg-white shadow p-4">
     <div class="mx-auto max-w-7xl px-4 py-1">
         <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800">
             <div class="flex flex-wrap justify-between items-center">
@@ -27,20 +69,19 @@
                 </div>
 
                 <div class="flex items-center lg:order-2 gap-1">
-
                     <!-- Подключаем кнопку МОЙ ПРОФИЛЬ в меню -->
                     {% include 'core/menu/menu_cl_profile.html' %}
-
                 </div>
 
             </div>
         </nav>
     </div>
-
 </header>
 
+{% endif %}
 
-<!--МЕНЮ ДЛЯ АВТОРИЗОВАННОГО ПСИХОЛОГА / АДМИНА-->
+
+<!-- ======= АВТОРИЗОВАННЫЙ ПСИХОЛОГ / АДМИН ======= -->
 {% elif user.is_authenticated %}
 <header class="bg-white shadow p-4">
 
@@ -69,7 +110,7 @@
 </header>
 
 
-<!--МЕНЮ НА СТРАНИЦЕ "СТАРТОВАЯ" ДЛЯ НЕАВТОРИЗОВАННОГО ПОЛЬЗОВАТЕЛЯ-->
+<!-- ======= МЕНЮ НА СТРАНИЦЕ "СТАРТОВАЯ" ДЛЯ НЕАВТОРИЗОВАННОГО ПОЛЬЗОВАТЕЛЯ ======= -->
 {% else %}
 <header class="bg-white shadow p-4">
 
@@ -79,18 +120,18 @@
             <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
         </a>
         <nav class="flex items-center gap-6 text-gray-600">
-                <a href="{% url 'users:web:login-page' %}"
-                   class="text-gray-800 dark:text-white hover:bg-gray-50 focus:ring-4 focus:ring-gray-300
+            <a href="{% url 'users:web:login-page' %}"
+               class="text-gray-800 dark:text-white hover:bg-gray-50 focus:ring-4 focus:ring-gray-300
                    font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:hover:bg-gray-700
                    focus:outline-none dark:focus:ring-gray-800">
-                    Войти
-                </a>
-                <a href="{% url 'users:web:register-page' %}"
-                   class="text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4 focus:ring-primary-300
+                Войти
+            </a>
+            <a href="{% url 'users:web:register-page' %}"
+               class="text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4 focus:ring-primary-300
                    font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:bg-primary-600
                    dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">
-                    Регистрация
-                </a>
+                Регистрация
+            </a>
         </nav>
     </div>
 

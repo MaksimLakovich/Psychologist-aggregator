@@ -1,0 +1,29 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %} {{ title_client_account_view|default:"ОПОРА" }} {% endblock %}
+
+{% block content %}
+
+
+<!-- ?????? -->
+
+<section class="bg-gray-100 h-screen">
+
+
+    <div>
+
+        <!-- ?????? -->
+        <div class="flex-1 flex items-center justify-center bg-gray-200">
+            <img src="{% static 'images/menu/opora-base.png' %}"
+                 alt="No info"
+                 class="w-1/5 h-auto bg-gray-300">
+        </div>
+
+    </div>
+
+
+</section>
+
+{% endblock %}

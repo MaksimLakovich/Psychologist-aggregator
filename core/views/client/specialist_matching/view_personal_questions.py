@@ -3,7 +3,8 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormView
 
-from core.forms.client.specialist_matching.form_personal_questions import ClientPersonalQuestionsForm
+from core.forms.client.specialist_matching.form_personal_questions import \
+    ClientPersonalQuestionsForm
 from users.models import ClientProfile, Method, Topic
 
 
