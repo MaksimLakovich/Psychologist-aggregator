@@ -2197,6 +2197,14 @@ input:checked + .toggle-bg {
   min-height: 100vh;
 }
 
+.min-h-4 {
+  min-height: 1rem;
+}
+
+.min-h-40 {
+  min-height: 10rem;
+}
+
 .w-1\/2 {
   width: 50%;
 }
@@ -2902,6 +2910,11 @@ input:checked + .toggle-bg {
 
 .bg-white\/50 {
   background-color: rgb(255 255 255 / 0.5);
+}
+
+.bg-gray-400 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(156 163 175 / var(--tw-bg-opacity, 1));
 }
 
 .object-contain {
@@ -4330,6 +4343,10 @@ input:checked + .toggle-bg {
     padding-top: 3rem;
   }
 
+  .md\:pt-10 {
+    padding-top: 2.5rem;
+  }
+
   .md\:text-3xl {
     font-size: 1.875rem;
     line-height: 2.25rem;
@@ -4485,6 +4502,10 @@ input:checked + .toggle-bg {
 
   .lg\:pt-20 {
     padding-top: 5rem;
+  }
+
+  .lg\:pt-12 {
+    padding-top: 3rem;
   }
 }
 
