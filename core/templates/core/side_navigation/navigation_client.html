@@ -29,7 +29,7 @@
     <!-- Окно навигации -->
     <div class="overflow-y-auto py-5 px-3 h-screen">
         {% with nav_item_classes="group flex items-center p-2 text-base md:text-lg font-medium tracking-wide text-slate-700 rounded-xl transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700 active:scale-95 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white" %}
-        {% with nav_sub_item_classes="group flex items-center p-2 pl-11 w-full text-base md:text-lg font-medium tracking-wide text-slate-700 rounded-xl transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700 active:scale-95 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white" %}
+        {% with nav_sub_item_classes="group flex items-center p-2 pl-9 w-full text-base md:text-lg font-medium tracking-wide text-slate-700 rounded-xl transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700 active:scale-95 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white" %}
         {% with nav_group_button_classes="group flex items-center p-2 w-full text-base md:text-lg font-medium tracking-wide text-slate-700 rounded-xl transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700 active:scale-95 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white" %}
 
         <!-- ЛОГО -->
@@ -81,6 +81,9 @@
                            data-nav-key="session-planned"
                            data-nav-parent-group="session"
                            class="{{ nav_sub_item_classes }}">
+                            <img src="{% static 'images/menu/num_point.svg' %}"
+                                 alt="point"
+                                 class="transition-transform duration-200 group-hover:scale-110">
                             <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Запланированные</span>
                         </a>
                     </li>
@@ -90,6 +93,9 @@
                            data-nav-key="session-archive"
                            data-nav-parent-group="session"
                            class="{{ nav_sub_item_classes }}">
+                            <img src="{% static 'images/menu/num_point.svg' %}"
+                                 alt="point"
+                                 class="transition-transform duration-200 group-hover:scale-110">
                             <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Архив</span>
                         </a>
                     </li>
@@ -123,6 +129,9 @@
                            data-nav-key="psychologist-match"
                            data-nav-parent-group="psychologist"
                            class="{{ nav_sub_item_classes }}">
+                            <img src="{% static 'images/menu/num_point.svg' %}"
+                                 alt="point"
+                                 class="transition-transform duration-200 group-hover:scale-110">
                             <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Подобрать и записаться</span>
                         </a>
                     </li>
@@ -132,6 +141,9 @@
                            data-nav-key="psychologist-catalog"
                            data-nav-parent-group="psychologist"
                            class="{{ nav_sub_item_classes }}">
+                            <img src="{% static 'images/menu/num_point.svg' %}"
+                                 alt="point"
+                                 class="transition-transform duration-200 group-hover:scale-110">
                             <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Каталог</span>
                         </a>
                     </li>
@@ -185,6 +197,9 @@
                            data-nav-key="profile-edit"
                            data-nav-parent-group="auth"
                            class="{{ nav_sub_item_classes }}">
+                            <img src="{% static 'images/menu/num_point.svg' %}"
+                                 alt="point"
+                                 class="transition-transform duration-200 group-hover:scale-110">
                             <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Редактировать профиль</span>
                         </a>
                     </li>
@@ -194,6 +209,9 @@
                            data-nav-key="email-change"
                            data-nav-parent-group="auth"
                            class="{{ nav_sub_item_classes }}">
+                            <img src="{% static 'images/menu/num_point.svg' %}"
+                                 alt="point"
+                                 class="transition-transform duration-200 group-hover:scale-110">
                             <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Изменить email</span>
                         </a>
                     </li>
@@ -203,6 +221,9 @@
                            data-nav-key="password-change"
                            data-nav-parent-group="auth"
                            class="{{ nav_sub_item_classes }}">
+                            <img src="{% static 'images/menu/num_point.svg' %}"
+                                 alt="point"
+                                 class="transition-transform duration-200 group-hover:scale-110">
                             <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Изменить пароль</span>
                         </a>
                     </li>
