@@ -23,19 +23,18 @@
     <div class="mx-auto max-w-screen-xl px-4 py-16 lg:grid lg:grid-cols-12 lg:gap-8 lg:py-32">
 
         <!-- Текст -->
-        <div class="lg:col-span-6 flex flex-col justify-center">
+        <div class="lg:col-span-9 flex flex-col justify-center">
 
             <div class="mt-10 flex flex-col gap-4 sm:flex-row">
-                <a href="{% url 'core:general-questions' %}"
-                   class="inline-flex items-center justify-center rounded-lg bg-indigo-700 px-6 py-3 text-white font-medium hover:bg-indigo-900 transition
-                   delay-50 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110">
-                    Подобрать психолога
-                </a>
+                <span class="text-2xl font-medium tracking-wide text-indigo-500/50">
+                    Тут появится общая консолидирующая инфо о состоянии профиля (активен/нет), небольшой виджет с календарем где будут ближайшие сессии,
+                    карточка ближайшей сессии с возможностью в нее прогрузится, какие-то акционные предложения от сервиса, какая-то статистика и прочее
+                </span>
             </div>
         </div>
 
         <!-- Иллюстрация -->
-        <div class="hidden lg:col-span-6 lg:block relative blur-sm">
+        <div class="hidden lg:col-span-3 lg:block relative blur-sm">
             <img src="{% static 'images/menu/opora-base.png' %}"
                  alt="Logo"
                  class="w-full h-auto">

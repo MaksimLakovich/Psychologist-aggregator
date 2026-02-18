@@ -3037,6 +3037,11 @@ input:checked + .toggle-bg {
   padding-bottom: 2rem;
 }
 
+.py-10 {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+
 .pb-0 {
   padding-bottom: 0px;
 }
@@ -3366,6 +3371,37 @@ input:checked + .toggle-bg {
 .text-zinc-400 {
   --tw-text-opacity: 1;
   color: rgb(161 161 170 / var(--tw-text-opacity, 1));
+}
+
+.text-slate-300 {
+  --tw-text-opacity: 1;
+  color: rgb(203 213 225 / var(--tw-text-opacity, 1));
+}
+
+.text-indigo-300 {
+  --tw-text-opacity: 1;
+  color: rgb(180 198 252 / var(--tw-text-opacity, 1));
+}
+
+.text-indigo-300\/50 {
+  color: rgb(180 198 252 / 0.5);
+}
+
+.text-indigo-700\/50 {
+  color: rgb(81 69 205 / 0.5);
+}
+
+.text-indigo-700\/75 {
+  color: rgb(81 69 205 / 0.75);
+}
+
+.text-indigo-500\/50 {
+  color: rgb(104 117 245 / 0.5);
+}
+
+.text-slate-500 {
+  --tw-text-opacity: 1;
+  color: rgb(100 116 139 / var(--tw-text-opacity, 1));
 }
 
 .line-through {
@@ -3791,6 +3827,11 @@ input:checked + .toggle-bg {
 .focus\:ring-primary-300:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(249 168 212 / var(--tw-ring-opacity, 1));
+}
+
+.focus\:ring-indigo-200:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(205 219 254 / var(--tw-ring-opacity, 1));
 }
 
 .active\:scale-95:active {
@@ -4330,6 +4371,14 @@ input:checked + .toggle-bg {
     grid-column: span 6 / span 6;
   }
 
+  .lg\:col-span-3 {
+    grid-column: span 3 / span 3;
+  }
+
+  .lg\:col-span-9 {
+    grid-column: span 9 / span 9;
+  }
+
   .lg\:mt-0 {
     margin-top: 0px;
   }
@@ -4411,6 +4460,11 @@ input:checked + .toggle-bg {
   .lg\:py-32 {
     padding-top: 8rem;
     padding-bottom: 8rem;
+  }
+
+  .lg\:py-16 {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
   }
 
   .lg\:pb-10 {
