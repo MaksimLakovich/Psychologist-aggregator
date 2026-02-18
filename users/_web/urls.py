@@ -3,9 +3,9 @@ from django.urls import path
 
 from users._web.views.auth_view import (LoginPageView, RegisterPageView,
                                         VerifyEmailView)
+from users._web.views.change_password_view import ChangePasswordPageView
 from users._web.views.reset_password_view import (PasswordResetConfirmPageView,
                                                   PasswordResetRequestPageView)
-from users._web.views.change_password_view import ChangePasswordPageView
 from users.apps import UsersConfig
 
 app_name = UsersConfig.name
