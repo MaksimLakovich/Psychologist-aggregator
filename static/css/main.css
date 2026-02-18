@@ -2778,6 +2778,16 @@ input:checked + .toggle-bg {
   border-color: rgb(255 255 255 / var(--tw-border-opacity, 1));
 }
 
+.border-green-200 {
+  --tw-border-opacity: 1;
+  border-color: rgb(188 240 218 / var(--tw-border-opacity, 1));
+}
+
+.border-teal-100 {
+  --tw-border-opacity: 1;
+  border-color: rgb(213 245 246 / var(--tw-border-opacity, 1));
+}
+
 .\!bg-gray-50 {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1)) !important;
@@ -2915,6 +2925,28 @@ input:checked + .toggle-bg {
 .bg-gray-400 {
   --tw-bg-opacity: 1;
   background-color: rgb(156 163 175 / var(--tw-bg-opacity, 1));
+}
+
+.bg-green-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(222 247 236 / var(--tw-bg-opacity, 1));
+}
+
+.bg-green-50\/60 {
+  background-color: rgb(243 250 247 / 0.6);
+}
+
+.bg-teal-50\/60 {
+  background-color: rgb(237 250 250 / 0.6);
+}
+
+.bg-teal-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(213 245 246 / var(--tw-bg-opacity, 1));
+}
+
+.bg-teal-100\/50 {
+  background-color: rgb(213 245 246 / 0.5);
 }
 
 .object-contain {
@@ -3417,6 +3449,21 @@ input:checked + .toggle-bg {
   color: rgb(100 116 139 / var(--tw-text-opacity, 1));
 }
 
+.text-green-800 {
+  --tw-text-opacity: 1;
+  color: rgb(3 84 63 / var(--tw-text-opacity, 1));
+}
+
+.text-teal-800 {
+  --tw-text-opacity: 1;
+  color: rgb(5 80 92 / var(--tw-text-opacity, 1));
+}
+
+.text-teal-600 {
+  --tw-text-opacity: 1;
+  color: rgb(4 116 129 / var(--tw-text-opacity, 1));
+}
+
 .line-through {
   text-decoration-line: line-through;
 }
@@ -3474,6 +3521,16 @@ input:checked + .toggle-bg {
 
 .shadow-indigo-500\/70 {
   --tw-shadow-color: rgb(104 117 245 / 0.7);
+  --tw-shadow: var(--tw-shadow-colored);
+}
+
+.shadow-teal-500\/50 {
+  --tw-shadow-color: rgb(6 148 162 / 0.5);
+  --tw-shadow: var(--tw-shadow-colored);
+}
+
+.shadow-teal-600 {
+  --tw-shadow-color: #047481;
   --tw-shadow: var(--tw-shadow-colored);
 }
 
@@ -4347,6 +4404,10 @@ input:checked + .toggle-bg {
     padding-top: 2.5rem;
   }
 
+  .md\:pt-24 {
+    padding-top: 6rem;
+  }
+
   .md\:text-3xl {
     font-size: 1.875rem;
     line-height: 2.25rem;
@@ -4506,6 +4567,18 @@ input:checked + .toggle-bg {
 
   .lg\:pt-12 {
     padding-top: 3rem;
+  }
+
+  .lg\:pt-16 {
+    padding-top: 4rem;
+  }
+
+  .lg\:pt-24 {
+    padding-top: 6rem;
+  }
+
+  .lg\:pt-10 {
+    padding-top: 2.5rem;
   }
 }
 

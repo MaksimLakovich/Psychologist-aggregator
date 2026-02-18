@@ -36,6 +36,8 @@ class ChangePasswordPageView(LoginRequiredMixin, FormView):
             context["profile_type"] = "psychologist"
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
         context["current_sidebar_key"] = "password-change"
+        # Одноразовый флаг успешной смены пароля (для показа экрана успеха вместо формы).
+        context["password_changed"] = self.request.session.pop("password_changed", False)
         return context
 
     def form_valid(self, form):
@@ -47,5 +49,6 @@ class ChangePasswordPageView(LoginRequiredMixin, FormView):
         # Сохраняем сессию после смены пароля (без выхода из аккаунта).
         update_session_auth_hash(self.request, user)
 
-        messages.success(self.request, "Пароль успешно изменен!")
+        # Одноразовый флаг для UI: покажем экран успеха и уберем форму.
+        self.request.session["password_changed"] = True
         return super().form_valid(form)
