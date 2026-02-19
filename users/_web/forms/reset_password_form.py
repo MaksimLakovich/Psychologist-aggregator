@@ -12,9 +12,8 @@ class PasswordResetRequestForm(forms.Form):
             attrs={
                 "placeholder": "name@email.com",
                 "class": (
-                    "bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg "
-                    "focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
-                    "dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                    "block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                    "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                 ),
                 "autocomplete": "email",
             }
@@ -32,9 +31,8 @@ class PasswordResetConfirmForm(forms.Form):
             attrs={
                 "placeholder": "••••••••",
                 "class": (
-                    "bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg "
-                    "focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
-                    "dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                    "block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                    "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                 ),
                 "autocomplete": "new-password",
             }
@@ -47,9 +45,8 @@ class PasswordResetConfirmForm(forms.Form):
             attrs={
                 "placeholder": "••••••••",
                 "class": (
-                    "bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg "
-                    "focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
-                    "dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                    "block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                    "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                 ),
                 "autocomplete": "new-password",
             }
