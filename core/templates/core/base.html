@@ -56,9 +56,15 @@
 
 <!-- Подключение основного контента страницы -->
 <!-- ВАЖНО: для пользователя с боковой НАВИГАЦИЕЙ смещаем контент вправо на ширину сайдбара -->
-<main class="flex-1 {% if profile_type == 'client' %}lg:pl-80{% endif %}">
+<main class="flex-1 {% if profile_type == 'client' %}lg:ml-80 lg:w-[calc(100%-20rem)]{% endif %}">
+    {% if profile_type == 'client' %}
+    <div class="lg:-ml-4">
+    {% endif %}
     {% block content %}
     {% endblock %}
+    {% if profile_type == 'client' %}
+    </div>
+    {% endif %}
 </main>
 
 
