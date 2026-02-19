@@ -17,7 +17,7 @@ class EditClientProfileForm(forms.ModelForm):
                     "placeholder": "Ваше имя",
                     "class": (
                         "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
-                        "text-gray-900 focus:border-indigo-600 shadow-sm"
+                        "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "autocomplete": "given-name",
                 }
