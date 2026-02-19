@@ -16,9 +16,8 @@ class EditClientProfileForm(forms.ModelForm):
                 attrs={
                     "placeholder": "Ваше имя",
                     "class": (
-                        "bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg "
-                        "focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
-                        "dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                        "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                        "text-gray-900 focus:border-indigo-600 shadow-sm"
                     ),
                     "autocomplete": "given-name",
                 }
@@ -27,9 +26,8 @@ class EditClientProfileForm(forms.ModelForm):
                 attrs={
                     "placeholder": "Ваша фамилия",
                     "class": (
-                        "bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg "
-                        "focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
-                        "dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                        "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                        "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "autocomplete": "family-name",
                 }
@@ -38,9 +36,8 @@ class EditClientProfileForm(forms.ModelForm):
                 attrs={
                     "placeholder": "Ваш возраст",
                     "class": (
-                        "bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg "
-                        "focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
-                        "dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                        "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                        "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "min": 18,
                     "max": 120,
@@ -51,9 +48,8 @@ class EditClientProfileForm(forms.ModelForm):
                     "placeholder": "name@email.com",
                     "readonly": "readonly",
                     "class": (
-                        "bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg "
-                        "focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
-                        "dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white "
+                        "block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                        "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm "
                         "cursor-not-allowed"
                     ),
                     "autocomplete": "email",
@@ -63,9 +59,8 @@ class EditClientProfileForm(forms.ModelForm):
                 attrs={
                     "placeholder": "+7XXXXXXXXXX",
                     "class": (
-                        "bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg "
-                        "focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
-                        "dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                        "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                        "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "autocomplete": "tel",
                 }
@@ -73,9 +68,8 @@ class EditClientProfileForm(forms.ModelForm):
             "timezone": forms.Select(
                 attrs={
                     "class": (
-                        "bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg "
-                        "focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
-                        "dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                        "block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                        "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm "
                     ),
                 }
             ),
