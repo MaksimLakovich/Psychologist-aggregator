@@ -3107,6 +3107,11 @@ input:checked + .toggle-bg {
   padding-bottom: 2.5rem;
 }
 
+.px-0 {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
 .pb-0 {
   padding-bottom: 0px;
 }
@@ -4531,6 +4536,10 @@ input:checked + .toggle-bg {
     margin-left: -6rem;
   }
 
+  .lg\:ml-40 {
+    margin-left: 10rem;
+  }
+
   .lg\:block {
     display: block;
   }
@@ -4592,6 +4601,14 @@ input:checked + .toggle-bg {
     gap: 2rem;
   }
 
+  .lg\:gap-1 {
+    gap: 0.25rem;
+  }
+
+  .lg\:gap-0 {
+    gap: 0px;
+  }
+
   .lg\:space-y-8 > :not([hidden]) ~ :not([hidden]) {
     --tw-space-y-reverse: 0;
     margin-top: calc(2rem * calc(1 - var(--tw-space-y-reverse)));
@@ -4632,6 +4649,16 @@ input:checked + .toggle-bg {
     padding-bottom: 4rem;
   }
 
+  .lg\:py-0 {
+    padding-top: 0px;
+    padding-bottom: 0px;
+  }
+
+  .lg\:py-4 {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
   .lg\:pb-10 {
     padding-bottom: 2.5rem;
   }
@@ -4667,6 +4694,18 @@ input:checked + .toggle-bg {
   .lg\:pl-80 {
     padding-left: 20rem;
   }
+
+  .lg\:pl-6 {
+    padding-left: 1.5rem;
+  }
+
+  .lg\:pl-0 {
+    padding-left: 0px;
+  }
+
+  .lg\:pl-10 {
+    padding-left: 2.5rem;
+  }
 }
 
 @media (min-width: 1280px) {
@@ -4681,6 +4720,10 @@ input:checked + .toggle-bg {
   .xl\:px-44 {
     padding-left: 11rem;
     padding-right: 11rem;
+  }
+
+  .xl\:pl-10 {
+    padding-left: 2.5rem;
   }
 }
 
