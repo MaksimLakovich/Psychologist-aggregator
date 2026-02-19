@@ -1,15 +1,22 @@
 {% extends 'core/base.html' %}
+
 {% load static %}
 
 {% block title %} {{ title_edit_client_page_view|default:"Настройки профиля" }} {% endblock %}
 
 {% block content %}
+
+
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+
     <div class="max-w-3xl mx-auto">
 
+        <!-- ШАПКА -->
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Настройки профиля</h1>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Управляйте своими личными данными и настройками часового пояса.</p>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                Управляйте своими личными данными и настройками часового пояса
+            </p>
         </div>
 
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -21,7 +28,9 @@
                     </div>
                 </div>
                 <div class="text-center sm:text-left">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ request.user.get_full_name|default:"Пользователь" }}</h2>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+                        {{ request.user.get_full_name|default:"Пользователь" }}
+                    </h2>
                     <div class="mt-1 flex items-center justify-center sm:justify-start gap-2">
                         <span class="text-sm text-gray-500 dark:text-gray-400">{{ request.user.email }}</span>
                         {% if request.user.is_active %}
@@ -33,83 +42,142 @@
                 </div>
             </div>
 
+            <!-- УВЕДОМЛЕНИЯ -->
             {% if messages %}
-            <div class="px-6 pt-6">
+            <div class="space-y-2">
                 {% for message in messages %}
-                <div class="p-4 rounded-xl flex items-center {% if 'success' in message.tags %}bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-400{% else %}bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400{% endif %}">
-                    <span class="text-sm font-medium">{{ message }}</span>
+                {% if "success" in message.tags %}
+                <div class="p-3 text-center text-base tracking-wide text-green-700 bg-green-50 rounded-lg">
+                    {{ message|linebreaksbr }}
                 </div>
+                {% else %}
+                <div class="p-3 text-center text-base tracking-wide text-pink-700 bg-pink-50 rounded-lg">
+                    {{ message|linebreaksbr }}
+                </div>
+                {% endif %}
                 {% endfor %}
             </div>
             {% endif %}
 
+            <!-- ОБЩИЕ ОШИБКИ -->
+            {% if form.non_field_errors %}
+            <div class="p-3 text-center text-base tracking-wide text-pink-700 bg-pink-50 rounded-lg">
+                {% for err in form.non_field_errors %}
+                {{ err }}{% if not forloop.last %}<br>{% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- ДАННЫЕ ПОЛЬЗОВАТЕЛЯ -->
             <form id="profile-edit-form" method="post" class="p-6">
                 {% csrf_token %}
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    <div class="space-y-2">
-                        <label class="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Имя</label>
+                    <!-- Имя -->
+                    <div>
+                        <label for="{{ form.first_name.id_for_label }}"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ form.first_name.label }}
+                        </label>
                         {{ form.first_name }}
                         {% if form.first_name.errors %}
-                            <p class="text-xs text-red-500 mt-1">{{ form.first_name.errors.0 }}</p>
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                            {{ form.first_name.errors.0 }}
+                        </p>
                         {% endif %}
                     </div>
 
-                    <div class="space-y-2">
-                        <label class="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Фамилия</label>
+                    <!-- Фамилия -->
+                    <div>
+                        <label for="{{ form.last_name.id_for_label }}"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ form.last_name.label }}
+                        </label>
                         {{ form.last_name }}
                         {% if form.last_name.errors %}
-                            <p class="text-xs text-red-500 mt-1">{{ form.last_name.errors.0 }}</p>
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                            {{ form.last_name.errors.0 }}
+                        </p>
                         {% endif %}
                     </div>
 
-                    <div class="space-y-2 md:col-span-2">
-                        <label class="flex justify-between text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">
-                            <span>Email</span>
-                            <span class="text-xs font-normal text-gray-400">Не редактируется</span>
+                    <!-- Email -->
+                    <div class="md:col-span-2">
+                        <label for="{{ form.email.id_for_label }}"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ form.email.label }}
                         </label>
                         <div class="relative">
                             {{ form.email }}
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                 </svg>
                             </div>
                         </div>
+                        {% if form.email.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                            {{ form.email.errors.0 }}
+                        </p>
+                        {% endif %}
                     </div>
 
-                    <div class="space-y-2">
-                        <label class="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Возраст</label>
+                    <!-- Возраст -->
+                    <div>
+                        <label for="{{ form.age.id_for_label }}"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ form.age.label }}
+                        </label>
                         {{ form.age }}
                         {% if form.age.errors %}
-                            <p class="text-xs text-red-500 mt-1">{{ form.age.errors.0 }}</p>
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                            {{ form.age.errors.0 }}
+                        </p>
                         {% endif %}
                     </div>
 
-                    <div class="space-y-2">
-                        <label class="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Телефон</label>
+                    <!-- Телефон -->
+                    <div>
+                        <label for="{{ form.phone_number.id_for_label }}"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ form.phone_number.label }}
+                        </label>
                         {{ form.phone_number }}
                         {% if form.phone_number.errors %}
-                            <p class="text-xs text-red-500 mt-1">{{ form.phone_number.errors.0 }}</p>
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                            {{ form.phone_number.errors.0 }}
+                        </p>
                         {% endif %}
                     </div>
 
-                    <div class="space-y-2 md:col-span-2">
-                        <label class="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Часовой пояс</label>
+                    <!-- Часовой пояс -->
+                    <div class="md:col-span-2">
+                        <label for="{{ form.timezone.id_for_label }}"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ form.timezone.label }}
+                        </label>
                         {{ form.timezone }}
                         {% if form.timezone.errors %}
-                            <p class="text-xs text-red-500 mt-1">{{ form.timezone.errors.0 }}</p>
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                            {{ form.timezone.errors.0 }}
+                        </p>
                         {% endif %}
                     </div>
                 </div>
 
                 <div class="mt-10 pt-6 border-t border-gray-200 dark:border-gray-700">
                     <div id="display-actions">
-                        <button type="button" id="profile-edit-toggle"
-                                class="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 shadow-md hover:shadow-lg">
+                        <button type="button"
+                                id="profile-edit-toggle"
+                                class="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3
+                                border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
+                                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                                transition-all duration-200 shadow-md hover:shadow-lg">
                             <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
                             Редактировать данные
                         </button>
@@ -117,62 +185,27 @@
 
                     <div id="profile-edit-actions" class="hidden flex flex-col sm:flex-row gap-3">
                         <button type="submit"
-                                class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 flex-1 shadow-md">
+                                class="inline-flex items-center justify-center px-6 py-3
+                                border border-transparent text-base font-medium rounded-xl text-white bg-green-600 hover:bg-green-700
+                                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500
+                                transition-all duration-200 flex-1 shadow-md">
                             Сохранить изменения
                         </button>
-                        <button type="button" id="profile-edit-cancel"
-                                class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-xl text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 flex-1">
+                        <button type="button"
+                                id="profile-edit-cancel"
+                                class="inline-flex items-center justify-center px-6 py-3
+                                border border-gray-300 dark:border-gray-600 text-base font-medium rounded-xl text-gray-700
+                                dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 flex-1">
                             Отмена
                         </button>
                     </div>
                 </div>
             </form>
+
         </div>
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('profile-edit-form');
-        const toggleBtn = document.getElementById('profile-edit-toggle');
-        const cancelBtn = document.getElementById('profile-edit-cancel');
-        const editActions = document.getElementById('profile-edit-actions');
-        const displayActions = document.getElementById('display-actions');
+<script src="{% static 'js/modules/edit_client_profile.js' %}"></script>
 
-        // Поля, которые мы будем переключать (исключая email, он всегда readonly)
-        const inputs = form.querySelectorAll('input:not([name="email"]), select');
-
-        // Функция переключения состояния
-        function setEditMode(isEditing) {
-            inputs.forEach(input => {
-                if (isEditing) {
-                    input.removeAttribute('readonly');
-                    input.disabled = false;
-                    input.classList.remove('bg-gray-50', 'cursor-not-allowed', 'opacity-75');
-                } else {
-                    if (input.tagName !== 'SELECT') input.setAttribute('readonly', 'readonly');
-                    if (input.tagName === 'SELECT') input.disabled = true;
-                    input.classList.add('bg-gray-50', 'dark:bg-gray-700/50', 'cursor-not-allowed', 'opacity-75');
-                }
-            });
-
-            if (isEditing) {
-                editActions.classList.remove('hidden');
-                displayActions.classList.add('hidden');
-            } else {
-                editActions.classList.add('hidden');
-                displayActions.classList.remove('hidden');
-            }
-        }
-
-        // Инициализация: ставим в режим просмотра
-        setEditMode(false);
-
-        toggleBtn.addEventListener('click', () => setEditMode(true));
-        cancelBtn.addEventListener('click', () => {
-            form.reset();
-            setEditMode(false);
-        });
-    });
-</script>
 {% endblock %}

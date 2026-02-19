@@ -7,7 +7,7 @@ def ratelimited_view(request, exception=None):
 
     context = {
         "title_ratelimit_view": "Слишком много запросов",
-        "message": "Слишком много неудачных запросов. Пожалуйста, проверьте данные и повторите попытку позже!",
+        "message": "Слишком много повторяющихся запросов. Пожалуйста, проверьте данные и повторите попытку позже!",
     }
 
     return render(request, "users/ratelimited.html", context, status=429)
