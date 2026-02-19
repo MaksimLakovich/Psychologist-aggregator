@@ -27,6 +27,11 @@
 
 
     <!-- Окно навигации -->
+
+    <!-- ВАЖНО: При использовании на какой-либо странице данного сайдбара мы автоматический смещаем контент вправо на ширину равную "lg:pl-80" -->
+    <!-- параметр "lg:pl-80" для отступа нужен чтоб при изменении ШИРИНЫ экрана контент страницы не прятался за навигацией -->
+    <!-- параметр "lg:pl-80" задается в BASE.HTML -->
+
     <div class="overflow-y-auto py-5 px-3 h-screen">
         {% with nav_item_classes="group flex items-center p-2 text-base md:text-lg font-medium tracking-wide text-slate-700 rounded-xl transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700 active:scale-95 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white" %}
         {% with nav_sub_item_classes="group flex items-center p-2 pl-9 w-full text-base md:text-lg font-medium tracking-wide text-slate-700 rounded-xl transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700 active:scale-95 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white" %}

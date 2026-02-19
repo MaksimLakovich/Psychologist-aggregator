@@ -2053,6 +2053,26 @@ input:checked + .toggle-bg {
   margin-top: 1.5cm;
 }
 
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
+.ml-24 {
+  margin-left: 6rem;
+}
+
+.-ml-24 {
+  margin-left: -6rem;
+}
+
+.-ml-80 {
+  margin-left: -20rem;
+}
+
+.ml-80 {
+  margin-left: 20rem;
+}
+
 .\!block {
   display: block !important;
 }
@@ -4470,6 +4490,22 @@ input:checked + .toggle-bg {
     margin-top: 0px;
   }
 
+  .lg\:ml-80 {
+    margin-left: 20rem;
+  }
+
+  .lg\:-ml-4 {
+    margin-left: -1rem;
+  }
+
+  .lg\:-ml-40 {
+    margin-left: -10rem;
+  }
+
+  .lg\:-ml-24 {
+    margin-left: -6rem;
+  }
+
   .lg\:block {
     display: block;
   }
@@ -4484,6 +4520,14 @@ input:checked + .toggle-bg {
 
   .lg\:hidden {
     display: none;
+  }
+
+  .lg\:w-\[calc\(100\%-20rem\)\] {
+    width: calc(100% - 20rem);
+  }
+
+  .lg\:w-\[calc\(100\%-19rem\)\] {
+    width: calc(100% - 19rem);
   }
 
   .lg\:max-w-xl {
