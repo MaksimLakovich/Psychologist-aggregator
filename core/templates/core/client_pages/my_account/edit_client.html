@@ -1,0 +1,235 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %} {{ title_edit_client_page_view|default:"Редактирование профиля" }} {% endblock %}
+
+{% block content %}
+
+
+<section class="flex flex-col flex-1 bg-transparent dark:bg-gray-900 pt-6 md:pt-10 lg:pt-20">
+
+    <!-- ========== РЕДАКТИРОВАНИЕ ПРОФИЛЯ ========== -->
+
+    <div class="w-full flex-1 flex items-center py-8 md:py-0 -ml-8">
+
+        <div class="w-full max-w-md mx-auto px-4">
+
+            <h1 class="text-2xl text-center font-extrabold leading-tight tracking-wide text-zinc-400 md:text-4xl dark:text-white">
+                Редактирование профиля
+            </h1>
+            <p class="text-sm text-center text-zinc-300 dark:text-gray-400 pt-2 mb-6 md:mb-12">
+                Нажмите «Редактировать», чтобы изменить данные аккаунта
+            </p>
+
+            <!-- УВЕДОМЛЕНИЯ -->
+            {% if messages %}
+            <div class="space-y-2 mb-6">
+                {% for message in messages %}
+                {% if "success" in message.tags %}
+                <div class="p-3 text-center text-base tracking-wide text-green-700 bg-green-50 rounded-lg">
+                    {{ message|linebreaksbr }}
+                </div>
+                {% else %}
+                <div class="p-3 text-center text-base tracking-wide text-pink-700 bg-pink-50 rounded-lg">
+                    {{ message|linebreaksbr }}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- ОБЩИЕ ОШИБКИ -->
+            {% if form.non_field_errors %}
+            <div class="p-3 text-center text-base tracking-wide text-pink-700 bg-pink-50 rounded-lg mb-6">
+                {% for err in form.non_field_errors %}
+                {{ err }}{% if not forloop.last %}<br>{% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form id="profile-edit-form" class="space-y-6" method="post">
+                {% csrf_token %}
+
+                <!-- Имя -->
+                <div>
+                    <label for="{{ form.first_name.id_for_label }}"
+                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        {{ form.first_name.label }}
+                    </label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        {{ form.first_name.errors.0 }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Фамилия -->
+                <div>
+                    <label for="{{ form.last_name.id_for_label }}"
+                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        {{ form.last_name.label }}
+                    </label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        {{ form.last_name.errors.0 }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Возраст -->
+                <div>
+                    <label for="{{ form.age.id_for_label }}"
+                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        {{ form.age.label }}
+                    </label>
+                    {{ form.age }}
+                    {% if form.age.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        {{ form.age.errors.0 }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Email + кнопка "Изменить email" -->
+                <div>
+                    <div class="flex items-center justify-between gap-4">
+                        <label for="{{ form.email.id_for_label }}"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ form.email.label }}
+                        </label>
+                        <button type="button"
+                                id="profile-email-change"
+                                class="hidden text-sm font-medium text-indigo-700 hover:text-indigo-900">
+                            Изменить email
+                        </button>
+                    </div>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        {{ form.email.errors.0 }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Телефон -->
+                <div>
+                    <label for="{{ form.phone_number.id_for_label }}"
+                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        {{ form.phone_number.label }}
+                    </label>
+                    {{ form.phone_number }}
+                    {% if form.phone_number.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        {{ form.phone_number.errors.0 }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Часовой пояс -->
+                <div>
+                    <label for="{{ form.timezone.id_for_label }}"
+                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        {{ form.timezone.label }}
+                    </label>
+                    {{ form.timezone }}
+                    {% if form.timezone.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        {{ form.timezone.errors.0 }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Статус аккаунта -->
+                <div class="pt-2">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Статус аккаунта:</span>
+                    {% if request.user.is_active %}
+                    <span class="ml-2 inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                        Активен
+                    </span>
+                    {% else %}
+                    <span class="ml-2 inline-flex items-center rounded-full bg-pink-100 px-3 py-1 text-xs font-medium text-pink-700">
+                        Не активен
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Кнопки -->
+                <div class="pt-6 md:pt-10 flex flex-col gap-3">
+                    <button type="button"
+                            id="profile-edit-toggle"
+                            class="w-full text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4 focus:outline-none
+                            focus:ring-primary-300 font-medium rounded-lg text-base px-6 py-3 text-center
+                            dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                        Редактировать
+                    </button>
+
+                    <div id="profile-edit-actions" class="hidden grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <button type="submit"
+                                id="profile-edit-save"
+                                class="w-full text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4 focus:outline-none
+                                focus:ring-primary-300 font-medium rounded-lg text-base px-6 py-3 text-center
+                                dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                            Сохранить
+                        </button>
+                        <button type="button"
+                                id="profile-edit-cancel"
+                                class="w-full text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:ring-4 focus:outline-none
+                                focus:ring-indigo-200 font-medium rounded-lg text-base px-6 py-3 text-center">
+                            Отмена
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</section>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("profile-edit-form");
+        const editButton = document.getElementById("profile-edit-toggle");
+        const actionsBlock = document.getElementById("profile-edit-actions");
+        const cancelButton = document.getElementById("profile-edit-cancel");
+        const emailChangeButton = document.getElementById("profile-email-change");
+
+        const editableFields = [
+            "{{ form.first_name.id_for_label }}",
+            "{{ form.last_name.id_for_label }}",
+            "{{ form.age.id_for_label }}",
+            "{{ form.phone_number.id_for_label }}",
+            "{{ form.timezone.id_for_label }}",
+        ];
+        function setEditing(isEditing) {
+            editableFields.forEach((fieldId) => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.disabled = !isEditing;
+                }
+            });
+
+            editButton.classList.toggle("hidden", isEditing);
+            actionsBlock.classList.toggle("hidden", !isEditing);
+            emailChangeButton.classList.toggle("hidden", !isEditing);
+        }
+
+        setEditing(false);
+
+        editButton.addEventListener("click", function () {
+            setEditing(true);
+        });
+
+        cancelButton.addEventListener("click", function () {
+            form.reset();
+            setEditing(false);
+        });
+    });
+</script>
+
+
+{% endblock %}

@@ -27,6 +27,7 @@ class ChangePasswordPageView(LoginRequiredMixin, FormView):
         """Формирование контекста страницы смены пароля."""
         context = super().get_context_data(**kwargs)
         context["title_change_password_view"] = "Смена пароля в сервисе ОПОРА"
+
         # Параметр, который передаем в menu.html и на его основе там настраиваем показ боков.НАВИГАЦИЙ / верх.МЕНЮ
         # Данный IF/ELSE позволяет нам задать отдельный параметр для клиента и для психолога, что позволит потом,
         # при необходимости, рендерить разные шаблоны страниц или использовать разный доп функционал
@@ -34,6 +35,7 @@ class ChangePasswordPageView(LoginRequiredMixin, FormView):
             context["profile_type"] = "client"
         else:
             context["profile_type"] = "psychologist"
+
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
         context["current_sidebar_key"] = "password-change"
         # Одноразовый флаг успешной смены пароля (для показа экрана успеха вместо формы).

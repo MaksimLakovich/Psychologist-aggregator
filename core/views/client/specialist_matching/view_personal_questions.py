@@ -101,39 +101,26 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
 
         form = context["form"]
 
-        # 1) preferred_topic_type
         context["preferred_topic_type"] = form.initial.get("preferred_topic_type", "individual")
-
-        # 2) requested_topics: 1) группируем; 2) превращаем PK тем в строки, чтобы удобнее работать в JS
+        # requested_topics: 1) группируем; 2) превращаем PK тем в строки, чтобы удобнее работать в JS
         context["topics_by_type"] = self._group_topics()
         context["selected_topics"] = [
             str(pk) for pk in form.initial.get("requested_topics", [])
         ]
-
-        # 3) has_preferences
         context["has_preferences"] = form.initial.get("has_preferences", False)
-
-        # 4) preferred_ps_gender
         context["preferred_ps_gender"] = form.initial.get("preferred_ps_gender", [])
-
-        # 5) preferred_ps_age
         context["preferred_ps_age"] = form.initial.get("preferred_ps_age", [])
-
-        # 6) preferred_methods (для шаблона превращаем PK методов в строки, чтобы удобнее работать в JS)
+        # preferred_methods (для шаблона превращаем PK методов в строки, чтобы удобнее работать в JS)
         context["methods"] = Method.objects.all().order_by("name")
         context["selected_methods"] = [
             str(pk) for pk in form.initial.get("preferred_methods", [])
         ]
-
-        # 7) has_time_preferences
         context["has_time_preferences"] = form.initial.get("has_time_preferences", False)
-
-        # 8) preferred_slots (сразу сериализоруем потому что JS не должен работать с Python datetime)
+        # preferred_slots (сразу сериализоруем потому что JS не должен работать с Python datetime)
         context["preferred_slots"] = [
             slot.isoformat()
             for slot in form.initial.get("preferred_slots", [])
         ]
-
         context["title_home_page_view"] = "Психологи онлайн на Опора — поиск и подбор психолога"
 
         return context
