@@ -6,8 +6,20 @@
 
 {% block content %}
 
+{% block extra_style %}
+<style>
+    body {
+        background-image: url('{% static "images/background/background-start.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed; /* красиво фиксирует фон */
+    }
+</style>
+{% endblock %}
 
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+
+<div class="min-h-screen bg-white/60 py-12 px-4 sm:px-6 lg:px-8">
 
     <div class="max-w-3xl mx-auto">
 
@@ -21,7 +33,7 @@
             </p>
         </div>
 
-        <div class="bg-gray-300 rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-transparent rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
 
             <!-- ПРИЗНАК АКТИВНОСТИ ПОЛЬЗОВАТЕЛЯ -->
             <div class="px-6 py-8 border-b border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row items-center gap-6">

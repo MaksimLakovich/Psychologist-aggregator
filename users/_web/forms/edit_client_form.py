@@ -16,9 +16,9 @@ class EditClientProfileForm(forms.ModelForm):
                 attrs={
                     "placeholder": "Ваше имя",
                     "class": (
-                        "block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                        "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
                         "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm "
-                        "read-only:bg-gray-50 read-only:cursor-not-allowed read-only:opacity-75"
+                        "read-only:bg-gray-50 read-only:cursor-not-allowed read-only:opacity-50"
                     ),
                     "autocomplete": "given-name",
                 }
@@ -27,9 +27,9 @@ class EditClientProfileForm(forms.ModelForm):
                 attrs={
                     "placeholder": "Ваша фамилия",
                     "class": (
-                        "block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                        "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
                         "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm "
-                        "read-only:bg-gray-50 read-only:cursor-not-allowed read-only:opacity-75"
+                        "read-only:bg-gray-50 read-only:cursor-not-allowed read-only:opacity-50"
                     ),
                     "autocomplete": "family-name",
                 }
@@ -38,9 +38,9 @@ class EditClientProfileForm(forms.ModelForm):
                 attrs={
                     "placeholder": "Ваш возраст",
                     "class": (
-                        "block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                        "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
                         "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm "
-                        "read-only:bg-gray-50 read-only:cursor-not-allowed read-only:opacity-75"
+                        "read-only:bg-gray-50 read-only:cursor-not-allowed read-only:opacity-50"
                     ),
                     "min": 18,
                     "max": 120,
@@ -51,9 +51,9 @@ class EditClientProfileForm(forms.ModelForm):
                     "placeholder": "name@email.com",
                     "readonly": "readonly",
                     "class": (
-                        "block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                        "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
                         "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm "
-                        "cursor-not-allowed read-only:opacity-75"
+                        "cursor-not-allowed read-only:opacity-50"
                     ),
                     "autocomplete": "email",
                 }
@@ -62,9 +62,9 @@ class EditClientProfileForm(forms.ModelForm):
                 attrs={
                     "placeholder": "+7XXXXXXXXXX",
                     "class": (
-                        "block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                        "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
                         "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm "
-                        "read-only:bg-gray-50 read-only:cursor-not-allowed read-only:opacity-75"
+                        "read-only:bg-gray-50 read-only:cursor-not-allowed read-only:opacity-50"
                     ),
                     "autocomplete": "tel",
                 }
@@ -72,9 +72,9 @@ class EditClientProfileForm(forms.ModelForm):
             "timezone": forms.Select(
                 attrs={
                     "class": (
-                        "block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                        "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
                         "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm "
-                        "disabled:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-75"
+                        "disabled:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                     ),
                 }
             ),
