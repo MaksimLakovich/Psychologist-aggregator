@@ -1,0 +1,192 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %} {{ title_start_page_view|default:"Вопросы-ответы — ОПОРА" }} {% endblock %}
+
+{% block extra_style %}
+<style>
+    body {
+        background-image: url('{% static "images/background/background-start.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+<section class="relative min-h-screen bg-white/70 backdrop-blur-[2px] pb-20 overflow-hidden">
+    
+    <div class="mx-auto max-w-screen-xl px-4 py-12 lg:grid lg:grid-cols-12 lg:gap-8 relative z-10">
+
+        <div class="lg:col-span-8 flex flex-col gap-10">
+            
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 sm:text-4xl tracking-tight">Вопросы-ответы</h1>
+                <p class="mt-4 text-gray-600 text-lg">Собрали для вас ответы на самые частые вопросы о работе нашего сервиса.</p>
+            </div>
+
+            <div class="space-y-4">
+                <h2 class="text-2xl font-semibold text-indigo-900 mb-6">Общие вопросы</h2>
+
+                <details class="group rounded-xl bg-white/80 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-white p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-300">
+                    <summary class="flex cursor-pointer items-center justify-between gap-1.5 text-gray-900">
+                        <h3 class="font-medium text-lg pr-4">Что такое консультации с психологом?</h3>
+                        <span class="relative size-5 shrink-0 text-indigo-500">
+                            <svg class="absolute inset-0 size-5 opacity-100 group-open:opacity-0 transition-opacity" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                            <svg class="absolute inset-0 size-5 opacity-0 group-open:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" /></svg>
+                        </span>
+                    </summary>
+                    <div class="mt-4 text-gray-700 leading-relaxed text-sm sm:text-base">
+                        Ответить на этот вопрос в рамках FAQ – примерно то же самое, что и в двух словах раскрыть тему любви в творчестве Пушкина. Но если очень грубо, то консультации с психологом – это метод лечения/разрешения психологических проблем/конфликтов. Он направлен на то, чтобы примирить человека с его бессознательным, в котором накоплены разного рода негативные чувства, – обиды, страхи, злость, – и помочь ему от них избавиться.
+                    </div>
+                </details>
+
+                <details class="group rounded-xl bg-white/80 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-white p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-300">
+                    <summary class="flex cursor-pointer items-center justify-between gap-1.5 text-gray-900">
+                        <h3 class="font-medium text-lg pr-4">Как работает консультация с психологом?</h3>
+                        <span class="relative size-5 shrink-0 text-indigo-500">
+                            <svg class="absolute inset-0 size-5 opacity-100 group-open:opacity-0 transition-opacity" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                            <svg class="absolute inset-0 size-5 opacity-0 group-open:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" /></svg>
+                        </span>
+                    </summary>
+                    <div class="mt-4 space-y-3 text-gray-700 leading-relaxed text-sm sm:text-base">
+                        <p>Консультация с психологом – это лечение разговором. Вы располагаетесь перед терапевтом (в нашем случае – с компьютером) и начинаете говорить обо всём, что вас волнует. Терапевт задает наводящие или уточняющие вопросы, и постепенно вы подходите к тому, что для вас действительно важно.</p>
+                        <p>Как правило, для этого требуется время, потому что настоящие проблемы скрываются за пеленой стыда, запретов, искаженных представлений о себе и окружающих и так далее. Докопавшись до сути, вы начинаете эти проблемы решать.</p>
+                        <p class="bg-indigo-50/50 p-4 rounded-lg border border-indigo-100"><strong>Очень простой пример.</strong> В детстве у девушки был отстраненный папа. Поскольку все мы склонны бессознательно проигрывать свои детские конфликты, то девушка, сама того не замечая, выбирает себе таких же, незаинтересованных в ней мужчин. С одной стороны, она чувствует себя комфортно, потому что такой расклад подтверждает её мироощущение, но с другой – она несчастлива, потому что кто же может быть счастлив с эмоционально недоступным партнёром. Консультация с психологом помогает этой девушке выяснить причину, лежащую в основе её выбора (отстраненный папа), признать наличие проблемы и разрешить её, изменив паттерн своего поведения.</p>
+                        <p class="text-xs text-gray-500 italic">P.S. Вместо девушки можно подставить молодого человека и маму – будет то же самое.</p>
+                    </div>
+                </details>
+
+                <details class="group rounded-xl bg-white/80 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-white p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-300">
+                    <summary class="flex cursor-pointer items-center justify-between gap-1.5 text-gray-900">
+                        <h3 class="font-medium text-lg pr-4">Зачем это мне?</h3>
+                        <span class="relative size-5 shrink-0 text-indigo-500">
+                            <svg class="absolute inset-0 size-5 opacity-100 group-open:opacity-0 transition-opacity" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                            <svg class="absolute inset-0 size-5 opacity-0 group-open:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" /></svg>
+                        </span>
+                    </summary>
+                    <div class="mt-4 text-gray-700 leading-relaxed text-sm sm:text-base">
+                        Затем, чтобы разобраться с теми вещами (проблемами, реакциями, чертами своего характера), которые немножечко мешают вам жить. Они могут быть разными. Например, вы не можете общаться с родителями без раздражения и не понимаете откуда оно берется. Или влюбляетесь, но теряете интерес, как только видите, что чувства взаимны. Или знаете, как хотите поступить, но в очередной раз делаете так, как хотят другие. Или всё время чувствуете себя провинившимся школьником.<br><br>
+                        <strong>Консультация с психологом нужна вам, чтобы всё это ушло.</strong>
+                    </div>
+                </details>
+            </div>
+
+            <div class="space-y-4 mt-8">
+                <h2 class="text-2xl font-semibold text-indigo-900 mb-6">Конкретные вопросы</h2>
+
+                <details class="group rounded-xl bg-white/80 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-white p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-300">
+                    <summary class="flex cursor-pointer items-center justify-between gap-1.5 text-gray-900">
+                        <h3 class="font-medium text-lg pr-4">Как вы набираете терапевтов?</h3>
+                        <span class="relative size-5 shrink-0 text-indigo-500">
+                            <svg class="absolute inset-0 size-5 opacity-100 group-open:opacity-0 transition-opacity" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                            <svg class="absolute inset-0 size-5 opacity-0 group-open:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" /></svg>
+                        </span>
+                    </summary>
+                    <div class="mt-4 text-gray-700 leading-relaxed text-sm sm:text-base">
+                        У нас достаточно ясные требования: высшее профильное образование, обучение в одном из психотерапевтических методов от 500 часов, опыт консультирования (не менее 3 лет после окончания высшего образования и с начала обучения основному методу), наличие рекомендаций от кого-либо из признанных членов профессионального сообщества.<br><br>
+                        Кроме того, для размещения на платформе необходимо пройти собеседование, на основании которого куратор сервиса (опытный супервизор) примет окончательное решение.
+                    </div>
+                </details>
+
+                <details class="group rounded-xl bg-white/80 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-white p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-300">
+                    <summary class="flex cursor-pointer items-center justify-between gap-1.5 text-gray-900">
+                        <h3 class="font-medium text-lg pr-4">Сколько это стоит и как платить?</h3>
+                        <span class="relative size-5 shrink-0 text-indigo-500">
+                            <svg class="absolute inset-0 size-5 opacity-100 group-open:opacity-0 transition-opacity" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                            <svg class="absolute inset-0 size-5 opacity-0 group-open:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" /></svg>
+                        </span>
+                    </summary>
+                    <div class="mt-4 text-gray-700 leading-relaxed text-sm sm:text-base space-y-3">
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>Стоимость:</strong> От 3150 рублей за 50-минутную сессию. (В среднем по Москве цены от 2,5 до 8 тысяч рублей, так что судите сами).</li>
+                            <li><strong>Оплата иностранными картами:</strong> Точная стоимость зависит от курса доллара на момент списания оплаты.</li>
+                            <li><strong>Как работает оплата:</strong> Вы привязываете свою карточку, деньги за сессию мы холдируем за 24 часа, списываем ровно за 12 часов до начала сессии.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="group rounded-xl bg-white/80 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-white p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-300">
+                    <summary class="flex cursor-pointer items-center justify-between gap-1.5 text-gray-900">
+                        <h3 class="font-medium text-lg pr-4">Почему деньги списываются заранее и сессия длится 50 минут?</h3>
+                        <span class="relative size-5 shrink-0 text-indigo-500">
+                            <svg class="absolute inset-0 size-5 opacity-100 group-open:opacity-0 transition-opacity" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                            <svg class="absolute inset-0 size-5 opacity-0 group-open:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" /></svg>
+                        </span>
+                    </summary>
+                    <div class="mt-4 text-gray-700 leading-relaxed text-sm sm:text-base space-y-3">
+                        <p><strong>Про 50 минут:</strong> Существует исторический анекдот, что Зигмунд Фрейд не мог выдержать больше без туалета. На самом деле это здравый смысл: 50 минут интенсивной эмоциональной работы для клиента, и 10 минут терапевту на записи и отдых.</p>
+                        <p><strong>Про списание:</strong> Сессия, которую клиент пропускает, предупреждая менее чем за 12 часов, оплачивается. Это вносит элемент дисциплины и помогает избежать психологического сопротивления. Если предупредить позже — деньги не возвращаются. Это не мы придумали, это Фрейд :)</p>
+                    </div>
+                </details>
+
+                <details class="group rounded-xl bg-white/80 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-white p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-300">
+                    <summary class="flex cursor-pointer items-center justify-between gap-1.5 text-gray-900">
+                        <h3 class="font-medium text-lg pr-4">Технические и организационные моменты</h3>
+                        <span class="relative size-5 shrink-0 text-indigo-500">
+                            <svg class="absolute inset-0 size-5 opacity-100 group-open:opacity-0 transition-opacity" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                            <svg class="absolute inset-0 size-5 opacity-0 group-open:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" /></svg>
+                        </span>
+                    </summary>
+                    <div class="mt-4 text-gray-700 leading-relaxed text-sm sm:text-base space-y-3">
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>Перенос сессии:</strong> В личном кабинете кнопкой «Перенести сессию» (если до неё более 12 часов). Если слотов нет — напишите специалисту в чат.</li>
+                            <li><strong>Смена терапевта:</strong> В правом верхнем углу кликните на своё имя -> «Настройки» -> переподобрать специалиста.</li>
+                            <li><strong>Завершение работы:</strong> Желательно проговорить это с психологом. Затем в меню «Настройки» откажитесь от специалиста.</li>
+                            <li><strong>Устройства:</strong> Приложение адаптировано для работы с телефона и iPad.</li>
+                            <li><strong>Конфиденциальность:</strong> 100%. Видеосвязь идёт напрямую между вашими браузерами (p2p), у нас нет доступа к потоку.</li>
+                        </ul>
+                    </div>
+                </details>
+
+            </div>
+
+            <div class="mt-8 p-6 bg-white/80 rounded-xl border-l-4 border-indigo-500 shadow-sm">
+                <h3 class="text-lg font-semibold text-gray-900">У вас остались вопросы?</h3>
+                <p class="mt-2 text-gray-700">Напишите нам на почту, и мы с радостью ответим: <a href="mailto:vasha@opora.live" class="text-indigo-600 font-medium hover:underline">vasha@opora.live</a></p>
+            </div>
+
+        </div>
+
+        <div class="lg:col-span-4 mt-10 lg:mt-0 relative z-20">
+            <div class="sticky top-10">
+                <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-7 shadow-xl text-white overflow-hidden relative">
+                    <div class="absolute -right-10 -top-10 bg-white/10 w-32 h-32 rounded-full blur-2xl"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.32.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-bold text-xl tracking-wide">Мы в Telegram</h3>
+                        </div>
+                        
+                        <p class="text-indigo-100 mb-6 text-sm leading-relaxed">
+                            Получайте быстрые ответы, полезные материалы от психологов и свежие новости сервиса прямо в мессенджере.
+                        </p>
+                        
+                        <a href="#" class="inline-flex w-full justify-center items-center gap-2 bg-white text-indigo-600 font-semibold py-3 px-4 rounded-xl hover:bg-indigo-50 transition-colors duration-200 shadow-md">
+                            Подписаться
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <img src="{% static 'images/menu/opora-base.png' %}" 
+         alt="Logo Background" 
+         class="fixed bottom-0 right-0 w-64 md:w-80 lg:w-96 h-auto blur-sm opacity-40 pointer-events-none z-0 transform translate-x-4 translate-y-4">
+         
+</section>
+
+{% endblock %}

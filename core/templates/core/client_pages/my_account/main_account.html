@@ -2,28 +2,47 @@
 
 {% load static %}
 
-{% block title %} {{ title_client_account_view|default:"ОПОРА" }} {% endblock %}
+{% block title %} {{ title_start_page_view|default:"ОПОРА" }} {% endblock %}
 
 {% block content %}
 
+{% block extra_style %}
+<style>
+    body {
+        background-image: url('{% static "images/background/background-start.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed; /* красиво фиксирует фон */
+    }
+</style>
+{% endblock %}
 
-<!-- ?????? -->
 
-<section class="bg-gray-100 h-screen">
+<!-- Блок ???????? -->
+<section class="min-h-screen bg-white/60">
+    <div class="mx-auto max-w-screen-xl px-4 py-16 lg:grid lg:grid-cols-12 lg:gap-1 lg:py-4">
 
+        <!-- Текст -->
+        <div class="lg:col-span-9 flex flex-col justify-center">
 
-    <div>
+            <div class="m-8 flex flex-col gap-4 sm:flex-row">
+                <span class="text-2xl font-medium tracking-wide text-indigo-500/50">
+                    Тут появится общая консолидирующая инфо о состоянии профиля (активен/нет), небольшой виджет с календарем где будут ближайшие сессии,
+                    карточка ближайшей сессии с возможностью в нее прогрузится, какие-то акционные предложения от сервиса, какая-то статистика и прочее
+                </span>
+            </div>
+        </div>
 
-        <!-- ?????? -->
-        <div class="flex-1 flex items-center justify-center bg-gray-200">
+        <!-- Иллюстрация -->
+        <div class="hidden lg:col-span-3 lg:block relative blur-sm">
             <img src="{% static 'images/menu/opora-base.png' %}"
-                 alt="No info"
-                 class="w-1/5 h-auto bg-gray-300">
+                 alt="Logo"
+                 class="w-full h-auto">
         </div>
 
     </div>
-
-
 </section>
+
 
 {% endblock %}
