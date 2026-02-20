@@ -7,12 +7,12 @@
 {% block content %}
 
 
-<section class="bg-tranceparent dark:bg-gray-900 min-h-screen flex flex-col md:flex-row">
+<section class="bg-tranceparent min-h-screen flex flex-col md:flex-row">
 
 
     <!-- ========== ЛЕВАЯ ЧАСТЬ ДЛЯ АВТОРИЗАЦИИ ========== -->
 
-    <div class="w-full md:w-1/2 flex flex-col items-center p-4 sm:p-12 md:p-4 dark:bg-gray-900 order-1">
+    <div class="w-full md:w-1/2 flex flex-col items-center p-4 sm:p-12 md:p-4 order-1">
 
         <!-- ========== ЛОГО (ЛЕВАЯ КОЛОНКА) ========== -->
         <div class="w-full max-w-md flex items-center justify-between pb-1">
@@ -31,10 +31,10 @@
         <!-- ========== АВТОРИЗАЦИЯ ========== -->
         <div class="w-full flex-1 flex pt-8 md:pt-28">
             <div class="w-full max-w-md mx-auto">
-                <h1 class="text-2xl text-center font-extrabold leading-tight tracking-wide text-zinc-400 md:text-4xl dark:text-white">
+                <h1 class="text-2xl text-center font-extrabold leading-tight tracking-wide text-zinc-400 md:text-4xl">
                     Добро пожаловать!
                 </h1>
-                <p class="text-sm text-center text-zinc-300 dark:text-gray-400 pt-2 mb-6 md:mb-12">
+                <p class="text-sm text-center text-zinc-300 pt-2 mb-6 md:mb-12">
                     Вход для тех, у кого уже есть аккаунт
                 </p>
 
@@ -71,13 +71,13 @@
                     <!-- Username -->
                     <div>
                         <label for="{{ form.username.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                               class="block mb-2 text-sm font-medium text-gray-900">
                             {{ form.username.label }}
                         </label>
                         {{ form.username }}
 
                         {% if form.username.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <p class="mt-2 text-sm text-red-600">
                             {{ form.username.errors.0 }}
                         </p>
                         {% endif %}
@@ -86,13 +86,13 @@
                     <!-- Password -->
                     <div>
                         <label for="{{ form.password.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                               class="block mb-2 text-sm font-medium text-gray-900">
                             {{ form.password.label }}
                         </label>
                         {{ form.password }}
 
                         {% if form.password.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <p class="mt-2 text-sm text-red-600">
                             {{ form.password.errors.0 }}
                         </p>
                         {% endif %}
@@ -103,15 +103,15 @@
                         <div class="flex items-start">
                             <div class="flex items-center h-5">
                                 <input id="remember" name="remember" type="checkbox"
-                                       class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3
-                              focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600">
+                                       class="w-4 h-4 border border-gray-300 rounded bg-gray-50
+                                       focus:ring-3 focus:ring-primary-300">
                             </div>
-                            <label for="remember" class="ml-3 text-sm text-gray-500 dark:text-gray-300">
+                            <label for="remember" class="ml-3 text-sm text-gray-500">
                                 Запомнить меня
                             </label>
                         </div>
                         <a href="{% url 'users:web:password-reset' %}"
-                           class="text-sm font-medium text-indigo-700 hover:underline dark:text-primary-500">
+                           class="text-sm font-medium text-indigo-700 hover:underline">
                             Забыли пароль?
                         </a>
                     </div>
@@ -124,10 +124,10 @@
                         Войти
                     </button>
 
-                    <p class="text-sm font-light text-gray-500 dark:text-gray-400 pb-6 md:pb-12">
+                    <p class="text-sm font-light text-gray-500 pb-6 md:pb-12">
                         Нет аккаунта?
                         <a href="{% url 'users:web:register-page' %}"
-                           class="font-medium text-indigo-700 hover:underline dark:text-primary-500">
+                           class="font-medium text-indigo-700 hover:underline">
                             Создать аккаунт
                         </a>
                     </p>
@@ -136,14 +136,15 @@
                 <!-- ВРЕМЕННАЯ ЗАГЛУШКИ - будущий блок для входа через аккаунт GOOGLE / APPLE -->
 
                 <div class="flex items-center mb-6 md:mb-12">
-                    <div class="w-full h-px bg-gray-200 dark:bg-gray-700"></div>
+                    <div class="w-full h-px bg-gray-200"></div>
                     <span class="px-4 text-gray-500 text-sm">или</span>
-                    <div class="w-full h-px bg-gray-200 dark:bg-gray-700"></div>
+                    <div class="w-full h-px bg-gray-200"></div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4 pb-12 md:mb-12">
                     <button type="button"
-                            class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                            class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-900 bg-white
+                            border border-gray-200 rounded-lg hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-gray-300">
                         <svg class="w-5 h-5 mr-2" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <g clip-path="url(#clip0_123_456)">
                                 <path d="M20.3082 10.0825C20.3082 9.38257 20.2457 8.70752 20.1282 8.0575H10.5308V11.8325H16.0232C15.7907 13.125 15.0607 14.225 13.9782 14.9625V17.55H17.2657C19.1882 15.7475 20.3082 13.0825 20.3082 10.0825Z"
@@ -159,7 +160,8 @@
                         Войти с Google
                     </button>
                     <button type="button"
-                            class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                            class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-900 bg-white
+                            border border-gray-200 rounded-lg hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-gray-300">
                         <svg class="w-5 h-5 mr-2 text-gray-900 dark:text-white" fill="currentColor" viewBox="0 0 24 24"
                              aria-hidden="true">
                             <path d="M17.2025 15.6562C16.8925 16.109 16.4825 16.697 15.9862 17.417C15.4212 18.237 14.9375 18.91 14.5362 19.435C14.0012 20.142 13.5675 20.495 13.235 20.495C13.0912 20.495 12.8712 20.442 12.5738 20.337C12.2775 20.231 11.9362 20.179 11.5512 20.179C11.1662 20.179 10.825 20.231 10.5288 20.337C10.2312 20.442 10.0112 20.495 9.86875 20.495C9.535 20.495 9.09125 20.133 8.53625 19.408C8.16375 18.916 7.69625 18.257 7.135 17.432C5.68875 15.342 4.96625 13.435 4.96625 11.711C4.96625 10.287 5.485 9.068 6.5225 8.055C7.38875 7.218 8.47375 6.8 9.7775 6.8C10.1975 6.8 10.6625 6.883 11.1712 7.049C11.68 7.215 12.0838 7.298 12.3838 7.298C12.6375 7.298 13.0025 7.227 13.48 7.085C13.9575 6.942 14.4175 6.871 14.8612 6.871C16.4275 6.871 17.6838 7.424 18.63 8.531C17.7562 9.066 17.32 9.947 17.32 11.174C17.32 12.222 17.5962 13.111 18.1488 13.841C18.5775 14.398 19.1412 14.83 19.8412 15.138C19.7012 15.536 19.5088 15.961 19.2625 16.413C18.6675 17.534 17.9812 18.282 17.2025 15.6562ZM13.8362 2.766C13.8362 3.656 13.5138 4.516 12.8688 5.346C12.2612 6.131 11.4588 6.523 10.4625 6.523C10.435 6.523 10.395 6.522 10.3425 6.519C10.29 6.516 10.2462 6.514 10.2113 6.512C10.2113 5.567 10.575 4.654 11.3025 3.774C11.9562 2.973 12.805 2.531 13.8488 2.531C13.8588 2.613 13.8638 2.691 13.8638 2.766H13.8362Z"/>
@@ -175,14 +177,14 @@
 
     <!-- ========== ПРАВАЯ ЧАСТЬ С ЛОЗУНГОМ И АВАМИ ========== -->
 
-    <div class="w-full md:w-1/2 flex flex-col p-4 sm:p-12 md:p-4 bg-indigo-700 dark:bg-indigo-700 order-2">
+    <div class="w-full md:w-1/2 flex flex-col p-4 sm:p-12 md:p-4 bg-indigo-700 order-2">
 
         <!-- ========== КНОПКА НАЗАД (ПРАВАЯ КОЛОНКА) ========== -->
         <div class="w-full hidden md:flex pb-1">
             <div class="w-full max-w-md mx-auto flex justify-end">
                 <a href="{% url 'core:start-page' %}"
                    class="flex items-center gap-1 text-white hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300
-                   font-medium rounded-lg text-base px-4 md:px-5 py-2 md:py-3 dark:hover:bg-indigo-800
+                   font-medium rounded-lg text-base px-4 md:px-5 py-2 md:py-3
                    focus:outline-none">
                     <img src="{% static 'images/menu/back-icon-white.svg' %}" class="hover:text-white" alt="Back_icon"/>
                     <span>Назад</span>
@@ -207,7 +209,7 @@
             <div class="flex flex-col gap-3">
                 <div class="flex -space-x-4">
                     {% for profile in verified_psychologist_avatars %}
-                    <img class="w-14 h-14 border-2 border-white rounded-full dark:border-gray-800"
+                    <img class="w-14 h-14 border-2 border-white rounded-full"
                          src="{{ profile.photo.url }}" alt="Психолог">
                     {% endfor %}
                 </div>

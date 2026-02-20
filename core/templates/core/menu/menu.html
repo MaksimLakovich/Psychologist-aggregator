@@ -20,7 +20,7 @@
 
 <header class="bg-white p-4">
     <div class="mx-auto max-w-7xl px-4 py-1">
-        <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800">
+        <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5">
             <div class="flex flex-wrap justify-between items-center">
 
                 <div class="flex justify-start items-center">
@@ -33,8 +33,7 @@
                        class="flex items-center gap-2 px-3 py-2 mr-1 rounded-lg
                        text-slate-700 hover:text-indigo-700 hover:bg-gray-100
                        text-lg font-medium tracking-wide md:text-xl
-                       active:scale-95 transition-all duration-150
-                       dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700">
+                       active:scale-95 transition-all duration-150">
                         <span
                                 class="w-7 h-7 bg-current inline-block"
                                 aria-hidden="true"
@@ -58,7 +57,7 @@
 {% else %}
 <header class="bg-white shadow p-4">
     <div class="mx-auto max-w-7xl px-4 py-1">
-        <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800">
+        <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5">
             <div class="flex flex-wrap justify-between items-center">
 
                 <div class="flex justify-start items-center">
@@ -86,7 +85,7 @@
 <header class="bg-white shadow p-4">
 
     <div class="mx-auto max-w-7xl px-4 py-1">
-        <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800">
+        <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5">
             <div class="flex flex-wrap justify-between items-center">
 
                 <div class="flex justify-start items-center">
@@ -121,15 +120,13 @@
         </a>
         <nav class="flex items-center gap-6 text-gray-600">
             <a href="{% url 'users:web:login-page' %}"
-               class="text-gray-800 dark:text-white hover:bg-gray-50 focus:ring-4 focus:ring-gray-300
-                   font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:hover:bg-gray-700
-                   focus:outline-none dark:focus:ring-gray-800">
+               class="text-gray-800 hover:bg-gray-50 focus:ring-4 focus:ring-gray-300
+                   font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 focus:outline-none">
                 Войти
             </a>
             <a href="{% url 'users:web:register-page' %}"
                class="text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4 focus:ring-primary-300
-                   font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:bg-primary-600
-                   dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">
+                   font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 focus:outline-none">
                 Регистрация
             </a>
         </nav>

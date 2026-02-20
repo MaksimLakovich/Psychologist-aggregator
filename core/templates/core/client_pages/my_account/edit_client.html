@@ -7,34 +7,34 @@
 {% block content %}
 
 
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
 
     <div class="max-w-3xl mx-auto">
 
         <!-- ШАПКА -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Настройки профиля</h1>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Настройки профиля</h1>
+            <p class="mt-2 text-sm text-gray-600">
                 Управляйте своими личными данными и настройками часового пояса
             </p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
 
-            <div class="px-6 py-8 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col sm:flex-row items-center gap-6">
+            <div class="px-6 py-8 border-b border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row items-center gap-6">
                 <div class="relative">
                     <div class="h-24 w-24 rounded-full bg-indigo-600 flex items-center justify-center text-white text-3xl font-semibold shadow-inner">
                         {{ request.user.first_name|slice:":1" }}{{ request.user.last_name|slice:":1"|default:request.user.email|slice:":1"|upper }}
                     </div>
                 </div>
                 <div class="text-center sm:text-left">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+                    <h2 class="text-xl font-bold text-gray-900">
                         {{ request.user.get_full_name|default:"Пользователь" }}
                     </h2>
                     <div class="mt-1 flex items-center justify-center sm:justify-start gap-2">
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ request.user.email }}</span>
+                        <span class="text-sm text-gray-500">{{ request.user.email }}</span>
                         {% if request.user.is_active %}
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-green-500"></span> Активен
                         </span>
                         {% endif %}
@@ -77,12 +77,12 @@
                     <!-- Имя -->
                     <div>
                         <label for="{{ form.first_name.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-indigo-700 dark:text-white">
+                               class="block mb-2 text-sm font-medium text-indigo-700">
                             {{ form.first_name.label }}
                         </label>
                         {{ form.first_name }}
                         {% if form.first_name.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <p class="mt-2 text-sm text-red-600">
                             {{ form.first_name.errors.0 }}
                         </p>
                         {% endif %}
@@ -91,12 +91,12 @@
                     <!-- Фамилия -->
                     <div>
                         <label for="{{ form.last_name.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                               class="block mb-2 text-sm font-medium text-gray-900">
                             {{ form.last_name.label }}
                         </label>
                         {{ form.last_name }}
                         {% if form.last_name.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <p class="mt-2 text-sm text-red-600">
                             {{ form.last_name.errors.0 }}
                         </p>
                         {% endif %}
@@ -105,7 +105,7 @@
                     <!-- Email -->
                     <div class="md:col-span-2">
                         <label for="{{ form.email.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                               class="block mb-2 text-sm font-medium text-gray-900">
                             {{ form.email.label }}
                         </label>
                         <div class="relative">
@@ -118,7 +118,7 @@
                             </div>
                         </div>
                         {% if form.email.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <p class="mt-2 text-sm text-red-600">
                             {{ form.email.errors.0 }}
                         </p>
                         {% endif %}
@@ -127,12 +127,12 @@
                     <!-- Возраст -->
                     <div>
                         <label for="{{ form.age.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                               class="block mb-2 text-sm font-medium text-gray-900">
                             {{ form.age.label }}
                         </label>
                         {{ form.age }}
                         {% if form.age.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <p class="mt-2 text-sm text-red-600">
                             {{ form.age.errors.0 }}
                         </p>
                         {% endif %}
@@ -141,12 +141,12 @@
                     <!-- Телефон -->
                     <div>
                         <label for="{{ form.phone_number.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                               class="block mb-2 text-sm font-medium text-gray-900">
                             {{ form.phone_number.label }}
                         </label>
                         {{ form.phone_number }}
                         {% if form.phone_number.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <p class="mt-2 text-sm text-red-600">
                             {{ form.phone_number.errors.0 }}
                         </p>
                         {% endif %}
@@ -155,19 +155,19 @@
                     <!-- Часовой пояс -->
                     <div class="md:col-span-2">
                         <label for="{{ form.timezone.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                               class="block mb-2 text-sm font-medium text-gray-900">
                             {{ form.timezone.label }}
                         </label>
                         {{ form.timezone }}
                         {% if form.timezone.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <p class="mt-2 text-sm text-red-600">
                             {{ form.timezone.errors.0 }}
                         </p>
                         {% endif %}
                     </div>
                 </div>
 
-                <div class="mt-10 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div class="mt-10 pt-6 border-t border-gray-200">
                     <div id="display-actions">
                         <button type="button"
                                 id="profile-edit-toggle"
@@ -194,8 +194,8 @@
                         <button type="button"
                                 id="profile-edit-cancel"
                                 class="inline-flex items-center justify-center px-6 py-3
-                                border border-gray-300 dark:border-gray-600 text-base font-medium rounded-xl text-gray-700
-                                dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 flex-1">
+                                border border-gray-300 text-base font-medium rounded-xl text-gray-700
+                                bg-white hover:bg-gray-50 transition-all duration-200 flex-1">
                             Отмена
                         </button>
                     </div>

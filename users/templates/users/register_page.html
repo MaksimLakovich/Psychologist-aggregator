@@ -7,12 +7,12 @@
 {% block content %}
 
 
-<section class="bg-tranceparent dark:bg-gray-900 min-h-screen flex flex-col md:flex-row">
+<section class="bg-tranceparent min-h-screen flex flex-col md:flex-row">
 
 
     <!-- ========== ЛЕВАЯ ЧАСТЬ ========== -->
 
-    <div class="w-full md:w-1/2 flex flex-col p-4 sm:p-12 md:p-4 bg-indigo-700 dark:bg-indigo-700 md:order-1 order-2">
+    <div class="w-full md:w-1/2 flex flex-col p-4 sm:p-12 md:p-4 bg-indigo-700 md:order-1 order-2">
 
         <!-- ========== ЛОГО (ЛЕВАЯ КОЛОНКА) ========== -->
         <div class="w-full max-w-md hidden md:flex items-center justify-between pb-1 mx-auto">
@@ -33,7 +33,7 @@
 
     <!-- ========== ПРАВАЯ ЧАСТЬ ДЛЯ РЕГИСТРАЦИИИ ========== -->
 
-    <div class="w-full md:w-1/2 flex flex-col items-center p-4 sm:p-12 md:p-4 dark:bg-gray-900 md:order-2 order-1">
+    <div class="w-full md:w-1/2 flex flex-col items-center p-4 sm:p-12 md:p-4 md:order-2 order-1">
 
         <!-- ========== КНОПКА НАЗАД (ПРАВАЯ КОЛОНКА) ========== -->
         <div class="w-full pb-1">
@@ -53,7 +53,7 @@
                 <div class="w-full max-w-md mx-auto flex justify-end">
                     <a href="{% url 'core:start-page' %}"
                        class="flex items-center gap-1 text-indigo-700 hover:bg-gray-100 focus:ring-4 focus:ring-indigo-300
-                       font-medium rounded-lg text-base px-4 md:px-5 py-2 md:py-3 dark:hover:bg-indigo-800
+                       font-medium rounded-lg text-base px-4 md:px-5 py-2 md:py-3
                        focus:outline-none">
                         <img src="{% static 'images/menu/back-icon.svg' %}" class="hover:text-white" alt="Back_icon"/>
                         <span>Назад</span>
@@ -65,10 +65,10 @@
         <!-- ========== РЕГИСТРАЦИЯ ========== -->
         <div class="w-full flex-1 flex items-center py-8 md:py-0">
             <div class="w-full max-w-md mx-auto">
-                <h1 class="text-2xl text-center font-extrabold leading-tight tracking-wide text-zinc-400 md:text-4xl dark:text-white">
+                <h1 class="text-2xl text-center font-extrabold leading-tight tracking-wide text-zinc-400 md:text-4xl">
                     Регистрация
                 </h1>
-                <p class="text-sm text-center text-zinc-300 dark:text-gray-400 pt-2 mb-6 md:mb-12">
+                <p class="text-sm text-center text-zinc-300 pt-2 mb-6 md:mb-12">
                     Для тех, у кого ещё нет аккаунта
                 </p>
 
@@ -99,13 +99,13 @@
                     <!-- Email -->
                     <div>
                         <label for="{{ form.email.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                               class="block mb-2 text-sm font-medium text-gray-900">
                             {{ form.email.label }}
                         </label>
                         {{ form.email }}
 
                         {% if form.email.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <p class="mt-2 text-sm text-red-600">
                             {{ form.email.errors.0 }}
                         </p>
                         {% endif %}
@@ -114,13 +114,13 @@
                     <!-- First name -->
                     <div>
                         <label for="{{ form.first_name.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                               class="block mb-2 text-sm font-medium text-gray-900">
                             {{ form.first_name.label }}
                         </label>
                         {{ form.first_name }}
 
                         {% if form.first_name.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <p class="mt-2 text-sm text-red-600">
                             {{ form.first_name.errors.0 }}
                         </p>
                         {% endif %}
@@ -129,13 +129,13 @@
                     <!-- Age -->
                     <div>
                         <label for="{{ form.age.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                               class="block mb-2 text-sm font-medium text-gray-900">
                             {{ form.age.label }}
                         </label>
                         {{ form.age }}
 
                         {% if form.age.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <p class="mt-2 text-sm text-red-600">
                             {{ form.age.errors.0 }}
                         </p>
                         {% endif %}
@@ -144,13 +144,13 @@
                     <!-- Password -->
                     <div>
                         <label for="{{ form.password1.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                               class="block mb-2 text-sm font-medium text-gray-900">
                             {{ form.password1.label }}
                         </label>
                         {{ form.password1 }}
 
                         {% if form.password1.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <p class="mt-2 text-sm text-red-600">
                             {{ form.password1.errors.0 }}
                         </p>
                         {% endif %}
@@ -158,13 +158,13 @@
 
                     <div class="pb-12">
                         <label for="{{ form.password2.id_for_label }}"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                               class="block mb-2 text-sm font-medium text-gray-900">
                             {{ form.password2.label }}
                         </label>
                         {{ form.password2 }}
 
                         {% if form.password2.errors %}
-                        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <p class="mt-2 text-sm text-red-600">
                             {{ form.password2.errors.0 }}
                         </p>
                         {% endif %}
@@ -180,10 +180,10 @@
                         Зарегистрироваться
                     </button>
 
-                    <p class="text-sm font-light text-gray-500 dark:text-gray-400 pb-12">
+                    <p class="text-sm font-light text-gray-500 pb-12">
                         Есть аккаунт?
                         <a href="{% url 'users:web:login-page' %}"
-                           class="font-medium text-indigo-700 hover:underline dark:text-primary-500">
+                           class="font-medium text-indigo-700 hover:underline">
                             Войти в аккаунт
                         </a>
                     </p>
