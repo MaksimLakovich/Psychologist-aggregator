@@ -38,9 +38,10 @@
                                 class="w-7 h-7 bg-current inline-block"
                                 aria-hidden="true"
                                 style="
-                                -webkit-mask: url('{% static "images/menu/back-icon.svg" %}') no-repeat center / contain;
-                                mask: url('{% static "images/menu/back-icon.svg" %}') no-repeat center / contain;
-                                ">
+                                -webkit-mask: url('{% static " images/menu/back-icon.svg" %}') no-repeat center /
+                        contain;
+                        mask: url('{% static "images/menu/back-icon.svg" %}') no-repeat center / contain;
+                        ">
                         </span>
                         <span>
                             Назад
@@ -120,13 +121,17 @@
         </a>
         <nav class="flex items-center gap-6 text-gray-600">
             <a href="{% url 'users:web:login-page' %}"
-               class="text-gray-800 hover:bg-gray-50 focus:ring-4 focus:ring-gray-300
-                   font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 focus:outline-none">
+               class="inline-flex items-center justify-center w-full px-4 lg:px-5 py-2 lg:py-2.5 mr-2
+               border border-transparent text-base font-medium rounded-xl text-zinc-700 bg-white hover:bg-zinc-50
+               focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-zinc-50
+               transition-all duration-200 hover:shadow-lg">
                 Войти
             </a>
             <a href="{% url 'users:web:register-page' %}"
-               class="text-white bg-indigo-700 hover:bg-indigo-900 focus:ring-4 focus:ring-primary-300
-                   font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 focus:outline-none">
+               class="inline-flex items-center justify-center w-full px-4 lg:px-5 py-2 lg:py-2.5 mr-2
+               border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
+               focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+               transition-all duration-200 shadow-md hover:shadow-lg">
                 Регистрация
             </a>
         </nav>
