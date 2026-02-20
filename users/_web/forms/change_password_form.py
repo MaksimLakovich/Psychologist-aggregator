@@ -3,27 +3,23 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 
 
-class PasswordResetRequestForm(forms.Form):
-    """Форма для запроса восстановления пароля неавторизованным пользователем."""
+class ChangePasswordForm(forms.Form):
+    """Форма для смены пароля авторизованного пользователя."""
 
-    email = forms.EmailField(
-        label="Email",
-        widget=forms.EmailInput(
+    current_password = forms.CharField(
+        label="Текущий пароль",
+        strip=False,
+        widget=forms.PasswordInput(
             attrs={
-                "placeholder": "name@email.com",
+                "placeholder": "••••••••",
                 "class": (
                     "block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
                     "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                 ),
-                "autocomplete": "email",
+                "autocomplete": "current-password",
             }
         ),
     )
-
-
-class PasswordResetConfirmForm(forms.Form):
-    """Форма для подтверждения сброса пароля через uid/token и установку нового пароля."""
-
     new_password = forms.CharField(
         label="Новый пароль",
         strip=False,
@@ -53,19 +49,33 @@ class PasswordResetConfirmForm(forms.Form):
         ),
     )
 
+    def __init__(self, *args, **kwargs):
+        """Принимаем пользователя, чтобы проверить текущий пароль."""
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+
     def clean(self):
-        """Валидация совпадения паролей и проверка по Django Password Validators."""
+        """Проверяем текущий пароль и валидируем новый (проверяем совпадение в новом пароле и параллельно
+        выполняем валидацию нового пароля через Django Password Validators)."""
         cleaned_data = super().clean()
+        current_password = cleaned_data.get("current_password")
         new_password = cleaned_data.get("new_password")
         new_password_confirm = cleaned_data.get("new_password_confirm")
 
+        # Проверяем текущий пароль
+        if self.user and current_password:
+            if not self.user.check_password(current_password):
+                self.add_error("current_password", "Текущий пароль указан неверно.")
+
+        # Проверяем совпадение новых паролей
         if new_password and new_password_confirm and new_password != new_password_confirm:
             self.add_error("new_password_confirm", "Пароли не совпадают.")
             return cleaned_data
 
+        # Проверяем новый пароль через Django Password Validators
         if new_password:
             try:
-                validate_password(new_password)
+                validate_password(new_password, user=self.user)
             except ValidationError as exc:
                 self.add_error("new_password", exc)
 

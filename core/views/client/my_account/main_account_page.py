@@ -21,7 +21,7 @@ class ClientAccountView(TemplateView):
             - dict: словарь со всеми данными, доступными внутри HTML-шаблона."""
         context = super().get_context_data(**kwargs)
         context["title_client_account_view"] = "Мой кабинет на ОПОРА"
-        # Параметр, который передаем в menu.html и на там настраиваем отображение БОКОВАЯ НАВИГАЦИЯ / ВЕРХНЕЕ МЕНЮ
+        # Параметр, который передаем в menu.html и на его основе там настраиваем показ боков.НАВИГАЦИЙ / верх.МЕНЮ
         context["profile_type"] = "client"
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
         context["current_sidebar_key"] = "client-account"

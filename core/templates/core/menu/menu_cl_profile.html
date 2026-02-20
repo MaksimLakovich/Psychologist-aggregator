@@ -9,8 +9,7 @@
             aria-expanded="false"
             class="flex items-center gap-2 px-3 py-2 mr-1 rounded-lg
             text-slate-700 hover:text-indigo-700 hover:bg-gray-100
-            active:scale-95 transition-all duration-150
-            dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700">
+            active:scale-95 transition-all duration-150">
 
         <span class="sr-only">Open menu</span>
 
@@ -34,17 +33,16 @@
     <div
             class="hidden z-50 mt-4 w-auto min-w-[22rem] border-1 border-gray-700 list-none
             md:backdrop-blur-sm backdrop-blur-md rounded-3xl divide-y-2 divide-indigo-100
-            shadow-2xl shadow-indigo-500/70 dark:bg-gray-700 dark:divide-gray-600"
+            shadow-2xl shadow-indigo-500/70"
             id="dropdown">
 
         <!-- ПУНКТЫ МЕНЮ -->
-        <ul class="px-1 sm:px-2 md:px-3 py-2 font-medium tracking-wide text-slate-700 dark:text-gray-400"
+        <ul class="px-1 sm:px-2 md:px-3 py-2 font-medium tracking-wide text-slate-700"
             aria-labelledby="dropdown">
             <li>
                 <a href="{% url 'core:client-account' %}"
                    class="group flex items-center gap-4 py-2 px-2 sm:px-3 md:px-4 text-lg rounded-xl
-                   transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700
-                   dark:hover:bg-gray-600 dark:hover:text-white">
+                   transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700">
                     <img src="{% static 'images/menu/my-profile.svg' %}"
                          alt="profile"
                          class="transition-transform duration-200 group-hover:scale-110">
@@ -53,13 +51,12 @@
             </li>
         </ul>
 
-        <ul class="px-1 sm:px-2 md:px-3 py-2 font-medium tracking-wide text-slate-700 dark:text-gray-400"
+        <ul class="px-1 sm:px-2 md:px-3 py-2 font-medium tracking-wide text-slate-700"
             aria-labelledby="dropdown">
             <li>
                 <a href="{% url 'core:general-questions' %}"
                    class="group flex items-center gap-4 py-2 px-2 sm:px-3 md:px-4 text-lg rounded-xl
-                   transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700
-                   dark:hover:bg-gray-600 dark:hover:text-white">
+                   transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700">
                     <img src="{% static 'images/menu/search-user.svg' %}"
                          alt="search"
                          class="transition-transform duration-200 group-hover:scale-110">
@@ -69,8 +66,7 @@
             <li>
                 <a href="#"
                    class="group flex items-center gap-4 py-2 px-2 sm:px-3 md:px-4 text-lg rounded-xl
-                   transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700
-                   dark:hover:bg-gray-600 dark:hover:text-white">
+                   transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700">
                     <img src="{% static 'images/menu/catalog-users.svg' %}"
                          alt="catalog"
                          class="transition-transform duration-200 group-hover:scale-110">
@@ -79,13 +75,12 @@
             </li>
         </ul>
 
-        <ul class="px-1 sm:px-2 md:px-3 py-2 font-medium tracking-wide text-slate-700 dark:text-gray-400"
+        <ul class="px-1 sm:px-2 md:px-3 py-2 font-medium tracking-wide text-slate-700"
             aria-labelledby="dropdown">
             <li>
-                <a href="#"
+                <a href="{% url 'core:faq-page' %}"
                    class="group flex items-center gap-4 py-2 px-2 sm:px-3 md:px-4 text-lg rounded-xl
-                   transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700
-                   dark:hover:bg-gray-600 dark:hover:text-white">
+                   transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700">
                     <img src="{% static 'images/menu/question-answer.svg' %}"
                          alt="answers"
                          class="transition-transform duration-200 group-hover:scale-110">
@@ -95,8 +90,7 @@
             <li>
                 <a href="#"
                    class="group flex items-center gap-4 py-2 px-2 sm:px-3 md:px-4 text-lg rounded-xl
-                   transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700
-                   dark:hover:bg-gray-600 dark:hover:text-white">
+                   transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700">
                     <img src="{% static 'images/menu/support_service.svg' %}"
                          alt="support"
                          class="transition-transform duration-200 group-hover:scale-110">
@@ -106,15 +100,14 @@
         </ul>
 
         <!-- ВЫХОД -->
-        <ul class="px-1 sm:px-2 md:px-3 py-2 font-medium tracking-wide text-slate-700 dark:text-gray-400"
+        <ul class="px-1 sm:px-2 md:px-3 py-2 font-medium tracking-wide text-slate-700"
             aria-labelledby="dropdown">
             <li>
                 <form method="post" action="{% url 'users:web:logout' %}">
                     {% csrf_token %}
                     <button type="submit"
                             class="group gap-4 w-full flex items-center py-2 px-2 sm:px-3 md:px-4 text-lg rounded-xl
-                            transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700
-                            dark:hover:bg-gray-600 dark:hover:text-white">
+                            transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700">
                         <img src="{% static 'images/menu/logout.svg' %}"
                              alt="logout"
                              class="transition-transform duration-200 group-hover:scale-110">

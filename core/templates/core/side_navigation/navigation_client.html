@@ -4,10 +4,9 @@
 <!-- ======= КНОПКА для открытия/закрытия меню ======= -->
 <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar"
         type="button"
-        class="inline-flex items-center px-3 py-2 mr-1 text-sm text-gray-500 rounded-lg sm:hidden
+        class="inline-flex items-center px-3 py-2 mr-1 text-sm text-gray-500 rounded-lg lg:hidden
         text-slate-700 hover:text-indigo-700 hover:bg-gray-100 text-lg font-medium tracking-wide md:text-xl
-        active:scale-95 transition-all duration-150
-        dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
+        active:scale-95 transition-all duration-150">
     <span class="sr-only">Open sidebar</span>
     <svg class="w-7 h-7" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
         <path clip-rule="evenodd" fill-rule="evenodd"
@@ -20,16 +19,21 @@
 
 <!-- ФОН и ГРАНИЦА окна с меню -->
 <aside id="default-sidebar"
-       class="border-1 border-gray-700 list-none dark:bg-gray-800 dark:border-gray-700
+       class="border-1 border-gray-700 list-none
        md:backdrop-blur-sm backdrop-blur-md shadow-2xl shadow-indigo-500/70
-       fixed top-0 left-0 z-40 w-80 h-screen transition-transform -translate-x-full sm:translate-x-0"
+       fixed top-0 left-0 z-40 w-80 h-screen transition-transform -translate-x-full lg:translate-x-0"
        aria-label="Sidenav">
 
 
     <!-- Окно навигации -->
+
+    <!-- ВАЖНО: При использовании на какой-либо странице данного сайдбара мы автоматический смещаем контент вправо на ширину равную "lg:pl-80" -->
+    <!-- параметр "lg:pl-80" для отступа нужен чтоб при изменении ШИРИНЫ экрана контент страницы не прятался за навигацией -->
+    <!-- параметр "lg:pl-80" задается в BASE.HTML -->
+
     <div class="overflow-y-auto py-5 px-3 h-screen">
         {% with nav_item_classes="group flex items-center p-2 text-base md:text-lg font-medium tracking-wide text-slate-700 rounded-xl transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700 active:scale-95 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white" %}
-        {% with nav_sub_item_classes="group flex items-center p-2 pl-11 w-full text-base md:text-lg font-medium tracking-wide text-slate-700 rounded-xl transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700 active:scale-95 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white" %}
+        {% with nav_sub_item_classes="group flex items-center p-2 pl-9 w-full text-base md:text-lg font-medium tracking-wide text-slate-700 rounded-xl transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700 active:scale-95 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white" %}
         {% with nav_group_button_classes="group flex items-center p-2 w-full text-base md:text-lg font-medium tracking-wide text-slate-700 rounded-xl transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700 active:scale-95 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white" %}
 
         <!-- ЛОГО -->
@@ -81,6 +85,9 @@
                            data-nav-key="session-planned"
                            data-nav-parent-group="session"
                            class="{{ nav_sub_item_classes }}">
+                            <img src="{% static 'images/menu/num_point.svg' %}"
+                                 alt="point"
+                                 class="transition-transform duration-200 group-hover:scale-110">
                             <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Запланированные</span>
                         </a>
                     </li>
@@ -90,6 +97,9 @@
                            data-nav-key="session-archive"
                            data-nav-parent-group="session"
                            class="{{ nav_sub_item_classes }}">
+                            <img src="{% static 'images/menu/num_point.svg' %}"
+                                 alt="point"
+                                 class="transition-transform duration-200 group-hover:scale-110">
                             <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Архив</span>
                         </a>
                     </li>
@@ -123,6 +133,9 @@
                            data-nav-key="psychologist-match"
                            data-nav-parent-group="psychologist"
                            class="{{ nav_sub_item_classes }}">
+                            <img src="{% static 'images/menu/num_point.svg' %}"
+                                 alt="point"
+                                 class="transition-transform duration-200 group-hover:scale-110">
                             <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Подобрать и записаться</span>
                         </a>
                     </li>
@@ -132,6 +145,9 @@
                            data-nav-key="psychologist-catalog"
                            data-nav-parent-group="psychologist"
                            class="{{ nav_sub_item_classes }}">
+                            <img src="{% static 'images/menu/num_point.svg' %}"
+                                 alt="point"
+                                 class="transition-transform duration-200 group-hover:scale-110">
                             <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Каталог</span>
                         </a>
                     </li>
@@ -150,9 +166,8 @@
                     </span>
                     <span class="inline-flex flex-shrink-0 justify-center items-center mr-px
                     w-5 h-5 text-xs font-semibold rounded-full text-indigo-100 bg-indigo-600
-                    transition-transform duration-200 group-hover:scale-110
-                    dark:bg-primary-200 dark:text-primary-800">
-                        6
+                    transition-transform duration-200 group-hover:scale-110">
+                        4
                     </span>
                 </a>
             </li>
@@ -178,31 +193,35 @@
                 </button>
                 <ul
                         id="dropdown-authentication"
-                        class="space-y-2 overflow-hidden transition-all duration-300 ease-out transform max-h-0 opacity-0 -translate-y-1 pointer-events-none">
+                        class="space-y-2 overflow-hidden transition-all duration-300 ease-out transform
+                        {% if current_sidebar_key == 'profile-edit' or current_sidebar_key == 'password-change' %}
+                        max-h-80 opacity-100 translate-y-0 pointer-events-auto py-2
+                        {% else %}
+                        max-h-0 opacity-0 -translate-y-1 pointer-events-none
+                        {% endif %}">
                     <li>
-                        <a href="#"
+                        <a href="{% url 'users:web:profile-edit' %}"
                            data-nav-item
                            data-nav-key="profile-edit"
                            data-nav-parent-group="auth"
-                           class="{{ nav_sub_item_classes }}">
+                           class="{{ nav_sub_item_classes }} {% if current_sidebar_key == 'profile-edit' %}bg-gray-300/25 !text-indigo-700{% endif %}"
+                           {% if current_sidebar_key == 'profile-edit' %}data-nav-active-server="1" aria-current="page"{% endif %}>
+                            <img src="{% static 'images/menu/num_point.svg' %}"
+                                 alt="point"
+                                 class="transition-transform duration-200 group-hover:scale-110">
                             <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Редактировать профиль</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#"
-                           data-nav-item
-                           data-nav-key="email-change"
-                           data-nav-parent-group="auth"
-                           class="{{ nav_sub_item_classes }}">
-                            <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Изменить email</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#"
+                        <a href="{% url 'users:web:password-change' %}"
                            data-nav-item
                            data-nav-key="password-change"
                            data-nav-parent-group="auth"
-                           class="{{ nav_sub_item_classes }}">
+                           class="{{ nav_sub_item_classes }} {% if current_sidebar_key == 'password-change' %}bg-gray-300/25 !text-indigo-700{% endif %}"
+                           {% if current_sidebar_key == 'password-change' %}data-nav-active-server="1" aria-current="page"{% endif %}>
+                            <img src="{% static 'images/menu/num_point.svg' %}"
+                                 alt="point"
+                                 class="transition-transform duration-200 group-hover:scale-110">
                             <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Изменить пароль</span>
                         </a>
                     </li>
@@ -211,7 +230,7 @@
         </ul>
 
 
-        <ul class="pt-5 mt-5 space-y-2 border-t border-gray-200 dark:border-gray-700">
+        <ul class="pt-5 mt-5 space-y-2 border-t border-gray-200">
             <li>
                 <a href="#"
                    data-nav-item
@@ -241,9 +260,9 @@
         </ul>
 
 
-        <ul class="pt-5 mt-5 space-y-2 border-t border-gray-200 dark:border-gray-700">
+        <ul class="pt-5 mt-5 space-y-2 border-t border-gray-200">
             <li>
-                <a href="#"
+                <a href="{% url 'core:faq-page' %}"
                    data-nav-item
                    data-nav-key="faq"
                    class="{{ nav_item_classes }}">
@@ -271,7 +290,7 @@
         </ul>
 
 
-        <ul class="pt-5 mt-5 space-y-2 border-t border-gray-200 dark:border-gray-700">
+        <ul class="pt-5 mt-5 space-y-2 border-t border-gray-200">
             <li>
                 <form method="post" action="{% url 'users:web:logout' %}">
                     {% csrf_token %}

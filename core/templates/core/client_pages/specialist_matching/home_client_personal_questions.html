@@ -7,7 +7,7 @@
 {% block content %}
 
 
-<section class="bg-white py-8 antialiased dark:bg-gray-900 md:py-0">
+<section class="bg-white py-8 antialiased md:py-0">
     <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
 
         <div class="gap-8 lg:flex">
@@ -23,68 +23,68 @@
                     <!-- ШАГИ / ЭТАПЫ -->
                     <div class="space-y-6 sm:space-y-8 pb-3">
                         <ol class="flex flex-col gap-4 rounded-lg border border-gray-200 bg-indigo-100 p-2
-                        dark:border-gray-700 dark:bg-gray-800 sm:justify-center md:flex-row md:items-center lg:gap-6">
+                        sm:justify-center md:flex-row md:items-center lg:gap-6">
 
                             <a href="{% url 'core:general-questions' %}" class="flex mr-4">
                                 <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                                    <svg class="h-8 w-8 text-indigo-700 dark:text-gray-400" aria-hidden="true"
+                                    <svg class="h-8 w-8 text-indigo-700" aria-hidden="true"
                                          xmlns="http://www.w3.org/2000/svg"
                                          width="24" height="24" fill="none" viewBox="0 0 24 24">
                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                               stroke-width="2.5"
                                               d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                                     </svg>
-                                    <p class="text-base font-medium leading-tight text-indigo-700 dark:text-gray-400">
+                                    <p class="text-base font-medium leading-tight text-indigo-700">
                                         <strong>Общие вопросы</strong>
                                     </p>
                                 </li>
                             </a>
 
-                            <div class="hidden h-1 w-8 shrink-0 rounded-full bg-indigo-700 dark:bg-gray-700 md:block xl:w-16"></div>
+                            <div class="hidden h-1 w-8 shrink-0 rounded-full bg-indigo-700 md:block xl:w-16"></div>
 
                             <a href="{% url 'core:personal-questions' %}" class="flex mr-4">
                                 <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                                    <svg class="h-8 w-8 text-indigo-700 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                    <svg class="h-8 w-8 text-indigo-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                                          width="24" height="24" fill="none" viewBox="0 0 24 24">
                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                               stroke-width="2.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                                     </svg>
-                                    <p class="text-base font-medium leading-tight text-indigo-700 dark:text-gray-400">
+                                    <p class="text-base font-medium leading-tight text-indigo-700">
                                         <strong>Личные вопросы</strong>
                                     </p>
                                 </li>
                             </a>
 
-                            <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+                            <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 md:block xl:w-16"></div>
 
                             <!-- reset=1 = новая повторная фильтрация/подбор, на следующей странице откроется первый специалист -->
                             <a id="step-choice-psychologist-link"
                                href="{% url 'core:choice-psychologist' %}?reset=1"
                                class="flex mr-4">
                                 <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                                    <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                    <svg class="h-8 w-8 text-gray-500" aria-hidden="true"
                                          xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                                          viewBox="0 0 24 24">
                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                               stroke-width="1.5"
                                               d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                                     </svg>
-                                    <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
+                                    <p class="text-base font-medium leading-tight text-gray-500">
                                         Выбор психолога
                                     </p>
                                 </li>
                             </a>
 
-                            <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 dark:bg-gray-700 md:block xl:w-16"></div>
+                            <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 md:block xl:w-16"></div>
 
                             <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
-                                <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                <svg class="h-8 w-8 text-gray-500" aria-hidden="true"
                                      xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                                      viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                           stroke-width="1.5" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                                 </svg>
-                                <p class="text-base font-medium leading-tight text-gray-500 dark:text-gray-400">
+                                <p class="text-base font-medium leading-tight text-gray-500">
                                     Запись и оплата
                                 </p>
                             </li>
@@ -157,7 +157,7 @@
                         <div id="topics-container"
                              data-save-url="{% url 'users:api:save-topics' %}"
                              data-csrf-token="{{ csrf_token }}"
-                             class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-0">
+                             class="block w-full max-w-[90%] bg-white rounded-lg border border-white p-0">
 
                             <!-- Индивидуальные темы -->
                             <div id="topics-individual"
@@ -181,7 +181,7 @@
                                                     class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                                                     {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
                                             >
-                                            <span class="text-base font-medium text-gray-900 dark:text-gray-200">
+                                            <span class="text-base font-medium text-gray-900">
                                                 {{ topic.name }}
                                             </span>
                                         </label>
@@ -225,7 +225,7 @@
                                                     class="topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                                                     {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}
                                             >
-                                            <span class="text-base font-medium text-gray-900 dark:text-gray-200">
+                                            <span class="text-base font-medium text-gray-900">
                                                 {{ topic.name }}
                                             </span>
                                         </label>
@@ -288,7 +288,7 @@
 
                             <!-- ========== ПОЛ ПСИХОЛОГА ========== -->
                             <div id="ps-gender-block"
-                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-0 pb-7">
+                                 class="block w-full max-w-[90%] bg-white rounded-lg border border-white p-0 pb-7">
                                 <label class="block mb-2 text-lg font-medium text-indigo-500">
                                     <strong>Пол психолога</strong>
                                 </label>
@@ -315,7 +315,7 @@
 
                             <!-- ========== ВОЗРАСТ ПСИХОЛОГА ========== -->
                             <div id="ps-age-block"
-                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-0 pb-7">
+                                 class="block w-full max-w-[90%] bg-white rounded-lg border border-white p-0 pb-7">
                                 <label class="block mb-2 text-lg font-medium text-indigo-500">
                                     <strong>Возраст психолога</strong>
                                 </label>
@@ -359,7 +359,7 @@
                             <div id="methods-container"
                                  data-save-url="{% url 'users:api:save-methods' %}"
                                  data-csrf-token="{{ csrf_token }}"
-                                 class="block w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg border border-white p-0">
+                                 class="block w-full max-w-[90%] bg-white rounded-lg border border-white p-0">
 
                                 <label class="block mb-2 text-lg font-medium text-indigo-500">
                                     <strong>Психотерапевтический подход</strong>
@@ -368,7 +368,7 @@
                                 <div id="methods-grid"
                                      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2">
                                     {% for method in methods %}
-                                    <div class="method-item flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                                    <div class="method-item flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 transition"
                                          data-index="{{ forloop.counter0 }}">
                                         <input
                                                 id="method-{{ method.pk }}"
@@ -379,7 +379,7 @@
                                                 {% if method.pk|stringformat:"s" in selected_methods %}checked{% endif %}
                                         >
                                         <label for="method-{{ method.pk }}"
-                                               class="text-base font-medium text-gray-900 dark:text-gray-200">
+                                               class="text-base font-medium text-gray-900">
                                             {{ method.name }}
                                         </label>
                                     </div>
