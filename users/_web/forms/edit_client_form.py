@@ -17,15 +17,15 @@ class EditClientProfileForm(forms.ModelForm):
                     "placeholder": "Ваше имя",
                     "class": (
                         "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
-                        "text-indigo-600/50 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "data-view-class": (
                         "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
-                        "text-indigo-600/50 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "data-edit-class": (
                         "block w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-lg "
-                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+                        "text-indigo-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "autocomplete": "given-name",
                 }
@@ -35,15 +35,15 @@ class EditClientProfileForm(forms.ModelForm):
                     "placeholder": "Ваша фамилия",
                     "class": (
                         "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
-                        "text-indigo-600/50 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "data-view-class": (
                         "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
-                        "text-indigo-600/50 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "data-edit-class": (
                         "block w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-lg "
-                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+                        "text-indigo-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "autocomplete": "family-name",
                 }
@@ -53,15 +53,15 @@ class EditClientProfileForm(forms.ModelForm):
                     "placeholder": "Ваш возраст",
                     "class": (
                         "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
-                        "text-indigo-600/50 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "data-view-class": (
                         "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
-                        "text-indigo-600/50 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "data-edit-class": (
                         "block w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-lg "
-                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+                        "text-indigo-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "min": 18,
                     "max": 120,
@@ -73,12 +73,12 @@ class EditClientProfileForm(forms.ModelForm):
                     "readonly": "readonly",
                     "class": (
                         "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
-                        "text-indigo-600/50 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm "
+                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm "
                         "cursor-not-allowed"
                     ),
                     "data-view-class": (
                         "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
-                        "text-indigo-600/50 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm "
+                        "text-indigo-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm "
                         "cursor-not-allowed"
                     ),
                     "autocomplete": "email",
@@ -89,15 +89,15 @@ class EditClientProfileForm(forms.ModelForm):
                     "placeholder": "+7XXXXXXXXXX",
                     "class": (
                         "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
-                        "text-indigo-600/50 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "data-view-class": (
                         "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
-                        "text-indigo-600/50 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "data-edit-class": (
                         "block w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-lg "
-                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+                        "text-indigo-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "autocomplete": "tel",
                 }
@@ -106,15 +106,15 @@ class EditClientProfileForm(forms.ModelForm):
                 attrs={
                     "class": (
                         "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
-                        "text-indigo-600/50 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "data-view-class": (
                         "block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-lg "
-                        "text-indigo-600/50 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                     "data-edit-class": (
                         "block w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-lg "
-                        "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+                        "text-indigo-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                     ),
                 }
             ),

@@ -3998,6 +3998,42 @@ input:checked + .toggle-bg {
   color: rgb(88 80 236 / 0.5);
 }
 
+.text-zinc-700\/90 {
+  color: rgb(63 63 70 / 0.9);
+}
+
+.text-zinc-400\/90 {
+  color: rgb(161 161 170 / 0.9);
+}
+
+.text-zinc-500\/90 {
+  color: rgb(113 113 122 / 0.9);
+}
+
+.text-zinc-300\/90 {
+  color: rgb(212 212 216 / 0.9);
+}
+
+.text-zinc-700\/40 {
+  color: rgb(63 63 70 / 0.4);
+}
+
+.text-zinc-700\/50 {
+  color: rgb(63 63 70 / 0.5);
+}
+
+.text-zinc-900\/40 {
+  color: rgb(24 24 27 / 0.4);
+}
+
+.text-zinc-400\/50 {
+  color: rgb(161 161 170 / 0.5);
+}
+
+.text-zinc-400\/60 {
+  color: rgb(161 161 170 / 0.6);
+}
+
 .line-through {
   text-decoration-line: line-through;
 }
