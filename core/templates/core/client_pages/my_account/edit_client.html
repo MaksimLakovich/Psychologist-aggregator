@@ -36,7 +36,7 @@
         <div class="bg-transparent">
 
             <!-- ПРИЗНАК АКТИВНОСТИ ПОЛЬЗОВАТЕЛЯ -->
-            <div class="px-6 py-8 flex flex-col sm:flex-row items-center gap-6">
+            <div class="py-6 md:py-8 flex flex-row items-center justify-end gap-6">
                 <p class="text-base font-semibold tracking-wide text-zinc-600">
                     Ваш текущий статус:
                 </p>
@@ -84,105 +84,120 @@
             {% endif %}
 
             <!-- ДАННЫЕ ПОЛЬЗОВАТЕЛЯ -->
-            <form id="profile-edit-form" method="post" class="p-6">
+            <form id="profile-edit-form" method="post" class="divide-y divide-indigo-500/50">
                 {% csrf_token %}
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                    <!-- Имя -->
-                    <div>
-                        <label for="{{ form.first_name.id_for_label }}"
-                               class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
-                            {{ form.first_name.label }}
-                        </label>
-                        {{ form.first_name }}
-                        {% if form.first_name.errors %}
-                        <p class="mt-2 text-sm tracking-wide text-pink-700">
-                            {{ form.first_name.errors.0 }}
-                        </p>
-                        {% endif %}
-                    </div>
-
-                    <!-- Фамилия -->
-                    <div>
-                        <label for="{{ form.last_name.id_for_label }}"
-                               class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
-                            {{ form.last_name.label }}
-                        </label>
-                        {{ form.last_name }}
-                        {% if form.last_name.errors %}
-                        <p class="mt-2 text-sm tracking-wide text-pink-700">
-                            {{ form.last_name.errors.0 }}
-                        </p>
-                        {% endif %}
-                    </div>
-
-                    <!-- Email -->
-                    <div class="md:col-span-2">
-                        <label for="{{ form.email.id_for_label }}"
-                               class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
-                            {{ form.email.label }}
-                        </label>
-                        <div class="relative">
-                            {{ form.email }}
-                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                </svg>
-                            </div>
+                <!-- БЛОК: ЛИЧНЫЕ ДАННЫЕ -->
+                <div class="p-4 md:p-4 mb-4 md:mb-8 space-y-6">
+                    <div class="flex items-center gap-2">
+                        <div class="p-2 bg-indigo-50 rounded-lg">
+                            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
                         </div>
-                        {% if form.email.errors %}
-                        <p class="mt-2 text-sm tracking-wide text-pink-700">
-                            {{ form.email.errors.0 }}
-                        </p>
-                        {% endif %}
+                        <h2 class="text-lg font-semibold text-gray-900">Личные данные</h2>
                     </div>
 
-                    <!-- Возраст -->
-                    <div>
-                        <label for="{{ form.age.id_for_label }}"
-                               class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
-                            {{ form.age.label }}
-                        </label>
-                        {{ form.age }}
-                        {% if form.age.errors %}
-                        <p class="mt-2 text-sm tracking-wide text-pink-700">
-                            {{ form.age.errors.0 }}
-                        </p>
-                        {% endif %}
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label for="{{ form.first_name.id_for_label }}"
+                                   class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
+                                {{ form.first_name.label }}
+                            </label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                            <p class="mt-2 text-sm tracking-wide text-pink-700">
+                                {{ form.first_name.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
 
-                    <!-- Телефон -->
-                    <div>
-                        <label for="{{ form.phone_number.id_for_label }}"
-                               class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
-                            {{ form.phone_number.label }}
-                        </label>
-                        {{ form.phone_number }}
-                        {% if form.phone_number.errors %}
-                        <p class="mt-2 text-sm tracking-wide text-pink-700">
-                            {{ form.phone_number.errors.0 }}
-                        </p>
-                        {% endif %}
-                    </div>
+                        <div class="space-y-2">
+                            <label for="{{ form.last_name.id_for_label }}"
+                                   class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
+                                {{ form.last_name.label }}
+                            </label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                            <p class="mt-2 text-sm tracking-wide text-pink-700">
+                                {{ form.last_name.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
 
-                    <!-- Часовой пояс -->
-                    <div class="md:col-span-2">
-                        <label for="{{ form.timezone.id_for_label }}"
-                               class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
-                            {{ form.timezone.label }}
-                        </label>
-                        {{ form.timezone }}
-                        {% if form.timezone.errors %}
-                        <p class="mt-2 text-sm tracking-wide text-pink-700">
-                            {{ form.timezone.errors.0 }}
-                        </p>
-                        {% endif %}
+                        <div class="space-y-2">
+                            <label for="{{ form.age.id_for_label }}"
+                                   class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
+                                {{ form.age.label }}
+                            </label>
+                            {{ form.age }}
+                            {% if form.age.errors %}
+                            <p class="mt-2 text-sm tracking-wide text-pink-700">
+                                {{ form.age.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <div class="space-y-2">
+                            <label for="{{ form.timezone.id_for_label }}"
+                                   class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
+                                {{ form.timezone.label }}
+                            </label>
+                            {{ form.timezone }}
+                            {% if form.timezone.errors %}
+                            <p class="mt-2 text-sm tracking-wide text-pink-700">
+                                {{ form.timezone.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
 
-                <div class="mt-10 pt-6 border-t border-gray-200">
+                <!-- БЛОК: ЛИЧНЫЕ ДАННЫЕ -->
+                <div class="p-4 md:p-4 mb-4 md:mb-8 space-y-6">
+                    <div class="flex items-center gap-2">
+                        <div class="p-2 bg-blue-50 rounded-lg">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-lg font-semibold text-gray-900">Контактная информация</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <label for="{{ form.email.id_for_label }}"
+                                       class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
+                                    {{ form.email.label }}
+                                </label>
+                                <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400">Только чтение</span>
+                            </div>
+                            {{ form.email }}
+                        </div>
+
+                        <div class="space-y-2">
+                            <label for="{{ form.phone_number.id_for_label }}"
+                                   class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
+                                {{ form.phone_number.label }}
+                            </label>
+                            {{ form.phone_number }}
+                            {% if form.phone_number.errors %}
+                            <p class="mt-2 text-sm tracking-wide text-pink-700">
+                                {{ form.phone_number.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- КНОПКИ -->
+                <div class="p-8 md:p-12 space-y-6">
+
                     <div id="display-actions">
                         <button type="button"
                                 id="profile-edit-toggle"
@@ -213,7 +228,9 @@
                             Отмена
                         </button>
                     </div>
+
                 </div>
+
             </form>
 
         </div>
