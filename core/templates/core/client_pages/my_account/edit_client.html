@@ -41,7 +41,7 @@
                     Ваш текущий статус:
                 </p>
                 <div class="text-center sm:text-left">
-                    {% if request.user.is_active %}
+                    {% if db_user.is_active %}
                     <span class="inline-flex items-center px-4 py-1.5 rounded-full
                     text-base font-medium tracking-wide text-emerald-600 bg-emerald-100">
                         <span class="w-2 h-2 mr-2 rounded-full bg-emerald-600"></span>
@@ -84,8 +84,17 @@
             {% endif %}
 
             <!-- ДАННЫЕ ПОЛЬЗОВАТЕЛЯ -->
-            <form id="profile-edit-form" method="post" class="divide-y divide-indigo-500/50">
+            <form id="profile-edit-form" method="post" class="divide-y divide-indigo-500/50"
+                  data-has-errors="{% if form.errors %}1{% else %}0{% endif %}">
                 {% csrf_token %}
+
+                <!-- ИСХОДНЫЕ ДАННЫЕ (для корректной кнопки "Отмена") -->
+                <input type="hidden" id="initial-first-name" value="{{ db_user.first_name|default_if_none:'' }}">
+                <input type="hidden" id="initial-last-name" value="{{ db_user.last_name|default_if_none:'' }}">
+                <input type="hidden" id="initial-age" value="{{ db_user.age|default_if_none:'' }}">
+                <input type="hidden" id="initial-email" value="{{ db_user.email|default_if_none:'' }}">
+                <input type="hidden" id="initial-phone" value="{{ db_user.phone_number|default_if_none:'' }}">
+                <input type="hidden" id="initial-timezone" value="{{ db_user.timezone|default_if_none:'' }}">
 
                 <!-- БЛОК: ЛИЧНЫЕ ДАННЫЕ -->
                 <div class="p-4 md:p-4 mb-4 md:mb-8 space-y-6">

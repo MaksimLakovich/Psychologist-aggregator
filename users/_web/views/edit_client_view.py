@@ -7,6 +7,7 @@ from django.views.generic.edit import FormView
 from django_ratelimit.decorators import ratelimit
 
 from users._web.forms.edit_client_form import EditClientProfileForm
+from users.models import AppUser
 
 
 @method_decorator(ratelimit(key="ip", rate="5/m", block=True), name="post")
@@ -27,7 +28,8 @@ class EditClientProfilePageView(LoginRequiredMixin, FormView):
     def get_form_kwargs(self):
         """Передаем текущего пользователя в форму как instance."""
         kwargs = super().get_form_kwargs()
-        kwargs["instance"] = self.request.user
+        # Берем пользователя заново из БД, чтобы не мутировать request.user при невалидном POST.
+        kwargs["instance"] = AppUser.objects.get(pk=self.request.user.pk)
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -45,6 +47,8 @@ class EditClientProfilePageView(LoginRequiredMixin, FormView):
 
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
         context["current_sidebar_key"] = "profile-edit"
+        # Отдельный "чистый" объект из БД для initial-данных (не связан с form.instance).
+        context["db_user"] = AppUser.objects.get(pk=self.request.user.pk)
         return context
 
     def form_valid(self, form):
