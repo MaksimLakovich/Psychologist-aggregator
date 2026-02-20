@@ -24,9 +24,12 @@ document.addEventListener("DOMContentLoaded", function () {
    */
   function setEditMode(isEditing) {
     inputs.forEach((input) => {
+      const viewClasses = input.dataset.viewClass || input.className;
+      const editClasses = input.dataset.editClass || input.className;
       if (isEditing) {
         input.removeAttribute("readonly");
         input.disabled = false;
+        input.className = editClasses;
       } else {
         if (input.tagName !== "SELECT") {
           input.setAttribute("readonly", "readonly");
@@ -34,6 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (input.tagName === "SELECT") {
           input.disabled = true;
         }
+        input.className = viewClasses;
       }
     });
 

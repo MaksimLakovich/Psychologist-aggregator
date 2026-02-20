@@ -3994,6 +3994,10 @@ input:checked + .toggle-bg {
   color: rgb(82 82 91 / 0.8);
 }
 
+.text-indigo-600\/50 {
+  color: rgb(88 80 236 / 0.5);
+}
+
 .line-through {
   text-decoration-line: line-through;
 }
