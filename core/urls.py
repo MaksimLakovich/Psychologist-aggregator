@@ -10,13 +10,15 @@ from core.views.client.specialist_matching.view_payment_card import \
     ClientAddPaymentCardPageView
 from core.views.client.specialist_matching.view_personal_questions import \
     ClientPersonalQuestionsPageView
+from core.views.questions_answers import CommonQuestionPageView
 from core.views.start_view import StartPageView
 
 app_name = CoreConfig.name
 
 urlpatterns = [
-    # Общая стартовая страница
+    # Общая стартовая страница + общие информативные
     path("", StartPageView.as_view(), name="start-page"),
+    path("faq/", CommonQuestionPageView.as_view(), name="faq-page"),
 
     # КЛИЕНТ: этапы подбора/фильтрации необходимых специалистов
     path("general-questions/", ClientGeneralQuestionsPageView.as_view(), name="general-questions"),
