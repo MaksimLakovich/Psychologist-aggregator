@@ -27,7 +27,6 @@ document.addEventListener("DOMContentLoaded", function () {
       if (isEditing) {
         input.removeAttribute("readonly");
         input.disabled = false;
-        input.classList.remove("bg-gray-50", "cursor-not-allowed", "opacity-75");
       } else {
         if (input.tagName !== "SELECT") {
           input.setAttribute("readonly", "readonly");
@@ -35,12 +34,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (input.tagName === "SELECT") {
           input.disabled = true;
         }
-        input.classList.add(
-          "bg-gray-50",
-          "dark:bg-gray-700/50",
-          "cursor-not-allowed",
-          "opacity-75"
-        );
       }
     });
 
