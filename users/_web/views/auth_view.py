@@ -41,6 +41,7 @@ class RegisterPageView(AnonymousOnlyMixin, FormView):
         context = super().get_context_data(**kwargs)
         context["title_register_page_view"] = "Регистрация в сервисе ОПОРА"
         context["menu_variant"] = "register"
+
         return context
 
     def form_valid(self, form):
@@ -87,6 +88,7 @@ class RegisterPageView(AnonymousOnlyMixin, FormView):
             self.request,
             "Мы отправили инструкцию для подтверждения регистрации.\nПожалуйста, проверьте вашу почту.",
         )
+
         return super().form_valid(form)
 
 
@@ -119,6 +121,7 @@ class VerifyEmailView(AnonymousOnlyMixin, View):
             user.is_active = True
             user.save(update_fields=["is_active"])
         messages.success(self.request, "Email успешно подтвержден. Теперь вы можете войти.")
+
         return redirect("users:web:login-page")
 
 
@@ -163,6 +166,7 @@ class LoginPageView(AnonymousOnlyMixin, LoginView):
                 "в том, чтобы делиться с людьми этой любовью и пониманием»",
             ]
         )
+
         return context
 
     def get_success_url(self):
@@ -173,4 +177,5 @@ class LoginPageView(AnonymousOnlyMixin, LoginView):
     def form_valid(self, form):
         """Автоматический вход пользователя после успешной аутентификации."""
         login(self.request, form.get_user())
+
         return super().form_valid(form)

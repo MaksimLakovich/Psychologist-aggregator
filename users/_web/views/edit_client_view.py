@@ -23,6 +23,7 @@ class EditClientProfilePageView(LoginRequiredMixin, FormView):
         if getattr(request.user, "role_id", None) != 2:
             messages.error(request, "Доступ к редактированию профиля клиента ограничен.")
             return redirect("core:start-page")
+
         return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
@@ -30,6 +31,7 @@ class EditClientProfilePageView(LoginRequiredMixin, FormView):
         kwargs = super().get_form_kwargs()
         # Берем пользователя заново из БД, чтобы не мутировать request.user при невалидном POST.
         kwargs["instance"] = AppUser.objects.get(pk=self.request.user.pk)
+
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -49,10 +51,12 @@ class EditClientProfilePageView(LoginRequiredMixin, FormView):
         context["current_sidebar_key"] = "profile-edit"
         # Отдельный "чистый" объект из БД для initial-данных (не связан с form.instance).
         context["db_user"] = AppUser.objects.get(pk=self.request.user.pk)
+
         return context
 
     def form_valid(self, form):
         """Сохраняем данные профиля и выводим сообщение."""
         form.save()
         messages.success(self.request, "Данные профиля обновлены.")
+
         return super().form_valid(form)

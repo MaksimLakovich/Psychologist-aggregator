@@ -20,6 +20,7 @@ class ChangePasswordPageView(LoginRequiredMixin, FormView):
         """Передаем пользователя в форму для проверки текущего пароля."""
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
+
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -39,6 +40,7 @@ class ChangePasswordPageView(LoginRequiredMixin, FormView):
         context["current_sidebar_key"] = "password-change"
         # Одноразовый флаг успешной смены пароля (для показа экрана успеха вместо формы).
         context["password_changed"] = self.request.session.pop("password_changed", False)
+
         return context
 
     def form_valid(self, form):
@@ -52,4 +54,5 @@ class ChangePasswordPageView(LoginRequiredMixin, FormView):
 
         # Одноразовый флаг для UI: покажем экран успеха и уберем форму.
         self.request.session["password_changed"] = True
+
         return super().form_valid(form)

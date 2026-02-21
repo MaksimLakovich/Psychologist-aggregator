@@ -16,5 +16,16 @@ class CommonQuestionPageView(TemplateView):
             - dict: словарь со всеми данными, доступными внутри HTML-шаблона."""
         context = super().get_context_data(**kwargs)
         context["title_common_question_page_view"] = "Вопросы и ответы — Опора"
-        context["profile_type"] = "client"
+
+        # Параметр, который передаем в menu.html и на его основе там настраиваем показ боков.НАВИГАЦИЙ / верх.МЕНЮ
+        # Данный IF/ELSE позволяет нам задать отдельный параметр для клиента и для психолога, что позволит потом,
+        # при необходимости, рендерить разные шаблоны страниц или использовать разный доп функционал
+        if getattr(self.request.user, "role_id", None) == 2:
+            context["profile_type"] = "client"
+        else:
+            context["profile_type"] = "psychologist"
+
+        # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
+        context["current_sidebar_key"] = "password-change"
+
         return context
