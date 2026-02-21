@@ -262,7 +262,7 @@
 
         <ul class="pt-5 mt-5 space-y-2 border-t border-gray-200">
             <li>
-                <a href="{% url 'core:faq-page' %}"
+                <a href="{% url 'core:faq-page' %}?layout=sidebar"
                    data-nav-item
                    data-nav-key="faq"
                    class="{{ nav_item_classes }} {% if current_sidebar_key == 'faq' %}bg-gray-300/25 !text-indigo-700{% endif %}"

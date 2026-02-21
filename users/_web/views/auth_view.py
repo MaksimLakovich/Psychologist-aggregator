@@ -40,7 +40,7 @@ class RegisterPageView(AnonymousOnlyMixin, FormView):
             - dict: словарь со всеми данными, доступными внутри HTML-шаблона."""
         context = super().get_context_data(**kwargs)
         context["title_register_page_view"] = "Регистрация в сервисе ОПОРА"
-        context["menu_variant"] = "register"
+        context["menu_variant"] = "without-any-menu"
 
         return context
 
@@ -146,7 +146,7 @@ class LoginPageView(AnonymousOnlyMixin, LoginView):
             - dict: словарь со всеми данными, доступными внутри HTML-шаблона."""
         context = super().get_context_data(**kwargs)
         context["title_login_page_view"] = "Вход в личный кабинет сервиса ОПОРА"
-        context["menu_variant"] = "login"
+        context["menu_variant"] = "without-any-menu"
         context["verified_psychologists_count"] = PsychologistProfile.objects.filter(
             is_verified=True
         ).count() + 888

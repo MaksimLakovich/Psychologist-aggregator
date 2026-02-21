@@ -27,7 +27,7 @@ class PasswordResetRequestPageView(AnonymousOnlyMixin, FormView):
         """Формирование контекста страницы запроса восстановления пароля."""
         context = super().get_context_data(**kwargs)
         context["title_password_reset_request_view"] = "Восстановление пароля в сервисе ОПОРА"
-        context["menu_variant"] = "login"
+        context["menu_variant"] = "without-any-menu"
 
         return context
 
@@ -83,7 +83,7 @@ class PasswordResetConfirmPageView(AnonymousOnlyMixin, FormView):
         """Формирование контекста страницы подтверждения сброса пароля."""
         context = super().get_context_data(**kwargs)
         context["title_password_reset_confirm_view"] = "Подтверждение нового пароля в сервисе ОПОРА"
-        context["menu_variant"] = "login"
+        context["menu_variant"] = "without-any-menu"
 
         return context
 
