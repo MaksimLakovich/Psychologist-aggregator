@@ -26,6 +26,6 @@ class CommonQuestionPageView(TemplateView):
             context["profile_type"] = "psychologist"
 
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
-        context["current_sidebar_key"] = "password-change"
+        context["current_sidebar_key"] = "faq"
 
         return context

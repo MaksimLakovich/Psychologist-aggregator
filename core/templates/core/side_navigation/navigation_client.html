@@ -265,7 +265,8 @@
                 <a href="{% url 'core:faq-page' %}"
                    data-nav-item
                    data-nav-key="faq"
-                   class="{{ nav_item_classes }}">
+                   class="{{ nav_item_classes }} {% if current_sidebar_key == 'faq' %}bg-gray-300/25 !text-indigo-700{% endif %}"
+                   {% if current_sidebar_key == 'faq' %}data-nav-active-server="1" aria-current="page"{% endif %}>
                     <img src="{% static 'images/menu/question-answer.svg' %}"
                          alt="answers"
                          class="transition-transform duration-200 group-hover:scale-110">
