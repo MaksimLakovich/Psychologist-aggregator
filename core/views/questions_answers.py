@@ -16,4 +16,5 @@ class CommonQuestionPageView(TemplateView):
             - dict: словарь со всеми данными, доступными внутри HTML-шаблона."""
         context = super().get_context_data(**kwargs)
         context["title_common_question_page_view"] = "Вопросы и ответы — Опора"
+        context["profile_type"] = "client"
         return context
