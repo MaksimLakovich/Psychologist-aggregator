@@ -13,7 +13,7 @@
     <!-- 1. Вариант для определенных страниц, которые есть и в МЕНЮ и в САЙДБАРЕ и мы показываем: -->
     <!--    а) или только верхнее МЕНЮ без сайдбара, если перешли на эту страницу из МЕНЮ -->
     <!--    б) или только САЙДБАР без меню, если перешли на эту страницу из САЙДБАРА -->
-    {% if menu_variant == "client-top" %}
+    {% if menu_variant == "without-sidebar" %}
     <header class="bg-white shadow p-4">
         <div class="mx-auto max-w-7xl px-4 py-1">
             <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5">
@@ -39,7 +39,7 @@
     {% else %}
 
         <!-- 2. Вариант только с САЙДБАРОМ для страниц из личного кабинета -->
-        {% if show_sidebar == 'sidebar' %}
+        {% if show_sidebar %}
 
         <header class="bg-white p-4">
             <div class="mx-auto max-w-7xl px-4 py-1">

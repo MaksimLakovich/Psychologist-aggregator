@@ -5853,6 +5853,10 @@ input:checked + .toggle-bg {
     width: 24rem;
   }
 
+  .lg\:w-\[calc\(100\%-10rem\)\] {
+    width: calc(100% - 10rem);
+  }
+
   .lg\:max-w-xl {
     max-width: 36rem;
   }
