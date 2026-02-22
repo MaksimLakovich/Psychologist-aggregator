@@ -19,30 +19,78 @@
 {% endblock %}
 
 
-<!-- Блок ???????? -->
-<section class="min-h-screen bg-white/60">
-    <div class="mx-auto max-w-screen-xl px-4 py-16 lg:grid lg:grid-cols-12 lg:gap-1 lg:py-4">
+<section class="relative overflow-hidden min-h-screen bg-white/70 w-full overflow-hidden">
 
-        <!-- Текст -->
-        <div class="lg:col-span-9 flex flex-col justify-center">
+    <!-- Фоновое ЛОГО в нижний правый угол -->
+    <div class="hidden lg:block absolute bottom-0 right-0 p-8 pointer-events-none z-0 select-none">
+        <img src="{% static 'images/menu/opora-base.png' %}"
+             alt=""
+             class="w-96 h-auto opacity-20 blur-[5px] transform translate-x-10 translate-y-10">
+    </div>
 
-            <div class="m-8 flex flex-col gap-4 sm:flex-row">
-                <span class="text-2xl font-medium tracking-wide text-indigo-500/50">
-                    Тут появится общая консолидирующая инфо о состоянии профиля (активен/нет), небольшой виджет с календарем где будут ближайшие сессии,
-                    карточка ближайшей сессии с возможностью в нее прогрузится, какие-то акционные предложения от сервиса, какая-то статистика и прочее
-                </span>
+    <!-- КОНТЕНТ СТРАНИЦЫ -->
+    <div class="relative z-10 w-full mx-full px-6 sm:px-8 lg:px-12 py-10">
+
+        <!-- Шапка страницы -->
+        <div>
+            <header class="mb-10">
+                <h1 class="text-3xl md:text-4xl font-bold text-zinc-400 tracking-tight">
+                    Мой кабинет
+                </h1>
+                <p class="text-lg text-zinc-400 font-medium tracking-wide mt-2 pt-2 mb-6 md:mb-12">
+                    Добро пожаловать, {{ user.first_name|default:"пользователь" }}!
+                </p>
+            </header>
+
+            <div class="bg-indigo-600 rounded-3xl p-8 text-white shadow-lg shadow-indigo-200">
+                <h3 class="text-lg font-semibold opacity-80">Статус профиля</h3>
+                <div class="text-left">
+                    {% if user.is_active %}
+                    <span class="inline-flex items-center rounded-full text-3xl text-emerald-200 font-bold mt-2 tracking-wide gap-2">
+                        <span class="relative flex w-2.5 h-2.5">
+                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-100 opacity-75"></span>
+                            <span class="relative inline-flex w-2.5 h-2.5 rounded-full bg-emerald-200"></span>
+                        </span>
+                        Активен
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center rounded-full text-3xl text-pink-300 font-bold mt-2 tracking-wide gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-pink-300"></span>
+                        Неактивен
+                    </span>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
-        <!-- Иллюстрация -->
-        <div class="hidden lg:col-span-3 lg:block relative blur-sm">
-            <img src="{% static 'images/menu/opora-base.png' %}"
-                 alt="Logo"
-                 class="w-full h-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+            <div class="md:col-span-2 xl:col-span-2 bg-white/50 backdrop-blur-md rounded-3xl p-8 border border-indigo-100 shadow-sm">
+                <div class="flex flex-col gap-4">
+                    <span class="text-sm font-bold uppercase tracking-widest text-indigo-500">Ближайшее событие</span>
+                    <p class="text-xl md:text-2xl font-medium text-zinc-700 leading-relaxed">
+                        Тут появится общая информация о состоянии профиля, виджет с календарем,
+                        ближайшие сессии и другие важные уведомления.
+                    </p>
+                    <div class="mt-4 flex gap-4">
+                        <div class="h-2 w-24 bg-indigo-500 rounded-full"></div>
+                        <div class="h-2 w-12 bg-indigo-200 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="h-64 border-2 border-dashed border-zinc-300 rounded-3xl flex items-center justify-center text-zinc-400">
+                Виджет статистики (в разработке)
+            </div>
+
+            <div class="h-64 border-2 border-dashed border-zinc-300 rounded-3xl flex items-center justify-center text-zinc-400">
+                Акционные предложения (в разработке)
+            </div>
+
         </div>
-
     </div>
-</section>
 
+</section>
 
 {% endblock %}

@@ -19,7 +19,14 @@
 {% block content %}
 
 
-<section class="relative min-h-screen bg-white/70 backdrop-blur-[2px] pb-20 overflow-hidden">
+<section class="relative overflow-hidden min-h-screen bg-white/70 w-full px-6 sm:px-8 lg:px-12 py-10">
+
+    <!-- Фоновое ЛОГО в нижний правый угол -->
+    <div class="hidden lg:block absolute bottom-0 right-0 p-8 pointer-events-none z-0 select-none">
+        <img src="{% static 'images/menu/opora-base.png' %}"
+             alt=""
+             class="w-96 h-auto opacity-20 blur-[5px] transform translate-x-10 translate-y-10">
+    </div>
 
     <!-- Устанавливаем сетку для страницы -->
     <div class="mx-auto max-w-screen-xl px-4 py-12 lg:grid lg:grid-cols-12 lg:gap-8 relative z-10">
@@ -209,10 +216,6 @@
         </div>
 
     </div>
-
-    <img src="{% static 'images/menu/opora-base.png' %}"
-         alt="Logo Background"
-         class="fixed bottom-0 right-0 w-48 md:w-48 lg:w-60 h-auto blur-sm opacity-20 pointer-events-none z-0 transform -translate-x-4 -translate-y-4">
 
 </section>
 
