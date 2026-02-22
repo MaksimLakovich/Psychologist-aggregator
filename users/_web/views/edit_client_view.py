@@ -23,6 +23,7 @@ class EditClientProfilePageView(LoginRequiredMixin, FormView):
         if getattr(request.user, "role_id", None) != 2:
             messages.error(request, "Доступ к редактированию профиля клиента ограничен.")
             return redirect("core:start-page")
+
         return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
@@ -30,29 +31,37 @@ class EditClientProfilePageView(LoginRequiredMixin, FormView):
         kwargs = super().get_form_kwargs()
         # Берем пользователя заново из БД, чтобы не мутировать request.user при невалидном POST.
         kwargs["instance"] = AppUser.objects.get(pk=self.request.user.pk)
+
         return kwargs
 
     def get_context_data(self, **kwargs):
-        """Формирование контекста страницы редактирования профиля клиента."""
+        """Формирование контекста страницы редактирования профиля клиента.
+        1) Метод вызывается автоматически при рендеринге HTML-страницы и дополняет базовый контекст
+        пользовательскими ключами, которые затем можно вывести в html-странице через Django Template Language.
+        2) В текущей реализации передаем:
+            - Заголовок страницы (title)
+            - Параметр для настройки отображения меню/навигация
+            - Параметр для подсветки выбранного пункта в навигации
+            - Текущие initial-данные пользователя из БД
+        3) Возвращает:
+            - dict: словарь со всеми данными, доступными внутри HTML-шаблона."""
         context = super().get_context_data(**kwargs)
         context["title_edit_client_page_view"] = "Редактирование профиля в сервисе ОПОРА"
 
-        # Параметр, который передаем в menu.html и на его основе там настраиваем показ боков.НАВИГАЦИЙ / верх.МЕНЮ
-        # Данный IF/ELSE позволяет нам задать отдельный параметр для клиента и для психолога, что позволит потом,
-        # при необходимости, рендерить разные шаблоны страниц или использовать разный доп функционал
-        if getattr(self.request.user, "role_id", None) == 2:
-            context["profile_type"] = "client"
-        else:
-            context["profile_type"] = "psychologist"
+        # Параметр, который передаем в menu.html и на его основе там настраиваем показ САЙДБАРА
+        context["show_sidebar"] = "sidebar"
 
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
         context["current_sidebar_key"] = "profile-edit"
+
         # Отдельный "чистый" объект из БД для initial-данных (не связан с form.instance).
         context["db_user"] = AppUser.objects.get(pk=self.request.user.pk)
+
         return context
 
     def form_valid(self, form):
         """Сохраняем данные профиля и выводим сообщение."""
         form.save()
         messages.success(self.request, "Данные профиля обновлены.")
+
         return super().form_valid(form)
