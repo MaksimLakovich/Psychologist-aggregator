@@ -40,7 +40,8 @@ class RegisterPageView(AnonymousOnlyMixin, FormView):
             - dict: словарь со всеми данными, доступными внутри HTML-шаблона."""
         context = super().get_context_data(**kwargs)
         context["title_register_page_view"] = "Регистрация в сервисе ОПОРА"
-        context["menu_variant"] = "register"
+        context["menu_variant"] = "without-any-menu"
+
         return context
 
     def form_valid(self, form):
@@ -87,6 +88,7 @@ class RegisterPageView(AnonymousOnlyMixin, FormView):
             self.request,
             "Мы отправили инструкцию для подтверждения регистрации.\nПожалуйста, проверьте вашу почту.",
         )
+
         return super().form_valid(form)
 
 
@@ -119,6 +121,7 @@ class VerifyEmailView(AnonymousOnlyMixin, View):
             user.is_active = True
             user.save(update_fields=["is_active"])
         messages.success(self.request, "Email успешно подтвержден. Теперь вы можете войти.")
+
         return redirect("users:web:login-page")
 
 
@@ -143,7 +146,7 @@ class LoginPageView(AnonymousOnlyMixin, LoginView):
             - dict: словарь со всеми данными, доступными внутри HTML-шаблона."""
         context = super().get_context_data(**kwargs)
         context["title_login_page_view"] = "Вход в личный кабинет сервиса ОПОРА"
-        context["menu_variant"] = "login"
+        context["menu_variant"] = "without-any-menu"
         context["verified_psychologists_count"] = PsychologistProfile.objects.filter(
             is_verified=True
         ).count() + 888
@@ -163,6 +166,7 @@ class LoginPageView(AnonymousOnlyMixin, LoginView):
                 "в том, чтобы делиться с людьми этой любовью и пониманием»",
             ]
         )
+
         return context
 
     def get_success_url(self):
@@ -173,4 +177,5 @@ class LoginPageView(AnonymousOnlyMixin, LoginView):
     def form_valid(self, form):
         """Автоматический вход пользователя после успешной аутентификации."""
         login(self.request, form.get_user())
+
         return super().form_valid(form)

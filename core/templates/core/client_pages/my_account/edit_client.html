@@ -42,19 +42,21 @@
                 </p>
                 <div class="text-center sm:text-left">
                     {% if db_user.is_active %}
-                    <span class="inline-flex items-center px-4 py-1.5 rounded-full
-                    text-base font-medium tracking-wide text-emerald-600 bg-emerald-100">
-                        <span class="w-2 h-2 mr-2 rounded-full bg-emerald-600"></span>
+                    <span class="inline-flex items-center px-4 py-1.5 rounded-full text-base font-medium tracking-wide text-emerald-600 bg-emerald-100 gap-2">
+                        <span class="relative flex w-2.5 h-2.5">
+                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        </span>
                         Активен
                     </span>
                     {% else %}
-                    <span class="inline-flex items-center px-4 py-1.5 rounded-full
-                    text-base font-medium tracking-wide text-pink-600 bg-pink-100">
-                        <span class="w-2 h-2 mr-2 rounded-full bg-pink-600"></span>
+                    <span class="inline-flex items-center px-4 py-1.5 rounded-full text-base font-medium tracking-wide text-pink-600 bg-pink-100 gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-pink-600"></span>
                         Неактивен
                     </span>
                     {% endif %}
                 </div>
+
             </div>
 
             <!-- УВЕДОМЛЕНИЯ -->
@@ -102,7 +104,7 @@
                         <img src="{% static 'images/menu/personal-data.svg' %}"
                              alt="personal-data"
                              class="w-8 h-8">
-                        <h2 class="text-xl md:text-2xl text-center text-zinc-400/60 font-semibold leading-tight tracking-wide">
+                        <h2 class="text-xl md:text-2xl text-center text-indigo-700 font-semibold leading-tight tracking-wide">
                             Личные данные
                         </h2>
                     </div>
@@ -168,7 +170,7 @@
                         <img src="{% static 'images/menu/contact-data.svg' %}"
                              alt="contact-data"
                              class="w-8 h-8">
-                        <h2 class="text-xl md:text-2xl text-center text-zinc-400/60 font-semibold leading-tight tracking-wide">
+                        <h2 class="text-xl md:text-2xl text-center text-indigo-700 font-semibold leading-tight tracking-wide">
                             Контактная информация
                         </h2>
                     </div>
