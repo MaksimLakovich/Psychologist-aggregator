@@ -2055,6 +2055,11 @@ input:checked + .toggle-bg {
   margin-bottom: 2.5rem;
 }
 
+.my-12 {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+}
+
 .-mt-10 {
   margin-top: -2.5rem;
 }
@@ -3330,6 +3335,14 @@ input:checked + .toggle-bg {
   border-color: rgb(167 243 208 / var(--tw-border-opacity, 1));
 }
 
+.border-indigo-100\/50 {
+  border-color: rgb(229 237 255 / 0.5);
+}
+
+.border-indigo-300\/50 {
+  border-color: rgb(180 198 252 / 0.5);
+}
+
 .\!bg-gray-50 {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1)) !important;
@@ -3760,6 +3773,10 @@ input:checked + .toggle-bg {
   background-color: rgb(110 231 183 / var(--tw-bg-opacity, 1));
 }
 
+.bg-indigo-50\/70 {
+  background-color: rgb(240 245 255 / 0.7);
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
@@ -3901,6 +3918,10 @@ input:checked + .toggle-bg {
 
 .p-10 {
   padding: 2.5rem;
+}
+
+.p-5 {
+  padding: 1.25rem;
 }
 
 .px-1 {
@@ -4674,6 +4695,11 @@ input:checked + .toggle-bg {
   color: rgb(81 69 205 / 0.85);
 }
 
+.text-indigo-50 {
+  --tw-text-opacity: 1;
+  color: rgb(240 245 255 / var(--tw-text-opacity, 1));
+}
+
 .line-through {
   text-decoration-line: line-through;
 }
@@ -5329,6 +5355,10 @@ input:checked + .toggle-bg {
 
 .hover\:bg-zinc-300\/75:hover {
   background-color: rgb(212 212 216 / 0.75);
+}
+
+.hover\:bg-white\/80:hover {
+  background-color: rgb(255 255 255 / 0.8);
 }
 
 .hover\:text-blue-600:hover {
@@ -6065,6 +6095,11 @@ input:checked + .toggle-bg {
     font-size: 1rem;
     line-height: 1.5rem;
   }
+
+  .sm\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
 }
 
 @media (min-width: 768px) {
@@ -6144,6 +6179,10 @@ input:checked + .toggle-bg {
     margin-bottom: 0px;
   }
 
+  .md\:mb-10 {
+    margin-bottom: 2.5rem;
+  }
+
   .md\:block {
     display: block;
   }
@@ -6182,6 +6221,10 @@ input:checked + .toggle-bg {
 
   .md\:w-48 {
     width: 12rem;
+  }
+
+  .md\:w-auto {
+    width: auto;
   }
 
   .md\:flex-1 {
