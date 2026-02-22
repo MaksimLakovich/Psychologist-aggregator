@@ -28,7 +28,8 @@
              class="w-96 h-auto opacity-20 blur-[5px] transform translate-x-10 translate-y-10">
     </div>
 
-    <div class="relative z-10 w-full px-6 sm:px-8 lg:px-24 py-10">
+    <div class="relative z-10 w-full px-6 sm:px-8 py-10
+        {% if show_sidebar %} lg:px-24 {% else %} lg:px-40 xl:px-64 {% endif %}">
 
         <!-- Шапка страницы -->
         <div class="flex flex-wrap justify-between items-start mb-8 md:mb-10">
@@ -195,10 +196,10 @@
 
                         <div class="relative z-10">
                             <div class="flex items-center gap-3 mb-5">
-                                <div class="p-2 bg-white/10 rounded-xl">
+                                <div class="bg-white/10 rounded-xl">
                                     <img src="{% static 'images/menu/telegram-icon.svg' %}"
                                          alt="telegram"
-                                         class="w-10 h-10">
+                                         class="w-12 h-12">
                                 </div>
                                 <h3 class="font-bold text-xl tracking-wide">Мы в Telegram</h3>
                             </div>
@@ -213,7 +214,7 @@
                                 Подписаться
                                 <img src="{% static 'images/menu/heart-icon.svg' %}"
                                      alt="heart-icon"
-                                     class="w-5 h-5">
+                                     class="w-6 h-6">
                             </a>
                         </div>
                     </div>
