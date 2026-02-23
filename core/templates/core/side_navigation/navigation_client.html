@@ -126,7 +126,12 @@
                     </svg>
                 </button>
                 <ul id="dropdown-psychologist"
-                    class="space-y-2 overflow-hidden transition-all duration-300 ease-out transform max-h-0 opacity-0 -translate-y-1 pointer-events-none">
+                    class="space-y-2 overflow-hidden transition-all duration-300 ease-out transform
+                        {% if current_sidebar_key == 'psychologist-match' or current_sidebar_key == 'psychologist-catalog' %}
+                        max-h-80 opacity-100 translate-y-0 pointer-events-auto py-2
+                        {% else %}
+                        max-h-0 opacity-0 -translate-y-1 pointer-events-none
+                        {% endif %}">
                     <li>
                         <a href="{% url 'core:general-questions' %}"
                            data-nav-item
@@ -140,11 +145,12 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#"
+                        <a href="{% url 'core:psychologist-catalog' %}?layout=sidebar"
                            data-nav-item
                            data-nav-key="psychologist-catalog"
                            data-nav-parent-group="psychologist"
-                           class="{{ nav_sub_item_classes }}">
+                           class="{{ nav_sub_item_classes }} {% if current_sidebar_key == 'psychologist-catalog' %}bg-gray-300/25 !text-indigo-700{% endif %}"
+                           {% if current_sidebar_key == 'psychologist-catalog' %}data-nav-active-server="1" aria-current="page"{% endif %}>
                             <img src="{% static 'images/menu/num_point.svg' %}"
                                  alt="point"
                                  class="transition-transform duration-200 group-hover:scale-110">
