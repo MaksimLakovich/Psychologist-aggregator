@@ -229,6 +229,10 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
         context["current_sidebar_key"] = "psychologist-catalog"
 
+        # ВАЖНО: обязательно добавляем page_data в context.
+        # Иначе шаблон не получит profiles/has_next/total_count и карточки не отобразятся.
+        context.update(page_data)
+
         return context
 
     def get(self, request, *args, **kwargs):
