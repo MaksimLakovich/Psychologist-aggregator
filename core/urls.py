@@ -34,11 +34,6 @@ urlpatterns = [
     path("client-account/", ClientAccountView.as_view(), name="client-account"),
 
     # КЛИЕНТ: каталог психологов
-    # Важно: используем именно маршрут psychologist_catalog/ согласно согласованным требованиям.
     path("psychologist_catalog/", PsychologistCatalogPageView.as_view(), name="psychologist-catalog"),
-    path(
-        "psychologist_catalog/<slug:profile_slug>/",
-        PsychologistCatalogDetailPageView.as_view(),
-        name="psychologist-catalog-detail",
-    ),
+    path("psychologist_catalog/<slug:profile_slug>/", PsychologistCatalogDetailPageView.as_view(), name="psychologist-catalog-detail"),
 ]
