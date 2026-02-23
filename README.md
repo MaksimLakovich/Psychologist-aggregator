@@ -217,12 +217,16 @@
 │    ├── _web/                        # ℹ️ WEB-часть (формы + HTML)
 │    │    ├── forms/
 │    │    │    ├── auth_form.py                      # Формы Входа / Регистрации клиента / Регистрации психолога
-│    │    │    ├── reset_password_form.py            # Формы для восстановления пароля
+│    │    │    ├── reset_password_form.py            # Форма для восстановления пароля (сброс неактивным пользователем)
+│    │    │    ├── change_password_form.py           # Форма для изменения пароля (активный пользователь)
+│    │    │    ├── edit_client_form.py               # Форма для редактирования данных клиента
 │    │    │    └── ...
 │    │    ├── views/
 │    │    │    ├── auth_view.py                      # Login / Logout / Register
 │    │    │    ├── ratelimit_view.py                 # django-ratelimit: тут красивая обработка ошибок 403/429. Отображает понятную страницу для случаев превышения лимитов запросов
 │    │    │    ├── reset_password_view.py            # Восстановление пароля
+│    │    │    ├── change_password_view.py           # Изменение пароля
+│    │    │    ├── edit_client_view.py               # Редактирование данных клиента
 │    │    │    └── ...
 │    │    └── urls.py                         # Роуты для web-страниц
 │    ├── templates/                   # HTML-шаблоны
@@ -232,6 +236,8 @@
 │    │          ├── ratelimited.html                    # Страница для красивой обработки ошибок 403/429 в django-ratelimit
 │    │          ├── password_reset_request_page.html    # Страница для запроса восстановления пароля
 │    │          ├── password_reset_confirm_page.html    # Страница для установки нового пароля 
+│    │          ├── change_password.html                # Страница для изменения пароля
+│    │          ├── edit_client.html                    # Страница для редактирования данных клиента
 │    │          └── ...
 │    ├── migrations/
 │    ├── services/                    # Сервисные вспомогательные функции

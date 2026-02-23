@@ -4,7 +4,7 @@ from django.views.generic import TemplateView
 class CommonQuestionPageView(TemplateView):
     """Класс-контроллер на основе Generic для отображения страницы *ВОПРОСЫ-ОТВЕТЫ*."""
 
-    template_name = "core/questions_answers.html"
+    template_name = "core/client_pages/my_account/questions_answers.html"
 
     def get_context_data(self, **kwargs):
         """Формирование контекста для передачи данных в шаблон.

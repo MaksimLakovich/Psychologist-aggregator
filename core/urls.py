@@ -10,7 +10,7 @@ from core.views.client.specialist_matching.view_payment_card import \
     ClientAddPaymentCardPageView
 from core.views.client.specialist_matching.view_personal_questions import \
     ClientPersonalQuestionsPageView
-from core.views.questions_answers import CommonQuestionPageView
+from core.views.client.my_account.questions_answers import CommonQuestionPageView
 from core.views.start_view import StartPageView
 
 app_name = CoreConfig.name

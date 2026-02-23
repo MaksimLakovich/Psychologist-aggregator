@@ -15,7 +15,7 @@ class EditClientProfilePageView(LoginRequiredMixin, FormView):
     """Web-контроллер для редактирования профиля клиента."""
 
     form_class = EditClientProfileForm
-    template_name = "core/client_pages/my_account/edit_client.html"
+    template_name = "users/edit_client.html"
     success_url = reverse_lazy("users:web:profile-edit")
 
     def dispatch(self, request, *args, **kwargs):
