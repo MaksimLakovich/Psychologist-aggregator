@@ -124,11 +124,14 @@
     <!-- 8) Кнопка перехода в полный профиль -->
     <div class="mt-5">
         <a
-            href="{% url 'core:psychologist-catalog-detail' profile_slug=profile.catalog_slug %}"
+            href="{% url 'core:psychologist-catalog-detail' profile_slug=profile.slug %}"
             class="inline-flex w-full items-center justify-center rounded-xl bg-indigo-700 px-4 py-3 text-base font-bold tracking-wide text-white transition hover:bg-indigo-900"
         >
             Смотреть полный профиль
         </a>
     </div>
 </article>
+
+<script type="module" src="{% static 'js/modules/psychologist_catalog.js' %}"></script>
+
 {% endfor %}
