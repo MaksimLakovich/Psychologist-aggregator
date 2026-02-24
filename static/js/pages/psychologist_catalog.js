@@ -57,9 +57,9 @@ function initLoadMore() {
     loadMoreButton.addEventListener("click", async () => {
         const endpoint = loadMoreButton.dataset.endpoint;
         const nextPage = loadMoreButton.dataset.nextPage;
-        const seed = loadMoreButton.dataset.seed;
+        const randomOrderKey = loadMoreButton.dataset.randomOrderKey;
 
-        if (!endpoint || !nextPage || !seed) {
+        if (!endpoint || !nextPage || !randomOrderKey) {
             loadMoreButton.hidden = true;
             return;
         }
@@ -71,7 +71,7 @@ function initLoadMore() {
             const params = new URLSearchParams({
                 partial: "1",
                 page: String(nextPage),
-                seed: String(seed),
+                order_key: String(randomOrderKey),
             });
 
             const response = await fetch(`${endpoint}?${params.toString()}`, {
@@ -103,7 +103,7 @@ function initLoadMore() {
 
             if (data.has_next && data.next_page_number) {
                 loadMoreButton.dataset.nextPage = String(data.next_page_number);
-                loadMoreButton.dataset.seed = String(data.catalog_seed || seed);
+                loadMoreButton.dataset.randomOrderKey = String(data.random_order_key || randomOrderKey);
                 loadMoreButton.hidden = false;
             } else {
                 loadMoreButton.hidden = true;

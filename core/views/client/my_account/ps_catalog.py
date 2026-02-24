@@ -1,5 +1,4 @@
 import random
-import secrets
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
@@ -22,13 +21,16 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
         2) Использует архитектуру без Django-формы (чистый GET-поток).
         3) Показывает первые N-карточек и поддерживает кнопку "Показать еще" с догрузкой.
         4) На первом входе в каталог формирует случайный порядок карточек и закрепляет этот порядок
-            в рамках текущей сессии, чтобы при пагинации не было дублей и "прыгающего" списка."""
+            в рамках текущей сессии через "ключ случайного порядка", чтобы при пагинации
+            не было дублей и "прыгающего" списка."""
 
     template_name = "core/client_pages/my_account/psychologist_catalog.html"
 
     # Храним константы рядом с вью, чтобы не размазывать важную конфигурацию по проекту
     page_size = CARDS_PER_PAGE
-    CATALOG_SEED_SESSION_KEY = "psychologist_catalog_seed"
+    # Техническое имя ключа в session. Тут хранится число, которое определяет
+    # стабильный случайный порядок/набор карточек на время сессии пользователя
+    CATALOG_RANDOM_ORDER_SESSION_KEY = "psychologist_catalog_random_order_key"
 
     def get_queryset(self):
         """Получение базового QuerySet для каталога психологов.
@@ -37,7 +39,8 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
             1) Фильтруем только активных и верифицированных специалистов.
             2) Применяем select_related/prefetch_related, чтобы избежать N+1-запросов.
             3) Базовую сортировку оставляем стабильной (по id), а реальную случайность применяем безопасно
-                на уровне списка id (random.shuffle() + seed).
+                на уровне списка id (random + ключ случайного порядка).
+
         "Случайность" - это рандомный вывод ВСЕХ карточек БЕЗ фильтрации при первом открытии страницы, чтоб
         была динамика. Далее мы добавим коэффициент совпадения при наличии фильтрации и ранжированный вывод."""
         return (
@@ -48,39 +51,45 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
             .order_by("id")
         )
 
-    def _build_catalog_seed(self):
-        """Определяет seed (источник) для случайного порядка карточек.
+    def _get_or_create_random_order_key(self):
+        """Определяет "ключ случайного порядка" для карточек каталога.
 
         Основная логика:
-            - Если seed явно пришел в query-параметре (AJAX "Показать еще"), используем его.
-            - Если это первый заход на страницу каталога (обычный GET без page/partial),
-              создаем новый seed, чтобы при каждом новом входе порядок был новым.
-            - Иначе используем seed из session, чтобы пагинация была стабильной."""
-        seed_from_query = self.request.GET.get("seed")
-        if seed_from_query is not None:
+            - Если ключ явно пришел в query-параметре (AJAX "Показать еще"), используем его.
+            - Если это первый заход на страницу каталога (обычный GET без page/partial), то создаем новый ключ,
+                чтобы при каждом новом входе порядок был новым.
+            - Иначе используем ключ из session, чтобы пагинация была стабильной.
+
+        Почему это важно:
+            - page=1, page=2, page=3 должны работать с ОДНИМ и тем же порядком карточек (чтоб случайно не показывать
+                один и тех же психологов и на page=1 и на page=2 и так далее).
+            - Тогда "Показать еще" не покажет дубли и не пропустит специалистов."""
+        order_key_from_query = self.request.GET.get("order_key")
+
+        if order_key_from_query is not None:
             try:
-                return int(seed_from_query)
+                return int(order_key_from_query)
             except ValueError:
-                # Невалидный seed в query не должен ломать страницу
+                # Невалидный ключ в query не должен ломать страницу
                 pass
 
         page = self.request.GET.get("page")
         is_partial = self.request.GET.get("partial") == "1"
 
-        # Новый вход на страницу каталога: формируем новый рандомный порядок
+        # Новый вход на страницу каталога: формируем новый случайный порядок
         if not is_partial and (page is None or page == "1"):
-            seed = secrets.randbelow(10**9)
-            self.request.session[self.CATALOG_SEED_SESSION_KEY] = seed
-            return seed
+            random_order_key = random.randrange(10**9)
+            self.request.session[self.CATALOG_RANDOM_ORDER_SESSION_KEY] = random_order_key
+            return random_order_key
 
-        seed_from_session = self.request.session.get(self.CATALOG_SEED_SESSION_KEY)
-        if isinstance(seed_from_session, int):
-            return seed_from_session
+        order_key_from_session = self.request.session.get(self.CATALOG_RANDOM_ORDER_SESSION_KEY)
+        if isinstance(order_key_from_session, int):
+            return order_key_from_session
 
-        # Fallback (если в session seed по какой-то причине отсутствует)
-        seed = secrets.randbelow(10**9)
-        self.request.session[self.CATALOG_SEED_SESSION_KEY] = seed
-        return seed
+        # Fallback (если в session ключ по какой-то причине отсутствует)
+        random_order_key = random.randrange(10**9)
+        self.request.session[self.CATALOG_RANDOM_ORDER_SESSION_KEY] = random_order_key
+        return random_order_key
 
     @staticmethod
     def _build_experience_label(work_experience_years):
@@ -128,16 +137,22 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
         profile.slug = generate_unique_slug(profile, source_value)
         profile.save(update_fields=["slug"])
 
-    def _get_catalog_page(self):
-        """Собирает страницу каталога с учетом случайного порядка и пагинации.
+    def _build_catalog_page_data(self):
+        """Собирает данные текущей страницы каталога (page=1 / page=2 / ...).
 
         Возвращает dict:
             - profiles: список PsychologistProfile для текущей страницы;
             - has_next / next_page_number / current_page_number;
             - total_count;
-            - catalog_seed."""
+            - random_order_key.
+
+        Техническая логика (простыми словами):
+            1) Берем id всех подходящих психологов из БД.
+            2) Перемешиваем эти id по "ключу случайного порядка".
+            3) Берем только нужный кусок страницы (например, 1-18 или 19-36).
+            4) Вторым запросом в БД забираем данные только по этим id."""
         queryset = self.get_queryset()
-        catalog_seed = self._build_catalog_seed()
+        random_order_key = self._get_or_create_random_order_key()
 
         # 1) Берем только id, чтобы дешево перемешать порядок в памяти
         profile_ids = list(queryset.values_list("id", flat=True))
@@ -150,11 +165,11 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
                 "next_page_number": None,
                 "current_page_number": 1,
                 "total_count": 0,
-                "catalog_seed": catalog_seed,
+                "random_order_key": random_order_key,
             }
 
-        # 2) Перемешиваем детерминированно через seed
-        rng = random.Random(catalog_seed)
+        # 2) Перемешиваем детерминированно через "ключ случайного порядка"
+        rng = random.Random(random_order_key)
         rng.shuffle(profile_ids)
 
         # 3) Пагинируем уже перемешанный список id
@@ -196,18 +211,19 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
             "next_page_number": page_obj.next_page_number() if page_obj.has_next() else None,
             "current_page_number": page_obj.number,
             "total_count": paginator.count,
-            "catalog_seed": catalog_seed,
+            "random_order_key": random_order_key,
         }
 
     def get_context_data(self, **kwargs):
         """Формирование контекста для HTML-шаблона каталога.
+
         В контекст передаем:
             - title страницы;
             - параметры для сайдбара/меню;
             - карточки текущей страницы;
             - состояние пагинации для кнопки "Показать еще"."""
         context = super().get_context_data(**kwargs)
-        page_data = self._get_catalog_page()
+        page_data = self._build_catalog_page_data()
 
         context["title_psychologist_catalog_page_view"] = "Каталог психологов на Опора — запись на приём к психологу"
 
@@ -232,8 +248,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
         """Обрабатывает 2 режима ответа:
 
         1) Полная HTML-страница (обычный переход в каталог).
-        2) JSON с HTML-фрагментом карточек (AJAX-догрузка по кнопке "Показать еще").
-        """
+        2) JSON с HTML-фрагментом карточек (AJAX-догрузка по кнопке "Показать еще")."""
         context = self.get_context_data(**kwargs)
 
         # partial=1 используется только для асинхронной подгрузки следующей страницы
@@ -252,7 +267,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
                     "cards_html": cards_html,
                     "has_next": context["has_next"],
                     "next_page_number": context["next_page_number"],
-                    "catalog_seed": context["catalog_seed"],
+                    "random_order_key": context["random_order_key"],
                 },
                 status=200,
             )

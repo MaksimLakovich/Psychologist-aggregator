@@ -60,7 +60,7 @@
                 type="button"
                 data-endpoint="{% url 'core:psychologist-catalog' %}"
                 data-next-page="{{ next_page_number|default:'' }}"
-                data-seed="{{ catalog_seed }}"
+                data-random-order-key="{{ random_order_key }}"
                 class="rounded-xl bg-indigo-700 px-8 py-3 text-lg font-extrabold tracking-wide text-white transition hover:bg-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"
                 {% if not has_next %}hidden{% endif %}
             >
