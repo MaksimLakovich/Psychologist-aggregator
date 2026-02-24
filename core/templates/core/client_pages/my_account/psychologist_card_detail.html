@@ -6,6 +6,14 @@
 
 {% block content %}
 <section class="bg-white py-8 antialiased md:py-10">
+
+    <!-- Фоновое лого в правом нижнем углу для узнаваемого визуального контекста страницы -->
+    <div class="pointer-events-none absolute bottom-0 right-0 z-0 hidden select-none p-8 lg:block">
+        <img src="{% static 'images/menu/opora-base.png' %}"
+             alt=""
+             class="h-auto w-96 translate-x-10 translate-y-10 opacity-20 blur-[5px]">
+    </div>
+
     <div class="mx-auto max-w-6xl px-4 2xl:px-0">
 
         <div class="mb-6">

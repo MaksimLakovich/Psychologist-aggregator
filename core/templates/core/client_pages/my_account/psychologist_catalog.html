@@ -19,13 +19,6 @@
 {% block content %}
 <section class="relative min-h-screen w-full overflow-hidden bg-white/70">
 
-    <!-- Фоновое лого в правом нижнем углу для узнаваемого визуального контекста страницы -->
-    <div class="pointer-events-none absolute bottom-0 right-0 z-0 hidden select-none p-8 lg:block">
-        <img src="{% static 'images/menu/opora-base.png' %}"
-             alt=""
-             class="h-auto w-96 translate-x-10 translate-y-10 opacity-20 blur-[5px]">
-    </div>
-
     <div class="relative z-10 w-full px-6 py-10 sm:px-8 {% if show_sidebar %}lg:px-16 xl:px-24{% else %}lg:px-40 xl:px-72{% endif %}">
 
         <!-- Шапка страницы -->
