@@ -3,10 +3,9 @@ from django.urls import path
 from core.apps import CoreConfig
 from core.views.client.my_account.main_account_page import ClientAccountView
 from core.views.client.my_account.ps_catalog import (
-    PsychologistCatalogDetailPageView,
-    PsychologistCatalogPageView,
-)
-from core.views.client.my_account.questions_answers import CommonQuestionPageView
+    PsychologistCardDetailPageView, PsychologistCatalogPageView)
+from core.views.client.my_account.questions_answers import \
+    CommonQuestionPageView
 from core.views.client.specialist_matching.view_choice_psychologist import \
     ClientChoicePsychologistPageView
 from core.views.client.specialist_matching.view_general_questions import \
@@ -35,5 +34,5 @@ urlpatterns = [
 
     # КЛИЕНТ: каталог психологов
     path("psychologist_catalog/", PsychologistCatalogPageView.as_view(), name="psychologist-catalog"),
-    path("psychologist_catalog/<slug:profile_slug>/", PsychologistCatalogDetailPageView.as_view(), name="psychologist-catalog-detail"),
+    path("<slug:profile_slug>/", PsychologistCardDetailPageView.as_view(), name="psychologist-card-detail"),
 ]

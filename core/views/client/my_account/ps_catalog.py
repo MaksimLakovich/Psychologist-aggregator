@@ -1,6 +1,6 @@
 import random
 import secrets
-from core.constants import CARDS_PER_PAGE
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Case, IntegerField, Value, When
@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.views.generic import TemplateView
 
+from core.constants import CARDS_PER_PAGE
 from users.models import PsychologistProfile
 from users.services.slug import generate_unique_slug
 
@@ -259,12 +260,12 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
         return self.render_to_response(context)
 
 
-class PsychologistCatalogDetailPageView(LoginRequiredMixin, TemplateView):
+class PsychologistCardDetailPageView(LoginRequiredMixin, TemplateView):
     """Контроллер на основе TemplateView для отображения страницы детального профиля психолога из каталога.
     Страница нужна для перехода из краткой карточки по кнопке "Смотреть полный профиль" на отдельный URL вида:
         - psychologist_catalog/anna-ivanova/ """
 
-    template_name = "core/client_pages/my_account/psychologist_catalog_detail.html"
+    template_name = "core/client_pages/my_account/psychologist_card_detail.html"
 
     def get_context_data(self, **kwargs):
         """Формирование контекста для HTML-шаблона детальной страницы психолога.
