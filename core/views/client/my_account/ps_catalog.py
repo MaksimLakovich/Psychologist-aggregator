@@ -34,6 +34,9 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
     # Техническое имя ключа в session. Тут хранится число, которое определяет
     # стабильный случайный порядок/набор карточек на время сессии пользователя
     CATALOG_RANDOM_ORDER_SESSION_KEY = "psychologist_catalog_random_order_key"
+    # Техническое имя ключа в session для режима отображения каталога.
+    # Возможные значения: "sidebar" / "menu".
+    CATALOG_LAYOUT_MODE_SESSION_KEY = "psychologist_catalog_layout_mode"
 
     def get_queryset(self):
         """Получение базового QuerySet для каталога психологов.
@@ -93,6 +96,42 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
         random_order_key = random.randrange(10**9)
         self.request.session[self.CATALOG_RANDOM_ORDER_SESSION_KEY] = random_order_key
         return random_order_key
+
+    def _resolve_layout_mode(self):
+        """Определяет режим отображения каталога: через сайдбар или через верхнее меню.
+
+        Возвращает:
+            - "sidebar" -> нужно показывать левую навигацию;
+            - "menu" -> страница рендерится без левого сайдбара.
+
+        Приоритет источников:
+            1) Явный query-параметр layout (например, ?layout=sidebar).
+            2) Для AJAX/пагинации без layout берем значение из session.
+            3) Для обычного первого входа без layout считаем, что это режим "menu".
+
+        Почему нужен session fallback:
+            - В запросах "Показать еще" layout может не прийти по разным причинам
+              (кеш статики, устаревший JS, ручной вызов URL), но мы обязаны сохранить
+              единый режим интерфейса до конца текущей сессии каталога."""
+        layout_from_query = self.request.GET.get("layout")
+        if layout_from_query in {"sidebar", "menu"}:
+            self.request.session[self.CATALOG_LAYOUT_MODE_SESSION_KEY] = layout_from_query
+            return layout_from_query
+
+        is_partial = self.request.GET.get("partial") == "1"
+        requested_page = self.request.GET.get("page")
+
+        # Для первого полного входа без явного layout фиксируем "menu",
+        # чтобы не подтягивать случайно старый режим из прошлых переходов.
+        if not is_partial and (requested_page is None or requested_page == "1"):
+            self.request.session[self.CATALOG_LAYOUT_MODE_SESSION_KEY] = "menu"
+            return "menu"
+
+        layout_from_session = self.request.session.get(self.CATALOG_LAYOUT_MODE_SESSION_KEY)
+        if layout_from_session in {"sidebar", "menu"}:
+            return layout_from_session
+
+        return "menu"
 
     @staticmethod
     def _build_experience_label(work_experience_years):
@@ -257,12 +296,12 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
 
         context["title_psychologist_catalog_page_view"] = "Каталог психологов на Опора — запись на приём к психологу"
 
-        # Логика управление отображением сайдбара:
-        # 1) если пришли из сайдбара, показываем его;
-        # 2) и показываем верхнее меню без сайдбара, если открыли не из сайдбара
-        from_sidebar = self.request.GET.get("layout") == "sidebar"
-        context["show_sidebar"] = from_sidebar
-        if not from_sidebar:
+        # Логика управления отображением сайдбара.
+        # Используем единый layout_mode, чтобы одинаково работать для page=1 и page=2+.
+        layout_mode = self._resolve_layout_mode()
+        context["layout_mode"] = layout_mode
+        context["show_sidebar"] = layout_mode == "sidebar"
+        if layout_mode != "sidebar":
             context["menu_variant"] = "without-sidebar"
 
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
@@ -287,6 +326,10 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
                 "core/client_pages/my_account/_psychologist_catalog_cards.html",
                 {
                     "profiles": context["profiles"],
+                    # ВАЖНО: для догружаемых карточек обязательно передаем layout_mode,
+                    # иначе у ссылок карточек может потеряться корректный параметр layout.
+                    "layout_mode": context["layout_mode"],
+                    "show_sidebar": context["show_sidebar"],
                 },
                 request=request,
             )
@@ -311,6 +354,29 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, TemplateView):
         - psychologist_catalog/anna-ivanova/ """
 
     template_name = "core/client_pages/my_account/psychologist_card_detail.html"
+
+    CATALOG_LAYOUT_MODE_SESSION_KEY = PsychologistCatalogPageView.CATALOG_LAYOUT_MODE_SESSION_KEY
+
+    def _resolve_layout_mode(self):
+        """Определяет режим отображения детальной карточки психолога.
+
+        Приоритет:
+            1) Явный query-параметр layout.
+            2) Значение из session, сохраненное на странице каталога.
+            3) Режим по умолчанию "menu".
+
+        Такой подход гарантирует, что кнопка "Назад в каталог" вернет пользователя
+        в тот же визуальный режим (с сайдбаром или без него)."""
+        layout_from_query = self.request.GET.get("layout")
+        if layout_from_query in {"sidebar", "menu"}:
+            self.request.session[self.CATALOG_LAYOUT_MODE_SESSION_KEY] = layout_from_query
+            return layout_from_query
+
+        layout_from_session = self.request.session.get(self.CATALOG_LAYOUT_MODE_SESSION_KEY)
+        if layout_from_session in {"sidebar", "menu"}:
+            return layout_from_session
+
+        return "menu"
 
     def get_context_data(self, **kwargs):
         """Формирование контекста для HTML-шаблона детальной страницы психолога.
@@ -338,12 +404,11 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, TemplateView):
             f"{profile.user.first_name} {profile.user.last_name} — профиль психолога"
         )
 
-        # Логика управление отображением сайдбара:
-        # 1) если пришли из сайдбара, показываем его;
-        # 2) и показываем верхнее меню без сайдбара, если открыли не из сайдбара
-        from_sidebar = self.request.GET.get("layout") == "sidebar"
-        context["show_sidebar"] = from_sidebar
-        if not from_sidebar:
+        # Логика управления отображением сайдбара.
+        layout_mode = self._resolve_layout_mode()
+        context["layout_mode"] = layout_mode
+        context["show_sidebar"] = layout_mode == "sidebar"
+        if layout_mode != "sidebar":
             context["menu_variant"] = "without-sidebar"
 
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ

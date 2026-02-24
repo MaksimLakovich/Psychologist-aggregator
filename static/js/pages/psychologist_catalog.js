@@ -58,6 +58,7 @@ function initLoadMore() {
         const endpoint = loadMoreButton.dataset.endpoint;
         const nextPage = loadMoreButton.dataset.nextPage;
         const randomOrderKey = loadMoreButton.dataset.randomOrderKey;
+        const layoutMode = loadMoreButton.dataset.layout;
 
         if (!endpoint || !nextPage || !randomOrderKey) {
             loadMoreButton.hidden = true;
@@ -73,6 +74,9 @@ function initLoadMore() {
                 page: String(nextPage),
                 order_key: String(randomOrderKey),
             });
+            if (layoutMode) {
+                params.append("layout", layoutMode);
+            }
 
             const response = await fetch(`${endpoint}?${params.toString()}`, {
                 method: "GET",
