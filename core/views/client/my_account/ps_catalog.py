@@ -6,13 +6,16 @@ from django.db.models import Case, IntegerField, Value, When
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
+from django_ratelimit.decorators import ratelimit
 
 from core.constants import CARDS_PER_PAGE
 from users.models import PsychologistProfile
 from users.services.slug import generate_unique_slug
 
 
+@method_decorator(ratelimit(key="user_or_ip", rate="60/m", block=True), name="get")
 class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
     """Контроллер на основе TemplateView для отображения страницы *Каталог психологов*.
 
@@ -39,7 +42,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
             1) Фильтруем только активных и верифицированных специалистов.
             2) Применяем select_related/prefetch_related, чтобы избежать N+1-запросов.
             3) Базовую сортировку оставляем стабильной (по id), а реальную случайность применяем безопасно
-                на уровне списка id (random + ключ случайного порядка).
+                на уровне списка id (random.shuffle() + ключ случайного порядка).
 
         "Случайность" - это рандомный вывод ВСЕХ карточек БЕЗ фильтрации при первом открытии страницы, чтоб
         была динамика. Далее мы добавим коэффициент совпадения при наличии фильтрации и ранжированный вывод."""
@@ -122,7 +125,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
         return f"Опыт {years} {suffix}"
 
     @staticmethod
-    def _ensure_profile_slug(profile):
+    def _profile_slug(profile):
         """Гарантирует наличие slug у профиля психолога.
 
         Основная логика:
@@ -186,7 +189,34 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
         current_page_ids = list(page_obj.object_list)
 
         # 4) Возвращаем профили в том же порядке, что и в current_page_ids
+        # current_page_ids - это список id текущей страницы (например, page=2) в нужном порядке после перемешивания.
+        # Например: current_page_ids = [42, 7, 19]. Если сделать просто: queryset.filter(pk__in=current_page_ids), то
+        # БД вернет записи в своем порядке (часто по id: 7, 19, 42), а нам нужен порядок 42, 7, 19. Вот эту задачу
+        # решает код ниже.
+
+        # УПРОЩЕННЫЙ ВАРИАНТ КОДА: конструкцию можно описать в развернутом виде вот так:
+        # # Шаг 1. Создаем пустой список условий для SQL-конструкции CASE ... WHEN ...
+        # order_conditions = []
+        # # Шаг 2. Проходим по id текущей страницы и запоминаем их позицию
+        # # Пример current_page_ids = [42, 7, 19]
+        # # Тогда пары будут: (0,42), (1,7), (2,19)
+        # for position, profile_id in enumerate(current_page_ids):
+        #     order_conditions.append(
+        #         When(pk=profile_id, then=Value(position))
+        #     )
+        # # Шаг 3. Собираем итоговое выражение:
+        # # CASE
+        # #   WHEN pk=42 THEN 0
+        # #   WHEN pk=7  THEN 1
+        # #   WHEN pk=19 THEN 2
+        # # END
+        # ordering = Case(
+        #     *order_conditions,
+        #     output_field=IntegerField(),
+        # )
         if current_page_ids:
+            # enumerate - дает пары: (0, 42), (1, 7), (2, 19), то есть “какая позиция у каждого id”
+            # Case - создает SQL-правило: если pk=42 то _catalog_order=0, если pk=7 то _catalog_order=1 и т.д.
             ordering = Case(
                 *[When(pk=pk, then=Value(pos)) for pos, pk in enumerate(current_page_ids)],
                 output_field=IntegerField(),
@@ -194,15 +224,15 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
             profiles = list(
                 queryset
                 .filter(pk__in=current_page_ids)
-                .annotate(_catalog_order=ordering)
-                .order_by("_catalog_order")
+                .annotate(_catalog_order=ordering)  # annotate - добавляет это вычисленное поле к каждой записи
+                .order_by("_catalog_order")  # order_by - сортирует именно по этой позиции и получаем [42, 7, 19]
             )
         else:
             profiles = []
 
         # Динамически обогащаем объект значениями, которые нужны только для текущего UI
         for profile in profiles:
-            self._ensure_profile_slug(profile)
+            self._profile_slug(profile)
             profile.experience_label = self._build_experience_label(profile.work_experience_years)
 
         return {
