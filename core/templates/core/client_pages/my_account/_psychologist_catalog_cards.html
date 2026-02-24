@@ -125,8 +125,9 @@
     <!-- 8) Кнопка перехода в полный профиль -->
     <div class="mt-5">
         <a
-            href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}?layout={{ layout_mode|default:'menu' }}&catalog_page={{ current_page_number|default:1 }}&catalog_order_key={{ random_order_key }}&catalog_anchor={{ profile.slug }}"
+            href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}"
             data-catalog-detail-link
+            data-profile-slug="{{ profile.slug }}"
             class="inline-flex w-full items-center justify-center rounded-xl bg-indigo-700 px-4 py-3
             text-base font-bold tracking-wide text-white transition hover:bg-indigo-900"
         >

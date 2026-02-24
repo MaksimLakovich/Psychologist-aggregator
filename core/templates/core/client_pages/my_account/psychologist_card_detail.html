@@ -18,6 +18,8 @@
 
         <div class="mb-6">
             <a href="{{ catalog_back_url|default:'#' }}"
+               data-catalog-back-link
+               data-catalog-url="{% url 'core:psychologist-catalog' %}"
                class="inline-flex items-center text-base font-medium text-indigo-600 hover:text-indigo-800">
                 ← Назад в каталог
             </a>
@@ -99,4 +101,5 @@
 
     </div>
 </section>
+<script type="module" src="{% static 'js/pages/psychologist_catalog_detail.js' %}"></script>
 {% endblock %}

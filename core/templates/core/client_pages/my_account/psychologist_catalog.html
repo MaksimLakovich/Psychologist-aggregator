@@ -41,7 +41,7 @@
             id="catalog-cards-grid"
             class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
         >
-            {% include 'core/client_pages/my_account/_psychologist_catalog_cards.html' with profiles=profiles layout_mode=layout_mode show_sidebar=show_sidebar current_page_number=current_page_number random_order_key=random_order_key %}
+            {% include 'core/client_pages/my_account/_psychologist_catalog_cards.html' with profiles=profiles layout_mode=layout_mode show_sidebar=show_sidebar %}
         </div>
 
         <!-- Пустое состояние каталога -->
@@ -60,6 +60,7 @@
                 type="button"
                 data-endpoint="{% url 'core:psychologist-catalog' %}"
                 data-next-page="{{ next_page_number|default:'' }}"
+                data-current-page="{{ current_page_number|default:1 }}"
                 data-random-order-key="{{ random_order_key }}"
                 data-layout="{{ layout_mode }}"
                 class="rounded-xl bg-indigo-700 px-8 py-3 text-lg font-extrabold tracking-wide text-white transition hover:bg-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"

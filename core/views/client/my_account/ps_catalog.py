@@ -342,10 +342,6 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
                     # иначе у ссылок карточек может потеряться корректный параметр layout.
                     "layout_mode": context["layout_mode"],
                     "show_sidebar": context["show_sidebar"],
-                    # ВАЖНО: эти параметры нужны для корректного возврата из detail в каталог
-                    # к той же странице и позиции пользователя.
-                    "current_page_number": context["current_page_number"],
-                    "random_order_key": context["random_order_key"],
                 },
                 request=request,
             )
