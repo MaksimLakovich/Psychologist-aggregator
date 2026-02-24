@@ -1,4 +1,6 @@
 import random
+import re
+from urllib.parse import urlencode
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
@@ -6,6 +8,7 @@ from django.db.models import Case, IntegerField, Value, When
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from django_ratelimit.decorators import ratelimit
@@ -225,7 +228,16 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
         except EmptyPage:
             page_obj = paginator.page(paginator.num_pages)
 
-        current_page_ids = list(page_obj.object_list)
+        # Для сценария "возврат из детальной карточки в каталог":
+        # если указан restore=1 и page>1, то нужно вернуть НЕ только page=2,
+        # а всю ленту от начала и до конца этой страницы (1..2, 1..3 и т.д.),
+        # чтобы пользователь визуально оказался в том же месте списка.
+        restore_mode = self.request.GET.get("restore") == "1" and self.request.GET.get("partial") != "1"
+        if restore_mode and page_obj.number > 1:
+            end_index = page_obj.end_index()
+            current_page_ids = profile_ids[:end_index]
+        else:
+            current_page_ids = list(page_obj.object_list)
 
         # 4) Возвращаем профили в том же порядке, что и в current_page_ids
         # current_page_ids - это список id текущей страницы (например, page=2) в нужном порядке после перемешивания.
@@ -330,6 +342,10 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
                     # иначе у ссылок карточек может потеряться корректный параметр layout.
                     "layout_mode": context["layout_mode"],
                     "show_sidebar": context["show_sidebar"],
+                    # ВАЖНО: эти параметры нужны для корректного возврата из detail в каталог
+                    # к той же странице и позиции пользователя.
+                    "current_page_number": context["current_page_number"],
+                    "random_order_key": context["random_order_key"],
                 },
                 request=request,
             )
@@ -356,6 +372,7 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, TemplateView):
     template_name = "core/client_pages/my_account/psychologist_card_detail.html"
 
     CATALOG_LAYOUT_MODE_SESSION_KEY = PsychologistCatalogPageView.CATALOG_LAYOUT_MODE_SESSION_KEY
+    CATALOG_ANCHOR_PATTERN = re.compile(r"^[a-z0-9-]+$")
 
     def _resolve_layout_mode(self):
         """Определяет режим отображения детальной карточки психолога.
@@ -377,6 +394,53 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, TemplateView):
             return layout_from_session
 
         return "menu"
+
+    def _build_catalog_back_url(self):
+        """Собирает URL для кнопки "Назад в каталог" с восстановлением состояния ленты.
+
+        Что восстанавливаем:
+            1) layout (sidebar/menu);
+            2) стабильный random order через order_key;
+            3) номер страницы, до которой пользователь уже догрузил карточки;
+            4) якорь выбранной карточки, чтобы вернуться к нужной позиции.
+
+        Важно:
+            - Параметры приходят из query текущей детальной страницы.
+            - Все значения валидируем и добавляем только если они корректные.
+        """
+        layout_mode = self._resolve_layout_mode()
+        params = {
+            "layout": layout_mode,
+        }
+
+        raw_catalog_page = self.request.GET.get("catalog_page")
+        if raw_catalog_page:
+            try:
+                catalog_page = int(raw_catalog_page)
+                if catalog_page >= 1:
+                    params["page"] = catalog_page
+                    # restore нужен только если пользователь был дальше первой страницы.
+                    if catalog_page > 1:
+                        params["restore"] = 1
+            except (TypeError, ValueError):
+                pass
+
+        raw_order_key = self.request.GET.get("catalog_order_key")
+        if raw_order_key:
+            try:
+                params["order_key"] = int(raw_order_key)
+            except (TypeError, ValueError):
+                pass
+
+        base_url = reverse("core:psychologist-catalog")
+        query_string = urlencode(params)
+        back_url = f"{base_url}?{query_string}" if query_string else base_url
+
+        raw_anchor = (self.request.GET.get("catalog_anchor") or "").strip().lower()
+        if raw_anchor and self.CATALOG_ANCHOR_PATTERN.match(raw_anchor):
+            back_url = f"{back_url}#psychologist-card-{raw_anchor}"
+
+        return back_url
 
     def get_context_data(self, **kwargs):
         """Формирование контекста для HTML-шаблона детальной страницы психолога.
@@ -403,6 +467,7 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, TemplateView):
         context["title_psychologist_catalog_detail_page_view"] = (
             f"{profile.user.first_name} {profile.user.last_name} — профиль психолога"
         )
+        context["catalog_back_url"] = self._build_catalog_back_url()
 
         # Логика управления отображением сайдбара.
         layout_mode = self._resolve_layout_mode()
