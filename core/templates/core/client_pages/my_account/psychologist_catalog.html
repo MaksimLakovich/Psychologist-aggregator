@@ -56,7 +56,11 @@
         <!-- Нижняя панель: слева номер страницы, по центру "Показать еще", справа "Вернуться в начало" -->
         <div class="mt-10 grid items-center gap-4 text-zinc-400 md:grid-cols-3">
             <p id="catalog-page-indicator" class="text-sm font-medium tracking-wide md:justify-self-start">
-                Страница {{ current_page_number|default:1 }}
+                {% if total_pages %}
+                    {{ current_page_number|default:1 }} из {{ total_pages }}
+                {% else %}
+                    0 из 0
+                {% endif %}
             </p>
 
             <div class="flex flex-col items-center justify-center gap-3 md:justify-self-center">
@@ -66,6 +70,7 @@
                     data-endpoint="{% url 'core:psychologist-catalog' %}"
                     data-next-page="{{ next_page_number|default:'' }}"
                     data-current-page="{{ current_page_number|default:1 }}"
+                    data-total-pages="{{ total_pages|default:0 }}"
                     data-random-order-key="{{ random_order_key }}"
                     data-layout="{{ layout_mode }}"
                     class="rounded-xl bg-indigo-700 px-8 py-3 text-lg font-extrabold tracking-wide text-white transition hover:bg-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"

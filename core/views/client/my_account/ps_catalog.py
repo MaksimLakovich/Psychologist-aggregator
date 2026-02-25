@@ -207,6 +207,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
                 "has_next": False,
                 "next_page_number": None,
                 "current_page_number": 1,
+                "total_pages": 0,
                 "total_count": 0,
                 "random_order_key": random_order_key,
             }
@@ -289,6 +290,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
             "has_next": page_obj.has_next(),
             "next_page_number": page_obj.next_page_number() if page_obj.has_next() else None,
             "current_page_number": page_obj.number,
+            "total_pages": paginator.num_pages,
             "total_count": paginator.count,
             "random_order_key": random_order_key,
         }

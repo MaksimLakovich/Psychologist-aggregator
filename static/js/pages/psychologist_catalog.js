@@ -76,15 +76,22 @@ function persistCatalogState(loadMoreButton, extraState = {}) {
  * Обновляет текстовый индикатор текущей страницы внизу каталога.
  *
  * Пример:
- * - если currentPage = 1, показываем "Страница 1";
- * - после догрузки page=2 показываем "Страница 2".
+ * - если currentPage = 1 и totalPages = 12, показываем "1 из 12";
+ * - после догрузки page=2 показываем "2 из 12".
  */
-function renderCurrentPageIndicator(currentPage) {
+function renderCurrentPageIndicator(currentPage, totalPages) {
     const indicator = document.getElementById("catalog-page-indicator");
     if (!indicator) return;
 
-    const safePage = toPositiveInt(currentPage, 1);
-    indicator.textContent = `Страница ${safePage}`;
+    const safeTotalPages = toNonNegativeInt(totalPages, 0);
+    if (safeTotalPages === 0) {
+        indicator.textContent = "0 из 0";
+        return;
+    }
+
+    const safeCurrentPage = toPositiveInt(currentPage, 1);
+    const normalizedCurrentPage = Math.min(safeCurrentPage, safeTotalPages);
+    indicator.textContent = `${normalizedCurrentPage} из ${safeTotalPages}`;
 }
 
 /**
@@ -160,6 +167,7 @@ function initLoadMore() {
         const endpoint = loadMoreButton.dataset.endpoint;
         const requestedPage = toPositiveInt(loadMoreButton.dataset.nextPage, null);
         const orderKey = toNonNegativeInt(loadMoreButton.dataset.randomOrderKey, null);
+        const totalPages = toNonNegativeInt(loadMoreButton.dataset.totalPages, 0);
         const layoutMode = loadMoreButton.dataset.layout;
 
         if (!endpoint || !requestedPage || orderKey === null) {
@@ -208,7 +216,7 @@ function initLoadMore() {
 
             // Фиксируем прогресс пагинации (до какой страницы пользователь дошел).
             loadMoreButton.dataset.currentPage = String(requestedPage);
-            renderCurrentPageIndicator(requestedPage);
+            renderCurrentPageIndicator(requestedPage, totalPages);
 
             // Берем новый order_key от сервера (если есть), иначе оставляем текущий.
             const refreshedOrderKey = toNonNegativeInt(data.random_order_key, orderKey);
@@ -291,7 +299,8 @@ function initCatalogStatePersistence() {
 document.addEventListener("DOMContentLoaded", () => {
     const loadMoreButton = document.getElementById("catalog-load-more-btn");
     const initialPage = loadMoreButton ? toPositiveInt(loadMoreButton.dataset.currentPage, 1) : 1;
-    renderCurrentPageIndicator(initialPage);
+    const totalPages = loadMoreButton ? toNonNegativeInt(loadMoreButton.dataset.totalPages, 0) : 0;
+    renderCurrentPageIndicator(initialPage, totalPages);
 
     initCardTabs();
     initCatalogStatePersistence();
