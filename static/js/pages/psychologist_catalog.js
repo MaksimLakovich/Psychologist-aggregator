@@ -1,91 +1,36 @@
+import {
+    readCatalogState,
+    toNonNegativeInt,
+    toPositiveInt,
+    writeCatalogState,
+} from "../modules/catalog_state.js";
+
 /**
- * Страница каталога психологов (краткие карточки).
+ * Логика страницы "Каталог психологов".
  *
- * Что делает этот файл:
- * 1) Управляет вкладками внутри карточки: "Основное" / "О себе".
- * 2) Реализует кнопку "Показать еще" (AJAX-догрузка следующей страницы без перезагрузки).
- * 3) Сохраняет техническое состояние каталога в sessionStorage, чтобы при возврате
- *    из детальной карточки можно было восстановить тот же порядок/страницу/позицию.
+ * Этот файл отвечает за 3 задачи:
+ * 1) Переключение вкладок внутри карточки ("Основное" / "О себе").
+ * 2) Кнопку "Показать еще" (догрузка новых карточек без перезагрузки страницы).
+ * 3) Сохранение состояния каталога перед переходом в детальный профиль.
  *
- * Важно:
- * - Это клиентская зона (авторизованный пользователь), поэтому хранение такого технического
- *   состояния в sessionStorage безопасно и уместно.
- * - Любые ошибки работы sessionStorage не должны ломать основной UX каталога.
+ * Пример пользовательского сценария:
+ * - клиент открыл каталог, нажал "Показать еще" до page=3;
+ * - открыл карточку психолога;
+ * - нажал "Назад в каталог";
+ * - система должна помнить page=3 и порядок карточек.
  */
 
-const CATALOG_STATE_STORAGE_KEY = "psychologist_catalog_state_v1";
-const CATALOG_STATE_TTL_MS = 1000 * 60 * 60 * 6; // 6 часов
-
 /**
- * Преобразует значение в целое число > 0.
- * Используем для page, timestamps и других параметров, где 0 невалиден.
- */
-function toPositiveInt(value, fallback = null) {
-    const parsed = Number.parseInt(String(value), 10);
-    if (Number.isInteger(parsed) && parsed > 0) {
-        return parsed;
-    }
-    return fallback;
-}
-
-/**
- * Преобразует значение в целое число >= 0.
- * Используем для order_key: значение 0 допустимо.
- */
-function toNonNegativeInt(value, fallback = null) {
-    const parsed = Number.parseInt(String(value), 10);
-    if (Number.isInteger(parsed) && parsed >= 0) {
-        return parsed;
-    }
-    return fallback;
-}
-
-/**
- * Читает текущее сохраненное состояние каталога из sessionStorage.
+ * Собирает "базовое состояние" каталога из data-атрибутов кнопки "Показать еще".
  *
- * Возвращает:
- * - объект состояния, если оно валидно и не просрочено;
- * - null, если состояния нет/оно битое/истекло.
- */
-function readCatalogState() {
-    try {
-        const rawState = window.sessionStorage.getItem(CATALOG_STATE_STORAGE_KEY);
-        if (!rawState) return null;
-
-        const parsedState = JSON.parse(rawState);
-        if (!parsedState || typeof parsedState !== "object") return null;
-
-        const updatedAt = toPositiveInt(parsedState.updated_at, null);
-        if (updatedAt && Date.now() - updatedAt > CATALOG_STATE_TTL_MS) {
-            window.sessionStorage.removeItem(CATALOG_STATE_STORAGE_KEY);
-            return null;
-        }
-
-        return parsedState;
-    } catch (error) {
-        return null;
-    }
-}
-
-/**
- * Записывает состояние каталога в sessionStorage.
- * Любые ошибки хранилища молча игнорируем, чтобы не ломать рабочий поток пользователя.
- */
-function writeCatalogState(state) {
-    try {
-        window.sessionStorage.setItem(CATALOG_STATE_STORAGE_KEY, JSON.stringify(state));
-    } catch (error) {
-        // В некоторых браузерах/режимах хранилище может быть недоступно.
-        // Это не должно ломать основной сценарий работы каталога
-    }
-}
-
-/**
- * Собирает базовое состояние каталога из текущего DOM кнопки "Показать еще".
+ * Что собираем:
+ * - layout_mode (menu/sidebar);
+ * - current_page (до какой страницы уже догрузили);
+ * - order_key (чтобы не пересортировать карточки при возврате);
+ * - updated_at (время обновления состояния).
  *
- * Источник данных:
- * - data-атрибуты кнопки (layout, currentPage, randomOrderKey).
- * - дополнительные данные extraState (например, anchor выбранной карточки).
+ * extraState нужен для добавления контекста конкретного действия.
+ * Пример: при клике по карточке передаем anchor выбранного психолога.
  */
 function collectCatalogState(loadMoreButton, extraState = {}) {
     if (!loadMoreButton) return null;
@@ -104,10 +49,11 @@ function collectCatalogState(loadMoreButton, extraState = {}) {
 }
 
 /**
- * Сохраняет состояние каталога:
- * 1) читает предыдущее состояние;
- * 2) поверх него накладывает актуальные значения;
- * 3) пишет объединенный объект обратно в storage.
+ * Сохраняет состояние каталога в sessionStorage.
+ *
+ * Почему merge с предыдущим состоянием:
+ * - иногда обновляем не все поля сразу;
+ * - хотим не потерять уже сохраненные значения.
  */
 function persistCatalogState(loadMoreButton, extraState = {}) {
     const baseState = collectCatalogState(loadMoreButton, extraState);
@@ -121,12 +67,17 @@ function persistCatalogState(loadMoreButton, extraState = {}) {
 }
 
 /**
- * Инициализирует вкладки карточек.
+ * Инициализирует вкладки внутри карточек.
  *
- * Логика:
- * - у каждой карточки две вкладки: "main" и "bio";
- * - при переключении меняем стили кнопок и видимость панелей;
- * - защищаемся от повторной инициализации одной и той же карточки.
+ * Как это работает:
+ * - у каждой карточки есть 2 кнопки-вкладки и 2 панели контента;
+ * - при клике выделяем активную кнопку;
+ * - показываем нужную панель и скрываем вторую.
+ *
+ * Важный момент:
+ * - карточки могут догружаться AJAX-ом;
+ * - поэтому у каждой карточки ставим флаг tabsInitialized, чтобы не
+ *   навешивать обработчики повторно.
  */
 function initCardTabs(scope = document) {
     const cards = scope.querySelectorAll("[data-catalog-card]");
@@ -161,7 +112,7 @@ function initCardTabs(scope = document) {
             });
         });
 
-        // По умолчанию открываем "Основное"
+        // Дефолтный режим карточки: вкладка "Основное".
         activateTab("main");
         card.dataset.tabsInitialized = "1";
     });
@@ -170,12 +121,12 @@ function initCardTabs(scope = document) {
 /**
  * Инициализирует кнопку "Показать еще".
  *
- * Шаги на клик:
- * 1) валидируем входные параметры;
- * 2) отправляем GET partial-запрос за следующей страницей;
- * 3) добавляем карточки в текущую сетку;
- * 4) переинициализируем вкладки для новых карточек;
- * 5) обновляем data-атрибуты кнопки и состояние storage.
+ * Алгоритм при клике:
+ * 1) берем page/order_key/layout из data-атрибутов;
+ * 2) запрашиваем partial-HTML следующей страницы;
+ * 3) добавляем новые карточки вниз;
+ * 4) обновляем состояние кнопки (currentPage, nextPage, orderKey);
+ * 5) сохраняем актуальное состояние в sessionStorage.
  */
 function initLoadMore() {
     const grid = document.getElementById("catalog-cards-grid");
@@ -225,23 +176,23 @@ function initLoadMore() {
                 throw new Error("invalid_response");
             }
 
-            // Вставляем новые карточки в конец текущего списка
+            // Временный контейнер нужен, чтобы безопасно распарсить пришедший HTML.
             const temp = document.createElement("div");
             temp.innerHTML = data.cards_html || "";
             const appendedCards = temp.querySelectorAll("[data-catalog-card]");
             appendedCards.forEach((card) => grid.appendChild(card));
 
-            // Инициализация вкладок только для карточек, которые еще не инициализированы
+            // После добавления новых карточек запускаем инициализацию вкладок.
             initCardTabs(grid);
 
-            // Фиксируем, что пользователь уже догрузил эту страницу
+            // Фиксируем прогресс пагинации (до какой страницы пользователь дошел).
             loadMoreButton.dataset.currentPage = String(requestedPage);
 
-            // Сервер возвращает random_order_key; он может быть 0, это валидно
+            // Берем новый order_key от сервера (если есть), иначе оставляем текущий.
             const refreshedOrderKey = toNonNegativeInt(data.random_order_key, orderKey);
             loadMoreButton.dataset.randomOrderKey = String(refreshedOrderKey);
 
-            // Сохраняем обновленное состояние каталога для корректного возврата из detail
+            // Сохраняем обновленное состояние для корректного возврата из detail.
             persistCatalogState(loadMoreButton);
 
             const nextPageNumber = toPositiveInt(data.next_page_number, null);
@@ -261,24 +212,26 @@ function initLoadMore() {
 }
 
 /**
- * Включает сохранение состояния каталога перед переходом в detail.
+ * Включает сохранение состояния каталога.
  *
- * Что сохраняем:
- * - базовое состояние (layout/page/order_key) при загрузке страницы;
- * - anchor выбранной карточки и текущий scroll перед переходом в detail.
+ * Что делаем:
+ * - при загрузке страницы сохраняем базовое состояние;
+ * - при клике на "Смотреть полный профиль" сохраняем anchor выбранной карточки.
+ *
+ * Зачем anchor:
+ * - когда пользователь вернется назад, можно прокрутить к нужной карточке.
  */
 function initCatalogStatePersistence() {
     const loadMoreButton = document.getElementById("catalog-load-more-btn");
     if (!loadMoreButton) return;
 
-    // Обновляем базовое состояние сразу при рендере каталога.
-    // Нужен сценарий: пользователь открывает detail с page=1 без нажатия "Показать еще"
+    // Первичное состояние нужно даже если пользователь не нажимал "Показать еще".
     persistCatalogState(loadMoreButton, {
         anchor: null,
         scroll_y: Math.max(window.scrollY, 0),
     });
 
-    // Делегируем обработчик на document, чтобы он работал и для карточек, догруженных AJAX
+    // Делегирование на document: работает и для карточек, пришедших через AJAX.
     document.addEventListener("click", (event) => {
         const detailLink = event.target.closest("[data-catalog-detail-link]");
         if (!detailLink) return;

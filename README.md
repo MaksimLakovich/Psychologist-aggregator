@@ -173,6 +173,7 @@
 │    │    │    ├── menu_client_profile.js              # Добавления эффектов в "МЕНЮ" для ClientProfile
 │    │    │    ├── navigation_client_accordion.js      # Модуль управления аккордеоном в боковой "НАВИГАЦИИ" для ClientProfile
 │    │    │    ├── edit_client_profile.js              # Скрипт управляет режимами просмотра/редактирования формы профиля клиента
+│    │    │    ├── catalog_state.js                    # Общий модуль для хранения/чтения состояния каталога психологов в sessionStorage, чтобы не дублировать один и тот же код в нескольких файлах: psychologist_catalog.js, psychologist_catalog_detail.js
 │    │    │    └── ...
 │    │    ├── pages/                            # 💡 Оркестратор для страниц
 │    │    │    ├── personal_questions.js               # Страничный файл - собираем те JS, которые нужны для страницы "Личные вопросы"

@@ -1,73 +1,37 @@
+import {
+    readCatalogState,
+    toNonNegativeInt,
+    toPositiveInt,
+} from "../modules/catalog_state.js";
+
 /**
- * Страница детального профиля психолога из каталога.
+ * Логика страницы детального профиля психолога.
  *
- * Цель файла:
- * 1) Оставить красивый URL детальной страницы без длинных query-параметров.
- * 2) По кнопке "Назад в каталог" восстановить предыдущее состояние каталога.
+ * Главная задача:
+ * - показать "красивый" URL профиля без длинных query-параметров;
+ * - при нажатии "Назад в каталог" вернуть клиента туда, где он был в каталоге.
  *
- * Логика возврата:
- * - приоритет №1: history.back() (возвращает максимально точно, включая scroll/DOM);
- * - fallback: URL, собранный из состояния в sessionStorage.
+ * Как выбираем способ возврата:
+ * 1) сначала пробуем history.back() (обычно это самый точный возврат);
+ * 2) если history-back не подходит, используем fallback URL из sessionStorage.
  */
 
-const CATALOG_STATE_STORAGE_KEY = "psychologist_catalog_state_v1";
-const CATALOG_STATE_TTL_MS = 1000 * 60 * 60 * 6; // 6 часов
+/**
+ * Регулярка, которая проверяет путь каталога.
+ *
+ * Поддерживает оба варианта:
+ * - /psychologist_catalog
+ * - /psychologist_catalog/
+ */
 const CATALOG_PATH_PATTERN = /^\/psychologist_catalog\/?$/;
 
 /**
- * Преобразует значение в целое число > 0.
- * Используем для page и timestamp.
- */
-function toPositiveInt(value, fallback = null) {
-    const parsed = Number.parseInt(String(value), 10);
-    if (Number.isInteger(parsed) && parsed > 0) {
-        return parsed;
-    }
-    return fallback;
-}
-
-/**
- * Преобразует значение в целое число >= 0.
- * Используем для order_key: значение 0 считается валидным.
- */
-function toNonNegativeInt(value, fallback = null) {
-    const parsed = Number.parseInt(String(value), 10);
-    if (Number.isInteger(parsed) && parsed >= 0) {
-        return parsed;
-    }
-    return fallback;
-}
-
-/**
- * Читает состояние каталога из sessionStorage.
+ * Приводит anchor к безопасному формату slug.
  *
- * Возвращает:
- * - валидный объект состояния, если он есть и не просрочен;
- * - null в остальных случаях.
- */
-function readCatalogState() {
-    try {
-        const rawState = window.sessionStorage.getItem(CATALOG_STATE_STORAGE_KEY);
-        if (!rawState) return null;
-
-        const parsedState = JSON.parse(rawState);
-        if (!parsedState || typeof parsedState !== "object") return null;
-
-        const updatedAt = toPositiveInt(parsedState.updated_at, null);
-        if (updatedAt && Date.now() - updatedAt > CATALOG_STATE_TTL_MS) {
-            window.sessionStorage.removeItem(CATALOG_STATE_STORAGE_KEY);
-            return null;
-        }
-
-        return parsedState;
-    } catch (error) {
-        return null;
-    }
-}
-
-/**
- * Нормализует якорь карточки (slug) для безопасного добавления в hash URL.
- * Разрешаем только [a-z0-9-], как и на стороне сервера.
+ * Пример:
+ * - "anna-ivanova" -> "anna-ivanova" (валидно)
+ * - " Anna-Ivanova " -> "anna-ivanova" (нормализация)
+ * - "anna_ivanova" -> null (символ "_" не разрешен)
  */
 function normalizeAnchor(rawAnchor) {
     if (!rawAnchor || typeof rawAnchor !== "string") return null;
@@ -80,13 +44,13 @@ function normalizeAnchor(rawAnchor) {
 }
 
 /**
- * Собирает fallback URL каталога на основе состояния из storage.
+ * Собирает URL каталога для fallback-возврата.
  *
- * Что восстанавливает:
- * - layout (`sidebar/menu`);
+ * Что восстанавливаем:
+ * - layout (menu/sidebar);
  * - page + restore (если пользователь был дальше первой страницы);
- * - order_key (чтобы порядок карточек не менялся);
- * - hash-якорь на конкретную карточку.
+ * - order_key (чтобы порядок карточек сохранился);
+ * - hash-якорь на выбранную карточку.
  */
 function buildCatalogRestoreUrl(catalogBaseUrl, catalogState) {
     const url = new URL(catalogBaseUrl, window.location.origin);
@@ -117,8 +81,11 @@ function buildCatalogRestoreUrl(catalogBaseUrl, catalogState) {
 }
 
 /**
- * Проверяет, что пользователь пришел именно из каталога в этой же вкладке.
- * Это сигнал, что history.back() обычно сработает оптимально.
+ * Проверяет, что клиент пришел именно из каталога в этой же вкладке.
+ *
+ * Это важно для history.back():
+ * - если реферер действительно каталог, возврат обычно идеальный;
+ * - если реферер другой, лучше использовать fallback URL.
  */
 function cameFromCatalogInSameTab() {
     try {
@@ -134,13 +101,13 @@ function cameFromCatalogInSameTab() {
 }
 
 /**
- * Инициализирует кнопку "Назад в каталог".
+ * Подключает поведение кнопки "Назад в каталог".
  *
- * Алгоритм:
- * 1) Если есть состояние в storage — подставляем fallback href.
- * 2) На клик пробуем history.back() (если пришли из каталога и есть history).
- * 3) Если history.back() не подходит — уходим на URL, собранный из storage.
- * 4) Если storage пуст — оставляем поведение обычной ссылки (server fallback href).
+ * Пошагово:
+ * 1) если в storage есть состояние, сразу ставим fallback href;
+ * 2) на клик пытаемся сделать history.back();
+ * 3) если history.back() использовать нельзя — переходим на fallback URL;
+ * 4) если storage пуст, оставляем обычное поведение ссылки (server fallback).
  */
 function initCatalogBackLink() {
     const backLink = document.querySelector("[data-catalog-back-link]");
@@ -149,7 +116,6 @@ function initCatalogBackLink() {
     const catalogBaseUrl = backLink.dataset.catalogUrl || "/psychologist_catalog/";
     const stateFromStorage = readCatalogState();
 
-    // Если storage есть, заранее подготавливаем fallback URL.
     if (stateFromStorage) {
         backLink.setAttribute("href", buildCatalogRestoreUrl(catalogBaseUrl, stateFromStorage));
     }
@@ -163,7 +129,6 @@ function initCatalogBackLink() {
 
         const fallbackState = readCatalogState();
         if (!fallbackState) {
-            // Storage нет: пусть сработает обычная ссылка (server fallback).
             return;
         }
 
