@@ -50,6 +50,7 @@ JSON
 ### aggregator/paginators.py:
 
 - `PsychologistCatalogPagination(PageNumberPagination)` - класс-пагинатор для API-эндпоинта ***Публичного каталога психологов***.
+- `CatalogPagePagination(PageNumberPagination)` - класс-пагинатор для WEB-каталога ***Каталог психологов***.
 
 ---
 

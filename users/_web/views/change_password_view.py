@@ -13,7 +13,7 @@ class ChangePasswordPageView(LoginRequiredMixin, FormView):
     """Web-контроллер для смены пароля авторизованного пользователя."""
 
     form_class = ChangePasswordForm
-    template_name = "core/client_pages/my_account/change_password.html"
+    template_name = "users/change_password.html"
     success_url = reverse_lazy("users:web:password-change")
 
     def get_form_kwargs(self):

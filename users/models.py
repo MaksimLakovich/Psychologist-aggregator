@@ -438,6 +438,14 @@ class PsychologistProfile(TimeStampedModel):
         related_name="psychologist_profile",
         verbose_name="Пользователь",
     )
+    slug = models.SlugField(
+        unique=True,
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name="Slug-полное имя",
+        help_text="Укажите slug-полное имя психолога",
+    )
     is_verified = models.BooleanField(
         default=False,
         verbose_name="Верификация пользователя",
@@ -552,9 +560,21 @@ class PsychologistProfile(TimeStampedModel):
         help_text="Рейтинг психолога",
     )
 
-    def __str__(self):
-        """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
-        return f"{self.user.email}"
+    def save(self, *args, **kwargs):
+        """Если slug не указан, то метод сгенерирует его автоматически из полного имени специалиста.
+        Почему именно так:
+            1) Slug используется в человекочитаемых URL публичного каталога и detail-страницы психолога.
+            2) generate_unique_slug() гарантирует уникальность внутри модели и добавляет суффикс при коллизиях.
+            3) Генерация выполняется только при пустом slug, чтобы URL оставался стабильным и не "ломался"
+               при последующих изменениях first_name / last_name (SEO-friendly поведение).
+        """
+        if not self.slug:
+            full_name = f"{self.user.first_name} {self.user.last_name}".strip()
+            # Дополнительная защита: если имя/фамилия вдруг пустые, используем uuid как fallback.
+            # Это гарантирует, что slug будет создан даже для неполных профилей.
+            source_value = full_name or self.user.uuid
+            self.slug = generate_unique_slug(self, source_value)
+        super().save(*args, **kwargs)
 
     @property
     def work_experience_years(self):
@@ -571,6 +591,10 @@ class PsychologistProfile(TimeStampedModel):
         verbose_name = "Психолог"
         verbose_name_plural = "Психологи"
         ordering = ["user__email"]
+
+    def __str__(self):
+        """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
+        return f"{self.user.email}"
 
 
 class ClientProfile(TimeStampedModel):
