@@ -74,7 +74,8 @@ python manage.py loaddata fixtures/users_psychologists.json
       "rating": "0.0",
       "is_all_education_verified": true,
       "created_at": "2025-11-25T16:55:32.525181+03:00",
-      "updated_at": "2025-11-25T16:55:32.525181+03:00"
+      "updated_at": "2025-11-25T16:55:32.525181+03:00",
+      "slug": "irina-ivanova"
     }
   }
 ]

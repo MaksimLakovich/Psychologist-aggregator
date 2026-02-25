@@ -13,7 +13,7 @@
     <!-- 1. Вариант для определенных страниц, которые есть и в МЕНЮ и в САЙДБАРЕ и мы показываем: -->
     <!--    а) или только верхнее МЕНЮ без сайдбара, если перешли на эту страницу из МЕНЮ -->
     <!--    б) или только САЙДБАР без меню, если перешли на эту страницу из САЙДБАРА -->
-    {% if menu_variant == "client-top" %}
+    {% if menu_variant == "without-sidebar" %}
     <header class="bg-white shadow p-4">
         <div class="mx-auto max-w-7xl px-4 py-1">
             <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5">
@@ -39,10 +39,10 @@
     {% else %}
 
         <!-- 2. Вариант только с САЙДБАРОМ для страниц из личного кабинета -->
-        {% if show_sidebar == 'sidebar' %}
+        {% if show_sidebar %}
 
         <header class="bg-white p-4">
-            <div class="mx-auto max-w-7xl px-4 py-1">
+            <div class="mx-auto px-4 py-1">
                 <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5">
                     <div class="flex flex-wrap justify-between items-center">
 
@@ -55,7 +55,7 @@
                         <div class="flex items-center">
                             <a href="{% url 'core:start-page' %}"
                                class="flex items-center gap-2 px-3 py-2 mr-1 rounded-lg
-                               text-slate-700 hover:text-indigo-700 hover:bg-gray-100
+                               text-zinc-700 hover:text-indigo-700 hover:bg-gray-100
                                text-lg font-medium tracking-wide md:text-xl
                                active:scale-95 transition-all duration-150">
                                 <span

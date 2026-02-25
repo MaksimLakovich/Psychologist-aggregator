@@ -2,6 +2,10 @@ from django.urls import path
 
 from core.apps import CoreConfig
 from core.views.client.my_account.main_account_page import ClientAccountView
+from core.views.client.my_account.ps_catalog import (
+    PsychologistCardDetailPageView, PsychologistCatalogPageView)
+from core.views.client.my_account.questions_answers import \
+    CommonQuestionPageView
 from core.views.client.specialist_matching.view_choice_psychologist import \
     ClientChoicePsychologistPageView
 from core.views.client.specialist_matching.view_general_questions import \
@@ -10,13 +14,12 @@ from core.views.client.specialist_matching.view_payment_card import \
     ClientAddPaymentCardPageView
 from core.views.client.specialist_matching.view_personal_questions import \
     ClientPersonalQuestionsPageView
-from core.views.questions_answers import CommonQuestionPageView
 from core.views.start_view import StartPageView
 
 app_name = CoreConfig.name
 
 urlpatterns = [
-    # Общая стартовая страница + общие информативные
+    # КЛИЕНТ: общая стартовая страница + общие информативные
     path("", StartPageView.as_view(), name="start-page"),
     path("faq/", CommonQuestionPageView.as_view(), name="faq-page"),
 
@@ -28,4 +31,8 @@ urlpatterns = [
 
     # КЛИЕНТ: работа с профилем
     path("client-account/", ClientAccountView.as_view(), name="client-account"),
+
+    # КЛИЕНТ: каталог психологов
+    path("psychologist_catalog/", PsychologistCatalogPageView.as_view(), name="psychologist-catalog"),
+    path("<slug:profile_slug>/", PsychologistCardDetailPageView.as_view(), name="psychologist-card-detail"),
 ]

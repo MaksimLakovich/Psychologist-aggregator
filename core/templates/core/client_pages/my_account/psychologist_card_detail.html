@@ -1,0 +1,105 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}{{ title_psychologist_catalog_detail_page_view|default:"ОПОРА" }}{% endblock %}
+
+{% block content %}
+<section class="bg-white py-8 antialiased md:py-10">
+
+    <!-- Фоновое лого в правом нижнем углу для узнаваемого визуального контекста страницы -->
+    <div class="pointer-events-none absolute bottom-0 right-0 z-0 hidden select-none p-8 lg:block">
+        <img src="{% static 'images/menu/opora-base.png' %}"
+             alt=""
+             class="h-auto w-96 translate-x-10 translate-y-10 opacity-20 blur-[5px]">
+    </div>
+
+    <div class="mx-auto max-w-6xl px-4 2xl:px-0">
+
+        <div class="mb-6">
+            <a href="{{ catalog_back_url|default:'#' }}"
+               data-catalog-back-link
+               data-catalog-url="{% url 'core:psychologist-catalog' %}"
+               class="inline-flex items-center text-base font-medium text-indigo-600 hover:text-indigo-800">
+                ← Назад в каталог
+            </a>
+        </div>
+
+        <div class="rounded-2xl border border-indigo-100 bg-indigo-50/40 p-6 shadow-sm md:p-8">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-12">
+
+                <div class="md:col-span-4 flex flex-col items-center">
+                    <img
+                        src="{% if profile.photo %}{{ profile.photo.url }}{% else %}{% static 'images/menu/user-circle.svg' %}{% endif %}"
+                        alt="Фото психолога"
+                        class="h-48 w-48 rounded-full border-2 border-indigo-100 object-cover"
+                    >
+                    <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700">
+                            {% if profile.is_all_education_verified %}Диплом проверен{% else %}Диплом на проверке{% endif %}
+                        </span>
+                        <span class="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700">
+                            {{ profile.experience_label }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="space-y-5 md:col-span-8">
+                    <div>
+                        <h1 class="text-3xl font-semibold text-gray-900">
+                            {{ profile.user.first_name }} {{ profile.user.last_name }}
+                        </h1>
+                    </div>
+
+                    <div class="rounded-xl bg-white p-4">
+                        <p class="text-lg font-semibold text-gray-800">
+                            Индивидуальная сессия · 50 минут ·
+                            <span class="text-indigo-700">{{ profile.price_individual|floatformat:0 }} {{ profile.price_currency }}</span>
+                        </p>
+                        <p class="mt-1 text-base text-gray-700">
+                            Парная сессия · 1,5 часа · {{ profile.price_couples|floatformat:0 }} {{ profile.price_currency }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900">Методы</h2>
+                        {% if profile.methods.all %}
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                {% for method in profile.methods.all %}
+                                    <span class="rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700">{{ method.name }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="mt-2 text-sm text-gray-500">Методы не указаны</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900">Темы</h2>
+                        {% if profile.topics.all %}
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                {% for topic in profile.topics.all %}
+                                    <span class="rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700">{{ topic.name }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="mt-2 text-sm text-gray-500">Темы не указаны</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900">О специалисте</h2>
+                        {% if profile.biography %}
+                            <p class="mt-2 whitespace-pre-line leading-relaxed text-gray-700">{{ profile.biography }}</p>
+                        {% else %}
+                            <p class="mt-2 text-sm text-gray-500">Психолог еще не добавил информацию о себе.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+<script type="module" src="{% static 'js/pages/psychologist_catalog_detail.js' %}"></script>
+{% endblock %}

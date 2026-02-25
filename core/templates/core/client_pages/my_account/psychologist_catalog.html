@@ -1,0 +1,102 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}{{ title_psychologist_catalog_page_view|default:"ОПОРА" }}{% endblock %}
+
+{% block extra_style %}
+<style>
+    body {
+        background-image: url('{% static "images/background/background-start.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="relative min-h-screen w-full overflow-hidden bg-white/70">
+
+    <div class="relative z-10 w-full px-6 py-10 sm:px-8 {% if show_sidebar %}lg:px-16 xl:px-24{% else %}lg:px-40 xl:px-72{% endif %}">
+
+        <!-- Шапка страницы -->
+        <div class="mb-8 flex flex-wrap items-start justify-between md:mb-10">
+            <header>
+                <h1 class="tracking-tight text-3xl font-bold text-indigo-700/85 md:text-4xl">
+                    Наши психологи
+                </h1>
+                <p class="mt-2 text-lg font-medium tracking-wide text-zinc-500">
+                    Каталог квалифицированных специалистов с проверенным образованием и опытом
+                </p>
+                <p class="mt-1 text-base text-zinc-500">
+                    Всего специалистов: <strong>{{ total_count }}</strong>
+                </p>
+            </header>
+        </div>
+
+        <!-- Сетка карточек: 1 на mobile, 2 на tablet, 3 на desktop -->
+        <div
+            id="catalog-cards-grid"
+            class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
+        >
+            {% include 'core/client_pages/my_account/short_cards.html' with profiles=profiles layout_mode=layout_mode show_sidebar=show_sidebar %}
+        </div>
+
+        <!-- Пустое состояние каталога -->
+        <div
+            id="catalog-empty-state"
+            class="mt-10 rounded-2xl border border-indigo-100 bg-white/90 p-8 text-center {% if profiles %}hidden{% endif %}"
+        >
+            <p class="text-lg font-semibold text-gray-700">Психологи не найдены</p>
+            <p class="mt-2 text-gray-500">Попробуйте обновить страницу или изменить фильтры (когда они будут применены).</p>
+        </div>
+
+        <!-- Нижняя панель: слева номер страницы, по центру "Показать еще", справа "Вернуться в начало" -->
+        <div class="mt-10 grid items-center gap-4 text-zinc-400 md:grid-cols-3">
+            <p id="catalog-page-indicator" class="text-sm font-medium tracking-wide md:justify-self-start">
+                {% if total_pages %}
+                    {{ current_page_number|default:1 }} из {{ total_pages }}
+                {% else %}
+                    0 из 0
+                {% endif %}
+            </p>
+
+            <div class="flex flex-col items-center justify-center gap-3 md:justify-self-center">
+                <button
+                    id="catalog-load-more-btn"
+                    type="button"
+                    data-endpoint="{% url 'core:psychologist-catalog' %}"
+                    data-next-page="{{ next_page_number|default:'' }}"
+                    data-current-page="{{ current_page_number|default:1 }}"
+                    data-total-pages="{{ total_pages|default:0 }}"
+                    data-random-order-key="{{ random_order_key }}"
+                    data-layout="{{ layout_mode }}"
+                    class="rounded-xl bg-indigo-700 px-8 py-3 text-lg font-extrabold tracking-wide text-white transition hover:bg-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"
+                    {% if not has_next %}hidden{% endif %}
+                >
+                    Показать еще
+                </button>
+
+                <p id="catalog-load-more-error" class="hidden text-sm font-medium text-pink-600">
+                    Не удалось загрузить следующую страницу. Попробуйте еще раз.
+                </p>
+            </div>
+
+            <div class="flex justify-start md:justify-self-end">
+                <button
+                    id="catalog-scroll-top-btn"
+                    type="button"
+                    class="inline-flex items-center rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-400 transition hover:border-zinc-400 hover:text-zinc-500"
+                >
+                    Вернуться в начало
+                </button>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<script type="module" src="{% static 'js/pages/psychologist_catalog.js' %}"></script>
+{% endblock %}
