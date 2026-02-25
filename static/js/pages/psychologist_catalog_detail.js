@@ -22,6 +22,16 @@ import {
  * Поддерживает оба варианта:
  * - /psychologist_catalog
  * - /psychologist_catalog/
+ *
+ * Зачем это вообще нужно:
+ * - это защитный барьер перед вызовом history.back();
+ * - мы явно проверяем, что пользователь действительно пришел в detail из каталога.
+ *
+ * Если пользователь попал в detail не из каталога (например, открыл прямую ссылку),
+ * history.back() может вернуть не туда, куда ожидаем.
+ * В таком случае включается fallback-ветка с восстановлением по sessionStorage.
+ *
+ * По сути это "страховка на будущее": стоимость почти нулевая, а риск странной навигации ниже.
  */
 const CATALOG_PATH_PATTERN = /^\/psychologist_catalog\/?$/;
 
@@ -108,6 +118,10 @@ function cameFromCatalogInSameTab() {
  * 2) на клик пытаемся сделать history.back();
  * 3) если history.back() использовать нельзя — переходим на fallback URL;
  * 4) если storage пуст, оставляем обычное поведение ссылки (server fallback).
+ *
+ * Почему так:
+ * - history.back() дает лучший UX (точная позиция и нативное поведение браузера);
+ * - fallback нужен как резерв, чтобы поведение оставалось предсказуемым даже в нетипичных входах в detail.
  */
 function initCatalogBackLink() {
     const backLink = document.querySelector("[data-catalog-back-link]");
