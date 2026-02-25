@@ -1,3 +1,7 @@
+/**
+ * Эффект градиентного переливания цвета текста (стартовая страница)
+ */
+
 const DEFAULT_GRADIENT_OPTIONS = {
   colors: ["#5227FF", "#FF9FFC", "#B19EEF"],
   animationSpeed: 8,

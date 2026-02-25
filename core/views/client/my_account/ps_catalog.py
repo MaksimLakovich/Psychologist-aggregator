@@ -1,6 +1,4 @@
 import random
-import re
-from urllib.parse import urlencode
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
@@ -60,6 +58,52 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
             .order_by("id")
         )
 
+    @staticmethod
+    def _build_experience_label(work_experience_years):
+        """Формирует корректную подпись/окончание для опыта на русском языке.
+
+        Основная логика:
+            - "год" (пример, "Опыт 21 год").
+            - "года" (пример, "Опыт 4 года").
+            - "лет" (пример, "Опыт 25 лет")."""
+        if work_experience_years is None:
+            return "Опыт не указан"
+
+        years = int(work_experience_years)
+        remainder_100 = years % 100  # Остаток от деления на 100 (последние две цифры)
+        remainder_10 = years % 10  # Остаток от деления на 10 (последняя цифра)
+
+        # Числа, заканчивающиеся на 11–14 "remainder_100", всегда требуют слова "лет" (исключение 1)
+        if 11 <= remainder_100 <= 14:
+            suffix = "лет"
+        # Числа, заканчивающиеся на 1 (и это не 11), всегда пишем "год" (пример: 1 год, 21 год, 101 год)
+        elif remainder_10 == 1:
+            suffix = "год"
+        # Числа, заканчивающиеся на 2-4 (и это не 12, 13, 14), всегда пишем "года" (пример: 2 года, 34 года)
+        elif 2 <= remainder_10 <= 4:
+            suffix = "года"
+        # Для всех остальных цифр (5, 6, 7, 8, 9, 0) используется "лет" (пример: 5 лет, 20 лет, 100 лет)
+        else:
+            suffix = "лет"
+
+        return f"Опыт {years} {suffix}"
+
+    @staticmethod
+    def _profile_slug(profile):
+        """Гарантирует наличие slug у профиля психолога.
+
+        Основная логика:
+            1) После добавления нового поля slug в модель у части старых записей может быть NULL
+                до выполнения миграции/бэкфилла.
+            2) Каталог и карточки должны стабильно работать даже в этот переходный период."""
+        if profile.slug:
+            return
+
+        full_name = f"{profile.user.first_name} {profile.user.last_name}".strip()
+        source_value = full_name or profile.user.uuid
+        profile.slug = generate_unique_slug(profile, source_value)
+        profile.save(update_fields=["slug"])
+
     def _get_or_create_random_order_key(self):
         """Определяет "ключ случайного порядка" для карточек каталога.
 
@@ -71,7 +115,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
 
         Почему это важно:
             - page=1, page=2, page=3 должны работать с ОДНИМ и тем же порядком карточек (чтоб случайно не показывать
-                один и тех же психологов и на page=1 и на page=2 и так далее).
+                одних и тех же психологов и на page=1 и на page=2 и так далее).
             - Тогда "Показать еще" не покажет дубли и не пропустит специалистов."""
         order_key_from_query = self.request.GET.get("order_key")
 
@@ -135,52 +179,6 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
             return layout_from_session
 
         return "menu"
-
-    @staticmethod
-    def _build_experience_label(work_experience_years):
-        """Формирует корректную подпись/окончание для опыта на русском языке.
-
-        Основная логика:
-            - "год" (пример, "Опыт 21 год").
-            - "года" (пример, "Опыт 4 года").
-            - "лет" (пример, "Опыт 25 лет")."""
-        if work_experience_years is None:
-            return "Опыт не указан"
-
-        years = int(work_experience_years)
-        remainder_100 = years % 100  # Остаток от деления на 100 (последние две цифры)
-        remainder_10 = years % 10  # Остаток от деления на 10 (последняя цифра)
-
-        # Числа, заканчивающиеся на 11–14 "remainder_100", всегда требуют слова "лет" (исключение 1)
-        if 11 <= remainder_100 <= 14:
-            suffix = "лет"
-        # Числа, заканчивающиеся на 1 (и это не 11), всегда пишем "год" (пример: 1 год, 21 год, 101 год)
-        elif remainder_10 == 1:
-            suffix = "год"
-        # Числа, заканчивающиеся на 2-4 (и это не 12, 13, 14), всегда пишем "года" (пример: 2 года, 34 года)
-        elif 2 <= remainder_10 <= 4:
-            suffix = "года"
-        # Для всех остальных цифр (5, 6, 7, 8, 9, 0) используется "лет" (пример: 5 лет, 20 лет, 100 лет)
-        else:
-            suffix = "лет"
-
-        return f"Опыт {years} {suffix}"
-
-    @staticmethod
-    def _profile_slug(profile):
-        """Гарантирует наличие slug у профиля психолога.
-
-        Основная логика:
-            1) После добавления нового поля slug в модель у части старых записей может быть NULL
-                до выполнения миграции/бэкфилла.
-            2) Каталог и карточки должны стабильно работать даже в этот переходный период."""
-        if profile.slug:
-            return
-
-        full_name = f"{profile.user.first_name} {profile.user.last_name}".strip()
-        source_value = full_name or profile.user.uuid
-        profile.slug = generate_unique_slug(profile, source_value)
-        profile.save(update_fields=["slug"])
 
     def _build_catalog_page_data(self):
         """Собирает данные текущей страницы каталога (page=1 / page=2 / ...).
@@ -335,7 +333,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
         # partial=1 используется только для асинхронной подгрузки следующей страницы
         if request.GET.get("partial") == "1":
             cards_html = render_to_string(
-                "core/client_pages/my_account/_psychologist_catalog_cards.html",
+                "core/client_pages/my_account/short_cards.html",
                 {
                     "profiles": context["profiles"],
                     # ВАЖНО: для догружаемых карточек обязательно передаем layout_mode,
@@ -368,7 +366,6 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, TemplateView):
     template_name = "core/client_pages/my_account/psychologist_card_detail.html"
 
     CATALOG_LAYOUT_MODE_SESSION_KEY = PsychologistCatalogPageView.CATALOG_LAYOUT_MODE_SESSION_KEY
-    CATALOG_ANCHOR_PATTERN = re.compile(r"^[a-z0-9-]+$")
 
     def _resolve_layout_mode(self):
         """Определяет режим отображения детальной карточки психолога.
@@ -391,52 +388,17 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, TemplateView):
 
         return "menu"
 
-    def _build_catalog_back_url(self):
-        """Собирает URL для кнопки "Назад в каталог" с восстановлением состояния ленты.
+    @staticmethod
+    def _build_catalog_back_url(layout_mode):
+        """Собирает базовую ссылку "Назад в каталог" для non-JS fallback.
 
-        Что восстанавливаем:
-            1) layout (sidebar/menu);
-            2) стабильный random order через order_key;
-            3) номер страницы, до которой пользователь уже догрузил карточки;
-            4) якорь выбранной карточки, чтобы вернуться к нужной позиции.
-
-        Важно:
-            - Параметры приходят из query текущей детальной страницы.
-            - Все значения валидируем и добавляем только если они корректные.
-        """
-        layout_mode = self._resolve_layout_mode()
-        params = {
-            "layout": layout_mode,
-        }
-
-        raw_catalog_page = self.request.GET.get("catalog_page")
-        if raw_catalog_page:
-            try:
-                catalog_page = int(raw_catalog_page)
-                if catalog_page >= 1:
-                    params["page"] = catalog_page
-                    # restore нужен только если пользователь был дальше первой страницы.
-                    if catalog_page > 1:
-                        params["restore"] = 1
-            except (TypeError, ValueError):
-                pass
-
-        raw_order_key = self.request.GET.get("catalog_order_key")
-        if raw_order_key:
-            try:
-                params["order_key"] = int(raw_order_key)
-            except (TypeError, ValueError):
-                pass
-
+        ВАЖНО:
+            - Основное восстановление позиции/страницы теперь делает фронтенд через sessionStorage
+              (см. psychologist_catalog.js + psychologist_catalog_detail.js).
+            - Серверный fallback оставляем минимальным и предсказуемым:
+              возвращаем в каталог с тем же layout (sidebar/menu)."""
         base_url = reverse("core:psychologist-catalog")
-        query_string = urlencode(params)
-        back_url = f"{base_url}?{query_string}" if query_string else base_url
-
-        raw_anchor = (self.request.GET.get("catalog_anchor") or "").strip().lower()
-        if raw_anchor and self.CATALOG_ANCHOR_PATTERN.match(raw_anchor):
-            back_url = f"{back_url}#psychologist-card-{raw_anchor}"
-
-        return back_url
+        return f"{base_url}?layout={layout_mode}"
 
     def get_context_data(self, **kwargs):
         """Формирование контекста для HTML-шаблона детальной страницы психолога.
@@ -460,17 +422,17 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, TemplateView):
         )
         context["profile"] = profile
 
-        context["title_psychologist_catalog_detail_page_view"] = (
-            f"{profile.user.first_name} {profile.user.last_name} — профиль психолога"
-        )
-        context["catalog_back_url"] = self._build_catalog_back_url()
-
         # Логика управления отображением сайдбара.
         layout_mode = self._resolve_layout_mode()
         context["layout_mode"] = layout_mode
         context["show_sidebar"] = layout_mode == "sidebar"
         if layout_mode != "sidebar":
             context["menu_variant"] = "without-sidebar"
+
+        context["title_psychologist_catalog_detail_page_view"] = (
+            f"{profile.user.first_name} {profile.user.last_name} — профиль психолога"
+        )
+        context["catalog_back_url"] = self._build_catalog_back_url(layout_mode)
 
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
         context["current_sidebar_key"] = "psychologist-catalog"
