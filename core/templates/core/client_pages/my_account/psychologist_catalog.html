@@ -53,25 +53,41 @@
             <p class="mt-2 text-gray-500">Попробуйте обновить страницу или изменить фильтры (когда они будут применены).</p>
         </div>
 
-        <!-- Блок догрузки списка -->
-        <div class="mt-10 flex flex-col items-center justify-center gap-3">
-            <button
-                id="catalog-load-more-btn"
-                type="button"
-                data-endpoint="{% url 'core:psychologist-catalog' %}"
-                data-next-page="{{ next_page_number|default:'' }}"
-                data-current-page="{{ current_page_number|default:1 }}"
-                data-random-order-key="{{ random_order_key }}"
-                data-layout="{{ layout_mode }}"
-                class="rounded-xl bg-indigo-700 px-8 py-3 text-lg font-extrabold tracking-wide text-white transition hover:bg-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"
-                {% if not has_next %}hidden{% endif %}
-            >
-                Показать еще
-            </button>
-
-            <p id="catalog-load-more-error" class="hidden text-sm font-medium text-pink-600">
-                Не удалось загрузить следующую страницу. Попробуйте еще раз.
+        <!-- Нижняя панель: слева номер страницы, по центру "Показать еще", справа "Вернуться в начало" -->
+        <div class="mt-10 grid items-center gap-4 text-zinc-400 md:grid-cols-3">
+            <p id="catalog-page-indicator" class="text-sm font-medium tracking-wide md:justify-self-start">
+                Страница {{ current_page_number|default:1 }}
             </p>
+
+            <div class="flex flex-col items-center justify-center gap-3 md:justify-self-center">
+                <button
+                    id="catalog-load-more-btn"
+                    type="button"
+                    data-endpoint="{% url 'core:psychologist-catalog' %}"
+                    data-next-page="{{ next_page_number|default:'' }}"
+                    data-current-page="{{ current_page_number|default:1 }}"
+                    data-random-order-key="{{ random_order_key }}"
+                    data-layout="{{ layout_mode }}"
+                    class="rounded-xl bg-indigo-700 px-8 py-3 text-lg font-extrabold tracking-wide text-white transition hover:bg-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"
+                    {% if not has_next %}hidden{% endif %}
+                >
+                    Показать еще
+                </button>
+
+                <p id="catalog-load-more-error" class="hidden text-sm font-medium text-pink-600">
+                    Не удалось загрузить следующую страницу. Попробуйте еще раз.
+                </p>
+            </div>
+
+            <div class="flex justify-start md:justify-self-end">
+                <button
+                    id="catalog-scroll-top-btn"
+                    type="button"
+                    class="inline-flex items-center rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-400 transition hover:border-zinc-400 hover:text-zinc-500"
+                >
+                    Вернуться в начало
+                </button>
+            </div>
         </div>
 
     </div>

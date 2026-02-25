@@ -73,6 +73,21 @@ function persistCatalogState(loadMoreButton, extraState = {}) {
 }
 
 /**
+ * Обновляет текстовый индикатор текущей страницы внизу каталога.
+ *
+ * Пример:
+ * - если currentPage = 1, показываем "Страница 1";
+ * - после догрузки page=2 показываем "Страница 2".
+ */
+function renderCurrentPageIndicator(currentPage) {
+    const indicator = document.getElementById("catalog-page-indicator");
+    if (!indicator) return;
+
+    const safePage = toPositiveInt(currentPage, 1);
+    indicator.textContent = `Страница ${safePage}`;
+}
+
+/**
  * Инициализирует вкладки внутри карточек.
  *
  * Как это работает:
@@ -193,6 +208,7 @@ function initLoadMore() {
 
             // Фиксируем прогресс пагинации (до какой страницы пользователь дошел).
             loadMoreButton.dataset.currentPage = String(requestedPage);
+            renderCurrentPageIndicator(requestedPage);
 
             // Берем новый order_key от сервера (если есть), иначе оставляем текущий.
             const refreshedOrderKey = toNonNegativeInt(data.random_order_key, orderKey);
@@ -214,6 +230,25 @@ function initLoadMore() {
         } finally {
             loadMoreButton.disabled = false;
         }
+    });
+}
+
+/**
+ * Инициализирует кнопку "Вернуться в начало".
+ *
+ * При клике выполняется плавный скролл к началу страницы.
+ * Это удобно после просмотра page=2/page=3, когда пользователь хочет быстро
+ * вернуться к заголовку и первым карточкам.
+ */
+function initScrollToTopButton() {
+    const scrollTopButton = document.getElementById("catalog-scroll-top-btn");
+    if (!scrollTopButton) return;
+
+    scrollTopButton.addEventListener("click", () => {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+        });
     });
 }
 
@@ -254,7 +289,12 @@ function initCatalogStatePersistence() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    const loadMoreButton = document.getElementById("catalog-load-more-btn");
+    const initialPage = loadMoreButton ? toPositiveInt(loadMoreButton.dataset.currentPage, 1) : 1;
+    renderCurrentPageIndicator(initialPage);
+
     initCardTabs();
     initCatalogStatePersistence();
     initLoadMore();
+    initScrollToTopButton();
 });
