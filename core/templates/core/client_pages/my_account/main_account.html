@@ -15,27 +15,49 @@
         background-repeat: no-repeat;
         background-attachment: fixed; /* красиво фиксирует фон */
     }
+
+    /* Анимации входа блоков (как на странице редактирования профиля) */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .animate-fade-in-up {
+        opacity: 0;
+        animation: fadeInUp 1.0s ease-out forwards;
+    }
+    .animate-fade-in-left {
+        opacity: 0;
+        animation: fadeInLeft 0.9s ease-out forwards;
+    }
 </style>
 {% endblock %}
 
 
-<section class="relative overflow-hidden min-h-screen bg-white/80 w-full">
+<section class="relative overflow-hidden min-h-screen bg-white/80 backdrop-blur-[2px] w-full">
 
     <!-- СТРАНИЦА -->
 
     <div class="relative z-10 w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-10">
 
         <!-- Шапка страницы -->
-        <div class="flex flex-wrap justify-between items-start mb-6 md:mb-8">
+        <div class="mb-12 md:mb-16 animate-fade-in-left max-w-4xl">
             <header class="w-full">
-                <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-indigo-700/85 tracking-tight break-words">
-                    Добро пожаловать, {{ user.first_name|default:"пользователь" }}!
+                <h1 class="text-4xl md:text-5xl font-black text-indigo-900 tracking-tight leading-tight break-words">
+                    Добро пожаловать, <span class="text-indigo-600">{{ user.first_name|default:"пользователь" }}</span>!
                 </h1>
+                <p class="text-lg md:text-xl text-zinc-600 font-medium mt-4 leading-relaxed">
+                    Здесь вы можете отслеживать сессии, заметки и важные обновления вашего личного кабинета
+                </p>
             </header>
         </div>
 
         <!-- ===== ВИДЖЕТЫ ===== -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 animate-fade-in-up" style="animation-delay: 0.1s;">
 
             <!-- ===== Ближайшая сессия ===== -->
             <div class="md:col-span-2 lg:col-span-8 bg-gradient-to-br from-purple-100 to-indigo-200 backdrop-blur-md rounded-3xl p-6 border border-indigo-200 shadow-sm flex flex-col justify-between min-w-0">

@@ -82,7 +82,7 @@
             {% if messages %}
             <div class="mb-8 space-y-3">
                 {% for message in messages %}
-                <div class="p-4 rounded-2xl text-sm font-semibold tracking-wide shadow-sm animate-fade-in-up
+                <div class="p-4 rounded-2xl text-base font-semibold tracking-wide shadow-sm animate-fade-in-up
                     {% if 'success' in message.tags %}bg-emerald-50 text-emerald-700 border border-emerald-100{% else %}bg-rose-50 text-rose-700 border border-rose-100{% endif %}">
                     {{ message|linebreaksbr }}
                 </div>

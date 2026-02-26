@@ -2280,6 +2280,10 @@ input:checked + .toggle-bg {
   margin-bottom: 4rem;
 }
 
+.mb-12 {
+  margin-bottom: 3rem;
+}
+
 .line-clamp-3 {
   overflow: hidden;
   display: -webkit-box;
@@ -2715,6 +2719,10 @@ input:checked + .toggle-bg {
 
 .max-w-screen-2xl {
   max-width: 1536px;
+}
+
+.max-w-4xl {
+  max-width: 56rem;
 }
 
 .flex-1 {
