@@ -4,10 +4,9 @@
 
 {% block title %} {{ title_edit_client_page_view|default:"Настройки профиля" }} {% endblock %}
 
-{% block content %}
-
 {% block extra_style %}
 <style>
+    /* Плавный фон */
     body {
         background-image: url('{% static "images/background/background-start.jpg" %}');
         background-size: cover;
@@ -15,201 +14,233 @@
         background-repeat: no-repeat;
         background-attachment: fixed; /* красиво фиксирует фон */
     }
+
+    /* Анимации с предотвращением скачков (opacity: 0 в начале) */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Устанавливаем начальное состояние invisible, чтобы не было мерцания */
+    .animate-fade-in-up {
+        opacity: 0;
+        animation: fadeInUp 1.0s ease-out forwards;
+    }
+    .animate-fade-in-left {
+        opacity: 0;
+        animation: fadeInLeft 0.9s ease-out forwards;
+    }
+
+    /* Стилизация инпутов из Django Form, чтобы они соответствовали современному стилю */
+    input, select {
+        transition: all 0.3s ease-in-out !important;
+    }
+
+    /* Состояние фокуса для полей */
+    input:focus, select:focus {
+        background-color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1) !important;
+    }
 </style>
 {% endblock %}
 
 
-<section class="relative overflow-hidden min-h-screen bg-white/70 w-full px-6 sm:px-8 lg:px-24 py-10">
+{% block content %}
+
+<section class="relative overflow-hidden min-h-screen bg-white/80 backdrop-blur-[2px] w-full px-6 sm:px-8 lg:px-24 py-10">
 
     <!-- Фоновое ЛОГО в нижний правый угол -->
-    <div class="hidden lg:block absolute bottom-0 right-0 p-8 pointer-events-none z-0 select-none">
+    <div class="hidden lg:block absolute bottom-10 right-10 p-8 pointer-events-none z-0 select-none opacity-10 blur-[2px]">
         <img src="{% static 'images/menu/opora-base.png' %}"
              alt=""
-             class="w-96 h-auto opacity-20 blur-[5px] transform translate-x-10 translate-y-10">
+             class="w-80 h-auto">
     </div>
 
-    <div class="max-w-3xl">
+    <div class="max-w-7xl mx-auto relative z-10">
 
         <!-- ШАПКА -->
-        <div class="mb-10">
-            <h1 class="text-3xl md:text-4xl font-bold text-indigo-700/85 tracking-tight">
-                Настройки профиля
+        <div class="mb-16 animate-fade-in-left max-w-2xl">
+            <h1 class="text-4xl md:text-5xl font-black text-indigo-900 tracking-tight leading-tight">
+                Настройки <span class="text-indigo-600">профиля</span>
             </h1>
-            <p class="text-lg text-zinc-500 font-medium tracking-wide mt-2">
+            <p class="text-lg md:text-xl text-zinc-600 font-medium mt-4 leading-relaxed">
                 Управляйте своими личными данными и настройками часового пояса
             </p>
         </div>
 
-        <!-- УВЕДОМЛЕНИЯ -->
-        {% if messages %}
-        <div class="space-y-2">
-            {% for message in messages %}
-            {% if "success" in message.tags %}
-            <div class="p-3 text-center text-base tracking-wide text-green-700 bg-green-50 rounded-lg">
-                {{ message|linebreaksbr }}
-            </div>
-            {% else %}
-            <div class="p-3 text-center text-base tracking-wide text-pink-700 bg-pink-50 rounded-lg">
-                {{ message|linebreaksbr }}
+        <div class="max-w-3xl mx-auto animate-fade-in-up" style="animation-delay: 0.1s;">
+
+            <!-- УВЕДОМЛЕНИЯ -->
+            {% if messages %}
+            <div class="mb-8 space-y-3">
+                {% for message in messages %}
+                <div class="p-4 rounded-2xl text-sm font-semibold tracking-wide shadow-sm animate-fade-in-up
+                    {% if 'success' in message.tags %}bg-emerald-50 text-emerald-700 border border-emerald-100{% else %}bg-rose-50 text-rose-700 border border-rose-100{% endif %}">
+                    {{ message|linebreaksbr }}
+                </div>
+                {% endfor %}
             </div>
             {% endif %}
-            {% endfor %}
-        </div>
-        {% endif %}
 
-        <!-- ОБЩИЕ ОШИБКИ -->
-        {% if form.non_field_errors %}
-        <div class="p-3 mb-6 text-center text-base tracking-wide text-pink-700 bg-pink-50 rounded-lg">
-            {% for err in form.non_field_errors %}
-            {{ err }}{% if not forloop.last %}<br>{% endif %}
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <!-- ДАННЫЕ ПОЛЬЗОВАТЕЛЯ -->
-        <form id="profile-edit-form" method="post" class="divide-y divide-indigo-200"
-              data-has-errors="{% if form.errors %}1{% else %}0{% endif %}">
-            {% csrf_token %}
-
-            <!-- ИСХОДНЫЕ ДАННЫЕ (для корректной кнопки "Отмена") -->
-            <input type="hidden" id="initial-first-name" value="{{ db_user.first_name|default_if_none:'' }}">
-            <input type="hidden" id="initial-last-name" value="{{ db_user.last_name|default_if_none:'' }}">
-            <input type="hidden" id="initial-age" value="{{ db_user.age|default_if_none:'' }}">
-            <input type="hidden" id="initial-email" value="{{ db_user.email|default_if_none:'' }}">
-            <input type="hidden" id="initial-phone" value="{{ db_user.phone_number|default_if_none:'' }}">
-            <input type="hidden" id="initial-timezone" value="{{ db_user.timezone|default_if_none:'' }}">
-
-            <!-- БЛОК: ЛИЧНЫЕ ДАННЫЕ -->
-            <div class="p-4 md:p-4 mb-4 md:mb-8 space-y-6">
-                <div class="flex items-center gap-3">
-                    <img src="{% static 'images/menu/personal-data.svg' %}" alt="personal-data" class="w-8 h-8">
-                    <h2 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">
-                        Личные данные
-                    </h2>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                    <div class="space-y-2">
-                        <label for="{{ form.first_name.id_for_label }}"
-                               class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
-                            {{ form.first_name.label }}
-                        </label>
-                        {{ form.first_name }}
-                        {% if form.first_name.errors %}
-                        <p class="mt-2 text-sm tracking-wide text-pink-700">
-                            {{ form.first_name.errors.0 }}
-                        </p>
-                        {% endif %}
-                    </div>
-
-                    <div class="space-y-2">
-                        <label for="{{ form.last_name.id_for_label }}"
-                               class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
-                            {{ form.last_name.label }}
-                        </label>
-                        {{ form.last_name }}
-                        {% if form.last_name.errors %}
-                        <p class="mt-2 text-sm tracking-wide text-pink-700">
-                            {{ form.last_name.errors.0 }}
-                        </p>
-                        {% endif %}
-                    </div>
-
-                    <div class="space-y-2">
-                        <label for="{{ form.age.id_for_label }}"
-                               class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
-                            {{ form.age.label }}
-                        </label>
-                        {{ form.age }}
-                        {% if form.age.errors %}
-                        <p class="mt-2 text-sm tracking-wide text-pink-700">
-                            {{ form.age.errors.0 }}
-                        </p>
-                        {% endif %}
-                    </div>
-
-                    <div class="space-y-2">
-                        <label for="{{ form.timezone.id_for_label }}"
-                               class="block mb-2 text-base font-semibold tracking-wide text-zinc-600">
-                            {{ form.timezone.label }}
-                        </label>
-                        {{ form.timezone }}
-                        {% if form.timezone.errors %}
-                        <p class="mt-2 text-sm tracking-wide text-pink-700">
-                            {{ form.timezone.errors.0 }}
-                        </p>
-                        {% endif %}
-                    </div>
-                </div>
+            <!-- ОБЩИЕ ОШИБКИ -->
+            {% if form.non_field_errors %}
+            <div class="mb-8 p-4 rounded-2xl text-sm font-semibold bg-rose-50 text-rose-700 border border-rose-100 shadow-sm animate-fade-in-up">
+                {% for err in form.non_field_errors %}
+                    {{ err }}{% if not forloop.last %}<br>{% endif %}
+                {% endfor %}
             </div>
+            {% endif %}
 
-            <div class="p-4 md:p-4 mb-4 md:mb-8 space-y-6">
-                <div class="flex items-center gap-3">
-                    <img src="{% static 'images/menu/contact-data.svg' %}" alt="contact-data" class="w-8 h-8">
-                    <h2 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">
-                        Контактная информация
-                    </h2>
-                </div>
+            <!-- ДАННЫЕ ПОЛЬЗОВАТЕЛЯ -->
+            <form id="profile-edit-form" method="post" class="divide-y divide-indigo-400"
+                  data-has-errors="{% if form.errors %}1{% else %}0{% endif %}">
+                {% csrf_token %}
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center">
-                            <label for="{{ form.email.id_for_label }}"
-                                   class="block text-base font-semibold tracking-wide text-zinc-600">
-                                {{ form.email.label }}
+                <!-- ИСХОДНЫЕ ДАННЫЕ (для корректной кнопки "Отмена") -->
+                <input type="hidden" id="initial-first-name" value="{{ db_user.first_name|default_if_none:'' }}">
+                <input type="hidden" id="initial-last-name" value="{{ db_user.last_name|default_if_none:'' }}">
+                <input type="hidden" id="initial-age" value="{{ db_user.age|default_if_none:'' }}">
+                <input type="hidden" id="initial-email" value="{{ db_user.email|default_if_none:'' }}">
+                <input type="hidden" id="initial-phone" value="{{ db_user.phone_number|default_if_none:'' }}">
+                <input type="hidden" id="initial-timezone" value="{{ db_user.timezone|default_if_none:'' }}">
+
+                <!-- БЛОК: ЛИЧНЫЕ ДАННЫЕ -->
+                <div class="p-4 md:p-4 mb-4 md:mb-8 space-y-6">
+                    <div class="flex items-center gap-3">
+                        <img src="{% static 'images/menu/personal-data.svg' %}" alt="personal-data" class="w-8 h-8">
+                        <h2 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">
+                            Личные данные
+                        </h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div class="space-y-2">
+                            <label for="{{ form.first_name.id_for_label }}"
+                                   class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                {{ form.first_name.label }}
                             </label>
-                            <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400">Только чтение</span>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                            <p class="mt-2 text-sm tracking-wide text-pink-700">
+                                {{ form.first_name.errors.0 }}
+                            </p>
+                            {% endif %}
                         </div>
-                        {{ form.email }}
+
+                        <div class="space-y-2">
+                            <label for="{{ form.last_name.id_for_label }}"
+                                   class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                {{ form.last_name.label }}
+                            </label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                            <p class="mt-2 text-sm tracking-wide text-pink-700">
+                                {{ form.last_name.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <div class="space-y-2">
+                            <label for="{{ form.age.id_for_label }}"
+                                   class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                {{ form.age.label }}
+                            </label>
+                            {{ form.age }}
+                            {% if form.age.errors %}
+                            <p class="mt-2 text-sm tracking-wide text-pink-700">
+                                {{ form.age.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <div class="space-y-2">
+                            <label for="{{ form.timezone.id_for_label }}"
+                                   class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                {{ form.timezone.label }}
+                            </label>
+                            {{ form.timezone }}
+                            {% if form.timezone.errors %}
+                            <p class="mt-2 text-sm tracking-wide text-pink-700">
+                                {{ form.timezone.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 md:p-4 mb-4 md:mb-8 space-y-6">
+                    <div class="flex items-center gap-3">
+                        <img src="{% static 'images/menu/contact-data.svg' %}" alt="contact-data" class="w-8 h-8">
+                        <h2 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">
+                            Контактная информация
+                        </h2>
                     </div>
 
-                    <div class="space-y-2">
-                        <label for="{{ form.phone_number.id_for_label }}"
-                               class="block text-base font-semibold tracking-wide text-zinc-600">
-                            {{ form.phone_number.label }}
-                        </label>
-                        {{ form.phone_number }}
-                        {% if form.phone_number.errors %}
-                        <p class="mt-2 text-sm tracking-wide text-pink-700">
-                            {{ form.phone_number.errors.0 }}
-                        </p>
-                        {% endif %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <label for="{{ form.email.id_for_label }}"
+                                       class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                    {{ form.email.label }}
+                                </label>
+                                <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400">Только чтение</span>
+                            </div>
+                            {{ form.email }}
+                        </div>
+
+                        <div class="space-y-2">
+                            <label for="{{ form.phone_number.id_for_label }}"
+                                   class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                {{ form.phone_number.label }}
+                            </label>
+                            {{ form.phone_number }}
+                            {% if form.phone_number.errors %}
+                            <p class="mt-2 text-sm tracking-wide text-pink-700">
+                                {{ form.phone_number.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="p-8 md:p-12 space-y-6">
+                <div class="p-8 md:p-12 space-y-6">
 
-                <div id="display-actions">
-                    <button type="button" id="profile-edit-toggle"
-                            class="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 gap-2
-                            border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
-                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                            transition-all duration-200 shadow-md hover:shadow-lg">
-                        <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="w-5 h-5">
-                        Редактировать данные
-                    </button>
+                    <div id="display-actions">
+                        <button type="button" id="profile-edit-toggle"
+                                class="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 gap-2
+                                border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
+                                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                                transition-all duration-200 shadow-md hover:shadow-lg">
+                            <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="w-5 h-5">
+                            Редактировать профиль
+                        </button>
+                    </div>
+
+                    <div id="profile-edit-actions" class="hidden flex flex-col sm:flex-row gap-4">
+                        <button type="submit"
+                                class="inline-flex items-center justify-center px-6 py-3
+                                border border-transparent text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-700
+                                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500
+                                transition-all duration-200 flex-1 shadow-md hover:shadow-lg">
+                            Сохранить изменения
+                        </button>
+                        <button type="button" id="profile-edit-cancel"
+                                class="inline-flex items-center justify-center px-6 py-3
+                                border border-gray-300 text-base font-medium rounded-xl text-zinc-500 bg-white hover:bg-gray-100
+                                transition-all duration-200 flex-1 shadow-md hover:shadow-lg">
+                            Отмена
+                        </button>
+                    </div>
                 </div>
 
-                <div id="profile-edit-actions" class="hidden flex flex-col sm:flex-row gap-4">
-                    <button type="submit"
-                            class="inline-flex items-center justify-center px-6 py-3
-                            border border-transparent text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-700
-                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500
-                            transition-all duration-200 flex-1 shadow-md hover:shadow-lg">
-                        Сохранить изменения
-                    </button>
-                    <button type="button" id="profile-edit-cancel"
-                            class="inline-flex items-center justify-center px-6 py-3
-                            border border-gray-300 text-base font-medium rounded-xl text-zinc-500 bg-white hover:bg-gray-100
-                            transition-all duration-200 flex-1 shadow-md hover:shadow-lg">
-                        Отмена
-                    </button>
-                </div>
-            </div>
+            </form>
 
-        </form>
-
+        </div>
     </div>
 
 </section>
