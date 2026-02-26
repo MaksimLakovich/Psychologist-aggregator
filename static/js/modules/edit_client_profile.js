@@ -7,6 +7,10 @@
  */
 
 document.addEventListener("DOMContentLoaded", function () {
+  // Одноразовый флаг: отключаем вступительные анимации на следующую загрузку страницы.
+  // Нужен для UX после действий пользователя (submit/cancel), чтобы блоки формы не "прыгали" повторно.
+  const SKIP_INTRO_ANIMATIONS_ONCE_KEY = "profileEditSkipIntroAnimationsOnce";
+
   const form = document.getElementById("profile-edit-form");
   if (!form) return;
 
@@ -15,6 +19,32 @@ document.addEventListener("DOMContentLoaded", function () {
   const editActions = document.getElementById("profile-edit-actions");
   const displayActions = document.getElementById("display-actions");
   const hasErrors = form.dataset.hasErrors === "1";
+
+  /**
+   * Если ранее был установлен флаг пропуска анимаций,
+   * снимаем анимационные классы и делаем элементы сразу видимыми.
+   */
+  function applySkipIntroAnimationsIfNeeded() {
+    const shouldSkip = sessionStorage.getItem(SKIP_INTRO_ANIMATIONS_ONCE_KEY) === "1";
+    if (!shouldSkip) return;
+
+    const animatedBlocks = document.querySelectorAll(".animate-fade-in-up, .animate-fade-in-left");
+    animatedBlocks.forEach((el) => {
+      el.classList.remove("animate-fade-in-up", "animate-fade-in-left");
+      el.style.opacity = "1";
+      el.style.animation = "none";
+    });
+
+    // Флаг одноразовый: применили и сразу очищаем.
+    sessionStorage.removeItem(SKIP_INTRO_ANIMATIONS_ONCE_KEY);
+  }
+
+  /**
+   * Помечаем, что при следующей загрузке страницы нужно пропустить вступительные анимации.
+   */
+  function markSkipIntroAnimationsOnce() {
+    sessionStorage.setItem(SKIP_INTRO_ANIMATIONS_ONCE_KEY, "1");
+  }
 
   // Все поля, которые можно редактировать (email исключаем)
   const inputs = form.querySelectorAll('input:not([name="email"]), select');
@@ -32,6 +62,9 @@ document.addEventListener("DOMContentLoaded", function () {
    * @param {boolean} isEditing - true, если включаем редактирование.
    */
   function setEditMode(isEditing) {
+    // Служебный флаг на форме: используется CSS-правилом для focus-стилей только в режиме редактирования.
+    form.dataset.editMode = isEditing ? "1" : "0";
+
     inputs.forEach((input) => {
       const viewClasses = input.dataset.viewClass || input.className;
       const editClasses = input.dataset.editClass || input.className;
@@ -60,7 +93,14 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Инициализация: показываем режим просмотра
+  applySkipIntroAnimationsIfNeeded();
   setEditMode(hasErrors);
+
+  // Если пользователь нажал "Сохранить изменения" и страница перерендерилась (ошибка/успех),
+  // при следующей загрузке анимации не запускаем повторно.
+  form.addEventListener("submit", function () {
+    markSkipIntroAnimationsOnce();
+  });
 
   // Кнопка "Редактировать"
   toggleBtn.addEventListener("click", function () {
@@ -69,6 +109,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Кнопка "Отмена"
   cancelBtn.addEventListener("click", function () {
+    // На случай, если после отмены будет любой сценарий перезагрузки/перехода,
+    // вступительные анимации на следующем открытии этой страницы не повторяем.
+    markSkipIntroAnimationsOnce();
+
+    // Если форма сейчас находится в состоянии серверной ошибки (POST с невалидными данными),
+    // то обычный локальный reset недостаточен:
+    // 1) серверные тексты ошибок останутся на экране;
+    // 2) браузер будет считать текущую страницу результатом POST и при refresh покажет prompt.
+    //
+    // Решение: уходим на тот же URL через GET c replace(), чтобы:
+    // - полностью очистить ошибки;
+    // - заменить текущую POST-страницу в истории;
+    // - убрать предупреждение о повторной отправке формы при обновлении.
+    if (hasErrors) {
+      const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      window.location.replace(currentUrl);
+      return;
+    }
+
     const firstNameField = form.querySelector('input[name="first_name"]');
     const lastNameField = form.querySelector('input[name="last_name"]');
     const ageField = form.querySelector('input[name="age"]');

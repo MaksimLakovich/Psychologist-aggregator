@@ -4,6 +4,43 @@
 
 {% block title %} {{ title_home_page_view|default:"ОПОРА" }} {% endblock %}
 
+{% block extra_style %}
+{% if show_sidebar %}
+<style>
+    /*
+      Сохраняем фон страницы для полупрозрачного сайдбара но перекрываем контентную область main белым слоем.
+      Это убирает "вспышку" фоновой картинки в зоне контента при первом рендере.
+    */
+    body {
+        background-image: url('{% static "images/background/background-start.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+
+    @media (min-width: 1024px) {
+        /* 20rem = ширина сайдбара (w-80) */
+        main {
+            background: linear-gradient(
+                to right,
+                transparent 0,
+                transparent 20rem,
+                #ffffff 20rem,
+                #ffffff 100%
+            );
+        }
+    }
+
+    @media (max-width: 1023.98px) {
+        main {
+            background-color: #ffffff;
+        }
+    }
+</style>
+{% endif %}
+{% endblock %}
+
 {% block content %}
 
 
@@ -17,12 +54,15 @@
 
                 {% csrf_token %}
 
+                <!-- ========== ВАЖНО для открытия либо САЙДБАРА либо МЕНЮ ========== -->
+                <input type="hidden" name="layout" value="{{ layout_mode }}">
+
                 <!-- ========== ШАГИ / ЭТАПЫ ========== -->
                 <div class="space-y-6 sm:space-y-8 pb-0">
                     <ol class="flex flex-col gap-4 rounded-lg border border-gray-200 bg-indigo-100 p-2
                         sm:justify-center md:flex-row md:items-center lg:gap-6">
 
-                        <a href="{% url 'core:general-questions' %}" class="flex mr-4">
+                        <a href="{% url 'core:general-questions' %}{{ layout_query }}" class="flex mr-4">
                             <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
                                 <svg class="h-8 w-8 text-indigo-700" aria-hidden="true"
                                      xmlns="http://www.w3.org/2000/svg"
@@ -39,7 +79,7 @@
 
                         <div class="hidden h-1 w-8 shrink-0 rounded-full bg-indigo-700 md:block xl:w-16"></div>
 
-                        <a href="{% url 'core:personal-questions' %}" class="flex mr-4">
+                        <a href="{% url 'core:personal-questions' %}{{ layout_query }}" class="flex mr-4">
                             <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
                                 <svg class="h-8 w-8 text-indigo-700" aria-hidden="true"
                                      xmlns="http://www.w3.org/2000/svg"
@@ -56,7 +96,7 @@
 
                         <div class="hidden h-1 w-8 shrink-0 rounded-full bg-indigo-700 md:block xl:w-16"></div>
 
-                        <a href="{% url 'core:choice-psychologist' %}" class="flex mr-4">
+                        <a href="{% url 'core:choice-psychologist' %}{{ layout_query }}" class="flex mr-4">
                             <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
                                 <svg class="h-8 w-8 text-indigo-700" aria-hidden="true"
                                      xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
@@ -73,7 +113,7 @@
 
                         <div class="hidden h-1 w-8 shrink-0 rounded-full bg-indigo-700 md:block xl:w-16"></div>
 
-                        <a href="{% url 'core:payment-card' %}" class="flex mr-4">
+                        <a href="{% url 'core:payment-card' %}{{ layout_query }}" class="flex mr-4">
                             <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
                                 <svg class="h-8 w-8 text-indigo-700" aria-hidden="true"
                                      xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
@@ -112,7 +152,16 @@
                                             id="payment-psychologist-summary"
                                             class="mb-1 pb-4"
                                             data-client-timezone="{{ request.user.timezone|default_if_none:'' }}"
-                                    ></div>
+                                    >
+                                        <!-- Skeleton-заглушка: пока JS загружает выбранного психолога и слот -->
+                                        <div class="animate-pulse flex flex-col items-center gap-4">
+                                            <div class="h-20 w-20 rounded-full bg-indigo-100"></div>
+                                            <div class="h-5 w-48 rounded bg-indigo-100"></div>
+                                            <div class="h-4 w-64 rounded bg-gray-100"></div>
+                                            <div class="h-4 w-72 rounded bg-gray-100"></div>
+                                            <div class="mt-4 h-10 w-full rounded-lg bg-indigo-100"></div>
+                                        </div>
+                                    </div>
 
                                     <!-- Картинки платежных систем -->
                                     <div class="mt-6 grow sm:mt-8 lg:mt-0">
@@ -140,7 +189,7 @@
 
                                     <!-- КНОПКА -->
                                     <div class="flex justify-center gap-5">
-                                        <a href="{% url 'core:choice-psychologist' %}"
+                                        <a href="{% url 'core:choice-psychologist' %}{{ layout_query }}"
                                            class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-gray-100 text-xl text-gray-300
                                            font-extrabold tracking-wide hover:bg-gray-200 transition">
                                             Назад

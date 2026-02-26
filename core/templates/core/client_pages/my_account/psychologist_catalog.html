@@ -13,25 +13,33 @@
         background-repeat: no-repeat;
         background-attachment: fixed;
     }
+
+    /* Анимации входа блоков (как на странице редактирования профиля) */
+    @keyframes fadeInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .animate-fade-in-left {
+        opacity: 0;
+        animation: fadeInLeft 0.9s ease-out forwards;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="relative min-h-screen w-full overflow-hidden bg-white/70">
+<section class="relative min-h-screen w-full overflow-hidden bg-white/80">
 
     <div class="relative z-10 w-full px-6 py-10 sm:px-8 {% if show_sidebar %}lg:px-16 xl:px-24{% else %}lg:px-40 xl:px-72{% endif %}">
 
         <!-- Шапка страницы -->
-        <div class="mb-8 flex flex-wrap items-start justify-between md:mb-10">
+        <div class="mb-16 animate-fade-in-left max-w-4xl">
             <header>
-                <h1 class="tracking-tight text-3xl font-bold text-indigo-700/85 md:text-4xl">
-                    Наши психологи
+                <h1 class="text-4xl md:text-5xl font-black text-indigo-900 tracking-tight leading-tight">
+                    Наши <span class="text-indigo-600">психологи</span>
                 </h1>
-                <p class="mt-2 text-lg font-medium tracking-wide text-zinc-500">
+                <p class="text-lg md:text-xl text-zinc-600 font-medium mt-4 leading-relaxed">
                     Каталог квалифицированных специалистов с проверенным образованием и опытом
-                </p>
-                <p class="mt-1 text-base text-zinc-500">
-                    Всего специалистов: <strong>{{ total_count }}</strong>
                 </p>
             </header>
         </div>

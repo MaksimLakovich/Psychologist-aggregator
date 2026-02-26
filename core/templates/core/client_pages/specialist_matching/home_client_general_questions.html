@@ -6,6 +6,18 @@
 
 {% block content %}
 
+{% block extra_style %}
+<style>
+    body {
+        background-image: url('{% static "images/background/background-start.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed; /* красиво фиксирует фон */
+    }
+</style>
+{% endblock %}
+
 
 <section class="bg-white py-8 antialiased md:py-0">
     <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
@@ -16,6 +28,9 @@
             <form method="post" action="" class="w-full space-y-6 lg:space-y-8">
 
                 {% csrf_token %}
+
+                <!-- ========== ВАЖНО для открытия либо САЙДБАРА либо МЕНЮ ========== -->
+                <input type="hidden" name="layout" value="{{ layout_mode }}">
 
                 <!-- ========== STICKY HEADER (ШАГИ + АВАТАРЫ) ========== -->
                 <div class="sticky top-0 z-30 bg-white border-b pb-3">
@@ -39,7 +54,7 @@
 
                             <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 md:block xl:w-16"></div>
 
-                            <a href="{% url 'core:personal-questions' %}" class="flex mr-4">
+                            <a href="{% url 'core:personal-questions' %}{{ layout_query }}" class="flex mr-4">
                                 <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
                                     <svg class="h-8 w-8 text-gray-500" aria-hidden="true"
                                          xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
