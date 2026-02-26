@@ -12,6 +12,7 @@ from django.views.generic import TemplateView
 from django_ratelimit.decorators import ratelimit
 
 from core.constants import CARDS_PER_PAGE
+from core.services.experience_label import build_experience_label
 from users.models import PsychologistProfile
 from users.services.slug import generate_unique_slug
 
@@ -57,36 +58,6 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
             .prefetch_related("methods", "topics", "specialisations")
             .order_by("id")
         )
-
-    @staticmethod
-    def _build_experience_label(work_experience_years):
-        """Формирует корректную подпись/окончание для опыта на русском языке.
-
-        Основная логика:
-            - "год" (пример, "Опыт 21 год").
-            - "года" (пример, "Опыт 4 года").
-            - "лет" (пример, "Опыт 25 лет")."""
-        if work_experience_years is None:
-            return "Опыт не указан"
-
-        years = int(work_experience_years)
-        remainder_100 = years % 100  # Остаток от деления на 100 (последние две цифры)
-        remainder_10 = years % 10  # Остаток от деления на 10 (последняя цифра)
-
-        # Числа, заканчивающиеся на 11–14 "remainder_100", всегда требуют слова "лет" (исключение 1)
-        if 11 <= remainder_100 <= 14:
-            suffix = "лет"
-        # Числа, заканчивающиеся на 1 (и это не 11), всегда пишем "год" (пример: 1 год, 21 год, 101 год)
-        elif remainder_10 == 1:
-            suffix = "год"
-        # Числа, заканчивающиеся на 2-4 (и это не 12, 13, 14), всегда пишем "года" (пример: 2 года, 34 года)
-        elif 2 <= remainder_10 <= 4:
-            suffix = "года"
-        # Для всех остальных цифр (5, 6, 7, 8, 9, 0) используется "лет" (пример: 5 лет, 20 лет, 100 лет)
-        else:
-            suffix = "лет"
-
-        return f"Опыт {years} {suffix}"
 
     @staticmethod
     def _profile_slug(profile):
@@ -283,7 +254,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
         # Динамически обогащаем объект значениями, которые нужны только для текущего UI
         for profile in profiles:
             self._profile_slug(profile)
-            profile.experience_label = self._build_experience_label(profile.work_experience_years)
+            profile.experience_label = build_experience_label(profile.work_experience_years)
 
         return {
             "profiles": profiles,
@@ -419,9 +390,7 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, TemplateView):
             user__is_active=True,
             slug=profile_slug,
         )
-        profile.experience_label = PsychologistCatalogPageView._build_experience_label(
-            profile.work_experience_years
-        )
+        profile.experience_label = build_experience_label(profile.work_experience_years)
         context["profile"] = profile
 
         # Логика управления отображением сайдбара.

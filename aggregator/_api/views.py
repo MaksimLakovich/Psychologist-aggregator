@@ -15,6 +15,7 @@ from aggregator._web.services.topic_type_mapping import \
 from aggregator.paginators import PsychologistCatalogPagination
 from calendar_engine.application.mappers.match_result_mapper import \
     map_match_result_to_dict
+from core.services.experience_label import build_experience_label
 from users.models import Education, PsychologistProfile
 from users.permissions import IsProfileOwnerOrAdminMixin
 
@@ -162,6 +163,7 @@ class MatchPsychologistsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
                     "currency": ps.price_currency,
                 },
                 "work_experience": ps.work_experience_years,
+                "experience_label": build_experience_label(ps.work_experience_years),
                 "rating": ps.rating,
                 "biography": ps.biography,
                 "educations": educations_data,
