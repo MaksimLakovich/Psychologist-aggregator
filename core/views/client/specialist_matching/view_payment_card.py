@@ -4,8 +4,7 @@ from django.views.generic import FormView
 
 from core.forms.client.specialist_matching.form_payment_card import \
     ClientAddPaymentCardForm
-from core.services.mixins_current_layout import \
-    SpecialistMatchingLayoutMixin
+from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 
 
 class ClientAddPaymentCardPageView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, FormView):

@@ -5,8 +5,7 @@ from django.views.generic.edit import FormView
 
 from core.forms.client.specialist_matching.form_personal_questions import \
     ClientPersonalQuestionsForm
-from core.services.mixins_current_layout import \
-    SpecialistMatchingLayoutMixin
+from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 from users.models import ClientProfile, Method, Topic
 
 

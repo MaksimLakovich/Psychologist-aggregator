@@ -4,8 +4,7 @@ from django.views.generic import FormView
 
 from core.forms.client.specialist_matching.form_general_questions import \
     ClientGeneralQuestionsForm
-from core.services.mixins_current_layout import \
-    SpecialistMatchingLayoutMixin
+from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 
 
 class ClientGeneralQuestionsPageView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, FormView):
