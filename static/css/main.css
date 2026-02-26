@@ -4985,6 +4985,10 @@ input:checked + .toggle-bg {
   color: rgb(190 18 60 / var(--tw-text-opacity, 1));
 }
 
+.text-emerald-700\/90 {
+  color: rgb(4 120 87 / 0.9);
+}
+
 .line-through {
   text-decoration-line: line-through;
 }
