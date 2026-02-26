@@ -40,8 +40,11 @@
         transition: all 0.3s ease-in-out !important;
     }
 
-    /* Состояние фокуса для полей */
-    input:focus, select:focus {
+    /* Состояние фокуса для полей:
+       применяется только когда форма переведена в режим редактирования.
+       Дополнительно исключаем readonly/disabled поля, чтобы в режиме просмотра фон не "белел". */
+    #profile-edit-form[data-edit-mode="1"] input:not([type="hidden"]):not([readonly]):not(:disabled):focus,
+    #profile-edit-form[data-edit-mode="1"] select:not(:disabled):focus {
         background-color: white !important;
         transform: translateY(-1px);
         box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1) !important;
@@ -98,6 +101,7 @@
 
             <!-- ДАННЫЕ ПОЛЬЗОВАТЕЛЯ -->
             <form id="profile-edit-form" method="post" class="divide-y divide-indigo-400"
+                  data-edit-mode="0"
                   data-has-errors="{% if form.errors %}1{% else %}0{% endif %}">
                 {% csrf_token %}
 
@@ -183,7 +187,7 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                         <div class="space-y-2">
-                            <div class="flex justify-between items-center">
+                            <div class="flex justify-between items-center min-h-[20px]">
                                 <label for="{{ form.email.id_for_label }}"
                                        class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
                                     {{ form.email.label }}
@@ -194,10 +198,14 @@
                         </div>
 
                         <div class="space-y-2">
-                            <label for="{{ form.phone_number.id_for_label }}"
-                                   class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
-                                {{ form.phone_number.label }}
-                            </label>
+                            <div class="flex justify-between items-center min-h-[20px]">
+                                <label for="{{ form.phone_number.id_for_label }}"
+                                       class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                    {{ form.phone_number.label }}
+                                </label>
+                                <!-- Невидимый плейсхолдер сохраняет одинаковую высоту строки заголовка как у Email -->
+                                <span class="invisible text-[10px] uppercase tracking-wider font-bold">Только чтение</span>
+                            </div>
                             {{ form.phone_number }}
                             {% if form.phone_number.errors %}
                             <p class="mt-2 text-sm tracking-wide text-pink-700">

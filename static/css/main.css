@@ -2509,6 +2509,10 @@ input:checked + .toggle-bg {
   min-height: 10rem;
 }
 
+.min-h-\[20px\] {
+  min-height: 20px;
+}
+
 .w-1\/2 {
   width: 50%;
 }
