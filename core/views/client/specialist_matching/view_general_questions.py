@@ -43,4 +43,16 @@ class ClientGeneralQuestionsPageView(LoginRequiredMixin, FormView):
         context = super().get_context_data(**kwargs)
         context["title_home_page_view"] = "Психологи онлайн на Опора — поиск и подбор психолога"
 
+        # Логика управление отображением сайдбара:
+        # 1) если пришли из сайдбара, показываем его;
+        # 2) и показываем верхнее меню без сайдбара, если открыли не из сайдбара
+        from_sidebar = self.request.GET.get("layout") == "sidebar"
+        context["show_sidebar"] = from_sidebar
+
+        if not from_sidebar:
+            context["menu_variant"] = "without-sidebar"
+
+        # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
+        context["current_sidebar_key"] = "psychologist-match"
+
         return context
