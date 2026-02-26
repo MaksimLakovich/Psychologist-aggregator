@@ -1,5 +1,3 @@
-import { pluralizeRu } from "../utils/pluralize_ru.js";
-
 // Глобальное состояние страницы (список психологов + пагинация + выбранный психолог)
 let psychologists = [];
 let currentOffset = 0;
@@ -589,13 +587,9 @@ function renderPsychologistCard(ps) {
         `;
     };
 
-    // 4) Подключаю pluralize_ru.js и рассчитываем правильное окончание для слова ГОД
-    const word = pluralizeRu(
-        ps.work_experience,
-        "год",
-        "года",
-        "лет"
-    );
+    // 4) Получаем готовую подпись опыта только из backend (единая точка правды).
+    // Если поле по какой-то причине отсутствует, выводим нейтральный текст.
+    const experienceLabel = ps.experience_label || "Опыт не указан";
 
     // 5) Логика отображения PRICE в зависимости от "individual/couple"
     const isCoupleSession = ps.session_type === "couple";
@@ -746,9 +740,7 @@ function renderPsychologistCard(ps) {
                                         alt="check_icon"
                                     />
                                     <span class="text-lg text-gray-700 font-medium">
-                                        ${ps.work_experience
-                                            ? `Опыт ${ps.work_experience} ${word}`
-                                            : "Опыт не указан"}
+                                        ${experienceLabel}
                                     </span>
                                 </div>
                             </div>
