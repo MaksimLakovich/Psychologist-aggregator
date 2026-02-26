@@ -113,6 +113,21 @@ document.addEventListener("DOMContentLoaded", function () {
     // вступительные анимации на следующем открытии этой страницы не повторяем.
     markSkipIntroAnimationsOnce();
 
+    // Если форма сейчас находится в состоянии серверной ошибки (POST с невалидными данными),
+    // то обычный локальный reset недостаточен:
+    // 1) серверные тексты ошибок останутся на экране;
+    // 2) браузер будет считать текущую страницу результатом POST и при refresh покажет prompt.
+    //
+    // Решение: уходим на тот же URL через GET c replace(), чтобы:
+    // - полностью очистить ошибки;
+    // - заменить текущую POST-страницу в истории;
+    // - убрать предупреждение о повторной отправке формы при обновлении.
+    if (hasErrors) {
+      const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      window.location.replace(currentUrl);
+      return;
+    }
+
     const firstNameField = form.querySelector('input[name="first_name"]');
     const lastNameField = form.querySelector('input[name="last_name"]');
     const ageField = form.querySelector('input[name="age"]');
