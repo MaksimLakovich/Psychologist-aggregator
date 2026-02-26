@@ -17,6 +17,9 @@
 
                 {% csrf_token %}
 
+                <!-- ========== ВАЖНО для открытия либо САЙДБАРА либо МЕНЮ ========== -->
+                <input type="hidden" name="layout" value="{{ layout_mode }}">
+
                 <!-- ========== STICKY HEADER (ШАГИ + АВАТАРЫ) ========== -->
                 <div
                         id="choice-sticky-header"
@@ -28,7 +31,7 @@
                         <ol class="flex flex-col gap-4 rounded-lg border border-gray-200 bg-indigo-100 p-2
                         sm:justify-center md:flex-row md:items-center lg:gap-6">
 
-                            <a href="{% url 'core:general-questions' %}" class="flex mr-4">
+                            <a href="{% url 'core:general-questions' %}{{ layout_query }}" class="flex mr-4">
                                 <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
                                     <svg class="h-8 w-8 text-indigo-700" aria-hidden="true"
                                          xmlns="http://www.w3.org/2000/svg"
@@ -45,7 +48,7 @@
 
                             <div class="hidden h-1 w-8 shrink-0 rounded-full bg-indigo-700 md:block xl:w-16"></div>
 
-                            <a href="{% url 'core:personal-questions' %}" class="flex mr-4">
+                            <a href="{% url 'core:personal-questions' %}{{ layout_query }}" class="flex mr-4">
                                 <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
                                     <svg class="h-8 w-8 text-indigo-700" aria-hidden="true"
                                          xmlns="http://www.w3.org/2000/svg"
@@ -62,7 +65,7 @@
 
                             <div class="hidden h-1 w-8 shrink-0 rounded-full bg-indigo-700 md:block xl:w-16"></div>
 
-                            <a href="{% url 'core:choice-psychologist' %}" class="flex mr-4">
+                            <a href="{% url 'core:choice-psychologist' %}{{ layout_query }}" class="flex mr-4">
                                 <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
                                     <svg class="h-8 w-8 text-indigo-700" aria-hidden="true"
                                          xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
@@ -79,7 +82,7 @@
 
                             <div class="hidden h-1 w-8 shrink-0 rounded-full bg-gray-300 md:block xl:w-16"></div>
 
-                            <a href="{% url 'core:payment-card' %}" class="flex mr-4" data-payment-step-link>
+                            <a href="{% url 'core:payment-card' %}{{ layout_query }}" class="flex mr-4" data-payment-step-link>
                                 <li class="flex items-center gap-2 md:flex-1 md:flex-col md:gap-1.5 lg:flex-none">
                                     <svg class="h-8 w-8 text-gray-500" aria-hidden="true"
                                          xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
@@ -117,7 +120,7 @@
                     <div
                         id="psychologist-card"
                         data-static-url="{% static '' %}"
-                        data-back-url="{% url 'core:personal-questions' %}"
+                        data-back-url="{% url 'core:personal-questions' %}{{ layout_query }}"
                         data-client-timezone="{{ request.user.timezone|default_if_none:'' }}"
                         data-reset-choice="{% if reset_choice_psychologist %}1{% else %}0{% endif %}"
                     ></div>

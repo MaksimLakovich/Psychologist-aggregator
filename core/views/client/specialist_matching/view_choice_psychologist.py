@@ -1,17 +1,22 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.urls import reverse
 from django.views.generic import FormView
 
 from core.forms.client.specialist_matching.form_choice_psychologist import \
     ClientChoicePsychologistForm
+from core.services.mixins_current_layout import \
+    SpecialistMatchingLayoutMixin
 
 
-class ClientChoicePsychologistPageView(LoginRequiredMixin, FormView):
+class ClientChoicePsychologistPageView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, FormView):
     """Контроллер на основе FormView для отображения страницы *Выбор психолога*."""
 
     template_name = "core/client_pages/specialist_matching/home_client_choice_psychologist.html"
     form_class = ClientChoicePsychologistForm
-    success_url = reverse_lazy("core:payment-card")
+
+    def get_success_url(self):
+        """Формирует URL следующего шага с сохранением текущего layout."""
+        return f"{reverse('core:payment-card')}{self._build_layout_query()}"
 
     def get_context_data(self, **kwargs):
         """Формирование контекста для передачи данных в HTML-шаблон.
@@ -36,5 +41,13 @@ class ClientChoicePsychologistPageView(LoginRequiredMixin, FormView):
         )
 
         context["title_home_page_view"] = "Психологи онлайн на Опора — поиск и подбор психолога"
+
+        # Логика управление отображением сайдбара:
+        # 1) если пришли из сайдбара, показываем его;
+        # 2) и показываем верхнее меню без сайдбара, если открыли не из сайдбара
+        self._apply_layout_context(context)
+
+        # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
+        context["current_sidebar_key"] = "psychologist-match"
 
         return context

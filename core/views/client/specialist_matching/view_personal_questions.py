@@ -1,19 +1,20 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse
 from django.views.generic.edit import FormView
 
 from core.forms.client.specialist_matching.form_personal_questions import \
     ClientPersonalQuestionsForm
+from core.services.mixins_current_layout import \
+    SpecialistMatchingLayoutMixin
 from users.models import ClientProfile, Method, Topic
 
 
-class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
+class ClientPersonalQuestionsPageView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, FormView):
     """Контроллер на основе FormView для отображения страницы *Персональные вопросы* - предпочтения клиента."""
 
     template_name = "core/client_pages/specialist_matching/home_client_personal_questions.html"
     form_class = ClientPersonalQuestionsForm
-    success_url = reverse_lazy("core:choice-psychologist")
 
     def get_initial(self):
         """Возвращает предзаполненные значения формы, полученные из ClientProfile по данным:
@@ -91,6 +92,10 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
 
         return result
 
+    def get_success_url(self):
+        """Формирует URL следующего шага с сохранением текущего layout."""
+        return f"{reverse('core:personal-questions')}{self._build_layout_query()}"
+
     def get_context_data(self, **kwargs):
         """Формирование контекста для передачи данных в HTML-шаблон.
         1) Метод вызывается автоматически при рендеринге HTML-страницы и дополняет базовый контекст
@@ -122,6 +127,14 @@ class ClientPersonalQuestionsPageView(LoginRequiredMixin, FormView):
             for slot in form.initial.get("preferred_slots", [])
         ]
         context["title_home_page_view"] = "Психологи онлайн на Опора — поиск и подбор психолога"
+
+        # Логика управление отображением сайдбара:
+        # 1) если пришли из сайдбара, показываем его;
+        # 2) и показываем верхнее меню без сайдбара, если открыли не из сайдбара
+        self._apply_layout_context(context)
+
+        # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
+        context["current_sidebar_key"] = "psychologist-match"
 
         return context
 
