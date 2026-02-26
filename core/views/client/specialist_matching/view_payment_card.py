@@ -15,7 +15,8 @@ class ClientAddPaymentCardPageView(SpecialistMatchingLayoutMixin, LoginRequiredM
 
     def get_success_url(self):
         """Пока остаемся на этом шаге, но сохраняем layout и после submit."""
-        return f"{reverse('core:payment-card')}{self._build_layout_query()}"  # TODO: Заменить позже, когда создам след страницу
+        # TODO: Заменить позже, когда создам след страницу
+        return f"{reverse('core:payment-card')}{self._build_layout_query()}"
 
     def get_context_data(self, **kwargs):
         """Формирование контекста для передачи данных в HTML-шаблон.
