@@ -79,19 +79,19 @@
 
     <!-- 3) Плашки: диплом + опыт -->
     <div class="mt-5 flex flex-wrap items-center justify-center gap-2">
-        <div class="inline-flex items-center gap-2 rounded-2xl bg-white/40 px-3 py-1.5 border border-transparent group-hover:border-indigo-200 transition-all">
+        <div class="inline-flex items-center gap-2 rounded-2xl group-hover:bg-indigo-100/40 px-3 py-1.5 bg-slate-200/40 border border-transparent group-hover:border-indigo-200 transition-all">
             <img src="{% static 'images/menu/education-icon.svg' %}"
                  alt="education_icon"
-                 class="h-5 w-5 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
+                 class="h-5.5 w-5.5 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
             />
             <span class="text-base text-slate-600 font-medium tracking-tight">
                 {% if profile.is_all_education_verified %}Диплом проверен{% else %}Документы в работе{% endif %}
             </span>
         </div>
-        <div class="inline-flex items-center gap-2 rounded-2xl bg-white/40 px-3 py-1.5 border border-transparent group-hover:border-indigo-200 transition-all">
+        <div class="inline-flex items-center gap-2 rounded-2xl group-hover:bg-indigo-100/40 px-3 py-1.5 bg-slate-200/40 border border-transparent group-hover:border-indigo-200 transition-all">
             <img src="{% static 'images/psychologist_profile/seal-check.svg' %}"
                  alt="check_icon"
-                 class="h-5 w-5 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
+                 class="h-5.5 w-5.5 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
             />
             <span class="text-base text-slate-600 font-medium tracking-tight">
                 {{ profile.experience_label }}
@@ -100,7 +100,7 @@
     </div>
 
     <!-- 4) Стоимость -->
-    <div class="mt-5 rounded-2xl bg-slate-200/40 p-4 border border-slate-100 group-hover:border-indigo-200 transition-all">
+    <div class="mt-5 rounded-2xl p-4 border border-slate-100 group-hover:bg-slate-200/40 group-hover:border-indigo-200 transition-all">
         <div class="flex justify-between items-center">
             <span class="text-sm font-semibold text-slate-500 tracking-wide">Индивидуальная сессия · 50 мин</span>
             <span class="text-base font-black text-slate-600">{{ profile.price_individual|floatformat:0 }} <span class="text-xs font-medium opacity-50">{{ profile.price_currency }}</span></span>
@@ -144,7 +144,7 @@
                     <div class="flex flex-wrap ml-3 gap-1.5">
                         {% for method in methods|slice:":3" %}
                             <span
-                                    class="px-3 py-1 bg-slate-200/40 border border-slate-100 text-slate-600 text-base font-medium rounded-full transition-colors group-hover:border-indigo-200">
+                                    class="px-3 py-1.5 bg-slate-200/40 border border-transparent group-hover:border-indigo-200 text-slate-600 text-base font-medium rounded-2xl transition-all group-hover:bg-indigo-100/40 group-hover:border-indigo-200">
                                 {{ method.name }}
                             </span>
                         {% endfor %}
@@ -162,13 +162,13 @@
         </div>
 
         <div>
-            <h3 class="mt-6 mb-2 text-xs font-black uppercase tracking-[0.2em] text-slate-500 group-hover:text-indigo-700/90 transition-colors">С чем работаю</h3>
+            <h3 class="mt-8 mb-2 text-xs font-black uppercase tracking-[0.2em] text-slate-500 group-hover:text-indigo-700/90 transition-colors">С чем работаю</h3>
             {% with topics=profile.topics.all %}
                 {% if topics %}
                     <div class="flex flex-wrap ml-3 gap-1.5">
                         {% for topic in topics|slice:":4" %}
                             <span
-                                    class="px-3 py-1 bg-slate-200/40 border border-slate-100 text-slate-600 text-base font-medium rounded-full transition-colors group-hover:border-indigo-200">
+                                    class="px-3 py-1.5 bg-slate-200/40 border border-transparent group-hover:border-indigo-200 text-slate-600 text-base font-medium rounded-2xl transition-all group-hover:bg-indigo-100/40 group-hover:border-indigo-200">
                                 {{ topic.name }}
                             </span>
                         {% endfor %}
@@ -190,7 +190,7 @@
     <div class="mt-8 hidden flex-1 animate-fade-in" data-tab-panel="bio">
         {% if profile.biography %}
             <div class="relative">
-                <p class="text-base leading-relaxed text-slate-600 font-medium italic line-clamp-[6]">
+                <p class="text-base leading-loose leading-relaxed text-slate-600 font-medium italic line-clamp-[6]">
                     «{{ profile.biography }}»
                 </p>
                 <a href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}"

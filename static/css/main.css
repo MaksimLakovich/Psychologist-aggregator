@@ -4292,6 +4292,22 @@ input:checked + .toggle-bg {
   background-color: rgb(100 116 139 / 0.4);
 }
 
+.bg-slate-100\/70 {
+  background-color: rgb(241 245 249 / 0.7);
+}
+
+.bg-slate-100\/10 {
+  background-color: rgb(241 245 249 / 0.1);
+}
+
+.bg-slate-100\/90 {
+  background-color: rgb(241 245 249 / 0.9);
+}
+
+.bg-slate-200\/20 {
+  background-color: rgb(226 232 240 / 0.2);
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
@@ -4815,6 +4831,11 @@ input:checked + .toggle-bg {
   font-size: 13px;
 }
 
+.text-base\/8 {
+  font-size: 1rem;
+  line-height: 2rem;
+}
+
 .font-bold {
   font-weight: 700;
 }
@@ -4865,6 +4886,14 @@ input:checked + .toggle-bg {
 
 .leading-tight {
   line-height: 1.25;
+}
+
+.leading-7 {
+  line-height: 1.75rem;
+}
+
+.leading-loose {
+  line-height: 2;
 }
 
 .tracking-tight {
@@ -6572,6 +6601,36 @@ input:checked + .toggle-bg {
 
 .group:hover .group-hover\:bg-white\/40 {
   background-color: rgb(255 255 255 / 0.4);
+}
+
+.group:hover .group-hover\:bg-slate-100\/40 {
+  background-color: rgb(241 245 249 / 0.4);
+}
+
+.group:hover .group-hover\:bg-slate-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(241 245 249 / var(--tw-bg-opacity, 1));
+}
+
+.group:hover .group-hover\:bg-slate-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(226 232 240 / var(--tw-bg-opacity, 1));
+}
+
+.group:hover .group-hover\:bg-slate-200\/70 {
+  background-color: rgb(226 232 240 / 0.7);
+}
+
+.group:hover .group-hover\:bg-slate-200\/40 {
+  background-color: rgb(226 232 240 / 0.4);
+}
+
+.group:hover .group-hover\:bg-slate-200\/20 {
+  background-color: rgb(226 232 240 / 0.2);
+}
+
+.group:hover .group-hover\:bg-indigo-100\/40 {
+  background-color: rgb(229 237 255 / 0.4);
 }
 
 .group:hover .group-hover\:text-zinc-500 {
