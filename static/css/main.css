@@ -2284,6 +2284,10 @@ input:checked + .toggle-bg {
   margin-bottom: 3rem;
 }
 
+.mt-7 {
+  margin-top: 1.75rem;
+}
+
 .line-clamp-3 {
   overflow: hidden;
   display: -webkit-box;
@@ -2487,6 +2491,18 @@ input:checked + .toggle-bg {
 
 .max-h-36 {
   max-height: 9rem;
+}
+
+.max-h-40 {
+  max-height: 10rem;
+}
+
+.max-h-64 {
+  max-height: 16rem;
+}
+
+.max-h-52 {
+  max-height: 13rem;
 }
 
 .min-h-\[48px\] {
@@ -3243,6 +3259,10 @@ input:checked + .toggle-bg {
   justify-self: center;
 }
 
+.overflow-auto {
+  overflow: auto;
+}
+
 .overflow-hidden {
   overflow: hidden;
 }
@@ -3546,6 +3566,11 @@ input:checked + .toggle-bg {
 
 .border-white\/40 {
   border-color: rgb(255 255 255 / 0.4);
+}
+
+.border-indigo-600 {
+  --tw-border-opacity: 1;
+  border-color: rgb(88 80 236 / var(--tw-border-opacity, 1));
 }
 
 .\!bg-gray-50 {
@@ -4478,6 +4503,10 @@ input:checked + .toggle-bg {
 
 .pl-20 {
   padding-left: 5rem;
+}
+
+.pr-1 {
+  padding-right: 0.25rem;
 }
 
 .text-left {
@@ -6916,6 +6945,14 @@ input:checked + .toggle-bg {
 }
 
 @media (min-width: 1024px) {
+  .lg\:sticky {
+    position: sticky;
+  }
+
+  .lg\:top-6 {
+    top: 1.5rem;
+  }
+
   .lg\:order-2 {
     order: 2;
   }
@@ -7285,8 +7322,32 @@ input:checked + .toggle-bg {
 }
 
 @media (min-width: 1280px) {
+  .xl\:sticky {
+    position: sticky;
+  }
+
+  .xl\:top-6 {
+    top: 1.5rem;
+  }
+
   .xl\:col-span-2 {
     grid-column: span 2 / span 2;
+  }
+
+  .xl\:col-span-3 {
+    grid-column: span 3 / span 3;
+  }
+
+  .xl\:col-span-9 {
+    grid-column: span 9 / span 9;
+  }
+
+  .xl\:col-span-4 {
+    grid-column: span 4 / span 4;
+  }
+
+  .xl\:col-span-8 {
+    grid-column: span 8 / span 8;
   }
 
   .xl\:w-16 {
@@ -7299,6 +7360,10 @@ input:checked + .toggle-bg {
 
   .xl\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .xl\:grid-cols-12 {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
   }
 
   .xl\:flex-row {
@@ -7343,6 +7408,16 @@ input:checked + .toggle-bg {
     padding-right: 18rem;
   }
 
+  .xl\:px-16 {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+
+  .xl\:px-32 {
+    padding-left: 8rem;
+    padding-right: 8rem;
+  }
+
   .xl\:pl-10 {
     padding-left: 2.5rem;
   }
@@ -7359,6 +7434,14 @@ input:checked + .toggle-bg {
 }
 
 @media (min-width: 1536px) {
+  .\32xl\:col-span-3 {
+    grid-column: span 3 / span 3;
+  }
+
+  .\32xl\:col-span-9 {
+    grid-column: span 9 / span 9;
+  }
+
   .\32xl\:grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
