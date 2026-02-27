@@ -2304,6 +2304,10 @@ input:checked + .toggle-bg {
   margin-top: 3rem;
 }
 
+.ml-4 {
+  margin-left: 1rem;
+}
+
 .line-clamp-3 {
   overflow: hidden;
   display: -webkit-box;
@@ -6138,6 +6142,10 @@ input:checked + .toggle-bg {
   background-color: rgb(226 232 240 / 0.7);
 }
 
+.hover\:bg-slate-200\/50:hover {
+  background-color: rgb(226 232 240 / 0.5);
+}
+
 .hover\:text-blue-600:hover {
   --tw-text-opacity: 1;
   color: rgb(28 100 242 / var(--tw-text-opacity, 1));
@@ -6615,6 +6623,21 @@ input:checked + .toggle-bg {
   --tw-shadow: var(--tw-shadow-colored);
 }
 
+.group:hover .group-hover\:shadow-indigo-500 {
+  --tw-shadow-color: #6875F5;
+  --tw-shadow: var(--tw-shadow-colored);
+}
+
+.group:hover .group-hover\:shadow-indigo-500\/50 {
+  --tw-shadow-color: rgb(104 117 245 / 0.5);
+  --tw-shadow: var(--tw-shadow-colored);
+}
+
+.group:hover .group-hover\:shadow-indigo-300 {
+  --tw-shadow-color: #B4C6FC;
+  --tw-shadow: var(--tw-shadow-colored);
+}
+
 .group:hover .group-hover\:ring-2 {
   --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
   --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
@@ -6643,6 +6666,15 @@ input:checked + .toggle-bg {
 .group:hover .group-hover\:ring-indigo-600 {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(88 80 236 / var(--tw-ring-opacity, 1));
+}
+
+.group:hover .group-hover\:ring-indigo-700\/70 {
+  --tw-ring-color: rgb(81 69 205 / 0.7);
+}
+
+.group:hover .group-hover\:ring-indigo-500 {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(104 117 245 / var(--tw-ring-opacity, 1));
 }
 
 .group:hover .group-hover\:grayscale-0 {
