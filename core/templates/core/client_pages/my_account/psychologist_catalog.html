@@ -20,20 +20,63 @@
         to { opacity: 1; transform: translateX(0); }
     }
 
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Устанавливаем начальное состояние invisible, чтобы не было мерцания */
     .animate-fade-in-left {
         opacity: 0;
         animation: fadeInLeft 0.9s ease-out forwards;
     }
+
+    .animate-fade-in-up {
+        opacity: 0;
+        animation: fadeInUp 0.7s ease-out forwards;
+    }
+
+    /* Скрытие скроллбара для панели фильтров */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="relative min-h-screen w-full overflow-hidden bg-white/80">
+
+<!-- ======= СТИЛЬ МОДАЛКИ ДЛЯ ФИЛЬТРОВ ======= -->
+<div id="filter-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 sm:p-6">
+    <div onclick="closeFilterModal()" class="absolute inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity"></div>
+
+    <div class="relative w-full max-w-lg overflow-hidden rounded-[2.5rem] bg-white shadow-2xl">
+        <div class="p-8">
+            <div class="flex items-center justify-between mb-6">
+                <h3 id="modal-title" class="text-2xl font-bold text-gray-900 tracking-tight">Фильтр</h3>
+                <button onclick="closeFilterModal()" class="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div id="modal-content" class="min-h-[150px] text-gray-600">
+                <p class="italic text-sm">Параметры для фильтрации подгружаются...</p>
+            </div>
+
+            <div class="mt-8 flex gap-3">
+                <button onclick="closeFilterModal()" class="flex-1 px-6 py-4 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
+                    Показать результаты
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======= КОНТЕНТ СТРАНИЦЫ ======= -->
+<section class="relative min-h-screen w-full overflow-hidden bg-white backdrop-blur-[2px]">
 
     <div class="relative z-10 w-full px-6 py-10 sm:px-8 {% if show_sidebar %}lg:px-16 xl:px-24{% else %}lg:px-40 xl:px-72{% endif %}">
 
         <!-- Шапка страницы -->
-        <div class="mb-16 animate-fade-in-left max-w-4xl">
+        <div class="mb-12 animate-fade-in-left max-w-4xl">
             <header>
                 <h1 class="text-4xl md:text-5xl font-black text-indigo-900 tracking-tight leading-tight">
                     Наши <span class="text-indigo-600">психологи</span>
@@ -44,10 +87,29 @@
             </header>
         </div>
 
+        <!-- ФИЛЬТРЫ -->
+        <div class="mb-10 animate-fade-in-left" style="animation-delay: 0.1s;">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Настройка поиска</span>
+            </div>
+
+            <div class="no-scrollbar flex overflow-x-auto pb-4 gap-3">
+                <button onclick="openFilterModal('Вид консультации')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Вид консультации</button>
+                <button onclick="openFilterModal('Симптомы')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Симптомы</button>
+                <button onclick="openFilterModal('Возраст')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Возраст</button>
+                <button onclick="openFilterModal('Психотерапевтический подход')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Подход</button>
+                <button onclick="openFilterModal('Пол')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Пол</button>
+                <button onclick="openFilterModal('Цена')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Цена</button>
+                <button onclick="openFilterModal('Опыт')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Опыт</button>
+                <button onclick="openFilterModal('Время сессии')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Время сессии</button>
+            </div>
+        </div>
+
         <!-- Сетка карточек: 1 на mobile, 2 на tablet, 3 на desktop -->
         <div
             id="catalog-cards-grid"
-            class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
+            class="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3 animate-fade-in-up"
+            style="animation-delay: 0.2s;"
         >
             {% include 'core/client_pages/my_account/short_cards.html' with profiles=profiles layout_mode=layout_mode show_sidebar=show_sidebar %}
         </div>
@@ -55,17 +117,20 @@
         <!-- Пустое состояние каталога -->
         <div
             id="catalog-empty-state"
-            class="mt-10 rounded-2xl border border-indigo-100 bg-white/90 p-8 text-center {% if profiles %}hidden{% endif %}"
+            class="mt-16 rounded-[2.5rem] border border-indigo-100 bg-white/90 p-12 text-center shadow-xl {% if profiles %}hidden{% endif %}"
         >
-            <p class="text-lg font-semibold text-gray-700">Психологи не найдены</p>
+            <div class="inline-flex p-4 bg-indigo-50 rounded-full mb-4 text-indigo-300">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <p class="text-xl font-bold text-gray-800">Психологи не найдены</p>
             <p class="mt-2 text-gray-500">Попробуйте обновить страницу или изменить фильтры (когда они будут применены).</p>
         </div>
 
         <!-- Нижняя панель: слева номер страницы, по центру "Показать еще", справа "Вернуться в начало" -->
-        <div class="mt-10 grid items-center gap-4 text-zinc-400 md:grid-cols-3">
-            <p id="catalog-page-indicator" class="text-sm font-medium tracking-wide md:justify-self-start">
+        <div class="mt-20 grid items-center gap-6 text-zinc-400 md:grid-cols-3 border-t border-indigo-100/50 pt-10">
+            <p id="catalog-page-indicator" class="text-sm font-bold uppercase tracking-widest md:justify-self-start text-indigo-900/40">
                 {% if total_pages %}
-                    {{ current_page_number|default:1 }} из {{ total_pages }}
+                    Страница <span class="text-indigo-600">{{ current_page_number|default:1 }}</span> из {{ total_pages }}
                 {% else %}
                     0 из 0
                 {% endif %}
@@ -81,13 +146,13 @@
                     data-total-pages="{{ total_pages|default:0 }}"
                     data-random-order-key="{{ random_order_key }}"
                     data-layout="{{ layout_mode }}"
-                    class="rounded-xl bg-indigo-700 px-8 py-3 text-lg font-extrabold tracking-wide text-white transition hover:bg-indigo-900 disabled:cursor-not-allowed disabled:opacity-50"
+                    class="rounded-2xl bg-indigo-600 px-10 py-4 text-base font-black tracking-wide text-white transition hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                     {% if not has_next %}hidden{% endif %}
                 >
                     Показать еще
                 </button>
 
-                <p id="catalog-load-more-error" class="hidden text-sm font-medium text-pink-600">
+                <p id="catalog-load-more-error" class="hidden text-sm font-bold text-rose-500">
                     Не удалось загрузить следующую страницу. Попробуйте еще раз.
                 </p>
             </div>
@@ -96,15 +161,34 @@
                 <button
                     id="catalog-scroll-top-btn"
                     type="button"
-                    class="inline-flex items-center rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-400 transition hover:border-zinc-400 hover:text-zinc-500"
+                    class="inline-flex items-center rounded-xl border border-zinc-200 px-5 py-2 text-xs font-bold uppercase tracking-widest text-zinc-400 transition hover:border-indigo-400 hover:text-indigo-600"
                 >
-                    Вернуться в начало
+                    В начало
                 </button>
             </div>
         </div>
 
     </div>
 </section>
+
+<script>
+    function openFilterModal(filterName) {
+        const modal = document.getElementById('filter-modal');
+        const title = document.getElementById('modal-title');
+        title.innerText = filterName;
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden'; // Запрещаем скролл фона
+    }
+
+    function closeFilterModal() {
+        const modal = document.getElementById('filter-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = 'auto'; // Возвращаем скролл
+    }
+</script>
 
 <script type="module" src="{% static 'js/pages/psychologist_catalog.js' %}"></script>
 {% endblock %}
