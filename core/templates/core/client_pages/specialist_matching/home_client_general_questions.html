@@ -13,7 +13,34 @@
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        background-attachment: fixed; /* красиво фиксирует фон */
+        background-attachment: fixed;
+    }
+
+    /* Анимации входа блоков (как на странице редактирования профиля) */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeInRight {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .animate-fade-in-up {
+        opacity: 0;
+        animation: fadeInUp 1.0s ease-out forwards;
+    }
+    .animate-fade-in-left {
+        opacity: 0;
+        animation: fadeInLeft 0.9s ease-out forwards;
+    }
+    .animate-fade-in-right {
+        opacity: 0;
+        animation: fadeInRight 0.9s ease-out forwards;
     }
 </style>
 {% endblock %}
@@ -36,7 +63,7 @@
                 <div class="sticky top-0 z-30 bg-white border-b pb-3">
 
                     <!-- ШАГИ / ЭТАПЫ -->
-                    <div class="space-y-6 sm:space-y-8 pb-3">
+                    <div class="space-y-6 sm:space-y-8 pb-3 animate-fade-in-left">
                         <ol class="flex flex-col gap-4 rounded-lg border border-gray-200 bg-indigo-100 p-2
                         sm:justify-center md:flex-row md:items-center lg:gap-6">
 
@@ -100,14 +127,14 @@
                     </div>
 
                     <!-- Аватары -->
-                    <div class="flex justify-end min-h-[50px] w-full overflow-x-scroll rounded-lg lg:overflow-visible">
+                    <div class="flex justify-end min-h-[50px] w-full overflow-x-scroll rounded-lg lg:overflow-visible animate-fade-in-right">
                         {% include 'core/client_pages/specialist_matching/home_avatar_group.html' %}
                     </div>
 
                 </div>
 
                 <!-- ========== Блок 1 ========== -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-16 pb-7">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-16 pb-7 animate-fade-in-up">
                     <!-- Левая колонка -->
                     <div class="md:col-span-3">
                         <h2 class="text-xl font-semibold text-gray-900">Общие вопросы</h2>
@@ -151,7 +178,7 @@
                 </div>
 
                 <!-- ========== Блок 2 ========== -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-16 pb-7">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-16 pb-7 animate-fade-in-up">
                     <!-- Левая колонка -->
                     <div class="md:col-span-3">
                         <h2 class="text-xl font-semibold text-gray-900">Был ли у вас опыт терапии?</h2>
@@ -171,7 +198,7 @@
                 </div>
 
                 <!-- ========== Блок 3 ========== -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-16 pb-7">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-16 pb-7 animate-fade-in-up">
                     <!-- Левая колонка -->
                     <div class="md:col-span-3">
                         <h2 class="text-xl font-semibold text-gray-900">Часовой пояс</h2>
@@ -187,7 +214,7 @@
                 </div>
 
                 <!-- ========== Блок 4 ========== -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-16 pb-7">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-16 pb-7 animate-fade-in-up">
                     <!-- Левая колонка -->
                     <div class="md:col-span-3">
                         <h2 class="text-xl font-semibold text-gray-900">Получать информацию о сессиях, полезные материалы и персональные предложения</h2>
@@ -207,7 +234,7 @@
                 </div>
 
                 <!-- Кнопка -->
-                <div class="pt-6 pb-24 flex justify-center gap-5">
+                <div class="pt-6 pb-24 flex justify-center gap-5 animate-fade-in-up">
                     <a href="{% url 'core:start-page' %}"
                        class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-gray-100 text-xl text-gray-300 font-extrabold tracking-wide
                        hover:bg-gray-200 transition">
