@@ -93,7 +93,7 @@ class ClientPersonalQuestionsPageView(SpecialistMatchingLayoutMixin, LoginRequir
 
     def get_success_url(self):
         """Формирует URL следующего шага с сохранением текущего layout."""
-        return f"{reverse('core:personal-questions')}{self._build_layout_query()}"
+        return f"{reverse('core:choice-psychologist')}{self._build_layout_query()}"
 
     def get_context_data(self, **kwargs):
         """Формирование контекста для передачи данных в HTML-шаблон.
