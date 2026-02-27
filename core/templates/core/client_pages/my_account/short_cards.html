@@ -16,7 +16,9 @@
 {% for profile in profiles %}
 <article
     id="psychologist-card-{{ profile.slug }}"
-    class="flex h-full flex-col rounded-[2.5rem] border border-indigo-50 bg-white/90 p-6 shadow-[0_10px_30px_rgba(79,70,229,0.04)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(79,70,229,0.12)] group animate-fade-in-up"
+    class="flex h-full flex-col rounded-[2.5rem] border border-slate-100 bg-slate-200/40 p-6
+    shadow-xl transition-all duration-500
+    hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-500/50 group animate-fade-in-up"
     data-catalog-card
     style="animation-delay: calc({{ forloop.counter0 }} * 0.1s);"
 >
@@ -28,10 +30,11 @@
                 alt="Фото психолога {{ profile.user.get_full_name }}"
                 loading="lazy"
                 decoding="async"
-                class="h-32 w-32 rounded-[2.5rem] object-cover border-4 border-white shadow-lg ring-1 ring-indigo-50 group-hover:ring-indigo-200 transition-all duration-500"
+                class="h-32 w-32 rounded-[2.5rem] object-cover border-4 border-white shadow-lg
+                ring-2 ring-indigo-50 group-hover:ring-indigo-700 transition-all duration-500"
             >
-            {% if profile.is_all_education_verified %}
-            <div class="absolute -bottom-1 -right-1 bg-white p-1.5 rounded-full shadow-md">
+            {% if profile.is_verified %}
+            <div class="absolute -bottom-1 -right-1 bg-white p-0.5 rounded-full shadow-md">
                 <div class="bg-emerald-500 rounded-full p-1">
                     <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
@@ -43,42 +46,54 @@
     </div>
 
     <!-- 2) Полное имя -->
-    <h2 class="mt-6 text-center text-2xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-indigo-700 transition-colors">
-        {{ profile.user.first_name }} <br> {{ profile.user.last_name }}
+    <h2 class="mt-5 text-center text-2xl font-bold text-slate-600 tracking-wider leading-tight group-hover:text-indigo-700 transition-colors">
+        {{ profile.user.first_name }} {{ profile.user.last_name }}
     </h2>
 
     <!-- 3) Плашки: диплом + опыт -->
-    <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
-        <span class="inline-flex items-center rounded-xl px-3 py-1 text-[11px] font-black uppercase tracking-wider {% if profile.is_all_education_verified %}bg-emerald-50 text-emerald-600{% else %}bg-amber-50 text-amber-600{% endif %}">
-            {% if profile.is_all_education_verified %}
+    <div class="mt-5 flex flex-wrap items-center justify-center gap-2">
+        <span class="inline-flex items-center gap-2 rounded-2xl bg-indigo-100/50 px-3 py-1 hover:bg-indigo-100 transition">
+            <img src="{% static 'images/menu/education-icon.svg' %}"
+                 alt="education_icon"
+                 class="h-5 w-5"
+            />
+            <span class="text-base text-gray-700 font-medium tracking-tight">
+                {% if profile.is_all_education_verified %}
                 Диплом проверен
-            {% else %}
+                {% else %}
                 Проверка документов
-            {% endif %}
+                {% endif %}
+            </span>
         </span>
-        <span class="inline-flex items-center rounded-xl bg-indigo-50 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-indigo-600">
-            {{ profile.experience_label }}
+        <span class="inline-flex items-center gap-2 rounded-2xl bg-indigo-100/50 px-3 py-1 hover:bg-indigo-100 transition">
+            <img src="{% static 'images/psychologist_profile/seal-check.svg' %}"
+                 alt="check_icon"
+                 class="h-5 w-5"
+            />
+            <span class="text-base text-gray-700 font-medium tracking-tight">
+                {{ profile.experience_label }}
+            </span>
         </span>
     </div>
 
     <!-- 4) Стоимость -->
-    <div class="mt-6 rounded-2xl bg-slate-50/80 p-4 border border-slate-100 transition-colors group-hover:bg-indigo-50/30 group-hover:border-indigo-100">
+    <div class="mt-5 rounded-2xl bg-slate-200/40 p-4 border border-slate-100 group-hover:border-slate-200 transition-colors">
         <div class="flex justify-between items-center">
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-tighter">Индивидуальная · 50 мин</span>
-            <span class="text-base font-black text-slate-900">{{ profile.price_individual|floatformat:0 }} <span class="text-xs font-medium opacity-50">{{ profile.price_currency }}</span></span>
+            <span class="text-sm font-semibold text-slate-500 tracking-wide">Индивидуальная сессия · 50 мин</span>
+            <span class="text-base font-black text-slate-600">{{ profile.price_individual|floatformat:0 }} <span class="text-xs font-medium opacity-50">{{ profile.price_currency }}</span></span>
         </div>
         <div class="mt-2 pt-2 border-t border-slate-200/50 flex justify-between items-center">
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-tighter">Парная · 1.5 часа</span>
-            <span class="text-base font-black text-slate-900">{{ profile.price_couples|floatformat:0 }} <span class="text-xs font-medium opacity-50">{{ profile.price_currency }}</span></span>
+            <span class="text-sm font-semibold text-slate-500 tracking-wide">Парная сессия · 1.5 часа</span>
+            <span class="text-base font-black text-slate-600">{{ profile.price_couples|floatformat:0 }} <span class="text-xs font-medium opacity-50">{{ profile.price_currency }}</span></span>
         </div>
     </div>
 
     <!-- 5) Два пункта: Основное / О себе -->
-    <div class="mt-6">
-        <div class="flex p-1 bg-slate-100/80 rounded-2xl" role="tablist" aria-label="Карточка психолога">
+    <div class="mt-10">
+        <div class="flex" role="tablist" aria-label="Карточка психолога">
             <button
                 type="button"
-                class="catalog-tab-btn flex-1 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-300 bg-white text-indigo-600 shadow-sm"
+                class="catalog-tab-btn flex-1 py-2.5 text-xs font-black uppercase tracking-widest transition-all duration-300 text-slate-500"
                 data-tab-button
                 data-target="main"
                 aria-selected="true"
@@ -87,7 +102,7 @@
             </button>
             <button
                 type="button"
-                class="catalog-tab-btn flex-1 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-300 text-slate-500 hover:text-indigo-600"
+                class="catalog-tab-btn flex-1 py-2.5 text-xs font-black uppercase tracking-widest transition-all duration-300 text-slate-500"
                 data-tab-button
                 data-target="bio"
                 aria-selected="false"
@@ -100,41 +115,45 @@
     <!-- 6) Основной блок (по умолчанию активен): methods + topics -->
     <div class="mt-6 flex-1 space-y-5" data-tab-panel="main">
         <div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3 ml-1">Методы работы</h3>
+            <h3 class="text-xs font-black uppercase tracking-[0.2em] text-slate-500 group-hover:text-indigo-700/90 mb-3 ml-1">Методы работы</h3>
             {% with methods=profile.methods.all %}
                 {% if methods %}
                     <div class="flex flex-wrap gap-1.5">
-                        {% for method in methods|slice:":4" %}
-                            <span class="px-3 py-1 bg-white border border-slate-200 text-slate-600 text-[11px] font-bold rounded-full group-hover:border-indigo-200 transition-colors">
+                        {% for method in methods|slice:":3" %}
+                            <span
+                                    class="px-3 py-1 bg-slate-200/40 border border-slate-100 text-slate-600 text-base font-medium
+                                    rounded-full group-hover:border-indigo-200 transition-colors">
                                 {{ method.name }}
                             </span>
                         {% endfor %}
-                        {% if methods|length > 4 %}
-                            <span class="px-2 py-1 text-slate-400 text-[11px] font-bold">+ еще {{ methods|length|add:'-4' }}</span>
+                        {% if methods|length > 3 %}
+                            <span class="px-2 py-1 text-slate-600 group-hover:text-indigo-700 text-sm font-base italic">+ еще {{ methods|length|add:'-3' }}</span>
                         {% endif %}
                     </div>
                 {% else %}
-                    <p class="text-xs text-slate-400 italic">Методы не указаны</p>
+                    <p class="text-sm text-slate-400 italic">Методы не указаны</p>
                 {% endif %}
             {% endwith %}
         </div>
 
         <div>
-            <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3 ml-1">С чем работаю</h3>
+            <h3 class="text-xs font-black uppercase tracking-[0.2em] text-slate-500 group-hover:text-indigo-700/90 mb-3 ml-1">С чем работаю</h3>
             {% with topics=profile.topics.all %}
                 {% if topics %}
                     <div class="flex flex-wrap gap-1.5">
-                        {% for topic in topics|slice:":5" %}
-                            <span class="px-3 py-1 bg-indigo-50/50 text-indigo-700 text-[11px] font-bold rounded-full border border-indigo-100/50">
+                        {% for topic in topics|slice:":4" %}
+                            <span
+                                    class="px-3 py-1 bg-slate-200/40 border border-slate-100 text-slate-600 text-base font-medium
+                                    rounded-full group-hover:border-indigo-200 transition-colors">
                                 {{ topic.name }}
                             </span>
                         {% endfor %}
-                        {% if topics|length > 5 %}
-                            <span class="px-2 py-1 text-slate-400 text-[11px] font-bold">+ еще {{ topics|length|add:'-5' }}</span>
+                        {% if topics|length > 4 %}
+                            <span class="px-2 py-1 text-slate-600 group-hover:text-indigo-700 text-sm font-base italic">+ еще {{ topics|length|add:'-4' }}</span>
                         {% endif %}
                     </div>
                 {% else %}
-                    <p class="text-xs text-slate-400 italic">Темы не указаны</p>
+                    <p class="text-sm text-slate-400 italic">Темы не указаны</p>
                 {% endif %}
             {% endwith %}
         </div>
@@ -143,7 +162,7 @@
     <!-- 7) Блок "О себе" -->
     <div class="mt-6 hidden flex-1 animate-fade-in" data-tab-panel="bio">
         {% if profile.biography %}
-            <p class="text-[13px] leading-relaxed text-slate-500 italic line-clamp-[6]">
+            <p class="text-base leading-relaxed text-slate-600 font-medium italic line-clamp-[6]">
                 «{{ profile.biography }}»
             </p>
         {% else %}
@@ -157,9 +176,9 @@
             href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}"
             data-catalog-detail-link
             data-profile-slug="{{ profile.slug }}"
-            class="inline-flex w-full items-center justify-center rounded-[1.5rem] bg-slate-900 px-6 py-4
+            class="inline-flex w-full items-center justify-center rounded-[1.5rem] bg-slate-400 px-6 py-4
             text-sm font-black tracking-widest text-white uppercase transition-all duration-300
-            hover:bg-indigo-600 hover:shadow-xl hover:shadow-indigo-200 active:scale-[0.98]"
+            group-hover:bg-indigo-600 hover:shadow-xl hover:shadow-indigo-200 active:scale-[0.98]"
         >
             Подробнее о психологе
         </a>

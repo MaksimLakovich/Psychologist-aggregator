@@ -44,14 +44,15 @@
 
 {% block content %}
 
+
 <!-- ======= СТИЛЬ МОДАЛКИ ДЛЯ ФИЛЬТРОВ ======= -->
 <div id="filter-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 sm:p-6">
-    <div onclick="closeFilterModal()" class="absolute inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity"></div>
+    <div onclick="closeFilterModal()" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"></div>
 
     <div class="relative w-full max-w-lg overflow-hidden rounded-[2.5rem] bg-white shadow-2xl">
         <div class="p-8">
             <div class="flex items-center justify-between mb-6">
-                <h3 id="modal-title" class="text-2xl font-bold text-gray-900 tracking-tight">Фильтр</h3>
+                <h3 id="modal-title" class="text-2xl font-bold text-indigo-900 tracking-tight">Фильтр</h3>
                 <button onclick="closeFilterModal()" class="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
@@ -62,7 +63,10 @@
             </div>
 
             <div class="mt-8 flex gap-3">
-                <button onclick="closeFilterModal()" class="flex-1 px-6 py-4 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
+                <button onclick="closeFilterModal()"
+                        class="flex-1 px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-base font-medium rounded-xl
+                        border border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                        transition-all shadow-lg shadow-indigo-100 duration-200 shadow-md hover:shadow-lg">
                     Показать результаты
                 </button>
             </div>
@@ -70,13 +74,14 @@
     </div>
 </div>
 
+
 <!-- ======= КОНТЕНТ СТРАНИЦЫ ======= -->
 <section class="relative min-h-screen w-full overflow-hidden bg-white backdrop-blur-[2px]">
 
     <div class="relative z-10 w-full px-6 py-10 sm:px-8 {% if show_sidebar %}lg:px-16 xl:px-24{% else %}lg:px-40 xl:px-72{% endif %}">
 
         <!-- Шапка страницы -->
-        <div class="mb-12 animate-fade-in-left max-w-4xl">
+        <div class="mb-8 animate-fade-in-left max-w-4xl">
             <header>
                 <h1 class="text-4xl md:text-5xl font-black text-indigo-900 tracking-tight leading-tight">
                     Наши <span class="text-indigo-600">психологи</span>
@@ -88,20 +93,44 @@
         </div>
 
         <!-- ФИЛЬТРЫ -->
-        <div class="mb-10 animate-fade-in-left" style="animation-delay: 0.1s;">
-            <div class="flex items-center gap-3 mb-4">
+        <div class="mb-2 animate-fade-in-left" style="animation-delay: 0.1s;">
+            <div class="flex items-center gap-3 mb-2">
                 <span class="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Настройка поиска</span>
             </div>
 
             <div class="no-scrollbar flex overflow-x-auto pb-4 gap-3">
-                <button onclick="openFilterModal('Вид консультации')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Вид консультации</button>
-                <button onclick="openFilterModal('Симптомы')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Симптомы</button>
-                <button onclick="openFilterModal('Возраст')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Возраст</button>
-                <button onclick="openFilterModal('Психотерапевтический подход')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Подход</button>
-                <button onclick="openFilterModal('Пол')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Пол</button>
-                <button onclick="openFilterModal('Цена')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Цена</button>
-                <button onclick="openFilterModal('Опыт')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Опыт</button>
-                <button onclick="openFilterModal('Время сессии')" class="flex-shrink-0 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">Время сессии</button>
+                <button onclick="openFilterModal('Вид консультации')"
+                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-200 rounded-2xl text-sm font-bold text-slate-600
+                         hover:border-indigo-500 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Вид консультации
+                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+                <button onclick="openFilterModal('Симптомы')"
+                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-200 rounded-2xl text-sm font-bold text-slate-600
+                         hover:border-indigo-500 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Симптомы
+                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+                <button onclick="openFilterModal('Возраст')"
+                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-200 rounded-2xl text-sm font-bold text-slate-600
+                         hover:border-indigo-500 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Возраст
+                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+                <button onclick="openFilterModal('Психотерапевтический подход')"
+                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-200 rounded-2xl text-sm font-bold text-slate-600
+                         hover:border-indigo-500 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Подход
+                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+                <button onclick="openFilterModal('Пол')"
+                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-200 rounded-2xl text-sm font-bold text-slate-600
+                         hover:border-indigo-500 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Пол
+                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+                <button onclick="openFilterModal('Цена')"
+                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-200 rounded-2xl text-sm font-bold text-slate-600
+                         hover:border-indigo-500 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Цена
+                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+                <button onclick="openFilterModal('Опыт')"
+                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-200 rounded-2xl text-sm font-bold text-slate-600
+                         hover:border-indigo-500 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Опыт
+                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+                <button onclick="openFilterModal('Время сессии')"
+                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-200 rounded-2xl text-sm font-bold text-slate-600
+                         hover:border-indigo-500 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Время сессии
+                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
             </div>
         </div>
 
@@ -123,7 +152,7 @@
                 <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
             <p class="text-xl font-bold text-gray-800">Психологи не найдены</p>
-            <p class="mt-2 text-gray-500">Попробуйте обновить страницу или изменить фильтры (когда они будут применены).</p>
+            <p class="mt-2 text-gray-500">Попробуйте обновить страницу или изменить фильтры (когда они будут применены)</p>
         </div>
 
         <!-- Нижняя панель: слева номер страницы, по центру "Показать еще", справа "Вернуться в начало" -->
@@ -146,7 +175,8 @@
                     data-total-pages="{{ total_pages|default:0 }}"
                     data-random-order-key="{{ random_order_key }}"
                     data-layout="{{ layout_mode }}"
-                    class="rounded-2xl bg-indigo-600 px-10 py-4 text-base font-black tracking-wide text-white transition hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                    class="rounded-2xl bg-indigo-600 px-10 py-4 text-base font-black tracking-wide text-white transition
+                    hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                     {% if not has_next %}hidden{% endif %}
                 >
                     Показать еще
