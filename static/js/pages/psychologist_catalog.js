@@ -7,6 +7,14 @@ import {
 import { initMultiToggle } from "../modules/toggle_group_multi_choice.js";
 import { pluralizeRu } from "../utils/pluralize_ru.js";
 
+// Список технических query-параметров фильтров каталога, которые не должны
+// оставаться в пользовательском URL в адресной строке.
+// Сейчас тут только первый реализованный фильтр, но при добавлении новых
+// фильтров каталога этот список можно будет расширять.
+const CATALOG_FILTER_QUERY_KEYS = [
+    "consultation_type",
+];
+
 /**
  * Логика страницы "Каталог психологов".
  *
@@ -202,6 +210,37 @@ function resolveLayoutMode() {
 
     const layoutFromUrl = new URLSearchParams(window.location.search).get("layout");
     return layoutFromUrl === "sidebar" ? "sidebar" : "menu";
+}
+
+/**
+ * Очищает адресную строку от технических query-параметров фильтров каталога.
+ *
+ * Почему это полезно:
+ * - пользователь не видит "разрастающийся" URL с фильтрами;
+ * - адрес страницы выглядит чище;
+ * - мы оставляем в URL только то, что действительно имеет смысл для навигации пользователя
+ *   (например, layout), а не внутренние технические параметры фильтрации.
+ *
+ * Важно:
+ * - это влияет только на ВИДИМЫЙ URL в браузере;
+ * - сервер уже успел получить нужные query-параметры и отрендерить правильные данные,
+ *   поэтому очистка адресной строки ничего не ломает.
+ */
+function sanitizeCatalogVisibleUrl() {
+    const currentUrl = new URL(window.location.href);
+    let wasChanged = false;
+
+    CATALOG_FILTER_QUERY_KEYS.forEach((paramName) => {
+        if (!currentUrl.searchParams.has(paramName)) return;
+        currentUrl.searchParams.delete(paramName);
+        wasChanged = true;
+    });
+
+    if (!wasChanged) return;
+
+    const normalizedSearch = currentUrl.searchParams.toString();
+    const cleanUrl = `${currentUrl.pathname}${normalizedSearch ? `?${normalizedSearch}` : ""}${currentUrl.hash}`;
+    window.history.replaceState(window.history.state, "", cleanUrl);
 }
 
 /**
@@ -658,6 +697,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const loadMoreButton = document.getElementById("catalog-load-more-btn");
     const initialPage = loadMoreButton ? toPositiveInt(loadMoreButton.dataset.currentPage, 1) : 1;
     const totalPages = loadMoreButton ? toNonNegativeInt(loadMoreButton.dataset.totalPages, 0) : 0;
+
+    sanitizeCatalogVisibleUrl();
     renderCurrentPageIndicator(initialPage, totalPages);
 
     initCatalogFiltersModal();

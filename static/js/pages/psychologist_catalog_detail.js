@@ -4,6 +4,12 @@ import {
     toPositiveInt,
 } from "../modules/catalog_state.js";
 
+// Технические query-параметры каталога, которые не должны оставаться
+// в адресной строке detail-страницы психолога.
+const CATALOG_FILTER_QUERY_KEYS = [
+    "consultation_type",
+];
+
 /**
  * Логика страницы детального профиля психолога.
  *
@@ -116,6 +122,30 @@ function cameFromCatalogInSameTab() {
 }
 
 /**
+ * Очищает адресную строку detail-страницы от технических query-параметров каталога.
+ *
+ * Важно:
+ * - сервер уже получил эти параметры и построил правильный fallback для возврата;
+ * - после загрузки страницы они больше не нужны пользователю в видимом URL.
+ */
+function sanitizeDetailVisibleUrl() {
+    const currentUrl = new URL(window.location.href);
+    let wasChanged = false;
+
+    CATALOG_FILTER_QUERY_KEYS.forEach((paramName) => {
+        if (!currentUrl.searchParams.has(paramName)) return;
+        currentUrl.searchParams.delete(paramName);
+        wasChanged = true;
+    });
+
+    if (!wasChanged) return;
+
+    const normalizedSearch = currentUrl.searchParams.toString();
+    const cleanUrl = `${currentUrl.pathname}${normalizedSearch ? `?${normalizedSearch}` : ""}${currentUrl.hash}`;
+    window.history.replaceState(window.history.state, "", cleanUrl);
+}
+
+/**
  * Подключает поведение кнопки "Назад в каталог".
  *
  * Пошагово:
@@ -157,5 +187,6 @@ function initCatalogBackLink() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    sanitizeDetailVisibleUrl();
     initCatalogBackLink();
 });
