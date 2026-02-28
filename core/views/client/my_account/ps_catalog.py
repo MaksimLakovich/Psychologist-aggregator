@@ -103,10 +103,19 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
         - Возврат фильтров после detail-страницы делает frontend через sessionStorage + AJAX restore.
 
         В контекст передаем:
-            - title страницы;
-            - параметры для сайдбара/меню;
-            - карточки текущей страницы;
-            - состояние пагинации для кнопки "Показать еще"."""
+            - title_psychologist_catalog_page_view: SEO-title страницы каталога;
+            - layout_mode: текущий режим отображения ("sidebar" или "menu");
+            - show_sidebar: нужно ли показывать левую навигацию;
+            - menu_variant: дополнительный флаг для шаблона base/menu, если страница открыта без sidebar;
+            - catalog_detail_query: короткая query-строка для перехода из каталога в detail с сохранением layout;
+            - consultation_type_choices: справочник вариантов фильтра "Вид консультации";
+            - consultation_type_counts: предрассчитанные количества психологов по вариантам фильтра;
+            - catalog_filter_endpoint: URL AJAX-endpoint для временной фильтрации каталога;
+            - current_sidebar_key: ключ для серверной подсветки активного пункта боковой навигации;
+            - profiles: карточки психологов для текущей страницы каталога;
+            - has_next / next_page_number: состояние пагинации для кнопки "Показать еще";
+            - current_page_number / total_pages / total_count: метаданные текущей выдачи каталога;
+            - random_order_key: ключ стабильного случайного порядка карточек для догрузки и restore-сценария."""
         context = super().get_context_data(**kwargs)
 
         context["title_psychologist_catalog_page_view"] = "Каталог психологов на Опора — запись на приём к психологу"
@@ -155,9 +164,13 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, CatalogLayoutModeMixin,
     def get_context_data(self, **kwargs):
         """Формирование контекста для HTML-шаблона детальной страницы психолога.
         В контекст передаем:
-            - title страницы;
-            - данные психолога, включая уже готовый текст для "work_experience_years";
-            - параметры для сайдбара/меню."""
+            - title_psychologist_catalog_detail_page_view: title детальной страницы психолога;
+            - profile: объект PsychologistProfile с уже подготовленным profile.experience_label для UI;
+            - layout_mode: текущий режим отображения ("sidebar" или "menu");
+            - show_sidebar: нужно ли показывать левую навигацию;
+            - menu_variant: дополнительный флаг для шаблона base/menu, если страница открыта без sidebar;
+            - catalog_back_url: короткий server fallback URL для кнопки "Назад в каталог";
+            - current_sidebar_key: ключ для серверной подсветки активного пункта боковой навигации."""
         context = super().get_context_data(**kwargs)
 
         profile_slug = kwargs["profile_slug"]
