@@ -101,9 +101,9 @@
             <div class="no-scrollbar flex overflow-x-auto pb-4 gap-3">
                 <button type="button"
                         data-filter-chip
+                        data-filter-key="consultation_type"
                         data-filter-name="Вид консультации"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 border border-slate-100 rounded-2xl text-sm font-bold
-                         {% if active_consultation_type %}bg-indigo-700/10 text-indigo-600{% else %}bg-slate-200/40 text-slate-600{% endif %}
+                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 border border-slate-100 rounded-2xl text-sm font-bold bg-slate-200/40 text-slate-600
                          hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Вид консультации
                     <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
                 <button type="button"
@@ -186,13 +186,12 @@
                 <button
                     id="catalog-load-more-btn"
                     type="button"
-                    data-endpoint="{% url 'core:psychologist-catalog' %}"
+                    data-filter-endpoint="{{ catalog_filter_endpoint }}"
                     data-next-page="{{ next_page_number|default:'' }}"
                     data-current-page="{{ current_page_number|default:1 }}"
                     data-total-pages="{{ total_pages|default:0 }}"
                     data-random-order-key="{{ random_order_key }}"
                     data-layout="{{ layout_mode }}"
-                    data-consultation-type="{{ active_consultation_type|default:'' }}"
                     class="rounded-2xl bg-indigo-600 px-10 py-4 text-base font-black tracking-wide text-white transition
                     hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                     {% if not has_next %}hidden{% endif %}
@@ -219,9 +218,9 @@
     </div>
 </section>
 
-{{ active_consultation_type|json_script:"catalog-active-consultation-type-data" }}
 {{ consultation_type_choices|json_script:"catalog-consultation-type-choices-data" }}
 {{ consultation_type_counts|json_script:"catalog-consultation-type-counts-data" }}
 
+<script>window.CSRF_TOKEN = "{{ csrf_token }}";</script>
 <script type="module" src="{% static 'js/pages/psychologist_catalog.js' %}"></script>
 {% endblock %}

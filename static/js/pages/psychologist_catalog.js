@@ -1,4 +1,6 @@
 import {
+    clearCatalogState,
+    consumeCatalogRestorePending,
     readCatalogState,
     toNonNegativeInt,
     toPositiveInt,
@@ -7,53 +9,48 @@ import {
 import { initMultiToggle } from "../modules/toggle_group_multi_choice.js";
 import { pluralizeRu } from "../utils/pluralize_ru.js";
 
-// Список технических query-параметров фильтров каталога, которые не должны
-// оставаться в пользовательском URL в адресной строке.
-// Сейчас тут только первый реализованный фильтр, но при добавлении новых
-// фильтров каталога этот список можно будет расширять.
-const CATALOG_FILTER_QUERY_KEYS = [
-    "consultation_type",
-];
-
 /**
  * Логика страницы "Каталог психологов".
  *
- * Этот файл отвечает за 4 задачи:
- * 1) Переключение вкладок внутри карточки ("Основное" / "О себе").
- * 2) Кнопку "Показать еще" (догрузка новых карточек без перезагрузки страницы).
- * 3) Сохранение состояния каталога перед переходом в детальный профиль.
- * 4) Работу модалки фильтров каталога (на текущем шаге: "Вид консультации").
+ * В новой архитектуре этот файл отвечает за 5 задач:
+ * 1) вкладки внутри карточек;
+ * 2) AJAX-догрузку карточек по кнопке "Показать еще";
+ * 3) временное хранение состояния каталога только для сценария catalog <-> detail;
+ * 4) AJAX-применение фильтров без query-параметров в URL;
+ * 5) восстановление каталога после возврата из detail.
  *
- * Пример пользовательского сценария:
- * - клиент открыл каталог, нажал "Показать еще" до page=3;
- * - открыл карточку психолога;
- * - нажал "Назад в каталог";
- * - система должна помнить page=3 и порядок карточек.
- *
- * Важное уточнение по архитектуре:
- * - основной "идеальный" возврат обычно делает браузерный history.back();
- * - сохранение состояния в sessionStorage (через общий модуль) - это дополнительная
- *   защитная ветка для fallback-сценариев.
- * То есть это хорошая практика "на будущее" с почти нулевой стоимостью.
+ * Важный принцип:
+ * - каталог ничего не сохраняет в БД;
+ * - фильтры живут только во frontend-state и sessionStorage текущей вкладки.
  */
 
-/**
- * Текст на кнопке применения фильтра.
- */
 const APPLY_RESULTS_LABEL = "Показать результаты";
 
 /**
- * Кешируем прочитанные из DOM данные, чтобы не парсить script-теги повторно.
+ * Здесь держим текущее рабочее состояние каталога.
+ *
+ * Почему нужен runtime-state рядом с DOM:
+ * - DOM хранит только отображение;
+ * - sessionStorage хранит резервную копию на возврат из detail;
+ * - а runtime-state нужен для текущих AJAX-запросов и реактивного UI на странице.
  */
+const catalogRuntimeState = {
+    layout_mode: "menu",
+    current_page: 1,
+    total_pages: 0,
+    order_key: null,
+    anchor: null,
+    scroll_y: 0,
+    filters: {
+        consultation_type: null,
+    },
+};
+
 let cachedConsultationTypeChoices = null;
 let cachedConsultationTypeCounts = null;
-let cachedActiveConsultationType = null;
-let isActiveConsultationTypeLoaded = false;
 
 /**
  * Безопасно читает JSON из script-тега.
- *
- * Если тега нет или JSON битый, возвращаем fallback.
  */
 function readJsonScript(id, fallback) {
     const scriptTag = document.getElementById(id);
@@ -69,9 +66,8 @@ function readJsonScript(id, fallback) {
 /**
  * Возвращает mapping вариантов вида консультации.
  *
- * Источник истины:
- * - backend передает сюда CLIENT_TO_TOPIC_TYPE_MAP,
- *   то есть мы не дублируем словарь на frontend.
+ * Источник истины приходит с backend,
+ * чтобы не дублировать справочник на frontend.
  */
 function getConsultationTypeChoices() {
     if (cachedConsultationTypeChoices !== null) {
@@ -84,14 +80,7 @@ function getConsultationTypeChoices() {
 }
 
 /**
- * Возвращает предрассчитанные количества карточек по варианту вида консультации.
- *
- * Формат:
- * {
- *   all: 40,
- *   individual: 39,
- *   couple: 4,
- * }
+ * Возвращает предрассчитанные количества карточек для фильтра "Вид консультации".
  */
 function getConsultationTypeCounts() {
     if (cachedConsultationTypeCounts !== null) {
@@ -99,58 +88,81 @@ function getConsultationTypeCounts() {
     }
 
     const rawCounts = readJsonScript("catalog-consultation-type-counts-data", {});
+    cachedConsultationTypeCounts = normalizeConsultationTypeCounts(rawCounts);
+    return cachedConsultationTypeCounts;
+}
+
+/**
+ * Приводит счетчики фильтра к безопасному виду.
+ *
+ * Пример результата:
+ * {
+ *   all: 40,
+ *   individual: 39,
+ *   couple: 4,
+ * }
+ */
+function normalizeConsultationTypeCounts(rawCounts) {
     const parseCount = (value) => {
         const parsed = Number.parseInt(String(value), 10);
         return Number.isInteger(parsed) && parsed >= 0 ? parsed : 0;
     };
 
-    cachedConsultationTypeCounts = {
-        all: parseCount(rawCounts.all),
-        individual: parseCount(rawCounts.individual),
-        couple: parseCount(rawCounts.couple),
+    return {
+        all: parseCount(rawCounts?.all),
+        individual: parseCount(rawCounts?.individual),
+        couple: parseCount(rawCounts?.couple),
     };
-    return cachedConsultationTypeCounts;
 }
 
 /**
- * Возвращает активное значение фильтра из backend-контекста.
+ * Нормализует входное значение фильтра "Вид консультации".
  *
- * Возвращает:
- * - "individual" или "couple" если фильтр активен;
- * - null если фильтр не выбран и каталог открыт в режиме "все".
- */
-function getActiveConsultationTypeFromDOM() {
-    if (isActiveConsultationTypeLoaded) {
-        return cachedActiveConsultationType;
-    }
-
-    const rawValue = readJsonScript("catalog-active-consultation-type-data", null);
-    cachedActiveConsultationType = normalizeConsultationType(rawValue);
-    isActiveConsultationTypeLoaded = true;
-    return cachedActiveConsultationType;
-}
-
-/**
- * Нормализует входное значение вида консультации.
- *
- * Если значение отсутствует или не входит в допустимые ключи,
- * возвращаем null, что означает "фильтр не выбран".
+ * Если значение невалидно, считаем, что фильтр не выбран.
  */
 function normalizeConsultationType(rawValue) {
     if (typeof rawValue !== "string") return null;
 
     const choices = getConsultationTypeChoices();
-    if (Object.prototype.hasOwnProperty.call(choices, rawValue)) {
-        return rawValue;
-    }
-
-    return null;
+    return Object.prototype.hasOwnProperty.call(choices, rawValue) ? rawValue : null;
 }
 
 /**
- * Возвращает выбранное значение в модалке.
+ * Собирает объект фильтров каталога в едином формате.
  *
- * Если активных кнопок нет, возвращаем null.
+ * Это задел под следующие фильтры:
+ * сейчас внутри только consultation_type,
+ * позже сюда аккуратно добавятся topics, methods, gender, age и так далее.
+ */
+function normalizeCatalogFilters(rawFilters = {}) {
+    return {
+        consultation_type: normalizeConsultationType(rawFilters?.consultation_type),
+    };
+}
+
+/**
+ * Возвращает кнопку "Показать еще".
+ *
+ * Вся техническая конфигурация каталога сейчас привязана к ней через data-атрибуты,
+ * поэтому это удобная точка чтения текущих значений из DOM.
+ */
+function getLoadMoreButton() {
+    return document.getElementById("catalog-load-more-btn");
+}
+
+/**
+ * Возвращает endpoint AJAX-фильтрации каталога.
+ */
+function resolveCatalogFilterEndpoint() {
+    const loadMoreButton = getLoadMoreButton();
+    return loadMoreButton?.dataset.filterEndpoint || "";
+}
+
+/**
+ * Возвращает выбранное значение в модалке "Вид консультации".
+ *
+ * Если активных кнопок нет, возвращаем null,
+ * то есть режим "показать всех".
  */
 function getModalSelectedConsultationType() {
     const hiddenInput = document.querySelector("#catalog-consultation-hidden-inputs input");
@@ -158,11 +170,7 @@ function getModalSelectedConsultationType() {
 }
 
 /**
- * Перерисовывает кнопку "Показать результаты" с количеством найденных психологов.
- *
- * Пример:
- * Показать результаты
- * Найдено: 4 специалиста
+ * Перерисовывает кнопку "Показать результаты" с количеством найденных специалистов.
  */
 function renderApplyButtonWithCount(applyButton, selectedConsultationType) {
     if (!applyButton) return;
@@ -186,73 +194,315 @@ function renderApplyButtonWithCount(applyButton, selectedConsultationType) {
 }
 
 /**
- * Возвращает базовый endpoint каталога.
+ * Обновляет внешний вид фильтр-чипа на странице каталога.
+ *
+ * Простая бизнес-логика:
+ * - если фильтр выбран, кнопка получает индикатор активного состояния;
+ * - если фильтр снят, кнопка возвращается к обычному виду.
  */
-function resolveCatalogEndpoint() {
-    const loadMoreButton = document.getElementById("catalog-load-more-btn");
-    return loadMoreButton?.dataset.endpoint || window.location.pathname;
+function renderFilterChipStates() {
+    const consultationChip = document.querySelector('[data-filter-chip][data-filter-key="consultation_type"]');
+    if (!consultationChip) return;
+
+    const isActive = Boolean(catalogRuntimeState.filters.consultation_type);
+    consultationChip.classList.toggle("bg-indigo-200/40", isActive);
+    consultationChip.classList.toggle("text-indigo-700", isActive);
+    consultationChip.classList.toggle("bg-slate-200/40", !isActive);
+    consultationChip.classList.toggle("text-slate-600", !isActive);
 }
 
 /**
- * Возвращает активный режим layout.
- *
- * Приоритет:
- * 1) data-layout у кнопки "Показать еще";
- * 2) query-параметр layout;
- * 3) fallback "menu".
+ * Обновляет текстовый индикатор текущей страницы внизу каталога.
  */
-function resolveLayoutMode() {
-    const loadMoreButton = document.getElementById("catalog-load-more-btn");
-    const layoutFromButton = loadMoreButton?.dataset.layout;
-    if (layoutFromButton === "sidebar" || layoutFromButton === "menu") {
-        return layoutFromButton;
+function renderCurrentPageIndicator(currentPage, totalPages) {
+    const indicator = document.getElementById("catalog-page-indicator");
+    if (!indicator) return;
+
+    const safeTotalPages = toNonNegativeInt(totalPages, 0);
+    if (safeTotalPages === 0) {
+        indicator.textContent = "0 из 0";
+        return;
     }
 
-    const layoutFromUrl = new URLSearchParams(window.location.search).get("layout");
-    return layoutFromUrl === "sidebar" ? "sidebar" : "menu";
+    const safeCurrentPage = toPositiveInt(currentPage, 1);
+    indicator.textContent = `${Math.min(safeCurrentPage, safeTotalPages)} из ${safeTotalPages}`;
 }
 
 /**
- * Очищает адресную строку от технических query-параметров фильтров каталога.
+ * Обновляет кнопку "Показать еще" после любого AJAX-ответа.
  *
- * Почему это полезно:
- * - пользователь не видит "разрастающийся" URL с фильтрами;
- * - адрес страницы выглядит чище;
- * - мы оставляем в URL только то, что действительно имеет смысл для навигации пользователя
- *   (например, layout), а не внутренние технические параметры фильтрации.
- *
- * Важно:
- * - это влияет только на ВИДИМЫЙ URL в браузере;
- * - сервер уже успел получить нужные query-параметры и отрендерить правильные данные,
- *   поэтому очистка адресной строки ничего не ломает.
+ * Именно сервер сообщает, есть ли следующая страница и какой у нее номер,
+ * поэтому источник истины здесь всегда backend response.
  */
-function sanitizeCatalogVisibleUrl() {
-    const currentUrl = new URL(window.location.href);
-    let wasChanged = false;
+function syncLoadMoreButton(data) {
+    const loadMoreButton = getLoadMoreButton();
+    if (!loadMoreButton) return;
 
-    CATALOG_FILTER_QUERY_KEYS.forEach((paramName) => {
-        if (!currentUrl.searchParams.has(paramName)) return;
-        currentUrl.searchParams.delete(paramName);
-        wasChanged = true;
+    loadMoreButton.dataset.currentPage = String(toPositiveInt(data.current_page_number, 1));
+    loadMoreButton.dataset.totalPages = String(toNonNegativeInt(data.total_pages, 0));
+
+    const nextPageNumber = toPositiveInt(data.next_page_number, null);
+    if (data.has_next && nextPageNumber) {
+        loadMoreButton.dataset.nextPage = String(nextPageNumber);
+        loadMoreButton.hidden = false;
+    } else {
+        loadMoreButton.dataset.nextPage = "";
+        loadMoreButton.hidden = true;
+    }
+
+    const refreshedOrderKey = toNonNegativeInt(data.random_order_key, catalogRuntimeState.order_key);
+    loadMoreButton.dataset.randomOrderKey = refreshedOrderKey === null ? "" : String(refreshedOrderKey);
+    loadMoreButton.dataset.layout = catalogRuntimeState.layout_mode;
+}
+
+/**
+ * Показывает или скрывает пустое состояние каталога.
+ */
+function renderEmptyState(totalCount) {
+    const emptyState = document.getElementById("catalog-empty-state");
+    if (!emptyState) return;
+
+    emptyState.classList.toggle("hidden", toNonNegativeInt(totalCount, 0) > 0);
+}
+
+/**
+ * Инициализирует вкладки внутри карточек.
+ *
+ * Важный момент:
+ * - карточки появляются и при первом SSR-рендере, и после AJAX;
+ * - поэтому инициализацию можно вызывать повторно,
+ *   а каждая карточка сама защищается флагом tabsInitialized.
+ */
+function initCardTabs(scope = document) {
+    const cards = scope.querySelectorAll("[data-catalog-card]");
+
+    cards.forEach((card) => {
+        const tabButtons = card.querySelectorAll("[data-tab-button]");
+        const tabPanels = card.querySelectorAll("[data-tab-panel]");
+
+        if (!tabButtons.length || !tabPanels.length) return;
+        if (card.dataset.tabsInitialized === "1") return;
+
+        const activateTab = (target) => {
+            tabButtons.forEach((button) => {
+                const isActive = button.dataset.target === target;
+                button.setAttribute("aria-selected", String(isActive));
+                button.classList.toggle("bg-indigo-100", isActive);
+                button.classList.toggle("text-indigo-700", isActive);
+                button.classList.toggle("bg-gray-100", !isActive);
+                button.classList.toggle("text-gray-600", !isActive);
+            });
+
+            tabPanels.forEach((panel) => {
+                panel.classList.toggle("hidden", panel.dataset.tabPanel !== target);
+            });
+        };
+
+        tabButtons.forEach((button) => {
+            button.addEventListener("click", () => activateTab(button.dataset.target));
+        });
+
+        activateTab("main");
+        card.dataset.tabsInitialized = "1";
+    });
+}
+
+/**
+ * Считывает стартовое состояние каталога из серверного HTML.
+ *
+ * Это базовая точка, от которой потом отталкиваются фильтры, догрузка и restore.
+ */
+function hydrateRuntimeStateFromDom() {
+    const loadMoreButton = getLoadMoreButton();
+    if (!loadMoreButton) return;
+
+    catalogRuntimeState.layout_mode = loadMoreButton.dataset.layout === "sidebar" ? "sidebar" : "menu";
+    catalogRuntimeState.current_page = toPositiveInt(loadMoreButton.dataset.currentPage, 1);
+    catalogRuntimeState.total_pages = toNonNegativeInt(loadMoreButton.dataset.totalPages, 0);
+    catalogRuntimeState.order_key = toNonNegativeInt(loadMoreButton.dataset.randomOrderKey, null);
+    catalogRuntimeState.filters = normalizeCatalogFilters({ consultation_type: null });
+}
+
+/**
+ * Сохраняет текущее состояние каталога в sessionStorage.
+ *
+ * Это резервный снимок каталога на случай возврата из detail.
+ */
+function persistCatalogState(extraState = {}) {
+    writeCatalogState({
+        layout_mode: catalogRuntimeState.layout_mode,
+        current_page: catalogRuntimeState.current_page,
+        total_pages: catalogRuntimeState.total_pages,
+        order_key: catalogRuntimeState.order_key,
+        filters: normalizeCatalogFilters(catalogRuntimeState.filters),
+        anchor: catalogRuntimeState.anchor,
+        scroll_y: catalogRuntimeState.scroll_y,
+        updated_at: Date.now(),
+        ...extraState,
+    });
+}
+
+/**
+ * Возвращает заголовки для POST-запроса каталога.
+ */
+function buildCatalogRequestHeaders() {
+    return {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": window.CSRF_TOKEN || "",
+    };
+}
+
+/**
+ * Выполняет AJAX-запрос к backend и возвращает JSON каталога.
+ */
+async function requestCatalogData({ page, orderKey = null, restoreMode = false }) {
+    const endpoint = resolveCatalogFilterEndpoint();
+    if (!endpoint) {
+        throw new Error("catalog_filter_endpoint_missing");
+    }
+
+    const response = await fetch(endpoint, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: buildCatalogRequestHeaders(),
+        body: JSON.stringify({
+            filters: normalizeCatalogFilters(catalogRuntimeState.filters),
+            page,
+            order_key: orderKey,
+            restore_mode: restoreMode,
+            layout_mode: catalogRuntimeState.layout_mode,
+        }),
     });
 
-    if (!wasChanged) return;
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+    }
 
-    const normalizedSearch = currentUrl.searchParams.toString();
-    const cleanUrl = `${currentUrl.pathname}${normalizedSearch ? `?${normalizedSearch}` : ""}${currentUrl.hash}`;
-    window.history.replaceState(window.history.state, "", cleanUrl);
+    const data = await response.json();
+    if (data.status !== "ok") {
+        throw new Error("invalid_catalog_response");
+    }
+
+    return data;
+}
+
+/**
+ * Применяет AJAX-ответ к интерфейсу каталога.
+ *
+ * replaceMode=false:
+ * - полностью заменяем сетку карточек.
+ *
+ * appendMode=true:
+ * - добавляем новые карточки вниз к уже показанным.
+ */
+function applyCatalogResponse(data, { appendMode = false } = {}) {
+    const grid = document.getElementById("catalog-cards-grid");
+    if (!grid) return;
+
+    const temp = document.createElement("div");
+    temp.innerHTML = data.cards_html || "";
+    const incomingCards = Array.from(temp.querySelectorAll("[data-catalog-card]"));
+
+    if (!appendMode) {
+        grid.innerHTML = "";
+    }
+
+    incomingCards.forEach((card) => grid.appendChild(card));
+    initCardTabs(grid);
+
+    catalogRuntimeState.current_page = toPositiveInt(data.current_page_number, 1);
+    catalogRuntimeState.total_pages = toNonNegativeInt(data.total_pages, 0);
+    catalogRuntimeState.order_key = toNonNegativeInt(data.random_order_key, catalogRuntimeState.order_key);
+    catalogRuntimeState.filters = normalizeCatalogFilters(data.active_filters || catalogRuntimeState.filters);
+
+    if (data.consultation_type_counts && typeof data.consultation_type_counts === "object") {
+        cachedConsultationTypeCounts = normalizeConsultationTypeCounts(data.consultation_type_counts);
+    }
+
+    syncLoadMoreButton(data);
+    renderCurrentPageIndicator(catalogRuntimeState.current_page, catalogRuntimeState.total_pages);
+    renderEmptyState(data.total_count);
+    renderFilterChipStates();
+    persistCatalogState();
+}
+
+/**
+ * Восстанавливает позицию прокрутки после возврата из detail.
+ *
+ * Приоритет такой:
+ * 1) если знаем конкретную карточку, прокручиваем к ней;
+ * 2) если карточка не найдена, используем сохраненный scroll_y;
+ * 3) если и его нет, просто остаемся наверху списка.
+ */
+function restoreCatalogScrollPosition(savedState) {
+    if (!savedState) return;
+
+    const anchor = typeof savedState.anchor === "string" ? savedState.anchor.trim() : "";
+    if (anchor) {
+        const anchorElement = document.getElementById(`psychologist-card-${anchor}`);
+        if (anchorElement) {
+            anchorElement.scrollIntoView({ block: "center", behavior: "auto" });
+            return;
+        }
+    }
+
+    const scrollY = toNonNegativeInt(savedState.scroll_y, null);
+    if (scrollY !== null) {
+        window.scrollTo({ top: scrollY, behavior: "auto" });
+    }
+}
+
+/**
+ * Применяет фильтр "Вид консультации" через AJAX.
+ *
+ * Что происходит по шагам:
+ * 1) обновляем runtime-state;
+ * 2) просим backend вернуть первую страницу уже с этим фильтром;
+ * 3) полностью заменяем карточки и метаданные каталога;
+ * 4) сохраняем обновленное состояние для возможного возврата из detail.
+ */
+async function applyConsultationTypeFilter(selectedValue) {
+    const loadMoreButton = getLoadMoreButton();
+    const errorLabel = document.getElementById("catalog-load-more-error");
+    if (!loadMoreButton) return false;
+
+    loadMoreButton.disabled = true;
+    if (errorLabel) errorLabel.classList.add("hidden");
+
+    const previousConsultationType = catalogRuntimeState.filters.consultation_type;
+    const previousAnchor = catalogRuntimeState.anchor;
+    const previousScrollY = catalogRuntimeState.scroll_y;
+
+    catalogRuntimeState.filters.consultation_type = normalizeConsultationType(selectedValue);
+    catalogRuntimeState.anchor = null;
+    catalogRuntimeState.scroll_y = Math.max(window.scrollY, 0);
+
+    try {
+        const data = await requestCatalogData({
+            page: 1,
+            orderKey: null,
+            restoreMode: false,
+        });
+        applyCatalogResponse(data, { appendMode: false });
+        return true;
+    } catch (error) {
+        catalogRuntimeState.filters.consultation_type = previousConsultationType;
+        catalogRuntimeState.anchor = previousAnchor;
+        catalogRuntimeState.scroll_y = previousScrollY;
+        console.error("Ошибка применения фильтра каталога:", error);
+        if (errorLabel) errorLabel.classList.remove("hidden");
+        return false;
+    } finally {
+        loadMoreButton.disabled = false;
+    }
 }
 
 /**
  * Инициализирует модалку фильтров каталога.
  *
- * Что уже реализовано в рамках 1-го этапа:
- * - фильтр "Вид консультации" (Индивидуальная / Парная).
- *
- * Что важно по UX:
- * - пользователь выбирает значение в модалке;
- * - по кнопке "Показать результаты" страница перезагружается с query-параметром;
- * - выбранный фильтр живет в URL текущего сценария каталога, а не в server-side session.
+ * На этом шаге детально поддерживаем только фильтр "Вид консультации".
+ * Остальные фильтры пока показывают заглушку, но сама архитектура уже общая.
  */
 function initCatalogFiltersModal() {
     const modal = document.getElementById("filter-modal");
@@ -274,20 +524,15 @@ function initCatalogFiltersModal() {
     ) {
         return;
     }
+
     let openedFilterName = null;
 
-    /**
-     * Закрывает модалку и возвращает скролл основной странице.
-     */
     function closeModal() {
         modal.classList.add("hidden");
         modal.classList.remove("flex");
         document.body.style.overflow = "";
     }
 
-    /**
-     * Открывает модалку для выбранного фильтра.
-     */
     function openModal(filterName) {
         openedFilterName = filterName;
         modalTitle.textContent = filterName;
@@ -297,11 +542,6 @@ function initCatalogFiltersModal() {
         document.body.style.overflow = "hidden";
     }
 
-    /**
-     * Рендерит контент модалки для конкретного фильтра.
-     *
-     * На этом этапе детально поддерживаем только "Вид консультации".
-     */
     function renderModalContent(filterName) {
         if (filterName !== "Вид консультации") {
             modalContent.innerHTML = `
@@ -313,10 +553,10 @@ function initCatalogFiltersModal() {
             return;
         }
 
-        const activeConsultationType = getActiveConsultationTypeFromDOM();
         const consultationTypeChoices = getConsultationTypeChoices();
         const individualLabel = consultationTypeChoices.individual || "Индивидуальная";
         const coupleLabel = consultationTypeChoices.couple || "Парная";
+        const activeConsultationType = catalogRuntimeState.filters.consultation_type;
 
         modalContent.innerHTML = `
             <div class="space-y-4">
@@ -338,10 +578,8 @@ function initCatalogFiltersModal() {
             </div>
         `;
 
-        // Используем уже существующий multi-toggle модуль.
-        // Новый параметр maxSelected=1 добавлен обратно-совместимо:
-        // старые места использования не изменяются, а здесь мы получаем режим
-        // "выбран 1 вариант" или "не выбран ни один".
+        // Для каталога нужен сценарий "выбрать 1 вариант или снять выбор совсем".
+        // Именно поэтому используем уже существующий multi-toggle с maxSelected=1.
         initMultiToggle({
             containerSelector: "#catalog-consultation-block",
             buttonSelector: ".catalog-consultation-btn",
@@ -358,8 +596,8 @@ function initCatalogFiltersModal() {
             consultationBlock.addEventListener("click", (event) => {
                 if (!event.target.closest(".catalog-consultation-btn")) return;
 
-                // Ждем пока initMultiToggle обновит hidden-input и классы,
-                // и только после этого пересчитываем текст кнопки.
+                // Даем toggle-модулю один animation frame,
+                // чтобы он успел обновить hidden-input, и только потом читаем новое значение.
                 window.requestAnimationFrame(() => {
                     renderApplyButtonWithCount(applyButton, getModalSelectedConsultationType());
                 });
@@ -367,42 +605,21 @@ function initCatalogFiltersModal() {
         }
     }
 
-    /**
-     * Применяет фильтр по кнопке "Показать результаты".
-     *
-     * Поведение:
-     * - для реализованного фильтра "Вид консультации" перезагружаем страницу с query;
-     * - для остальных фильтров пока просто закрываем модалку.
-     */
-    function applyCurrentFilter() {
+    async function applyCurrentFilter() {
         if (openedFilterName !== "Вид консультации") {
             closeModal();
             return;
         }
 
-        const selectedValue = getModalSelectedConsultationType();
-        const nextUrl = new URL(resolveCatalogEndpoint(), window.location.origin);
-        const layoutMode = resolveLayoutMode();
-
-        if (layoutMode === "sidebar" || layoutMode === "menu") {
-            nextUrl.searchParams.set("layout", layoutMode);
+        const isApplied = await applyConsultationTypeFilter(getModalSelectedConsultationType());
+        if (isApplied) {
+            closeModal();
         }
-
-        // Если кнопки не активны, удаляем consultation_type и возвращаемся
-        // к состоянию "все психологи".
-        if (selectedValue) {
-            nextUrl.searchParams.set("consultation_type", selectedValue);
-        } else {
-            nextUrl.searchParams.delete("consultation_type");
-        }
-
-        window.location.assign(nextUrl.toString());
     }
 
     filterButtons.forEach((button) => {
         button.addEventListener("click", () => {
-            const filterName = button.dataset.filterName || "Фильтр";
-            openModal(filterName);
+            openModal(button.dataset.filterName || "Фильтр");
         });
     });
 
@@ -418,153 +635,22 @@ function initCatalogFiltersModal() {
 }
 
 /**
- * Собирает "базовое состояние" каталога из data-атрибутов кнопки "Показать еще".
- *
- * Что собираем:
- * - layout_mode (menu/sidebar);
- * - current_page (до какой страницы уже догрузили);
- * - order_key (чтобы не пересортировать карточки при возврате);
- * - updated_at (время обновления состояния).
- *
- * extraState нужен для добавления контекста конкретного действия.
- * Пример: при клике по карточке передаем anchor выбранного психолога.
- */
-function collectCatalogState(loadMoreButton, extraState = {}) {
-    if (!loadMoreButton) return null;
-
-    const currentPage = toPositiveInt(loadMoreButton.dataset.currentPage, 1);
-    const randomOrderKey = toNonNegativeInt(loadMoreButton.dataset.randomOrderKey, null);
-    const layoutMode = loadMoreButton.dataset.layout === "sidebar" ? "sidebar" : "menu";
-    const consultationType = normalizeConsultationType(loadMoreButton.dataset.consultationType);
-
-    return {
-        layout_mode: layoutMode,
-        current_page: currentPage,
-        order_key: randomOrderKey,
-        consultation_type: consultationType,
-        updated_at: Date.now(),
-        ...extraState,
-    };
-}
-
-/**
- * Сохраняет состояние каталога в sessionStorage.
- *
- * Почему merge с предыдущим состоянием:
- * - иногда обновляем не все поля сразу;
- * - хотим не потерять уже сохраненные значения.
- */
-function persistCatalogState(loadMoreButton, extraState = {}) {
-    const baseState = collectCatalogState(loadMoreButton, extraState);
-    if (!baseState) return;
-
-    const previousState = readCatalogState() || {};
-    writeCatalogState({
-        ...previousState,
-        ...baseState,
-    });
-}
-
-/**
- * Обновляет текстовый индикатор текущей страницы внизу каталога.
- *
- * Пример:
- * - если currentPage = 1 и totalPages = 12, показываем "1 из 12";
- * - после догрузки page=2 показываем "2 из 12".
- */
-function renderCurrentPageIndicator(currentPage, totalPages) {
-    const indicator = document.getElementById("catalog-page-indicator");
-    if (!indicator) return;
-
-    const safeTotalPages = toNonNegativeInt(totalPages, 0);
-    if (safeTotalPages === 0) {
-        indicator.textContent = "0 из 0";
-        return;
-    }
-
-    const safeCurrentPage = toPositiveInt(currentPage, 1);
-    const normalizedCurrentPage = Math.min(safeCurrentPage, safeTotalPages);
-    indicator.textContent = `${normalizedCurrentPage} из ${safeTotalPages}`;
-}
-
-/**
- * Инициализирует вкладки внутри карточек.
- *
- * Как это работает:
- * - у каждой карточки есть 2 кнопки-вкладки и 2 панели контента;
- * - при клике выделяем активную кнопку;
- * - показываем нужную панель и скрываем вторую.
- *
- * Важный момент:
- * - карточки могут догружаться AJAX-ом;
- * - поэтому у каждой карточки ставим флаг tabsInitialized, чтобы не
- *   навешивать обработчики повторно.
- */
-function initCardTabs(scope = document) {
-    const cards = scope.querySelectorAll("[data-catalog-card]");
-
-    cards.forEach((card) => {
-        const tabButtons = card.querySelectorAll("[data-tab-button]");
-        const tabPanels = card.querySelectorAll("[data-tab-panel]");
-
-        if (!tabButtons.length || !tabPanels.length) return;
-        if (card.dataset.tabsInitialized === "1") return;
-
-        const activateTab = (target) => {
-            tabButtons.forEach((button) => {
-                const isActive = button.dataset.target === target;
-
-                button.setAttribute("aria-selected", String(isActive));
-                button.classList.toggle("bg-indigo-100", isActive);
-                button.classList.toggle("text-indigo-700", isActive);
-                button.classList.toggle("bg-gray-100", !isActive);
-                button.classList.toggle("text-gray-600", !isActive);
-            });
-
-            tabPanels.forEach((panel) => {
-                const isActive = panel.dataset.tabPanel === target;
-                panel.classList.toggle("hidden", !isActive);
-            });
-        };
-
-        tabButtons.forEach((button) => {
-            button.addEventListener("click", () => {
-                activateTab(button.dataset.target);
-            });
-        });
-
-        // Дефолтный режим карточки: вкладка "Основное".
-        activateTab("main");
-        card.dataset.tabsInitialized = "1";
-    });
-}
-
-/**
  * Инициализирует кнопку "Показать еще".
  *
- * Алгоритм при клике:
- * 1) берем page/order_key/layout из data-атрибутов;
- * 2) запрашиваем partial-HTML следующей страницы;
- * 3) добавляем новые карточки вниз;
- * 4) обновляем состояние кнопки (currentPage, nextPage, orderKey);
- * 5) сохраняем актуальное состояние в sessionStorage.
+ * Здесь уже нет GET-параметров partial/order_key/filter в URL.
+ * Вместо этого фронтенд отправляет POST с текущим состоянием каталога.
  */
 function initLoadMore() {
     const grid = document.getElementById("catalog-cards-grid");
-    const loadMoreButton = document.getElementById("catalog-load-more-btn");
+    const loadMoreButton = getLoadMoreButton();
     const errorLabel = document.getElementById("catalog-load-more-error");
 
     if (!grid || !loadMoreButton) return;
 
     loadMoreButton.addEventListener("click", async () => {
-        const endpoint = loadMoreButton.dataset.endpoint;
         const requestedPage = toPositiveInt(loadMoreButton.dataset.nextPage, null);
         const orderKey = toNonNegativeInt(loadMoreButton.dataset.randomOrderKey, null);
-        const totalPages = toNonNegativeInt(loadMoreButton.dataset.totalPages, 0);
-        const layoutMode = loadMoreButton.dataset.layout;
-        const consultationType = normalizeConsultationType(loadMoreButton.dataset.consultationType);
-
-        if (!endpoint || !requestedPage || orderKey === null) {
+        if (!requestedPage || orderKey === null) {
             loadMoreButton.hidden = true;
             return;
         }
@@ -573,62 +659,12 @@ function initLoadMore() {
         if (errorLabel) errorLabel.classList.add("hidden");
 
         try {
-            const params = new URLSearchParams({
-                partial: "1",
-                page: String(requestedPage),
-                order_key: String(orderKey),
+            const data = await requestCatalogData({
+                page: requestedPage,
+                orderKey,
+                restoreMode: false,
             });
-            if (layoutMode) {
-                params.append("layout", layoutMode);
-            }
-            if (consultationType) {
-                params.append("consultation_type", consultationType);
-            }
-
-            const response = await fetch(`${endpoint}?${params.toString()}`, {
-                method: "GET",
-                credentials: "same-origin",
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-            if (data.status !== "ok") {
-                throw new Error("invalid_response");
-            }
-
-            // Временный контейнер нужен, чтобы безопасно распарсить пришедший HTML.
-            const temp = document.createElement("div");
-            temp.innerHTML = data.cards_html || "";
-            const appendedCards = temp.querySelectorAll("[data-catalog-card]");
-            appendedCards.forEach((card) => grid.appendChild(card));
-
-            // После добавления новых карточек запускаем инициализацию вкладок.
-            initCardTabs(grid);
-
-            // Фиксируем прогресс пагинации (до какой страницы пользователь дошел).
-            loadMoreButton.dataset.currentPage = String(requestedPage);
-            renderCurrentPageIndicator(requestedPage, totalPages);
-
-            // Берем новый order_key от сервера (если есть), иначе оставляем текущий.
-            const refreshedOrderKey = toNonNegativeInt(data.random_order_key, orderKey);
-            loadMoreButton.dataset.randomOrderKey = String(refreshedOrderKey);
-
-            // Сохраняем обновленное состояние для корректного возврата из detail.
-            persistCatalogState(loadMoreButton);
-
-            const nextPageNumber = toPositiveInt(data.next_page_number, null);
-            if (data.has_next && nextPageNumber) {
-                loadMoreButton.dataset.nextPage = String(nextPageNumber);
-                loadMoreButton.hidden = false;
-            } else {
-                loadMoreButton.hidden = true;
-            }
+            applyCatalogResponse(data, { appendMode: true });
         } catch (error) {
             console.error("Ошибка догрузки карточек каталога:", error);
             if (errorLabel) errorLabel.classList.remove("hidden");
@@ -640,70 +676,119 @@ function initLoadMore() {
 
 /**
  * Инициализирует кнопку "Вернуться в начало".
- *
- * При клике выполняется плавный скролл к началу страницы.
- * Это удобно после просмотра page=2/page=3, когда пользователь хочет быстро
- * вернуться к заголовку и первым карточкам.
  */
 function initScrollToTopButton() {
     const scrollTopButton = document.getElementById("catalog-scroll-top-btn");
     if (!scrollTopButton) return;
 
     scrollTopButton.addEventListener("click", () => {
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
     });
 }
 
 /**
- * Включает сохранение состояния каталога.
+ * Включает сохранение состояния каталога перед переходом в detail.
  *
- * Что делаем:
- * - при загрузке страницы сохраняем базовое состояние;
- * - при клике на "Смотреть полный профиль" сохраняем anchor выбранной карточки.
- *
- * Зачем anchor:
- * - когда пользователь вернется назад, можно прокрутить к нужной карточке.
- *
- * Почему сохраняем это заранее, даже если обычно срабатывает history.back():
- * - если detail откроют нестандартно (например, прямая ссылка, новая вкладка, внешний переход),
- *   то fallback-логика все равно сможет восстановить каталог максимально близко к прежнему виду.
+ * Что сохраняем:
+ * - текущую страницу каталога;
+ * - active filters;
+ * - random order key;
+ * - anchor карточки, по которой перешли;
+ * - текущую прокрутку страницы.
  */
 function initCatalogStatePersistence() {
-    const loadMoreButton = document.getElementById("catalog-load-more-btn");
-    if (!loadMoreButton) return;
-
-    // Первичное состояние нужно даже если пользователь не нажимал "Показать еще".
-    persistCatalogState(loadMoreButton, {
-        anchor: null,
-        scroll_y: Math.max(window.scrollY, 0),
-    });
-
-    // Делегирование на document: работает и для карточек, пришедших через AJAX.
     document.addEventListener("click", (event) => {
         const detailLink = event.target.closest("[data-catalog-detail-link]");
         if (!detailLink) return;
 
-        persistCatalogState(loadMoreButton, {
-            anchor: detailLink.dataset.profileSlug || null,
-            scroll_y: Math.max(window.scrollY, 0),
-        });
+        catalogRuntimeState.anchor = detailLink.dataset.profileSlug || null;
+        catalogRuntimeState.scroll_y = Math.max(window.scrollY, 0);
+        persistCatalogState();
     });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const loadMoreButton = document.getElementById("catalog-load-more-btn");
-    const initialPage = loadMoreButton ? toPositiveInt(loadMoreButton.dataset.currentPage, 1) : 1;
-    const totalPages = loadMoreButton ? toNonNegativeInt(loadMoreButton.dataset.totalPages, 0) : 0;
+/**
+ * Пытается восстановить каталог после возврата из detail.
+ *
+ * Важное бизнес-правило:
+ * - если пользователь открыл каталог заново, а не вернулся из detail,
+ *   старое состояние удаляем и НЕ применяем.
+ *
+ * То есть restore работает только по одноразовому флагу,
+ * который detail-страница ставит перед fallback-возвратом.
+ */
+async function restoreCatalogIfNeeded() {
+    const shouldRestore = consumeCatalogRestorePending();
+    const storedState = readCatalogState();
 
-    sanitizeCatalogVisibleUrl();
-    renderCurrentPageIndicator(initialPage, totalPages);
+    if (!shouldRestore || !storedState) {
+        clearCatalogState();
+        persistCatalogState({
+            anchor: null,
+            scroll_y: Math.max(window.scrollY, 0),
+        });
+        return false;
+    }
+
+    catalogRuntimeState.layout_mode = storedState.layout_mode === "sidebar" ? "sidebar" : catalogRuntimeState.layout_mode;
+    catalogRuntimeState.current_page = toPositiveInt(storedState.current_page, 1);
+    catalogRuntimeState.order_key = toNonNegativeInt(storedState.order_key, null);
+    catalogRuntimeState.anchor = typeof storedState.anchor === "string" ? storedState.anchor : null;
+    catalogRuntimeState.scroll_y = toNonNegativeInt(storedState.scroll_y, 0);
+    catalogRuntimeState.filters = normalizeCatalogFilters(storedState.filters || {});
+
+    const loadMoreButton = getLoadMoreButton();
+    const errorLabel = document.getElementById("catalog-load-more-error");
+    if (loadMoreButton) {
+        loadMoreButton.disabled = true;
+    }
+    if (errorLabel) {
+        errorLabel.classList.add("hidden");
+    }
+
+    try {
+        const data = await requestCatalogData({
+            page: catalogRuntimeState.current_page,
+            orderKey: catalogRuntimeState.order_key,
+            restoreMode: true,
+        });
+        applyCatalogResponse(data, { appendMode: false });
+        restoreCatalogScrollPosition(storedState);
+        return true;
+    } catch (error) {
+        console.error("Ошибка восстановления каталога после detail:", error);
+        clearCatalogState();
+        persistCatalogState({
+            anchor: null,
+            scroll_y: Math.max(window.scrollY, 0),
+        });
+        if (errorLabel) {
+            errorLabel.classList.remove("hidden");
+        }
+        return false;
+    } finally {
+        if (loadMoreButton) {
+            loadMoreButton.disabled = false;
+        }
+    }
+}
+
+async function bootstrapCatalogPage() {
+    hydrateRuntimeStateFromDom();
+    renderCurrentPageIndicator(catalogRuntimeState.current_page, catalogRuntimeState.total_pages);
+    renderFilterChipStates();
 
     initCatalogFiltersModal();
     initCardTabs();
-    initCatalogStatePersistence();
     initLoadMore();
     initScrollToTopButton();
+
+    await restoreCatalogIfNeeded();
+    initCatalogStatePersistence();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    bootstrapCatalogPage().catch((error) => {
+        console.error("Ошибка инициализации каталога:", error);
+    });
 });
