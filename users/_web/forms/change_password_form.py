@@ -13,7 +13,7 @@ class ChangePasswordForm(forms.Form):
             attrs={
                 "placeholder": "••••••••",
                 "class": (
-                    "block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                    "block w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-lg "
                     "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                 ),
                 "autocomplete": "current-password",
@@ -27,7 +27,7 @@ class ChangePasswordForm(forms.Form):
             attrs={
                 "placeholder": "••••••••",
                 "class": (
-                    "block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                    "block w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-lg "
                     "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                 ),
                 "autocomplete": "new-password",
@@ -41,7 +41,7 @@ class ChangePasswordForm(forms.Form):
             attrs={
                 "placeholder": "••••••••",
                 "class": (
-                    "block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                    "block w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-lg "
                     "text-zinc-700 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
                 ),
                 "autocomplete": "new-password",
