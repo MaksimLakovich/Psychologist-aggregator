@@ -5992,6 +5992,16 @@ input:checked + .toggle-bg {
   border-color: rgb(104 117 245 / var(--tw-border-opacity, 1));
 }
 
+.hover\:border-indigo-100:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(229 237 255 / var(--tw-border-opacity, 1));
+}
+
+.hover\:border-slate-100:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(241 245 249 / var(--tw-border-opacity, 1));
+}
+
 .hover\:\!bg-primary-800:hover {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(157 23 77 / var(--tw-bg-opacity, 1)) !important;
@@ -6631,6 +6641,14 @@ input:checked + .toggle-bg {
 
 .group:hover .group-hover\:bg-indigo-100\/40 {
   background-color: rgb(229 237 255 / 0.4);
+}
+
+.group:hover .group-hover\:bg-indigo-100\/60 {
+  background-color: rgb(229 237 255 / 0.6);
+}
+
+.group:hover .group-hover\:bg-indigo-100\/75 {
+  background-color: rgb(229 237 255 / 0.75);
 }
 
 .group:hover .group-hover\:text-zinc-500 {
