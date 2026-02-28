@@ -80,6 +80,11 @@ function buildCatalogRestoreUrl(catalogBaseUrl, catalogState) {
         params.set("order_key", String(orderKey));
     }
 
+    // Сохраняем фильтр вида консультации при fallback-возврате в каталог.
+    if (catalogState.consultation_type === "individual" || catalogState.consultation_type === "couple") {
+        params.set("consultation_type", catalogState.consultation_type);
+    }
+
     url.search = params.toString();
 
     const anchor = normalizeAnchor(catalogState.anchor);

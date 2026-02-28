@@ -1,4 +1,5 @@
 import random
+from urllib.parse import urlencode
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
@@ -11,6 +12,9 @@ from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from django_ratelimit.decorators import ratelimit
 
+from aggregator._web.services.basic_filter_catalog import (
+    CONSULTATION_TYPE_CHOICES, apply_catalog_basic_filters,
+    build_consultation_type_counts, extract_consultation_type)
 from core.constants import CARDS_PER_PAGE
 from core.services.experience_label import build_experience_label
 from users.models import PsychologistProfile
@@ -36,8 +40,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
     # Техническое имя ключа в session. Тут хранится число, которое определяет
     # стабильный случайный порядок/набор карточек на время сессии пользователя
     CATALOG_RANDOM_ORDER_SESSION_KEY = "psychologist_catalog_random_order_key"
-    # Техническое имя ключа в session для режима отображения каталога.
-    # Возможные значения: "sidebar" / "menu".
+    # Техническое имя ключа в session для режима отображения каталога. Возможные значения: "sidebar" / "menu"
     CATALOG_LAYOUT_MODE_SESSION_KEY = "psychologist_catalog_layout_mode"
 
     def get_queryset(self):
@@ -151,6 +154,41 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
 
         return "menu"
 
+    def _resolve_active_consultation_type(self):
+        """Определяет активное значение фильтра "Вид консультации" из query-параметра.
+
+        Важный бизнес-момент:
+            - фильтр должен жить только в сценарии "каталог -> detail -> назад в каталог";
+            - если пользователь ушел на другие страницы и потом заново открыл каталог без query-параметра,
+              нужно показать весь каталог без старой фильтрации.
+
+        Поэтому:
+            - здесь читаем только request.GET["consultation_type"];
+            - ничего не сохраняем в server-side session;
+            - если параметра нет или он невалиден, возвращаем None.
+        """
+        cached_value = getattr(self, "_active_consultation_type_cache", "__missing__")
+        if cached_value != "__missing__":
+            return cached_value
+
+        raw_value = self.request.GET.get("consultation_type")
+        resolved_value = extract_consultation_type(raw_value)
+        self._active_consultation_type_cache = resolved_value
+        return resolved_value
+
+    def _build_catalog_detail_query(self, layout_mode, consultation_type):
+        """Собирает query-строку для перехода из каталога в detail-страницу.
+
+        Передаем только те данные, которые действительно нужны detail-странице:
+            - layout: чтобы detail и обратная ссылка открывались в том же режиме интерфейса;
+            - consultation_type: чтобы при возврате в каталог сохранялась текущая фильтрация.
+        """
+        params = {"layout": layout_mode}
+        if consultation_type:
+            params["consultation_type"] = consultation_type
+
+        return f"?{urlencode(params)}"
+
     def _build_catalog_page_data(self):
         """Собирает данные текущей страницы каталога (page=1 / page=2 / ...).
 
@@ -166,6 +204,10 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
             3) Берем только нужный кусок страницы (например, 1-18 или 19-36).
             4) Вторым запросом в БД забираем данные только по этим id."""
         queryset = self.get_queryset()
+        filters_state = {
+            "consultation_type": self._resolve_active_consultation_type(),
+        }
+        queryset = apply_catalog_basic_filters(queryset, filters_state)
         random_order_key = self._get_or_create_random_order_key()
 
         # 1) Берем только id, чтобы дешево перемешать порядок в памяти
@@ -278,12 +320,20 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
         page_data = self._build_catalog_page_data()
 
         context["title_psychologist_catalog_page_view"] = "Каталог психологов на Опора — запись на приём к психологу"
+        active_consultation_type = self._resolve_active_consultation_type()
+        context["active_consultation_type"] = active_consultation_type
+        context["consultation_type_choices"] = CONSULTATION_TYPE_CHOICES
+        context["consultation_type_counts"] = build_consultation_type_counts(self.get_queryset())
 
         # Логика управления отображением сайдбара.
         # Используем единый layout_mode, чтобы одинаково работать для page=1 и page=2+.
         layout_mode = self._resolve_layout_mode()
         context["layout_mode"] = layout_mode
         context["show_sidebar"] = layout_mode == "sidebar"
+        context["catalog_detail_query"] = self._build_catalog_detail_query(
+            layout_mode=layout_mode,
+            consultation_type=active_consultation_type,
+        )
         if layout_mode != "sidebar":
             context["menu_variant"] = "without-sidebar"
 
@@ -312,6 +362,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, TemplateView):
                     # ВАЖНО: для догружаемых карточек обязательно передаем layout_mode,
                     # иначе у ссылок карточек может потеряться корректный параметр layout.
                     "layout_mode": context["layout_mode"],
+                    "catalog_detail_query": context["catalog_detail_query"],
                     "show_sidebar": context["show_sidebar"],
                 },
                 request=request,
@@ -362,16 +413,19 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, TemplateView):
         return "menu"
 
     @staticmethod
-    def _build_catalog_back_url(layout_mode):
+    def _build_catalog_back_url(layout_mode, consultation_type):
         """Собирает базовую ссылку "Назад в каталог" для non-JS fallback.
 
         ВАЖНО:
             - Основное восстановление позиции/страницы теперь делает фронтенд через sessionStorage
               (см. psychologist_catalog.js + psychologist_catalog_detail.js).
             - Серверный fallback оставляем минимальным и предсказуемым:
-              возвращаем в каталог с тем же layout (sidebar/menu)."""
+              возвращаем в каталог с тем же layout (sidebar/menu) и текущим фильтром."""
         base_url = reverse("core:psychologist-catalog")
-        return f"{base_url}?layout={layout_mode}"
+        params = {"layout": layout_mode}
+        if consultation_type:
+            params["consultation_type"] = consultation_type
+        return f"{base_url}?{urlencode(params)}"
 
     def get_context_data(self, **kwargs):
         """Формирование контекста для HTML-шаблона детальной страницы психолога.
@@ -403,7 +457,13 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, TemplateView):
         context["title_psychologist_catalog_detail_page_view"] = (
             f"{profile.user.first_name} {profile.user.last_name} — профиль психолога"
         )
-        context["catalog_back_url"] = self._build_catalog_back_url(layout_mode)
+        active_consultation_type = extract_consultation_type(
+            self.request.GET.get("consultation_type")
+        )
+        context["catalog_back_url"] = self._build_catalog_back_url(
+            layout_mode=layout_mode,
+            consultation_type=active_consultation_type,
+        )
 
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
         context["current_sidebar_key"] = "psychologist-catalog"

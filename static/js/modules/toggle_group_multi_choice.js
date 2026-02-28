@@ -31,7 +31,8 @@ export function initMultiToggle({
     buttonSelector,
     hiddenInputsContainerSelector,
     inputName,
-    initialValues = []
+    initialValues = [],
+    maxSelected = null,
 }) {
     const container = document.querySelector(containerSelector);
     if (!container) return;
@@ -54,15 +55,48 @@ export function initMultiToggle({
         });
     }
 
+    // 1) Вспомогательная функция: переводит одну конкретную кнопку в неактивное состояние.
+    // Простыми словами:
+    // - убираем у кнопки оформление "выбрано";
+    // - возвращаем ей обычный внешний вид, который означает "эта опция сейчас не выбрана".
+    function setInactive(btn) {
+        removeClasses(btn, ACTIVE_CLASSES);
+        addClasses(btn, INACTIVE_CLASSES);
+    }
+
+    // 2) Вспомогательная функция: переводит одну конкретную кнопку в активное состояние.
+    // Простыми словами:
+    // - визуально подсвечиваем кнопку;
+    // - показываем пользователю, что именно эта опция сейчас выбрана.
+    function setActive(btn) {
+        addClasses(btn, ACTIVE_CLASSES);
+        removeClasses(btn, INACTIVE_CLASSES);
+    }
+
     function toggleBtn(btn) {
         const isActive = ACTIVE_CLASSES.every(c => btn.classList.contains(c));
 
         if (isActive) {
-            removeClasses(btn, ACTIVE_CLASSES);
-            addClasses(btn, INACTIVE_CLASSES);
+            setInactive(btn);
         } else {
-            addClasses(btn, ACTIVE_CLASSES);
-            removeClasses(btn, INACTIVE_CLASSES);
+            // Режим maxSelected=1 нужен для сценария "выбрать 1 или снять выбор совсем".
+            // Пример такого сценария:
+            // - страница "Каталог" -> фильтр "Вид консультации";
+            // - пользователь может выбрать только "Индивидуальная" ИЛИ только "Парная";
+            // - при повторном клике по активной кнопке можно снять выбор полностью и вернуться к состоянию "все".
+            //
+            // Если maxSelected не задан:
+            // - остается прежний сценарий работы модуля, который используется на странице personal-questions/;
+            // - можно выбирать несколько кнопок одновременно без автоматического снятия других значений.
+            if (maxSelected === 1) {
+                buttons.forEach(otherBtn => {
+                    if (otherBtn !== btn) {
+                        setInactive(otherBtn);
+                    }
+                });
+            }
+
+            setActive(btn);
         }
 
         syncHiddenInputs();
@@ -77,10 +111,38 @@ export function initMultiToggle({
     // Затем: восстанавливаем состояние из initialValues
     buttons.forEach(btn => {
         if (initialValues.includes(btn.dataset.value)) {
-            addClasses(btn, ACTIVE_CLASSES);
-            removeClasses(btn, INACTIVE_CLASSES);
+            setActive(btn);
         }
     });
+
+    // Это защитная логика на случай некорректного стартового состояния.
+    // Например:
+    // - режим maxSelected=1 говорит, что активной может быть только ОДНА кнопка;
+    // - но если по ошибке в initialValues пришло сразу 2 значения
+    //   (например, ["individual", "couple"]),
+    //   то UI не должен показать пользователю две активные кнопки одновременно.
+    //
+    // Что делаем:
+    // - оставляем активной только первую найденную кнопку;
+    // - все остальные принудительно переводим в неактивное состояние.
+    //
+    // То есть простыми словами:
+    // если входные данные противоречат правилу "можно выбрать только один вариант",
+    // модуль сам мягко исправляет это состояние.
+    if (maxSelected === 1) {
+        let wasFirstSelectedFound = false;
+        buttons.forEach(btn => {
+            const isActive = ACTIVE_CLASSES.every(c => btn.classList.contains(c));
+            if (!isActive) return;
+
+            if (!wasFirstSelectedFound) {
+                wasFirstSelectedFound = true;
+                return;
+            }
+
+            setInactive(btn);
+        });
+    }
 
     // Назначаем обработчики
     buttons.forEach(btn => {

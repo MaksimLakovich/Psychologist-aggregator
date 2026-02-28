@@ -48,7 +48,9 @@
     <!-- 1) Фото психолога -->
     <div class="flex justify-center">
         <div class="relative w-32 h-32">
-            <a href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}"
+            <a href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}{{ catalog_detail_query|default:'' }}"
+               data-catalog-detail-link
+               data-profile-slug="{{ profile.slug }}"
                class="block w-full h-full relative z-10 rounded-[2.5rem] overflow-hidden border-4
                border-white shadow-md transition-all duration-500 group-hover:shadow-indigo-200">
                 <img
@@ -72,7 +74,9 @@
     </div>
 
     <!-- 2) Полное имя -->
-    <a href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}"
+    <a href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}{{ catalog_detail_query|default:'' }}"
+       data-catalog-detail-link
+       data-profile-slug="{{ profile.slug }}"
        class="mt-5 text-center text-2xl font-bold text-slate-600 tracking-wider leading-tight group-hover:text-indigo-700 transition-colors block">
         {{ profile.user.first_name }} {{ profile.user.last_name }}
     </a>
@@ -149,7 +153,9 @@
                             </span>
                         {% endfor %}
                         {% if methods|length > 3 %}
-                            <a href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}"
+                            <a href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}{{ catalog_detail_query|default:'' }}"
+                               data-catalog-detail-link
+                               data-profile-slug="{{ profile.slug }}"
                                class="text-sm font-medium italic text-slate-600 group-hover:text-indigo-700 transition-colors self-center ml-1">
                                 + еще {{ methods|length|add:'-3' }}
                             </a>
@@ -173,7 +179,9 @@
                             </span>
                         {% endfor %}
                         {% if topics|length > 4 %}
-                            <a href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}"
+                            <a href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}{{ catalog_detail_query|default:'' }}"
+                               data-catalog-detail-link
+                               data-profile-slug="{{ profile.slug }}"
                                class="text-sm font-medium italic text-slate-600 group-hover:text-indigo-700 transition-colors self-center ml-1">
                                 + еще {{ topics|length|add:'-4' }}
                             </a>
@@ -193,7 +201,9 @@
                 <p class="text-base leading-loose leading-relaxed text-slate-600 font-medium italic line-clamp-[6]">
                     «{{ profile.biography }}»
                 </p>
-                <a href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}"
+                <a href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}{{ catalog_detail_query|default:'' }}"
+                   data-catalog-detail-link
+                   data-profile-slug="{{ profile.slug }}"
                    class="inline-block mt-3 text-sm font-medium text-slate-600 group-hover:text-indigo-700 italic transition-colors">
                     Читать больше...
                 </a>
@@ -206,7 +216,9 @@
     <!-- 8) Кнопка перехода в полный профиль -->
     <div class="mt-10">
         <a
-            href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}"
+            href="{% url 'core:psychologist-card-detail' profile_slug=profile.slug %}{{ catalog_detail_query|default:'' }}"
+            data-catalog-detail-link
+            data-profile-slug="{{ profile.slug }}"
             class="inline-flex w-full items-center justify-center rounded-[1.5rem] bg-slate-400 px-6 py-4
             text-sm font-black tracking-widest text-white uppercase transition-all duration-300
             group-hover:bg-indigo-600 hover:shadow-xl hover:shadow-indigo-200 active:scale-[0.98]"

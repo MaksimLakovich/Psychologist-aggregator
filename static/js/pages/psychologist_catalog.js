@@ -4,14 +4,17 @@ import {
     toPositiveInt,
     writeCatalogState,
 } from "../modules/catalog_state.js";
+import { initMultiToggle } from "../modules/toggle_group_multi_choice.js";
+import { pluralizeRu } from "../utils/pluralize_ru.js";
 
 /**
  * Логика страницы "Каталог психологов".
  *
- * Этот файл отвечает за 3 задачи:
+ * Этот файл отвечает за 4 задачи:
  * 1) Переключение вкладок внутри карточки ("Основное" / "О себе").
  * 2) Кнопку "Показать еще" (догрузка новых карточек без перезагрузки страницы).
  * 3) Сохранение состояния каталога перед переходом в детальный профиль.
+ * 4) Работу модалки фильтров каталога (на текущем шаге: "Вид консультации").
  *
  * Пример пользовательского сценария:
  * - клиент открыл каталог, нажал "Показать еще" до page=3;
@@ -25,6 +28,355 @@ import {
  *   защитная ветка для fallback-сценариев.
  * То есть это хорошая практика "на будущее" с почти нулевой стоимостью.
  */
+
+/**
+ * Текст на кнопке применения фильтра.
+ */
+const APPLY_RESULTS_LABEL = "Показать результаты";
+
+/**
+ * Кешируем прочитанные из DOM данные, чтобы не парсить script-теги повторно.
+ */
+let cachedConsultationTypeChoices = null;
+let cachedConsultationTypeCounts = null;
+let cachedActiveConsultationType = null;
+let isActiveConsultationTypeLoaded = false;
+
+/**
+ * Безопасно читает JSON из script-тега.
+ *
+ * Если тега нет или JSON битый, возвращаем fallback.
+ */
+function readJsonScript(id, fallback) {
+    const scriptTag = document.getElementById(id);
+    if (!scriptTag) return fallback;
+
+    try {
+        return JSON.parse(scriptTag.textContent || "null") ?? fallback;
+    } catch (error) {
+        return fallback;
+    }
+}
+
+/**
+ * Возвращает mapping вариантов вида консультации.
+ *
+ * Источник истины:
+ * - backend передает сюда CLIENT_TO_TOPIC_TYPE_MAP,
+ *   то есть мы не дублируем словарь на frontend.
+ */
+function getConsultationTypeChoices() {
+    if (cachedConsultationTypeChoices !== null) {
+        return cachedConsultationTypeChoices;
+    }
+
+    const rawChoices = readJsonScript("catalog-consultation-type-choices-data", {});
+    cachedConsultationTypeChoices = rawChoices && typeof rawChoices === "object" ? rawChoices : {};
+    return cachedConsultationTypeChoices;
+}
+
+/**
+ * Возвращает предрассчитанные количества карточек по варианту вида консультации.
+ *
+ * Формат:
+ * {
+ *   all: 40,
+ *   individual: 39,
+ *   couple: 4,
+ * }
+ */
+function getConsultationTypeCounts() {
+    if (cachedConsultationTypeCounts !== null) {
+        return cachedConsultationTypeCounts;
+    }
+
+    const rawCounts = readJsonScript("catalog-consultation-type-counts-data", {});
+    const parseCount = (value) => {
+        const parsed = Number.parseInt(String(value), 10);
+        return Number.isInteger(parsed) && parsed >= 0 ? parsed : 0;
+    };
+
+    cachedConsultationTypeCounts = {
+        all: parseCount(rawCounts.all),
+        individual: parseCount(rawCounts.individual),
+        couple: parseCount(rawCounts.couple),
+    };
+    return cachedConsultationTypeCounts;
+}
+
+/**
+ * Возвращает активное значение фильтра из backend-контекста.
+ *
+ * Возвращает:
+ * - "individual" или "couple" если фильтр активен;
+ * - null если фильтр не выбран и каталог открыт в режиме "все".
+ */
+function getActiveConsultationTypeFromDOM() {
+    if (isActiveConsultationTypeLoaded) {
+        return cachedActiveConsultationType;
+    }
+
+    const rawValue = readJsonScript("catalog-active-consultation-type-data", null);
+    cachedActiveConsultationType = normalizeConsultationType(rawValue);
+    isActiveConsultationTypeLoaded = true;
+    return cachedActiveConsultationType;
+}
+
+/**
+ * Нормализует входное значение вида консультации.
+ *
+ * Если значение отсутствует или не входит в допустимые ключи,
+ * возвращаем null, что означает "фильтр не выбран".
+ */
+function normalizeConsultationType(rawValue) {
+    if (typeof rawValue !== "string") return null;
+
+    const choices = getConsultationTypeChoices();
+    if (Object.prototype.hasOwnProperty.call(choices, rawValue)) {
+        return rawValue;
+    }
+
+    return null;
+}
+
+/**
+ * Возвращает выбранное значение в модалке.
+ *
+ * Если активных кнопок нет, возвращаем null.
+ */
+function getModalSelectedConsultationType() {
+    const hiddenInput = document.querySelector("#catalog-consultation-hidden-inputs input");
+    return normalizeConsultationType(hiddenInput ? hiddenInput.value : null);
+}
+
+/**
+ * Перерисовывает кнопку "Показать результаты" с количеством найденных психологов.
+ *
+ * Пример:
+ * Показать результаты
+ * Найдено: 4 специалиста
+ */
+function renderApplyButtonWithCount(applyButton, selectedConsultationType) {
+    if (!applyButton) return;
+
+    const counts = getConsultationTypeCounts();
+    const countKey = selectedConsultationType || "all";
+    const selectedCount = counts[countKey] ?? counts.all ?? 0;
+    const specialistWord = pluralizeRu(
+        selectedCount,
+        "специалист",
+        "специалиста",
+        "специалистов",
+    );
+
+    applyButton.innerHTML = `
+        ${APPLY_RESULTS_LABEL}
+        <span class="block mt-1 text-xs font-medium text-indigo-100">
+            Найдено: ${selectedCount} ${specialistWord}
+        </span>
+    `;
+}
+
+/**
+ * Возвращает базовый endpoint каталога.
+ */
+function resolveCatalogEndpoint() {
+    const loadMoreButton = document.getElementById("catalog-load-more-btn");
+    return loadMoreButton?.dataset.endpoint || window.location.pathname;
+}
+
+/**
+ * Возвращает активный режим layout.
+ *
+ * Приоритет:
+ * 1) data-layout у кнопки "Показать еще";
+ * 2) query-параметр layout;
+ * 3) fallback "menu".
+ */
+function resolveLayoutMode() {
+    const loadMoreButton = document.getElementById("catalog-load-more-btn");
+    const layoutFromButton = loadMoreButton?.dataset.layout;
+    if (layoutFromButton === "sidebar" || layoutFromButton === "menu") {
+        return layoutFromButton;
+    }
+
+    const layoutFromUrl = new URLSearchParams(window.location.search).get("layout");
+    return layoutFromUrl === "sidebar" ? "sidebar" : "menu";
+}
+
+/**
+ * Инициализирует модалку фильтров каталога.
+ *
+ * Что уже реализовано в рамках 1-го этапа:
+ * - фильтр "Вид консультации" (Индивидуальная / Парная).
+ *
+ * Что важно по UX:
+ * - пользователь выбирает значение в модалке;
+ * - по кнопке "Показать результаты" страница перезагружается с query-параметром;
+ * - выбранный фильтр живет в URL текущего сценария каталога, а не в server-side session.
+ */
+function initCatalogFiltersModal() {
+    const modal = document.getElementById("filter-modal");
+    const modalOverlay = document.getElementById("filter-modal-overlay");
+    const modalTitle = document.getElementById("modal-title");
+    const modalContent = document.getElementById("modal-content");
+    const closeButton = document.getElementById("filter-modal-close-btn");
+    const applyButton = document.getElementById("filter-modal-apply-btn");
+    const filterButtons = document.querySelectorAll("[data-filter-chip]");
+
+    if (
+        !modal ||
+        !modalOverlay ||
+        !modalTitle ||
+        !modalContent ||
+        !closeButton ||
+        !applyButton ||
+        !filterButtons.length
+    ) {
+        return;
+    }
+    let openedFilterName = null;
+
+    /**
+     * Закрывает модалку и возвращает скролл основной странице.
+     */
+    function closeModal() {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        document.body.style.overflow = "";
+    }
+
+    /**
+     * Открывает модалку для выбранного фильтра.
+     */
+    function openModal(filterName) {
+        openedFilterName = filterName;
+        modalTitle.textContent = filterName;
+        renderModalContent(filterName);
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        document.body.style.overflow = "hidden";
+    }
+
+    /**
+     * Рендерит контент модалки для конкретного фильтра.
+     *
+     * На этом этапе детально поддерживаем только "Вид консультации".
+     */
+    function renderModalContent(filterName) {
+        if (filterName !== "Вид консультации") {
+            modalContent.innerHTML = `
+                <p class="text-sm text-gray-500 leading-relaxed">
+                    Этот фильтр будет подключен на следующем шаге. Сейчас можно закрыть модалку.
+                </p>
+            `;
+            applyButton.textContent = APPLY_RESULTS_LABEL;
+            return;
+        }
+
+        const activeConsultationType = getActiveConsultationTypeFromDOM();
+        const consultationTypeChoices = getConsultationTypeChoices();
+        const individualLabel = consultationTypeChoices.individual || "Индивидуальная";
+        const coupleLabel = consultationTypeChoices.couple || "Парная";
+
+        modalContent.innerHTML = `
+            <div class="space-y-4">
+                <p class="text-sm text-gray-500 leading-relaxed">
+                    Выберите формат консультации для фильтрации карточек.
+                </p>
+                <div id="catalog-consultation-block" class="grid grid-cols-2 gap-3 max-w-md">
+                    <button type="button" data-value="individual" class="catalog-consultation-btn px-4 py-2 rounded-lg border text-base font-medium">
+                        ${individualLabel}
+                    </button>
+                    <button type="button" data-value="couple" class="catalog-consultation-btn px-4 py-2 rounded-lg border text-base font-medium">
+                        ${coupleLabel}
+                    </button>
+                </div>
+                <div id="catalog-consultation-hidden-inputs" class="hidden"></div>
+                <p class="text-xs text-gray-400">
+                    Можно оставить оба варианта невыбранными — это режим "все специалисты".
+                </p>
+            </div>
+        `;
+
+        // Используем уже существующий multi-toggle модуль.
+        // Новый параметр maxSelected=1 добавлен обратно-совместимо:
+        // старые места использования не изменяются, а здесь мы получаем режим
+        // "выбран 1 вариант" или "не выбран ни один".
+        initMultiToggle({
+            containerSelector: "#catalog-consultation-block",
+            buttonSelector: ".catalog-consultation-btn",
+            hiddenInputsContainerSelector: "#catalog-consultation-hidden-inputs",
+            inputName: "consultation_type",
+            initialValues: activeConsultationType ? [activeConsultationType] : [],
+            maxSelected: 1,
+        });
+
+        renderApplyButtonWithCount(applyButton, getModalSelectedConsultationType());
+
+        const consultationBlock = document.getElementById("catalog-consultation-block");
+        if (consultationBlock) {
+            consultationBlock.addEventListener("click", (event) => {
+                if (!event.target.closest(".catalog-consultation-btn")) return;
+
+                // Ждем пока initMultiToggle обновит hidden-input и классы,
+                // и только после этого пересчитываем текст кнопки.
+                window.requestAnimationFrame(() => {
+                    renderApplyButtonWithCount(applyButton, getModalSelectedConsultationType());
+                });
+            });
+        }
+    }
+
+    /**
+     * Применяет фильтр по кнопке "Показать результаты".
+     *
+     * Поведение:
+     * - для реализованного фильтра "Вид консультации" перезагружаем страницу с query;
+     * - для остальных фильтров пока просто закрываем модалку.
+     */
+    function applyCurrentFilter() {
+        if (openedFilterName !== "Вид консультации") {
+            closeModal();
+            return;
+        }
+
+        const selectedValue = getModalSelectedConsultationType();
+        const nextUrl = new URL(resolveCatalogEndpoint(), window.location.origin);
+        const layoutMode = resolveLayoutMode();
+
+        if (layoutMode === "sidebar" || layoutMode === "menu") {
+            nextUrl.searchParams.set("layout", layoutMode);
+        }
+
+        // Если кнопки не активны, удаляем consultation_type и возвращаемся
+        // к состоянию "все психологи".
+        if (selectedValue) {
+            nextUrl.searchParams.set("consultation_type", selectedValue);
+        } else {
+            nextUrl.searchParams.delete("consultation_type");
+        }
+
+        window.location.assign(nextUrl.toString());
+    }
+
+    filterButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const filterName = button.dataset.filterName || "Фильтр";
+            openModal(filterName);
+        });
+    });
+
+    modalOverlay.addEventListener("click", closeModal);
+    closeButton.addEventListener("click", closeModal);
+    applyButton.addEventListener("click", applyCurrentFilter);
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !modal.classList.contains("hidden")) {
+            closeModal();
+        }
+    });
+}
 
 /**
  * Собирает "базовое состояние" каталога из data-атрибутов кнопки "Показать еще".
@@ -44,11 +396,13 @@ function collectCatalogState(loadMoreButton, extraState = {}) {
     const currentPage = toPositiveInt(loadMoreButton.dataset.currentPage, 1);
     const randomOrderKey = toNonNegativeInt(loadMoreButton.dataset.randomOrderKey, null);
     const layoutMode = loadMoreButton.dataset.layout === "sidebar" ? "sidebar" : "menu";
+    const consultationType = normalizeConsultationType(loadMoreButton.dataset.consultationType);
 
     return {
         layout_mode: layoutMode,
         current_page: currentPage,
         order_key: randomOrderKey,
+        consultation_type: consultationType,
         updated_at: Date.now(),
         ...extraState,
     };
@@ -169,6 +523,7 @@ function initLoadMore() {
         const orderKey = toNonNegativeInt(loadMoreButton.dataset.randomOrderKey, null);
         const totalPages = toNonNegativeInt(loadMoreButton.dataset.totalPages, 0);
         const layoutMode = loadMoreButton.dataset.layout;
+        const consultationType = normalizeConsultationType(loadMoreButton.dataset.consultationType);
 
         if (!endpoint || !requestedPage || orderKey === null) {
             loadMoreButton.hidden = true;
@@ -186,6 +541,9 @@ function initLoadMore() {
             });
             if (layoutMode) {
                 params.append("layout", layoutMode);
+            }
+            if (consultationType) {
+                params.append("consultation_type", consultationType);
             }
 
             const response = await fetch(`${endpoint}?${params.toString()}`, {
@@ -302,6 +660,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalPages = loadMoreButton ? toNonNegativeInt(loadMoreButton.dataset.totalPages, 0) : 0;
     renderCurrentPageIndicator(initialPage, totalPages);
 
+    initCatalogFiltersModal();
     initCardTabs();
     initCatalogStatePersistence();
     initLoadMore();

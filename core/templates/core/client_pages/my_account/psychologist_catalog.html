@@ -47,13 +47,13 @@
 
 <!-- ======= СТИЛЬ МОДАЛКИ ДЛЯ ФИЛЬТРОВ ======= -->
 <div id="filter-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 sm:p-6">
-    <div onclick="closeFilterModal()" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"></div>
+    <div id="filter-modal-overlay" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"></div>
 
     <div class="relative w-full max-w-lg overflow-hidden rounded-[2.5rem] bg-white shadow-2xl">
         <div class="p-8">
             <div class="flex items-center justify-between mb-6">
                 <h3 id="modal-title" class="text-2xl font-bold text-indigo-900 tracking-tight">Фильтр</h3>
-                <button onclick="closeFilterModal()" class="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400">
+                <button id="filter-modal-close-btn" type="button" class="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -63,7 +63,7 @@
             </div>
 
             <div class="mt-8 flex gap-3">
-                <button onclick="closeFilterModal()"
+                <button id="filter-modal-apply-btn" type="button"
                         class="flex-1 px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-base font-medium rounded-xl
                         border border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
                         transition-all shadow-lg shadow-indigo-100 duration-200 shadow-md hover:shadow-lg">
@@ -99,35 +99,52 @@
             </div>
 
             <div class="no-scrollbar flex overflow-x-auto pb-4 gap-3">
-                <button onclick="openFilterModal('Вид консультации')"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
+                <button type="button"
+                        data-filter-chip
+                        data-filter-name="Вид консультации"
+                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 border border-slate-100 rounded-2xl text-sm font-bold
+                         {% if active_consultation_type %}bg-indigo-700/10 text-indigo-600{% else %}bg-slate-200/40 text-slate-600{% endif %}
                          hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Вид консультации
                     <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button onclick="openFilterModal('Симптомы')"
+                <button type="button"
+                        data-filter-chip
+                        data-filter-name="Симптомы"
                         class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
                          hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Симптомы
                     <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button onclick="openFilterModal('Возраст')"
+                <button type="button"
+                        data-filter-chip
+                        data-filter-name="Возраст"
                         class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
                          hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Возраст
                     <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button onclick="openFilterModal('Психотерапевтический подход')"
+                <button type="button"
+                        data-filter-chip
+                        data-filter-name="Психотерапевтический подход"
                         class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
                          hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Подход
                     <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button onclick="openFilterModal('Пол')"
+                <button type="button"
+                        data-filter-chip
+                        data-filter-name="Пол"
                         class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
                          hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Пол
                     <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button onclick="openFilterModal('Цена')"
+                <button type="button"
+                        data-filter-chip
+                        data-filter-name="Цена"
                         class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
                          hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Цена
                     <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button onclick="openFilterModal('Опыт')"
+                <button type="button"
+                        data-filter-chip
+                        data-filter-name="Опыт"
                         class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
                          hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Опыт
                     <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button onclick="openFilterModal('Время сессии')"
+                <button type="button"
+                        data-filter-chip
+                        data-filter-name="Время сессии"
                         class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
                          hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Время сессии
                     <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
@@ -140,7 +157,7 @@
             class="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3 animate-fade-in-up"
             style="animation-delay: 0.2s;"
         >
-            {% include 'core/client_pages/my_account/short_cards.html' with profiles=profiles layout_mode=layout_mode show_sidebar=show_sidebar %}
+            {% include 'core/client_pages/my_account/short_cards.html' with profiles=profiles layout_mode=layout_mode catalog_detail_query=catalog_detail_query show_sidebar=show_sidebar %}
         </div>
 
         <!-- Пустое состояние каталога -->
@@ -175,6 +192,7 @@
                     data-total-pages="{{ total_pages|default:0 }}"
                     data-random-order-key="{{ random_order_key }}"
                     data-layout="{{ layout_mode }}"
+                    data-consultation-type="{{ active_consultation_type|default:'' }}"
                     class="rounded-2xl bg-indigo-600 px-10 py-4 text-base font-black tracking-wide text-white transition
                     hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                     {% if not has_next %}hidden{% endif %}
@@ -201,24 +219,9 @@
     </div>
 </section>
 
-<script>
-    function openFilterModal(filterName) {
-        const modal = document.getElementById('filter-modal');
-        const title = document.getElementById('modal-title');
-        title.innerText = filterName;
-
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        document.body.style.overflow = 'hidden'; // Запрещаем скролл фона
-    }
-
-    function closeFilterModal() {
-        const modal = document.getElementById('filter-modal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        document.body.style.overflow = 'auto'; // Возвращаем скролл
-    }
-</script>
+{{ active_consultation_type|json_script:"catalog-active-consultation-type-data" }}
+{{ consultation_type_choices|json_script:"catalog-consultation-type-choices-data" }}
+{{ consultation_type_counts|json_script:"catalog-consultation-type-counts-data" }}
 
 <script type="module" src="{% static 'js/pages/psychologist_catalog.js' %}"></script>
 {% endblock %}
