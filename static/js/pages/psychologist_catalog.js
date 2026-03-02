@@ -6,36 +6,47 @@ import {
     toPositiveInt,
     writeCatalogState,
 } from "../modules/catalog_state.js";
-import { initCollapsibleTopicGroups } from "../modules/collapsible_topics_list.js";
-import { initMultiToggle } from "../modules/toggle_group_multi_choice.js";
 import { pluralizeRu } from "../utils/pluralize_ru.js";
+import {
+    buildCatalogTopicTypeTentativeFilters,
+    CATALOG_TOPIC_TYPE_FILTER_KEY,
+    CATALOG_TOPIC_TYPE_FILTER_NAME,
+    getCatalogTopicTypeModalValue,
+    isCatalogTopicTypeFilterActive,
+    normalizeCatalogTopicType,
+    renderCatalogTopicTypeModal,
+} from "../modules/catalog_filter_topic_type.js";
+import {
+    buildCatalogTopicsTentativeFilters,
+    CATALOG_TOPICS_FILTER_KEY,
+    CATALOG_TOPICS_FILTER_NAME,
+    filterCatalogTopicIdsByConsultationType,
+    getCatalogTopicsModalValues,
+    isCatalogTopicsFilterActive,
+    normalizeCatalogTopicIds,
+    renderCatalogTopicsModal,
+} from "../modules/catalog_filter_topics.js";
 
 /**
- * Логика страницы "Каталог психологов".
+ * Главный файл страницы каталога психологов.
  *
- * В новой архитектуре этот файл отвечает за 5 задач:
- * 1) вкладки внутри карточек;
- * 2) AJAX-догрузку карточек по кнопке "Показать еще";
- * 3) временное хранение состояния каталога только для сценария catalog <-> detail;
- * 4) AJAX-применение фильтров без query-параметров в URL;
- * 5) восстановление каталога после возврата из detail.
+ * Бизнес-задача этого файла:
+ * - координировать работу страницы каталога целиком;
+ * - хранить временное runtime-state текущей вкладки;
+ * - выполнять AJAX-фильтрацию и догрузку карточек;
+ * - подключать отдельные модули фильтров catalog_filter_*.js;
+ * - восстанавливать каталог после возврата из detail.
  *
- * Важный принцип:
- * - каталог ничего не сохраняет в БД;
- * - фильтры живут только во frontend-state и sessionStorage текущей вкладки.
+ * Важно:
+ * - детали каждого фильтра вынесены в отдельные модули;
+ * - здесь остается только общая инфраструктура страницы и диспетчеризация.
  */
 
 const APPLY_RESULTS_LABEL = "Показать результаты";
 const PREVIEW_RESULTS_LABEL = "Считаем результаты...";
 
-/**
- * Здесь держим текущее рабочее состояние каталога.
- *
- * Почему нужен runtime-state рядом с DOM:
- * - DOM хранит только отображение;
- * - sessionStorage хранит резервную копию на возврат из detail;
- * - а runtime-state нужен для текущих AJAX-запросов и реактивного UI на странице.
- */
+// Временное состояние каталога для текущей вкладки браузера.
+// Это не БД и не server session, а только рабочие данные текущего сценария пользователя.
 const catalogRuntimeState = {
     layout_mode: "menu",
     current_page: 1,
@@ -49,11 +60,11 @@ const catalogRuntimeState = {
     },
 };
 
-let cachedConsultationTypeChoices = null;
-let cachedTopicsByType = null;
-let cachedTopicIdToTypeMap = null;
+// Храним id последнего preview-запроса, чтобы старый ответ не перерисовал кнопку поверх нового состояния модалки.
 let activePreviewRequestId = 0;
 
+// Преобразует текст в безопасный HTML.
+// Это нужно, потому что часть текста приходит из БД и не должна вставляться в DOM как сырой HTML.
 function escapeHtml(value) {
     const sourceValue = String(value ?? "");
 
@@ -65,9 +76,8 @@ function escapeHtml(value) {
         .replaceAll("'", "&#39;");
 }
 
-/**
- * Безопасно читает JSON из script-тега.
- */
+// Безопасно читает JSON из json_script.
+// Если данных нет или JSON поврежден, возвращаем fallback, чтобы страница не ломалась.
 function readJsonScript(id, fallback) {
     const scriptTag = document.getElementById(id);
     if (!scriptTag) return fallback;
@@ -79,99 +89,15 @@ function readJsonScript(id, fallback) {
     }
 }
 
-function getConsultationTypeChoices() {
-    if (cachedConsultationTypeChoices !== null) {
-        return cachedConsultationTypeChoices;
-    }
-
-    const rawChoices = readJsonScript("catalog-consultation-type-choices-data", {});
-    cachedConsultationTypeChoices = rawChoices && typeof rawChoices === "object" ? rawChoices : {};
-    return cachedConsultationTypeChoices;
-}
-
-function getCatalogTopicsByType() {
-    if (cachedTopicsByType !== null) {
-        return cachedTopicsByType;
-    }
-
-    const rawTopics = readJsonScript("catalog-topics-by-type-data", {});
-    cachedTopicsByType = rawTopics && typeof rawTopics === "object" ? rawTopics : {};
-    return cachedTopicsByType;
-}
-
-function getTopicIdToTypeMap() {
-    if (cachedTopicIdToTypeMap !== null) {
-        return cachedTopicIdToTypeMap;
-    }
-
-    const topicIdToTypeMap = {};
-    const topicsByType = getCatalogTopicsByType();
-
-    Object.entries(topicsByType).forEach(([topicTypeLabel, groups]) => {
-        Object.values(groups || {}).forEach((topics) => {
-            (topics || []).forEach((topic) => {
-                if (!topic?.id) return;
-                topicIdToTypeMap[String(topic.id)] = topicTypeLabel;
-            });
-        });
-    });
-
-    cachedTopicIdToTypeMap = topicIdToTypeMap;
-    return cachedTopicIdToTypeMap;
-}
-
-/**
- * Нормализует входное значение фильтра "Вид консультации".
- *
- * Если значение невалидно, считаем, что фильтр не выбран.
- */
-function normalizeConsultationType(rawValue) {
-    if (typeof rawValue !== "string") return null;
-
-    const choices = getConsultationTypeChoices();
-    return Object.prototype.hasOwnProperty.call(choices, rawValue) ? rawValue : null;
-}
-
-function normalizeTopicIds(rawValues) {
-    if (!Array.isArray(rawValues)) return [];
-
-    const normalizedTopicIds = [];
-    const seenTopicIds = new Set();
-
-    rawValues.forEach((rawValue) => {
-        const parsedValue = Number.parseInt(String(rawValue), 10);
-        if (!Number.isInteger(parsedValue) || parsedValue <= 0) return;
-
-        const normalizedValue = String(parsedValue);
-        if (seenTopicIds.has(normalizedValue)) return;
-
-        seenTopicIds.add(normalizedValue);
-        normalizedTopicIds.push(normalizedValue);
-    });
-
-    return normalizedTopicIds;
-}
-
-function resolveTopicTypeLabel(consultationType) {
-    if (!consultationType) return null;
-
-    const choices = getConsultationTypeChoices();
-    const rawLabel = choices[consultationType];
-    return typeof rawLabel === "string" ? rawLabel : null;
-}
-
-function filterTopicIdsByConsultationType(topicIds, consultationType) {
-    const normalizedTopicIds = normalizeTopicIds(topicIds);
-    const topicTypeLabel = resolveTopicTypeLabel(consultationType);
-    if (!topicTypeLabel) return normalizedTopicIds;
-
-    const topicIdToTypeMap = getTopicIdToTypeMap();
-    return normalizedTopicIds.filter((topicId) => topicIdToTypeMap[topicId] === topicTypeLabel);
-}
-
+// Приводит объект фильтров к единому предсказуемому формату.
+// Это общая точка нормализации всех фильтров каталога: по мере добавления новых фильтров они должны подключаться именно здесь.
 function normalizeCatalogFilters(rawFilters = {}) {
-    const consultationType = normalizeConsultationType(rawFilters?.consultation_type);
-    const topicIds = filterTopicIdsByConsultationType(rawFilters?.topic_ids, consultationType);
+    const consultationType = normalizeCatalogTopicType(rawFilters?.consultation_type, { readJsonScript });
+    const topicIds = filterCatalogTopicIdsByConsultationType({
+        topicIds: normalizeCatalogTopicIds(rawFilters?.topic_ids),
+        consultationType,
+        readJsonScript,
+    });
 
     return {
         consultation_type: consultationType,
@@ -179,24 +105,89 @@ function normalizeCatalogFilters(rawFilters = {}) {
     };
 }
 
-/**
- * Возвращает кнопку "Показать еще".
- *
- * Вся техническая конфигурация каталога сейчас привязана к ней через data-атрибуты,
- * поэтому это удобная точка чтения текущих значений из DOM.
- */
+// Описывает подключенные фильтры каталога.
+// Каждый фильтр сам знает, как отрисовать свою модалку, как собрать временное состояние и как прочитать выбранные пользователем значения.
+const CATALOG_FILTER_REGISTRY = {
+    [CATALOG_TOPIC_TYPE_FILTER_KEY]: {
+        key: CATALOG_TOPIC_TYPE_FILTER_KEY,
+        name: CATALOG_TOPIC_TYPE_FILTER_NAME,
+        isActive(filters) {
+            return isCatalogTopicTypeFilterActive(filters, { readJsonScript });
+        },
+        renderModal({ modalContent, schedulePreviewRefresh }) {
+            renderCatalogTopicTypeModal({
+                modalContent,
+                catalogRuntimeState,
+                schedulePreviewRefresh,
+                escapeHtml,
+                readJsonScript,
+            });
+        },
+        buildTentativeFilters() {
+            return buildCatalogTopicTypeTentativeFilters({
+                catalogRuntimeState,
+                normalizeCatalogFilters,
+                readJsonScript,
+            });
+        },
+        readModalFilters() {
+            return {
+                consultation_type: getCatalogTopicTypeModalValue({ readJsonScript }),
+            };
+        },
+    },
+    [CATALOG_TOPICS_FILTER_KEY]: {
+        key: CATALOG_TOPICS_FILTER_KEY,
+        name: CATALOG_TOPICS_FILTER_NAME,
+        isActive(filters) {
+            return isCatalogTopicsFilterActive(filters);
+        },
+        renderModal({ modalContent, schedulePreviewRefresh }) {
+            renderCatalogTopicsModal({
+                modalContent,
+                catalogRuntimeState,
+                schedulePreviewRefresh,
+                escapeHtml,
+                readJsonScript,
+            });
+        },
+        buildTentativeFilters() {
+            return buildCatalogTopicsTentativeFilters({
+                catalogRuntimeState,
+                normalizeCatalogFilters,
+            });
+        },
+        readModalFilters() {
+            return {
+                topic_ids: getCatalogTopicsModalValues(),
+            };
+        },
+    },
+};
+
+// Возвращает конфиг поддерживаемого фильтра по ключу или имени.
+// По ключу ищем в первую очередь, а по имени используем fallback для кнопок, у которых ключа пока нет.
+function getCatalogFilterConfig({ filterKey = "", filterName = "" } = {}) {
+    if (filterKey && CATALOG_FILTER_REGISTRY[filterKey]) {
+        return CATALOG_FILTER_REGISTRY[filterKey];
+    }
+
+    return Object.values(CATALOG_FILTER_REGISTRY).find((config) => config.name === filterName) || null;
+}
+
+// Возвращает кнопку "Показать еще".
+// В ее data-атрибутах лежит часть стартового состояния каталога.
 function getLoadMoreButton() {
     return document.getElementById("catalog-load-more-btn");
 }
 
-/**
- * Возвращает endpoint AJAX-фильтрации каталога.
- */
+// Возвращает AJAX-endpoint каталога.
 function resolveCatalogFilterEndpoint() {
     const loadMoreButton = getLoadMoreButton();
     return loadMoreButton?.dataset.filterEndpoint || "";
 }
 
+// Собирает заголовки для POST-запросов каталога.
 function buildCatalogRequestHeaders() {
     return {
         "Content-Type": "application/json",
@@ -205,6 +196,8 @@ function buildCatalogRequestHeaders() {
     };
 }
 
+// Делает AJAX-запрос к backend и возвращает JSON-ответ каталога.
+// Один и тот же endpoint используем для preview-count, применения фильтров, догрузки карточек и восстановления каталога после detail.
 async function requestCatalogData({
     page = 1,
     orderKey = null,
@@ -243,19 +236,12 @@ async function requestCatalogData({
     return data;
 }
 
-/**
- * Перерисовывает кнопку "Показать результаты" с количеством найденных специалистов.
- */
+// Перерисовывает текст кнопки применения фильтра с количеством найденных специалистов.
 function renderApplyButtonWithCount(applyButton, totalCount) {
     if (!applyButton) return;
 
     const safeCount = toNonNegativeInt(totalCount, 0);
-    const specialistWord = pluralizeRu(
-        safeCount,
-        "терапевт",
-        "терапевта",
-        "терапевтов",
-    );
+    const specialistWord = pluralizeRu(safeCount, "специалист", "специалиста", "специалистов");
 
     applyButton.innerHTML = `
         ${APPLY_RESULTS_LABEL}
@@ -265,6 +251,7 @@ function renderApplyButtonWithCount(applyButton, totalCount) {
     `;
 }
 
+// Показывает на кнопке применения фильтра состояние "идет подсчет".
 function renderApplyButtonLoading(applyButton) {
     if (!applyButton) return;
 
@@ -276,22 +263,14 @@ function renderApplyButtonLoading(applyButton) {
     `;
 }
 
-/**
- * Обновляет внешний вид фильтр-чипа на странице каталога.
- *
- * Простая бизнес-логика:
- * - если фильтр выбран, кнопка получает индикатор активного состояния;
- * - если фильтр снят, кнопка возвращается к обычному виду.
- */
+// Подсвечивает активные чипы фильтров на странице.
+// Каждый фильтр сам сообщает, активен он сейчас или нет, а page-файл только применяет нужные классы.
 function renderFilterChipStates() {
-    const filterStates = {
-        consultation_type: Boolean(catalogRuntimeState.filters.consultation_type),
-        topic_ids: normalizeTopicIds(catalogRuntimeState.filters.topic_ids).length > 0,
-    };
-
-    Object.entries(filterStates).forEach(([filterKey, isActive]) => {
-        const chip = document.querySelector(`[data-filter-chip][data-filter-key="${filterKey}"]`);
-        if (!chip) return;
+    document.querySelectorAll("[data-filter-chip]").forEach((chip) => {
+        const filterKey = chip.dataset.filterKey || "";
+        const filterName = chip.dataset.filterName || "";
+        const filterConfig = getCatalogFilterConfig({ filterKey, filterName });
+        const isActive = filterConfig ? filterConfig.isActive(catalogRuntimeState.filters) : false;
 
         chip.classList.toggle("bg-indigo-200/40", isActive);
         chip.classList.toggle("text-indigo-700", isActive);
@@ -300,9 +279,7 @@ function renderFilterChipStates() {
     });
 }
 
-/**
- * Обновляет текстовый индикатор текущей страницы внизу каталога.
- */
+// Обновляет текстовый индикатор текущей страницы каталога.
 function renderCurrentPageIndicator(currentPage, totalPages) {
     const indicator = document.getElementById("catalog-page-indicator");
     if (!indicator) return;
@@ -317,12 +294,7 @@ function renderCurrentPageIndicator(currentPage, totalPages) {
     indicator.textContent = `${Math.min(safeCurrentPage, safeTotalPages)} из ${safeTotalPages}`;
 }
 
-/**
- * Обновляет кнопку "Показать еще" после любого AJAX-ответа.
- *
- * Именно сервер сообщает, есть ли следующая страница и какой у нее номер,
- * поэтому источник истины здесь всегда backend response.
- */
+// Обновляет кнопку "Показать еще" после ответа сервера.
 function syncLoadMoreButton(data) {
     const loadMoreButton = getLoadMoreButton();
     if (!loadMoreButton) return;
@@ -344,9 +316,7 @@ function syncLoadMoreButton(data) {
     loadMoreButton.dataset.layout = catalogRuntimeState.layout_mode;
 }
 
-/**
- * Показывает или скрывает пустое состояние каталога.
- */
+// Показывает или скрывает пустое состояние каталога.
 function renderEmptyState(totalCount) {
     const emptyState = document.getElementById("catalog-empty-state");
     if (!emptyState) return;
@@ -354,14 +324,8 @@ function renderEmptyState(totalCount) {
     emptyState.classList.toggle("hidden", toNonNegativeInt(totalCount, 0) > 0);
 }
 
-/**
- * Инициализирует вкладки внутри карточек.
- *
- * Важный момент:
- * - карточки появляются и при первом SSR-рендере, и после AJAX;
- * - поэтому инициализацию можно вызывать повторно,
- *   а каждая карточка сама защищается флагом tabsInitialized.
- */
+// Инициализирует вкладки внутри карточек каталога.
+// Карточки могут прийти и с SSR, и через AJAX, поэтому эту функцию можно безопасно запускать повторно.
 function initCardTabs(scope = document) {
     const cards = scope.querySelectorAll("[data-catalog-card]");
 
@@ -396,11 +360,7 @@ function initCardTabs(scope = document) {
     });
 }
 
-/**
- * Считывает стартовое состояние каталога из серверного HTML.
- *
- * Это базовая точка, от которой потом отталкиваются фильтры, догрузка и restore.
- */
+// Считывает стартовое состояние каталога из data-атрибутов страницы.
 function hydrateRuntimeStateFromDom() {
     const loadMoreButton = getLoadMoreButton();
     if (!loadMoreButton) return;
@@ -415,11 +375,8 @@ function hydrateRuntimeStateFromDom() {
     });
 }
 
-/**
- * Сохраняет текущее состояние каталога в sessionStorage.
- *
- * Это резервный снимок каталога на случай возврата из detail.
- */
+// Сохраняет текущее состояние каталога в sessionStorage.
+// Это временная резервная копия для сценария возврата из detail.
 function persistCatalogState(extraState = {}) {
     writeCatalogState({
         layout_mode: catalogRuntimeState.layout_mode,
@@ -434,15 +391,8 @@ function persistCatalogState(extraState = {}) {
     });
 }
 
-/**
- * Применяет AJAX-ответ к интерфейсу каталога.
- *
- * replaceMode=false:
- * - полностью заменяем сетку карточек.
- *
- * appendMode=true:
- * - добавляем новые карточки вниз к уже показанным.
- */
+// Применяет ответ сервера к интерфейсу каталога.
+// В обычном режиме полностью заменяем карточки, а в режиме appendMode добавляем новую страницу карточек вниз.
 function applyCatalogResponse(data, { appendMode = false } = {}) {
     const grid = document.getElementById("catalog-cards-grid");
     if (!grid) return;
@@ -470,14 +420,8 @@ function applyCatalogResponse(data, { appendMode = false } = {}) {
     persistCatalogState();
 }
 
-/**
- * Восстанавливает позицию прокрутки после возврата из detail.
- *
- * Приоритет такой:
- * 1) если знаем конкретную карточку, прокручиваем к ней;
- * 2) если карточка не найдена, используем сохраненный scroll_y;
- * 3) если и его нет, просто остаемся наверху списка.
- */
+// Восстанавливает позицию прокрутки после возврата из detail.
+// Сначала пробуем вернуться к конкретной карточке, а если не получилось, используем сохраненную координату прокрутки.
 function restoreCatalogScrollPosition(savedState) {
     if (!savedState) return;
 
@@ -496,15 +440,8 @@ function restoreCatalogScrollPosition(savedState) {
     }
 }
 
-/**
- * Применяет фильтр "Вид консультации" через AJAX.
- *
- * Что происходит по шагам:
- * 1) обновляем runtime-state;
- * 2) просим backend вернуть первую страницу уже с этим фильтром;
- * 3) полностью заменяем карточки и метаданные каталога;
- * 4) сохраняем обновленное состояние для возможного возврата из detail.
- */
+// Применяет изменения фильтров каталога и запрашивает новую первую страницу.
+// Если запрос завершился ошибкой, возвращаем прежнее состояние фильтров и положения страницы.
 async function applyCatalogFilters(partialFilters = {}) {
     const loadMoreButton = getLoadMoreButton();
     const errorLabel = document.getElementById("catalog-load-more-error");
@@ -544,112 +481,17 @@ async function applyCatalogFilters(partialFilters = {}) {
     }
 }
 
-function getVisibleTopicTypeLabels() {
-    const selectedConsultationType = catalogRuntimeState.filters.consultation_type;
-    const selectedTopicTypeLabel = resolveTopicTypeLabel(selectedConsultationType);
-    const topicsByType = getCatalogTopicsByType();
-
-    if (selectedTopicTypeLabel && topicsByType[selectedTopicTypeLabel]) {
-        return [selectedTopicTypeLabel];
-    }
-
-    return Object.keys(topicsByType);
-}
-
-function buildTopicsModalHtml(selectedTopicIds) {
-    const topicsByType = getCatalogTopicsByType();
-    const visibleTopicTypeLabels = getVisibleTopicTypeLabels();
-
-    if (!visibleTopicTypeLabels.length) {
-        return `
-            <p class="text-sm text-gray-500 leading-relaxed">
-                Темы пока не добавлены.
-            </p>
-        `;
-    }
-
-    const sectionsHtml = visibleTopicTypeLabels.map((topicTypeLabel) => {
-        const groupedTopics = topicsByType[topicTypeLabel] || {};
-        const groupsHtml = Object.entries(groupedTopics).map(([groupName, topics]) => {
-            const itemsHtml = (topics || []).map((topic) => `
-                <label class="topic-item flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 transition">
-                    <input
-                        type="checkbox"
-                        value="${topic.id}"
-                        class="catalog-topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                        ${selectedTopicIds.includes(String(topic.id)) ? "checked" : ""}
-                    >
-                    <span class="text-base font-medium text-gray-900">${escapeHtml(topic.name)}</span>
-                </label>
-            `).join("");
-
-            return `
-                <div class="topic-group mb-1 pb-4">
-                    <p class="block mb-2 text-lg font-medium text-indigo-500">
-                        <strong>${escapeHtml(groupName)}</strong>
-                    </p>
-                    <div class="topics-group grid grid-cols-1 sm:grid-cols-2">
-                        ${itemsHtml || '<p class="text-base text-gray-500">Темы не найдены.</p>'}
-                    </div>
-                    <button
-                        type="button"
-                        class="show-more-topics hidden mt-2 italic text-sm font-medium text-indigo-500 hover:text-indigo-900"
-                    >
-                        Ещё
-                    </button>
-                </div>
-            `;
-        }).join("");
-
-        const typeTitleHtml = visibleTopicTypeLabels.length > 1 ? `
-            <div class="pt-2 pb-1 border-b border-slate-100">
-                <p class="text-sm font-black uppercase tracking-[0.2em] text-slate-400">${escapeHtml(topicTypeLabel)}</p>
-            </div>
-        ` : "";
-
-        return `
-            <section class="space-y-3">
-                ${typeTitleHtml}
-                ${groupsHtml || '<p class="text-sm text-gray-500">Темы не найдены.</p>'}
-            </section>
-        `;
-    }).join("");
-
-    const helperText = catalogRuntimeState.filters.consultation_type
-        ? "Показаны темы только для выбранного вида консультации."
-        : "Можно выбрать темы как для индивидуальной, так и для парной консультации.";
-
+// Возвращает стандартный текст-заглушку для фильтров, которые еще не подключены.
+function buildUnsupportedFilterHtml() {
     return `
-        <div class="space-y-4">
-            <p class="text-sm text-gray-500 leading-relaxed">
-                Выберите симптомы и запросы, с которыми должен работать психолог.
-            </p>
-            <div id="catalog-topic-groups-root" class="max-h-[28rem] overflow-y-auto pr-1 space-y-5">
-                ${sectionsHtml}
-            </div>
-            <p class="text-xs text-gray-400">
-                ${helperText}
-            </p>
-        </div>
+        <p class="text-sm text-gray-500 leading-relaxed">
+            Этот фильтр будет подключен на следующем шаге. Сейчас можно закрыть модалку.
+        </p>
     `;
 }
 
-function getModalSelectedConsultationType() {
-    const hiddenInput = document.querySelector("#catalog-consultation-hidden-inputs input");
-    return normalizeConsultationType(hiddenInput ? hiddenInput.value : null);
-}
-
-function getModalSelectedTopicIds() {
-    const checkboxes = document.querySelectorAll("#catalog-topic-groups-root .catalog-topic-checkbox:checked");
-    return normalizeTopicIds(Array.from(checkboxes).map((checkbox) => checkbox.value));
-}
-
-/**
- * Инициализирует модалку фильтров каталога.
- *
- * На этом шаге детально поддерживаем только фильтр "Вид консультации".
- * Остальные фильтры пока показывают заглушку, но сама архитектура уже общая.
- */
+// Инициализирует общую модалку фильтров каталога.
+// Здесь живет только оболочка модалки и диспетчеризация, а контент и бизнес-логика конкретных фильтров остаются в catalog_filter_*.js.
 function initCatalogFiltersModal() {
     const modal = document.getElementById("filter-modal");
     const modalOverlay = document.getElementById("filter-modal-overlay");
@@ -671,183 +513,113 @@ function initCatalogFiltersModal() {
         return;
     }
 
-    let openedFilterName = null;
+    let openedFilterConfig = null;
     let previewDebounceTimer = null;
 
+    // Останавливает отложенный пересчет preview-count, если пользователь уже закрыл модалку или быстро переключил состояние.
+    function clearPreviewRefreshTimer() {
+        if (!previewDebounceTimer) return;
+
+        window.clearTimeout(previewDebounceTimer);
+        previewDebounceTimer = null;
+    }
+
+    // Закрывает модалку и возвращает обычный скролл основной странице.
     function closeModal() {
+        clearPreviewRefreshTimer();
+        openedFilterConfig = null;
         modal.classList.add("hidden");
         modal.classList.remove("flex");
         document.body.style.overflow = "";
     }
 
-    function openModal(filterName) {
-        openedFilterName = filterName;
+    // Открывает модалку для выбранного фильтра и передает управление нужному filter-модулю.
+    function openModal(filterButton) {
+        const filterKey = filterButton.dataset.filterKey || "";
+        const filterName = filterButton.dataset.filterName || "Фильтр";
+
+        openedFilterConfig = getCatalogFilterConfig({ filterKey, filterName });
         modalTitle.textContent = filterName;
-        renderModalContent(filterName);
+        renderOpenedFilterModal();
         modal.classList.remove("hidden");
         modal.classList.add("flex");
         document.body.style.overflow = "hidden";
     }
 
-    function buildTentativeFiltersForModal() {
-        if (openedFilterName === "Вид консультации") {
-            return normalizeCatalogFilters({
-                ...catalogRuntimeState.filters,
-                consultation_type: getModalSelectedConsultationType(),
-                topic_ids: catalogRuntimeState.filters.topic_ids,
-            });
+    // Собирает временное состояние фильтров для preview-count по открытому сейчас фильтру.
+    function buildTentativeFiltersForOpenedModal() {
+        if (!openedFilterConfig) {
+            return normalizeCatalogFilters(catalogRuntimeState.filters);
         }
 
-        if (openedFilterName === "Симптомы") {
-            return normalizeCatalogFilters({
-                ...catalogRuntimeState.filters,
-                topic_ids: getModalSelectedTopicIds(),
-            });
-        }
-
-        return normalizeCatalogFilters(catalogRuntimeState.filters);
+        return openedFilterConfig.buildTentativeFilters();
     }
 
-    async function refreshApplyButtonPreview() {
+    // Запрашивает у backend количество результатов для текущего состояния открытой модалки.
+    function refreshApplyButtonPreview() {
         const requestId = ++activePreviewRequestId;
         renderApplyButtonLoading(applyButton);
 
-        try {
-            const previewData = await requestCatalogData({
-                previewOnly: true,
-                filtersOverride: buildTentativeFiltersForModal(),
-            });
-
+        requestCatalogData({
+            previewOnly: true,
+            filtersOverride: buildTentativeFiltersForOpenedModal(),
+        }).then((previewData) => {
             if (requestId !== activePreviewRequestId) return;
             renderApplyButtonWithCount(applyButton, previewData.total_count);
-        } catch (error) {
+        }).catch((error) => {
             if (requestId !== activePreviewRequestId) return;
             console.error("Ошибка preview-count каталога:", error);
             applyButton.textContent = APPLY_RESULTS_LABEL;
-        }
+        });
     }
 
-    function scheduleApplyButtonPreviewRefresh() {
-        if (previewDebounceTimer) {
-            window.clearTimeout(previewDebounceTimer);
-        }
-
+    // Запускает пересчет preview-count с небольшим debounce.
+    // Это уменьшает число лишних запросов, когда пользователь быстро кликает по фильтру.
+    function schedulePreviewRefresh() {
+        clearPreviewRefreshTimer();
         previewDebounceTimer = window.setTimeout(() => {
             refreshApplyButtonPreview();
         }, 180);
     }
 
-    function renderModalContent(filterName) {
-        if (filterName === "Вид консультации") {
-            const consultationTypeChoices = getConsultationTypeChoices();
-            const individualLabel = consultationTypeChoices.individual || "Индивидуальная";
-            const coupleLabel = consultationTypeChoices.couple || "Парная";
-            const activeConsultationType = catalogRuntimeState.filters.consultation_type;
-
-            modalContent.innerHTML = `
-                <div class="space-y-4">
-                    <p class="text-sm text-gray-500 leading-relaxed">
-                        Выберите формат консультации для фильтрации карточек.
-                    </p>
-                    <div id="catalog-consultation-block" class="grid grid-cols-2 gap-3 max-w-md">
-                        <button type="button" data-value="individual" class="catalog-consultation-btn px-4 py-2 rounded-lg border text-base font-medium">
-                            ${escapeHtml(individualLabel)}
-                        </button>
-                        <button type="button" data-value="couple" class="catalog-consultation-btn px-4 py-2 rounded-lg border text-base font-medium">
-                            ${escapeHtml(coupleLabel)}
-                        </button>
-                    </div>
-                    <div id="catalog-consultation-hidden-inputs" class="hidden"></div>
-                    <p class="text-xs text-gray-400">
-                        Можно оставить оба варианта невыбранными — это режим "все специалисты".
-                    </p>
-                </div>
-            `;
-
-            // Для каталога нужен сценарий "выбрать 1 вариант или снять выбор совсем".
-            // Именно поэтому используем уже существующий multi-toggle с maxSelected=1.
-            initMultiToggle({
-                containerSelector: "#catalog-consultation-block",
-                buttonSelector: ".catalog-consultation-btn",
-                hiddenInputsContainerSelector: "#catalog-consultation-hidden-inputs",
-                inputName: "consultation_type",
-                initialValues: activeConsultationType ? [activeConsultationType] : [],
-                maxSelected: 1,
-            });
-
-            const consultationBlock = document.getElementById("catalog-consultation-block");
-            if (consultationBlock) {
-                consultationBlock.addEventListener("click", (event) => {
-                    if (!event.target.closest(".catalog-consultation-btn")) return;
-
-                    window.requestAnimationFrame(() => {
-                        scheduleApplyButtonPreviewRefresh();
-                    });
-                });
-            }
-
-            scheduleApplyButtonPreviewRefresh();
+    // Отрисовывает контент для открытого фильтра.
+    // Если конкретный фильтр еще не подключен, показываем стандартную заглушку.
+    function renderOpenedFilterModal() {
+        if (!openedFilterConfig) {
+            modalContent.innerHTML = buildUnsupportedFilterHtml();
+            applyButton.textContent = APPLY_RESULTS_LABEL;
             return;
         }
 
-        if (filterName === "Симптомы") {
-            const selectedTopicIds = normalizeTopicIds(catalogRuntimeState.filters.topic_ids);
-            modalContent.innerHTML = buildTopicsModalHtml(selectedTopicIds);
-
-            initCollapsibleTopicGroups({
-                rootSelector: "#catalog-topic-groups-root",
-                visibleCount: 0,
-            });
-
-            const topicsRoot = document.getElementById("catalog-topic-groups-root");
-            if (topicsRoot) {
-                topicsRoot.addEventListener("change", (event) => {
-                    if (!event.target.closest(".catalog-topic-checkbox")) return;
-                    scheduleApplyButtonPreviewRefresh();
-                });
-            }
-
-            scheduleApplyButtonPreviewRefresh();
-            return;
-        }
-
-        modalContent.innerHTML = `
-            <p class="text-sm text-gray-500 leading-relaxed">
-                Этот фильтр будет подключен на следующем шаге. Сейчас можно закрыть модалку.
-            </p>
-        `;
-        applyButton.textContent = APPLY_RESULTS_LABEL;
+        openedFilterConfig.renderModal({
+            modalContent,
+            schedulePreviewRefresh,
+        });
+        schedulePreviewRefresh();
     }
 
-    async function applyCurrentFilter() {
-        if (openedFilterName === "Вид консультации") {
-            const isApplied = await applyCatalogFilters({
-                consultation_type: getModalSelectedConsultationType(),
-            });
-            if (isApplied) closeModal();
+    // Применяет изменения из открытой модалки к каталогу.
+    async function applyOpenedFilter() {
+        if (!openedFilterConfig) {
+            closeModal();
             return;
         }
 
-        if (openedFilterName === "Симптомы") {
-            const isApplied = await applyCatalogFilters({
-                topic_ids: getModalSelectedTopicIds(),
-            });
-            if (isApplied) closeModal();
-            return;
+        const isApplied = await applyCatalogFilters(openedFilterConfig.readModalFilters());
+        if (isApplied) {
+            closeModal();
         }
-
-        closeModal();
     }
 
     filterButtons.forEach((button) => {
         button.addEventListener("click", () => {
-            openModal(button.dataset.filterName || "Фильтр");
+            openModal(button);
         });
     });
 
     modalOverlay.addEventListener("click", closeModal);
     closeButton.addEventListener("click", closeModal);
-    applyButton.addEventListener("click", applyCurrentFilter);
+    applyButton.addEventListener("click", applyOpenedFilter);
 
     document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && !modal.classList.contains("hidden")) {
@@ -856,12 +628,7 @@ function initCatalogFiltersModal() {
     });
 }
 
-/**
- * Инициализирует кнопку "Показать еще".
- *
- * Здесь уже нет GET-параметров partial/order_key/filter в URL.
- * Вместо этого фронтенд отправляет POST с текущим состоянием каталога.
- */
+// Инициализирует кнопку "Показать еще" для догрузки следующих страниц каталога.
 function initLoadMore() {
     const grid = document.getElementById("catalog-cards-grid");
     const loadMoreButton = getLoadMoreButton();
@@ -896,9 +663,7 @@ function initLoadMore() {
     });
 }
 
-/**
- * Инициализирует кнопку "Вернуться в начало".
- */
+// Инициализирует кнопку "В начало".
 function initScrollToTopButton() {
     const scrollTopButton = document.getElementById("catalog-scroll-top-btn");
     if (!scrollTopButton) return;
@@ -908,16 +673,8 @@ function initScrollToTopButton() {
     });
 }
 
-/**
- * Включает сохранение состояния каталога перед переходом в detail.
- *
- * Что сохраняем:
- * - текущую страницу каталога;
- * - active filters;
- * - random order key;
- * - anchor карточки, по которой перешли;
- * - текущую прокрутку страницы.
- */
+// Сохраняет состояние каталога перед переходом в detail.
+// Это нужно, чтобы потом можно было вернуть пользователя на тот же набор карточек и к той же позиции.
 function initCatalogStatePersistence() {
     document.addEventListener("click", (event) => {
         const detailLink = event.target.closest("[data-catalog-detail-link]");
@@ -929,16 +686,8 @@ function initCatalogStatePersistence() {
     });
 }
 
-/**
- * Пытается восстановить каталог после возврата из detail.
- *
- * Важное бизнес-правило:
- * - если пользователь открыл каталог заново, а не вернулся из detail,
- *   старое состояние удаляем и НЕ применяем.
- *
- * То есть restore работает только по одноразовому флагу,
- * который detail-страница ставит перед fallback-возвратом.
- */
+// Пытается восстановить каталог после возврата из detail.
+// Если пользователь открыл каталог заново, а не вернулся назад из detail, старое состояние очищаем и не применяем.
 async function restoreCatalogIfNeeded() {
     const shouldRestore = consumeCatalogRestorePending();
     const storedState = readCatalogState();
@@ -995,6 +744,8 @@ async function restoreCatalogIfNeeded() {
     }
 }
 
+// Общая точка инициализации страницы каталога.
+// Здесь запускаем весь page-level функционал в правильном порядке.
 async function bootstrapCatalogPage() {
     hydrateRuntimeStateFromDom();
     renderCurrentPageIndicator(catalogRuntimeState.current_page, catalogRuntimeState.total_pages);
