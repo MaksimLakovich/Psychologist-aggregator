@@ -1,10 +1,13 @@
 import random
 from urllib.parse import urlencode
+
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Case, IntegerField, Value, When
 from django.template.loader import render_to_string
 from django.urls import reverse
-from aggregator._web.services.basic_filter_catalog import apply_catalog_basic_filters, extract_consultation_type, extract_topic_ids
+
+from aggregator._web.services.basic_filter_catalog import (
+    apply_catalog_basic_filters, extract_consultation_type, extract_topic_ids)
 from core.constants import CARDS_PER_PAGE
 from core.services.experience_label import build_experience_label
 from users.models import PsychologistProfile

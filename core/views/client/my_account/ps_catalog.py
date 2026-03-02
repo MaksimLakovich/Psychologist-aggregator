@@ -1,4 +1,5 @@
 import json
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -7,10 +8,15 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import TemplateView
 from django_ratelimit.decorators import ratelimit
-from aggregator._web.services.basic_filter_catalog import CONSULTATION_TYPE_CHOICES
+
+from aggregator._web.services.basic_filter_catalog import \
+    CONSULTATION_TYPE_CHOICES
 from core.services.experience_label import build_experience_label
-from core.services.mixins_ps_catalog import CatalogBackLinkMixin, CatalogLayoutModeMixin, CatalogPageDataMixin
-from core.services.topic_groups import build_topics_grouped_by_type, serialize_topics_grouped_by_type
+from core.services.mixins_ps_catalog import (CatalogBackLinkMixin,
+                                             CatalogLayoutModeMixin,
+                                             CatalogPageDataMixin)
+from core.services.topic_groups import (build_topics_grouped_by_type,
+                                        serialize_topics_grouped_by_type)
 from users.models import PsychologistProfile
 
 

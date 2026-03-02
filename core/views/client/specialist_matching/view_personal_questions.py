@@ -2,7 +2,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.generic.edit import FormView
-from core.forms.client.specialist_matching.form_personal_questions import ClientPersonalQuestionsForm
+
+from core.forms.client.specialist_matching.form_personal_questions import \
+    ClientPersonalQuestionsForm
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 from core.services.topic_groups import build_topics_grouped_by_type
 from users.models import ClientProfile, Method

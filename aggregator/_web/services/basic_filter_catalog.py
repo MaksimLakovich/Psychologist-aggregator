@@ -1,5 +1,7 @@
-from aggregator._web.selectors.psychologist_selectors import filter_by_topic_type
-from aggregator._web.services.topic_type_mapping import CLIENT_TO_TOPIC_TYPE_MAP
+from aggregator._web.selectors.psychologist_selectors import \
+    filter_by_topic_type
+from aggregator._web.services.topic_type_mapping import \
+    CLIENT_TO_TOPIC_TYPE_MAP
 
 # Используем уже существующий mapping-слой как единый источник истины для допустимых ключей фильтра "Вид консультации"
 CONSULTATION_TYPE_CHOICES = CLIENT_TO_TOPIC_TYPE_MAP
