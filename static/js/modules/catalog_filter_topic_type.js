@@ -59,7 +59,7 @@ export function getCatalogTopicTypeModalValue({ readJsonScript }) {
     return normalizeCatalogTopicType(hiddenInput ? hiddenInput.value : null, { readJsonScript });
 }
 
-// 6) Фукция собирает временное состояние фильтров для preview-count.
+// 6) Функция собирает временное состояние фильтров для preview-count.
 // Это нужно, когда пользователь только переключает кнопки в модалке, но еще не нажал "Показать результаты".
 export function buildCatalogTopicTypeTentativeFilters({
     catalogRuntimeState,
