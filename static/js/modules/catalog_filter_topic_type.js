@@ -4,19 +4,19 @@ import { initMultiToggle } from "./toggle_group_multi_choice.js";
  * Фильтр для каталога "ВИД КОНСУЛЬТАЦИИ" (фильтр по типу тем - "Индивидуальная/Парная").
  *
  * Бизнес-задача этого файла:
- * - отрисовать модалку фильтра "Вид консультации";
- * - прочитать и нормализовать выбранное значение;
- * - дать странице каталога готовые функции для preview и применения фильтра.
+ * - показать пользователю модалку выбора формата консультации;
+ * - понять, выбрал ли пользователь "Индивидуальная", "Парная" или оставил поиск без ограничения;
+ * - передать странице каталога готовые функции для preview-count, применения фильтра и подсветки кнопки фильтра.
  */
 
 export const CATALOG_TOPIC_TYPE_FILTER_KEY = "consultation_type";
 export const CATALOG_TOPIC_TYPE_FILTER_NAME = "Вид консультации";
 
+// Кешируем справочник вариантов, чтобы не читать один и тот же json_script много раз за жизнь страницы.
 let cachedConsultationTypeChoices = null;
 
-
-// 1) Функция читает справочник вариантов вида консультации из json_script.
-// Это единый источник истины для подписей кнопок в модалке.
+// Читает с backend справочник доступных значений фильтра "Вид консультации".
+// Простыми словами: именно отсюда берем, какие варианты вообще можно показать пользователю в модалке.
 export function getCatalogTopicTypeChoices({ readJsonScript }) {
     if (cachedConsultationTypeChoices !== null) {
         return cachedConsultationTypeChoices;
@@ -27,8 +27,8 @@ export function getCatalogTopicTypeChoices({ readJsonScript }) {
     return cachedConsultationTypeChoices;
 }
 
-// 2) Функция нормализует входное значение фильтра "Вид консультации".
-// Если значение невалидно, возвращаем null, то есть режим "показать всех".
+// Приводит входное значение фильтра к допустимому состоянию каталога.
+// Если пришло некорректное значение, возвращаем null, чтобы каталог работал в безопасном режиме "без фильтра по виду консультации" и показывал всех специалистов.
 export function normalizeCatalogTopicType(rawValue, { readJsonScript }) {
     if (typeof rawValue !== "string") return null;
 
@@ -36,8 +36,8 @@ export function normalizeCatalogTopicType(rawValue, { readJsonScript }) {
     return Object.prototype.hasOwnProperty.call(choices, rawValue) ? rawValue : null;
 }
 
-// 3) Функция возвращает русскую подпись типа консультации по его техническому ключу.
-// Это нужно второму фильтру "Симптомы", чтобы понять, какие группы тем показывать в модалке.
+// Возвращает человекочитаемую подпись вида консультации по его техническому ключу.
+// Эта логика относится именно к справочнику "Вид консультации", поэтому она живет здесь и переиспользуется, например, фильтром "Симптомы".
 export function resolveCatalogTopicTypeLabel(consultationType, { readJsonScript }) {
     if (!consultationType) return null;
 
@@ -46,41 +46,15 @@ export function resolveCatalogTopicTypeLabel(consultationType, { readJsonScript 
     return typeof rawLabel === "string" ? rawLabel : null;
 }
 
-// 4) Функция проверяет, активен ли фильтр "Вид консультации".
-// Если значение выбрано, чип фильтра на странице должен подсветиться.
+// Проверяет, применен ли сейчас фильтр "Вид консультации" в каталоге.
+// Если функция возвращает true, страница понимает, что кнопка фильтра в каталоге должна подсветиться как активная.
 export function isCatalogTopicTypeFilterActive(filters, { readJsonScript }) {
     return Boolean(normalizeCatalogTopicType(filters?.consultation_type, { readJsonScript }));
 }
 
-// 5) Функция читает текущее выбранное значение фильтра прямо из открытой модалки.
-// Если активных кнопок нет, возвращаем null.
-export function getCatalogTopicTypeModalValue({ readJsonScript }) {
-    const hiddenInput = document.querySelector("#catalog-consultation-hidden-inputs input");
-    return normalizeCatalogTopicType(hiddenInput ? hiddenInput.value : null, { readJsonScript });
-}
-
-// 6) Функция собирает временное состояние фильтров для preview-count.
-// Это нужно, когда пользователь только переключает кнопки в модалке, но еще не нажал "Показать результаты".
-export function buildCatalogTopicTypeTentativeFilters({
-    catalogRuntimeState,
-    normalizeCatalogFilters,
-    readJsonScript,
-}) {
-    return normalizeCatalogFilters({
-        ...catalogRuntimeState.filters,
-        consultation_type: getCatalogTopicTypeModalValue({ readJsonScript }),
-        topic_ids: catalogRuntimeState.filters.topic_ids,
-    });
-}
-
-/**
- * Рендерит HTML модалки фильтра "Вид консультации".
- *
- * Бизнес-логика:
- * - показываем 2 кнопки: "Индивидуальная" и "Парная";
- * - можно выбрать одну кнопку или снять выбор совсем;
- * - после каждого изменения просим страницу пересчитать preview-count.
- */
+// Рендерит HTML модалки фильтра "Вид консультации"
+// Рисует содержимое модального окна для фильтра "Вид консультации" и подключает его поведение.
+// Бизнес-смысл: дать пользователю выбрать один формат консультации или снять выбор совсем, чтобы вернуться в режим "показывать всех специалистов".
 export function renderCatalogTopicTypeModal({
     modalContent,
     catalogRuntimeState,
@@ -116,8 +90,8 @@ export function renderCatalogTopicTypeModal({
         </div>
     `;
 
-    // 1) Для каталога нужен сценарий "выбрать 1 вариант или снять выбор совсем".
-    // Именно поэтому используем уже существующий multi-toggle с maxSelected=1.
+    // Для каталога нужен сценарий "выбрать 1 вариант или снять выбор совсем".
+    // Простыми словами: пользователь может включить фильтр, поменять его или полностью убрать ограничение.
     initMultiToggle({
         containerSelector: "#catalog-consultation-block",
         buttonSelector: ".catalog-consultation-btn",
@@ -138,5 +112,29 @@ export function renderCatalogTopicTypeModal({
         window.requestAnimationFrame(() => {
             schedulePreviewRefresh();
         });
+    });
+}
+
+// Читает текущее выбранное значение прямо из открытой модалки фильтра.
+// Если в модалке сейчас ничего не выбрано, возвращаем null, чтобы страница понимала: пользователь оставил каталог без ограничения по виду консультации.
+// Зачем это нужно:
+// 1) чтобы при нажатии Показать результаты страница поняла, какой именно фильтр надо применить;
+// 2) и чтобы еще до нажатия кнопки можно было посчитать preview-count.
+export function getCatalogTopicTypeModalValue({ readJsonScript }) {
+    const hiddenInput = document.querySelector("#catalog-consultation-hidden-inputs input");
+    return normalizeCatalogTopicType(hiddenInput ? hiddenInput.value : null, { readJsonScript });
+}
+
+// Собирает временное состояние фильтров, которое нужно только для preview-count в кнопке "Показать результаты".
+// Простыми словами: пользователь еще не применил фильтр к каталогу, но мы уже можем посчитать, сколько специалистов будет найдено при текущем выборе в модалке.
+export function buildCatalogTopicTypeTentativeFilters({
+    catalogRuntimeState,
+    normalizeCatalogFilters,
+    readJsonScript,
+}) {
+    return normalizeCatalogFilters({
+        ...catalogRuntimeState.filters,
+        consultation_type: getCatalogTopicTypeModalValue({ readJsonScript }),
+        topic_ids: catalogRuntimeState.filters.topic_ids,
     });
 }
