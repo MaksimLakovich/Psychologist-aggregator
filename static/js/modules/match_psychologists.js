@@ -57,8 +57,8 @@ export function initMatchPsychologists() {
                     wrap.className = "avatar avatar-placeholder";
 
                     wrap.innerHTML = `
-                        <div class="relative font-medium tracking-wide text-gray-500 bg-white inline-flex w-auto
-                            rounded-full border-2 border-white items-center justify-center max-w-xs p-2">
+                        <div class="relative font-medium tracking-wide text-gray-500 bg-transparent inline-flex w-auto
+                            rounded-full items-center justify-center max-w-xs p-2">
                             <span><strong>${count}</strong> ${word} могут вам подойти</span>
                         </div>
                     `;
