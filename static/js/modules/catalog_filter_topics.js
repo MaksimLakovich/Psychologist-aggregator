@@ -2,26 +2,26 @@ import { initCollapsibleTopicGroups } from "./collapsible_topics_list.js";
 import { resolveCatalogTopicTypeLabel } from "./catalog_filter_topic_type.js";
 
 /**
- * Модуль фильтра каталога "Симптомы".
+ * Фильтр каталога "Симптомы".
  *
  * Бизнес-задача этого файла:
- * - отрисовать модалку сгруппированных тем с чекбоксами;
- * - прочитать и нормализовать выбранные topic-id;
- * - переиспользовать уже существующую UI-логику grouped topics;
- * - дать странице каталога готовые функции для preview и применения фильтра.
+ * - показать пользователю модалку со сгруппированными симптомами и запросами;
+ * - понять, какие темы пользователь выбрал для поиска психолога;
+ * - согласовать фильтр "Симптомы" с фильтром "Вид консультации";
+ * - передать странице каталога готовые функции для preview-count, применения фильтра и подсветки кнопки фильтра.
  */
 
 export const CATALOG_TOPICS_FILTER_KEY = "topic_ids";
 export const CATALOG_TOPICS_FILTER_NAME = "Симптомы";
 
+// Кешируем подготовленные данные тем, чтобы не читать один и тот же json_script много раз за жизнь страницы.
 let cachedTopicsByType = null;
+
+// Кешируем словарь "topic_id -> вид консультации", чтобы быстро согласовывать фильтр "Симптомы" с фильтром "Вид консультации".
 let cachedTopicIdToTypeMap = null;
 
-/**
- * Читает сгруппированные темы из json_script.
- *
- * Это данные, которые backend уже подготовил для модалки фильтра.
- */
+// Читает с backend уже сгруппированные темы для модалки фильтра "Симптомы".
+// Простыми словами: именно отсюда берем все разделы, группы и названия тем, которые показываем пользователю.
 export function getCatalogTopicsByType({ readJsonScript }) {
     if (cachedTopicsByType !== null) {
         return cachedTopicsByType;
@@ -32,12 +32,30 @@ export function getCatalogTopicsByType({ readJsonScript }) {
     return cachedTopicsByType;
 }
 
-/**
- * Строит быстрый словарь "topic_id -> вид консультации".
- *
- * Это нужно, чтобы при выбранном фильтре "Вид консультации"
- * автоматически отбрасывать темы другого типа.
- */
+// Приводит выбранные topic-id к чистому и безопасному виду.
+// Простыми словами: оставляем только корректные id тем, убираем дубли и получаем предсказуемый набор значений для каталога и backend.
+export function normalizeCatalogTopicIds(rawValues) {
+    if (!Array.isArray(rawValues)) return [];
+
+    const normalizedTopicIds = [];
+    const seenTopicIds = new Set();
+
+    rawValues.forEach((rawValue) => {
+        const parsedValue = Number.parseInt(String(rawValue), 10);
+        if (!Number.isInteger(parsedValue) || parsedValue <= 0) return;
+
+        const normalizedValue = String(parsedValue);
+        if (seenTopicIds.has(normalizedValue)) return;
+
+        seenTopicIds.add(normalizedValue);
+        normalizedTopicIds.push(normalizedValue);
+    });
+
+    return normalizedTopicIds;
+}
+
+// Строит быстрый словарь "topic_id -> к какому виду консультации относится тема".
+// Это нужно, чтобы фильтр "Симптомы" не оставлял темы, которые противоречат уже выбранному фильтру "Вид консультации".
 export function getCatalogTopicIdToTypeMap({ readJsonScript }) {
     if (cachedTopicIdToTypeMap !== null) {
         return cachedTopicIdToTypeMap;
@@ -59,40 +77,8 @@ export function getCatalogTopicIdToTypeMap({ readJsonScript }) {
     return cachedTopicIdToTypeMap;
 }
 
-/**
- * Нормализует список topic-id.
- *
- * Что делаем:
- * - оставляем только положительные целые id;
- * - убираем дубли;
- * - возвращаем список строк в стабильном порядке.
- */
-export function normalizeCatalogTopicIds(rawValues) {
-    if (!Array.isArray(rawValues)) return [];
-
-    const normalizedTopicIds = [];
-    const seenTopicIds = new Set();
-
-    rawValues.forEach((rawValue) => {
-        const parsedValue = Number.parseInt(String(rawValue), 10);
-        if (!Number.isInteger(parsedValue) || parsedValue <= 0) return;
-
-        const normalizedValue = String(parsedValue);
-        if (seenTopicIds.has(normalizedValue)) return;
-
-        seenTopicIds.add(normalizedValue);
-        normalizedTopicIds.push(normalizedValue);
-    });
-
-    return normalizedTopicIds;
-}
-
-/**
- * Оставляет только те темы, которые соответствуют выбранному виду консультации.
- *
- * Если фильтр "Вид консультации" не выбран,
- * возвращаем все выбранные темы без изменений.
- */
+// Оставляет только те темы, которые подходят выбранному виду консультации.
+// Если фильтр "Вид консультации" не выбран, ничего не отбрасываем и оставляем все отмеченные темы.
 export function filterCatalogTopicIdsByConsultationType({
     topicIds,
     consultationType,
@@ -106,29 +92,21 @@ export function filterCatalogTopicIdsByConsultationType({
     return normalizedTopicIds.filter((topicId) => topicIdToTypeMap[topicId] === topicTypeLabel);
 }
 
-/**
- * Проверяет, активен ли фильтр "Симптомы".
- *
- * Если выбран хотя бы один topic-id, чип фильтра на странице должен подсветиться.
- */
+// Проверяет, применен ли сейчас фильтр "Симптомы" в каталоге.
+// Если функция возвращает true, страница понимает, что кнопка фильтра "Симптомы" должна подсветиться как активная.
 export function isCatalogTopicsFilterActive(filters) {
     return normalizeCatalogTopicIds(filters?.topic_ids).length > 0;
 }
 
-/**
- * Читает выбранные topic-id из открытой модалки.
- */
+// Читает из открытой модалки, какие симптомы пользователь отметил чекбоксами прямо сейчас.
+// Это нужно и для применения фильтра, и для предварительного подсчета количества найденных специалистов.
 export function getCatalogTopicsModalValues() {
     const checkboxes = document.querySelectorAll("#catalog-topic-groups-root .catalog-topic-checkbox:checked");
     return normalizeCatalogTopicIds(Array.from(checkboxes).map((checkbox) => checkbox.value));
 }
 
-/**
- * Возвращает список разделов тем, которые надо показать в модалке.
- *
- * Если выбран вид консультации, показываем только его темы.
- * Если вид не выбран, показываем темы обоих видов.
- */
+// Определяет, какие разделы тем нужно показать пользователю в модалке.
+// Если уже выбран фильтр "Вид консультации", показываем только подходящие темы; если не выбран, показываем все доступные разделы.
 function getVisibleTopicTypeLabels({ catalogRuntimeState, readJsonScript }) {
     const selectedConsultationType = catalogRuntimeState.filters.consultation_type;
     const selectedTopicTypeLabel = resolveCatalogTopicTypeLabel(selectedConsultationType, { readJsonScript });
@@ -141,14 +119,8 @@ function getVisibleTopicTypeLabels({ catalogRuntimeState, readJsonScript }) {
     return Object.keys(topicsByType);
 }
 
-/**
- * Собирает HTML модалки фильтра "Симптомы".
- *
- * Здесь переиспользуем уже знакомую структуру grouped topics:
- * - заголовок группы;
- * - список чекбоксов;
- * - кнопка "Ещё".
- */
+// Собирает HTML содержимого модалки фильтра "Симптомы".
+// Простыми словами: превращает подготовленные backend-данные в удобный список групп и чекбоксов, который пользователь видит в интерфейсе.
 export function buildTopicsModalHtml({
     selectedTopicIds,
     catalogRuntimeState,
@@ -232,12 +204,8 @@ export function buildTopicsModalHtml({
     `;
 }
 
-/**
- * Собирает временное состояние фильтров для preview-count.
- *
- * Это нужно, когда пользователь отмечает чекбоксы в модалке,
- * но еще не нажал "Показать результаты".
- */
+// Собирает временное состояние фильтров только для preview-count в кнопке "Показать результаты".
+// Простыми словами: пользователь еще не применил фильтр к каталогу, но мы уже можем посчитать, сколько специалистов будет найдено при текущем выборе чекбоксов.
 export function buildCatalogTopicsTentativeFilters({
     catalogRuntimeState,
     normalizeCatalogFilters,
@@ -248,12 +216,8 @@ export function buildCatalogTopicsTentativeFilters({
     });
 }
 
-/**
- * Рендерит модалку фильтра "Симптомы" и подключает ее поведение.
- *
- * На странице каталога показываем все темы группы сразу,
- * поэтому visibleCount=0 в reusable-модуле grouped topics.
- */
+// Рисует модалку фильтра "Симптомы" и подключает ее поведение.
+// Бизнес-смысл: показать пользователю все нужные группы тем, дать отмечать чекбоксы и после каждого изменения пересчитывать preview-count.
 export function renderCatalogTopicsModal({
     modalContent,
     catalogRuntimeState,
@@ -269,6 +233,7 @@ export function renderCatalogTopicsModal({
         readJsonScript,
     });
 
+    // Для каталога показываем все темы группы сразу, поэтому visibleCount=0.
     initCollapsibleTopicGroups({
         rootSelector: "#catalog-topic-groups-root",
         visibleCount: 0,
