@@ -6,6 +6,7 @@ import {
     toPositiveInt,
     writeCatalogState,
 } from "../modules/catalog_state.js";
+import { initCollapsibleTopicGroups } from "../modules/collapsible_topics_list.js";
 import { initMultiToggle } from "../modules/toggle_group_multi_choice.js";
 import { pluralizeRu } from "../utils/pluralize_ru.js";
 
@@ -25,6 +26,7 @@ import { pluralizeRu } from "../utils/pluralize_ru.js";
  */
 
 const APPLY_RESULTS_LABEL = "Показать результаты";
+const PREVIEW_RESULTS_LABEL = "Считаем результаты...";
 
 /**
  * Здесь держим текущее рабочее состояние каталога.
@@ -43,11 +45,25 @@ const catalogRuntimeState = {
     scroll_y: 0,
     filters: {
         consultation_type: null,
+        topic_ids: [],
     },
 };
 
 let cachedConsultationTypeChoices = null;
-let cachedConsultationTypeCounts = null;
+let cachedTopicsByType = null;
+let cachedTopicIdToTypeMap = null;
+let activePreviewRequestId = 0;
+
+function escapeHtml(value) {
+    const sourceValue = String(value ?? "");
+
+    return sourceValue
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll("\"", "&quot;")
+        .replaceAll("'", "&#39;");
+}
 
 /**
  * Безопасно читает JSON из script-тега.
@@ -63,12 +79,6 @@ function readJsonScript(id, fallback) {
     }
 }
 
-/**
- * Возвращает mapping вариантов вида консультации.
- *
- * Источник истины приходит с backend,
- * чтобы не дублировать справочник на frontend.
- */
 function getConsultationTypeChoices() {
     if (cachedConsultationTypeChoices !== null) {
         return cachedConsultationTypeChoices;
@@ -79,40 +89,35 @@ function getConsultationTypeChoices() {
     return cachedConsultationTypeChoices;
 }
 
-/**
- * Возвращает предрассчитанные количества карточек для фильтра "Вид консультации".
- */
-function getConsultationTypeCounts() {
-    if (cachedConsultationTypeCounts !== null) {
-        return cachedConsultationTypeCounts;
+function getCatalogTopicsByType() {
+    if (cachedTopicsByType !== null) {
+        return cachedTopicsByType;
     }
 
-    const rawCounts = readJsonScript("catalog-consultation-type-counts-data", {});
-    cachedConsultationTypeCounts = normalizeConsultationTypeCounts(rawCounts);
-    return cachedConsultationTypeCounts;
+    const rawTopics = readJsonScript("catalog-topics-by-type-data", {});
+    cachedTopicsByType = rawTopics && typeof rawTopics === "object" ? rawTopics : {};
+    return cachedTopicsByType;
 }
 
-/**
- * Приводит счетчики фильтра к безопасному виду.
- *
- * Пример результата:
- * {
- *   all: 40,
- *   individual: 39,
- *   couple: 4,
- * }
- */
-function normalizeConsultationTypeCounts(rawCounts) {
-    const parseCount = (value) => {
-        const parsed = Number.parseInt(String(value), 10);
-        return Number.isInteger(parsed) && parsed >= 0 ? parsed : 0;
-    };
+function getTopicIdToTypeMap() {
+    if (cachedTopicIdToTypeMap !== null) {
+        return cachedTopicIdToTypeMap;
+    }
 
-    return {
-        all: parseCount(rawCounts?.all),
-        individual: parseCount(rawCounts?.individual),
-        couple: parseCount(rawCounts?.couple),
-    };
+    const topicIdToTypeMap = {};
+    const topicsByType = getCatalogTopicsByType();
+
+    Object.entries(topicsByType).forEach(([topicTypeLabel, groups]) => {
+        Object.values(groups || {}).forEach((topics) => {
+            (topics || []).forEach((topic) => {
+                if (!topic?.id) return;
+                topicIdToTypeMap[String(topic.id)] = topicTypeLabel;
+            });
+        });
+    });
+
+    cachedTopicIdToTypeMap = topicIdToTypeMap;
+    return cachedTopicIdToTypeMap;
 }
 
 /**
@@ -127,16 +132,50 @@ function normalizeConsultationType(rawValue) {
     return Object.prototype.hasOwnProperty.call(choices, rawValue) ? rawValue : null;
 }
 
-/**
- * Собирает объект фильтров каталога в едином формате.
- *
- * Это задел под следующие фильтры:
- * сейчас внутри только consultation_type,
- * позже сюда аккуратно добавятся topics, methods, gender, age и так далее.
- */
+function normalizeTopicIds(rawValues) {
+    if (!Array.isArray(rawValues)) return [];
+
+    const normalizedTopicIds = [];
+    const seenTopicIds = new Set();
+
+    rawValues.forEach((rawValue) => {
+        const parsedValue = Number.parseInt(String(rawValue), 10);
+        if (!Number.isInteger(parsedValue) || parsedValue <= 0) return;
+
+        const normalizedValue = String(parsedValue);
+        if (seenTopicIds.has(normalizedValue)) return;
+
+        seenTopicIds.add(normalizedValue);
+        normalizedTopicIds.push(normalizedValue);
+    });
+
+    return normalizedTopicIds;
+}
+
+function resolveTopicTypeLabel(consultationType) {
+    if (!consultationType) return null;
+
+    const choices = getConsultationTypeChoices();
+    const rawLabel = choices[consultationType];
+    return typeof rawLabel === "string" ? rawLabel : null;
+}
+
+function filterTopicIdsByConsultationType(topicIds, consultationType) {
+    const normalizedTopicIds = normalizeTopicIds(topicIds);
+    const topicTypeLabel = resolveTopicTypeLabel(consultationType);
+    if (!topicTypeLabel) return normalizedTopicIds;
+
+    const topicIdToTypeMap = getTopicIdToTypeMap();
+    return normalizedTopicIds.filter((topicId) => topicIdToTypeMap[topicId] === topicTypeLabel);
+}
+
 function normalizeCatalogFilters(rawFilters = {}) {
+    const consultationType = normalizeConsultationType(rawFilters?.consultation_type);
+    const topicIds = filterTopicIdsByConsultationType(rawFilters?.topic_ids, consultationType);
+
     return {
-        consultation_type: normalizeConsultationType(rawFilters?.consultation_type),
+        consultation_type: consultationType,
+        topic_ids: topicIds,
     };
 }
 
@@ -158,37 +197,81 @@ function resolveCatalogFilterEndpoint() {
     return loadMoreButton?.dataset.filterEndpoint || "";
 }
 
-/**
- * Возвращает выбранное значение в модалке "Вид консультации".
- *
- * Если активных кнопок нет, возвращаем null,
- * то есть режим "показать всех".
- */
-function getModalSelectedConsultationType() {
-    const hiddenInput = document.querySelector("#catalog-consultation-hidden-inputs input");
-    return normalizeConsultationType(hiddenInput ? hiddenInput.value : null);
+function buildCatalogRequestHeaders() {
+    return {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": window.CSRF_TOKEN || "",
+    };
+}
+
+async function requestCatalogData({
+    page = 1,
+    orderKey = null,
+    restoreMode = false,
+    previewOnly = false,
+    filtersOverride = null,
+} = {}) {
+    const endpoint = resolveCatalogFilterEndpoint();
+    if (!endpoint) {
+        throw new Error("catalog_filter_endpoint_missing");
+    }
+
+    const response = await fetch(endpoint, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: buildCatalogRequestHeaders(),
+        body: JSON.stringify({
+            filters: normalizeCatalogFilters(filtersOverride || catalogRuntimeState.filters),
+            page,
+            order_key: orderKey,
+            restore_mode: restoreMode,
+            preview_only: previewOnly,
+            layout_mode: catalogRuntimeState.layout_mode,
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.status !== "ok") {
+        throw new Error("invalid_catalog_response");
+    }
+
+    return data;
 }
 
 /**
  * Перерисовывает кнопку "Показать результаты" с количеством найденных специалистов.
  */
-function renderApplyButtonWithCount(applyButton, selectedConsultationType) {
+function renderApplyButtonWithCount(applyButton, totalCount) {
     if (!applyButton) return;
 
-    const counts = getConsultationTypeCounts();
-    const countKey = selectedConsultationType || "all";
-    const selectedCount = counts[countKey] ?? counts.all ?? 0;
+    const safeCount = toNonNegativeInt(totalCount, 0);
     const specialistWord = pluralizeRu(
-        selectedCount,
-        "специалист",
-        "специалиста",
-        "специалистов",
+        safeCount,
+        "терапевт",
+        "терапевта",
+        "терапевтов",
     );
 
     applyButton.innerHTML = `
         ${APPLY_RESULTS_LABEL}
         <span class="block mt-1 text-xs font-medium text-indigo-100">
-            Найдено: ${selectedCount} ${specialistWord}
+            Найдено: ${safeCount} ${specialistWord}
+        </span>
+    `;
+}
+
+function renderApplyButtonLoading(applyButton) {
+    if (!applyButton) return;
+
+    applyButton.innerHTML = `
+        ${APPLY_RESULTS_LABEL}
+        <span class="block mt-1 text-xs font-medium text-indigo-100">
+            ${PREVIEW_RESULTS_LABEL}
         </span>
     `;
 }
@@ -201,14 +284,20 @@ function renderApplyButtonWithCount(applyButton, selectedConsultationType) {
  * - если фильтр снят, кнопка возвращается к обычному виду.
  */
 function renderFilterChipStates() {
-    const consultationChip = document.querySelector('[data-filter-chip][data-filter-key="consultation_type"]');
-    if (!consultationChip) return;
+    const filterStates = {
+        consultation_type: Boolean(catalogRuntimeState.filters.consultation_type),
+        topic_ids: normalizeTopicIds(catalogRuntimeState.filters.topic_ids).length > 0,
+    };
 
-    const isActive = Boolean(catalogRuntimeState.filters.consultation_type);
-    consultationChip.classList.toggle("bg-indigo-200/40", isActive);
-    consultationChip.classList.toggle("text-indigo-700", isActive);
-    consultationChip.classList.toggle("bg-slate-200/40", !isActive);
-    consultationChip.classList.toggle("text-slate-600", !isActive);
+    Object.entries(filterStates).forEach(([filterKey, isActive]) => {
+        const chip = document.querySelector(`[data-filter-chip][data-filter-key="${filterKey}"]`);
+        if (!chip) return;
+
+        chip.classList.toggle("bg-indigo-200/40", isActive);
+        chip.classList.toggle("text-indigo-700", isActive);
+        chip.classList.toggle("bg-slate-200/40", !isActive);
+        chip.classList.toggle("text-slate-600", !isActive);
+    });
 }
 
 /**
@@ -320,7 +409,10 @@ function hydrateRuntimeStateFromDom() {
     catalogRuntimeState.current_page = toPositiveInt(loadMoreButton.dataset.currentPage, 1);
     catalogRuntimeState.total_pages = toNonNegativeInt(loadMoreButton.dataset.totalPages, 0);
     catalogRuntimeState.order_key = toNonNegativeInt(loadMoreButton.dataset.randomOrderKey, null);
-    catalogRuntimeState.filters = normalizeCatalogFilters({ consultation_type: null });
+    catalogRuntimeState.filters = normalizeCatalogFilters({
+        consultation_type: null,
+        topic_ids: [],
+    });
 }
 
 /**
@@ -340,51 +432,6 @@ function persistCatalogState(extraState = {}) {
         updated_at: Date.now(),
         ...extraState,
     });
-}
-
-/**
- * Возвращает заголовки для POST-запроса каталога.
- */
-function buildCatalogRequestHeaders() {
-    return {
-        "Content-Type": "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-        "X-CSRFToken": window.CSRF_TOKEN || "",
-    };
-}
-
-/**
- * Выполняет AJAX-запрос к backend и возвращает JSON каталога.
- */
-async function requestCatalogData({ page, orderKey = null, restoreMode = false }) {
-    const endpoint = resolveCatalogFilterEndpoint();
-    if (!endpoint) {
-        throw new Error("catalog_filter_endpoint_missing");
-    }
-
-    const response = await fetch(endpoint, {
-        method: "POST",
-        credentials: "same-origin",
-        headers: buildCatalogRequestHeaders(),
-        body: JSON.stringify({
-            filters: normalizeCatalogFilters(catalogRuntimeState.filters),
-            page,
-            order_key: orderKey,
-            restore_mode: restoreMode,
-            layout_mode: catalogRuntimeState.layout_mode,
-        }),
-    });
-
-    if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-    if (data.status !== "ok") {
-        throw new Error("invalid_catalog_response");
-    }
-
-    return data;
 }
 
 /**
@@ -415,10 +462,6 @@ function applyCatalogResponse(data, { appendMode = false } = {}) {
     catalogRuntimeState.total_pages = toNonNegativeInt(data.total_pages, 0);
     catalogRuntimeState.order_key = toNonNegativeInt(data.random_order_key, catalogRuntimeState.order_key);
     catalogRuntimeState.filters = normalizeCatalogFilters(data.active_filters || catalogRuntimeState.filters);
-
-    if (data.consultation_type_counts && typeof data.consultation_type_counts === "object") {
-        cachedConsultationTypeCounts = normalizeConsultationTypeCounts(data.consultation_type_counts);
-    }
 
     syncLoadMoreButton(data);
     renderCurrentPageIndicator(catalogRuntimeState.current_page, catalogRuntimeState.total_pages);
@@ -462,7 +505,7 @@ function restoreCatalogScrollPosition(savedState) {
  * 3) полностью заменяем карточки и метаданные каталога;
  * 4) сохраняем обновленное состояние для возможного возврата из detail.
  */
-async function applyConsultationTypeFilter(selectedValue) {
+async function applyCatalogFilters(partialFilters = {}) {
     const loadMoreButton = getLoadMoreButton();
     const errorLabel = document.getElementById("catalog-load-more-error");
     if (!loadMoreButton) return false;
@@ -470,11 +513,14 @@ async function applyConsultationTypeFilter(selectedValue) {
     loadMoreButton.disabled = true;
     if (errorLabel) errorLabel.classList.add("hidden");
 
-    const previousConsultationType = catalogRuntimeState.filters.consultation_type;
+    const previousFilters = normalizeCatalogFilters(catalogRuntimeState.filters);
     const previousAnchor = catalogRuntimeState.anchor;
     const previousScrollY = catalogRuntimeState.scroll_y;
 
-    catalogRuntimeState.filters.consultation_type = normalizeConsultationType(selectedValue);
+    catalogRuntimeState.filters = normalizeCatalogFilters({
+        ...catalogRuntimeState.filters,
+        ...partialFilters,
+    });
     catalogRuntimeState.anchor = null;
     catalogRuntimeState.scroll_y = Math.max(window.scrollY, 0);
 
@@ -487,7 +533,7 @@ async function applyConsultationTypeFilter(selectedValue) {
         applyCatalogResponse(data, { appendMode: false });
         return true;
     } catch (error) {
-        catalogRuntimeState.filters.consultation_type = previousConsultationType;
+        catalogRuntimeState.filters = previousFilters;
         catalogRuntimeState.anchor = previousAnchor;
         catalogRuntimeState.scroll_y = previousScrollY;
         console.error("Ошибка применения фильтра каталога:", error);
@@ -496,6 +542,106 @@ async function applyConsultationTypeFilter(selectedValue) {
     } finally {
         loadMoreButton.disabled = false;
     }
+}
+
+function getVisibleTopicTypeLabels() {
+    const selectedConsultationType = catalogRuntimeState.filters.consultation_type;
+    const selectedTopicTypeLabel = resolveTopicTypeLabel(selectedConsultationType);
+    const topicsByType = getCatalogTopicsByType();
+
+    if (selectedTopicTypeLabel && topicsByType[selectedTopicTypeLabel]) {
+        return [selectedTopicTypeLabel];
+    }
+
+    return Object.keys(topicsByType);
+}
+
+function buildTopicsModalHtml(selectedTopicIds) {
+    const topicsByType = getCatalogTopicsByType();
+    const visibleTopicTypeLabels = getVisibleTopicTypeLabels();
+
+    if (!visibleTopicTypeLabels.length) {
+        return `
+            <p class="text-sm text-gray-500 leading-relaxed">
+                Темы пока не добавлены.
+            </p>
+        `;
+    }
+
+    const sectionsHtml = visibleTopicTypeLabels.map((topicTypeLabel) => {
+        const groupedTopics = topicsByType[topicTypeLabel] || {};
+        const groupsHtml = Object.entries(groupedTopics).map(([groupName, topics]) => {
+            const itemsHtml = (topics || []).map((topic) => `
+                <label class="topic-item flex items-center gap-3 p-1 rounded-md hover:bg-gray-50 transition">
+                    <input
+                        type="checkbox"
+                        value="${topic.id}"
+                        class="catalog-topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                        ${selectedTopicIds.includes(String(topic.id)) ? "checked" : ""}
+                    >
+                    <span class="text-base font-medium text-gray-900">${escapeHtml(topic.name)}</span>
+                </label>
+            `).join("");
+
+            return `
+                <div class="topic-group mb-1 pb-4">
+                    <p class="block mb-2 text-lg font-medium text-indigo-500">
+                        <strong>${escapeHtml(groupName)}</strong>
+                    </p>
+                    <div class="topics-group grid grid-cols-1 sm:grid-cols-2">
+                        ${itemsHtml || '<p class="text-base text-gray-500">Темы не найдены.</p>'}
+                    </div>
+                    <button
+                        type="button"
+                        class="show-more-topics hidden mt-2 italic text-sm font-medium text-indigo-500 hover:text-indigo-900"
+                    >
+                        Ещё
+                    </button>
+                </div>
+            `;
+        }).join("");
+
+        const typeTitleHtml = visibleTopicTypeLabels.length > 1 ? `
+            <div class="pt-2 pb-1 border-b border-slate-100">
+                <p class="text-sm font-black uppercase tracking-[0.2em] text-slate-400">${escapeHtml(topicTypeLabel)}</p>
+            </div>
+        ` : "";
+
+        return `
+            <section class="space-y-3">
+                ${typeTitleHtml}
+                ${groupsHtml || '<p class="text-sm text-gray-500">Темы не найдены.</p>'}
+            </section>
+        `;
+    }).join("");
+
+    const helperText = catalogRuntimeState.filters.consultation_type
+        ? "Показаны темы только для выбранного вида консультации."
+        : "Можно выбрать темы как для индивидуальной, так и для парной консультации.";
+
+    return `
+        <div class="space-y-4">
+            <p class="text-sm text-gray-500 leading-relaxed">
+                Выберите симптомы и запросы, с которыми должен работать психолог.
+            </p>
+            <div id="catalog-topic-groups-root" class="max-h-[28rem] overflow-y-auto pr-1 space-y-5">
+                ${sectionsHtml}
+            </div>
+            <p class="text-xs text-gray-400">
+                ${helperText}
+            </p>
+        </div>
+    `;
+}
+
+function getModalSelectedConsultationType() {
+    const hiddenInput = document.querySelector("#catalog-consultation-hidden-inputs input");
+    return normalizeConsultationType(hiddenInput ? hiddenInput.value : null);
+}
+
+function getModalSelectedTopicIds() {
+    const checkboxes = document.querySelectorAll("#catalog-topic-groups-root .catalog-topic-checkbox:checked");
+    return normalizeTopicIds(Array.from(checkboxes).map((checkbox) => checkbox.value));
 }
 
 /**
@@ -526,6 +672,7 @@ function initCatalogFiltersModal() {
     }
 
     let openedFilterName = null;
+    let previewDebounceTimer = null;
 
     function closeModal() {
         modal.classList.add("hidden");
@@ -542,79 +689,154 @@ function initCatalogFiltersModal() {
         document.body.style.overflow = "hidden";
     }
 
-    function renderModalContent(filterName) {
-        if (filterName !== "Вид консультации") {
-            modalContent.innerHTML = `
-                <p class="text-sm text-gray-500 leading-relaxed">
-                    Этот фильтр будет подключен на следующем шаге. Сейчас можно закрыть модалку.
-                </p>
-            `;
-            applyButton.textContent = APPLY_RESULTS_LABEL;
-            return;
+    function buildTentativeFiltersForModal() {
+        if (openedFilterName === "Вид консультации") {
+            return normalizeCatalogFilters({
+                ...catalogRuntimeState.filters,
+                consultation_type: getModalSelectedConsultationType(),
+                topic_ids: catalogRuntimeState.filters.topic_ids,
+            });
         }
 
-        const consultationTypeChoices = getConsultationTypeChoices();
-        const individualLabel = consultationTypeChoices.individual || "Индивидуальная";
-        const coupleLabel = consultationTypeChoices.couple || "Парная";
-        const activeConsultationType = catalogRuntimeState.filters.consultation_type;
-
-        modalContent.innerHTML = `
-            <div class="space-y-4">
-                <p class="text-sm text-gray-500 leading-relaxed">
-                    Выберите формат консультации для фильтрации карточек
-                </p>
-                <div id="catalog-consultation-block" class="grid grid-cols-2 gap-3 max-w-md">
-                    <button type="button" data-value="individual" class="catalog-consultation-btn px-4 py-2 rounded-lg border text-base font-medium">
-                        ${individualLabel}
-                    </button>
-                    <button type="button" data-value="couple" class="catalog-consultation-btn px-4 py-2 rounded-lg border text-base font-medium">
-                        ${coupleLabel}
-                    </button>
-                </div>
-                <div id="catalog-consultation-hidden-inputs" class="hidden"></div>
-                <p class="text-xs text-gray-400">
-                    Можно оставить оба варианта невыбранными — это режим "все специалисты"
-                </p>
-            </div>
-        `;
-
-        // Для каталога нужен сценарий "выбрать 1 вариант или снять выбор совсем".
-        // Именно поэтому используем уже существующий multi-toggle с maxSelected=1.
-        initMultiToggle({
-            containerSelector: "#catalog-consultation-block",
-            buttonSelector: ".catalog-consultation-btn",
-            hiddenInputsContainerSelector: "#catalog-consultation-hidden-inputs",
-            inputName: "consultation_type",
-            initialValues: activeConsultationType ? [activeConsultationType] : [],
-            maxSelected: 1,
-        });
-
-        renderApplyButtonWithCount(applyButton, getModalSelectedConsultationType());
-
-        const consultationBlock = document.getElementById("catalog-consultation-block");
-        if (consultationBlock) {
-            consultationBlock.addEventListener("click", (event) => {
-                if (!event.target.closest(".catalog-consultation-btn")) return;
-
-                // Даем toggle-модулю один animation frame,
-                // чтобы он успел обновить hidden-input, и только потом читаем новое значение.
-                window.requestAnimationFrame(() => {
-                    renderApplyButtonWithCount(applyButton, getModalSelectedConsultationType());
-                });
+        if (openedFilterName === "Симптомы") {
+            return normalizeCatalogFilters({
+                ...catalogRuntimeState.filters,
+                topic_ids: getModalSelectedTopicIds(),
             });
+        }
+
+        return normalizeCatalogFilters(catalogRuntimeState.filters);
+    }
+
+    async function refreshApplyButtonPreview() {
+        const requestId = ++activePreviewRequestId;
+        renderApplyButtonLoading(applyButton);
+
+        try {
+            const previewData = await requestCatalogData({
+                previewOnly: true,
+                filtersOverride: buildTentativeFiltersForModal(),
+            });
+
+            if (requestId !== activePreviewRequestId) return;
+            renderApplyButtonWithCount(applyButton, previewData.total_count);
+        } catch (error) {
+            if (requestId !== activePreviewRequestId) return;
+            console.error("Ошибка preview-count каталога:", error);
+            applyButton.textContent = APPLY_RESULTS_LABEL;
         }
     }
 
-    async function applyCurrentFilter() {
-        if (openedFilterName !== "Вид консультации") {
-            closeModal();
+    function scheduleApplyButtonPreviewRefresh() {
+        if (previewDebounceTimer) {
+            window.clearTimeout(previewDebounceTimer);
+        }
+
+        previewDebounceTimer = window.setTimeout(() => {
+            refreshApplyButtonPreview();
+        }, 180);
+    }
+
+    function renderModalContent(filterName) {
+        if (filterName === "Вид консультации") {
+            const consultationTypeChoices = getConsultationTypeChoices();
+            const individualLabel = consultationTypeChoices.individual || "Индивидуальная";
+            const coupleLabel = consultationTypeChoices.couple || "Парная";
+            const activeConsultationType = catalogRuntimeState.filters.consultation_type;
+
+            modalContent.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-sm text-gray-500 leading-relaxed">
+                        Выберите формат консультации для фильтрации карточек.
+                    </p>
+                    <div id="catalog-consultation-block" class="grid grid-cols-2 gap-3 max-w-md">
+                        <button type="button" data-value="individual" class="catalog-consultation-btn px-4 py-2 rounded-lg border text-base font-medium">
+                            ${escapeHtml(individualLabel)}
+                        </button>
+                        <button type="button" data-value="couple" class="catalog-consultation-btn px-4 py-2 rounded-lg border text-base font-medium">
+                            ${escapeHtml(coupleLabel)}
+                        </button>
+                    </div>
+                    <div id="catalog-consultation-hidden-inputs" class="hidden"></div>
+                    <p class="text-xs text-gray-400">
+                        Можно оставить оба варианта невыбранными — это режим "все специалисты".
+                    </p>
+                </div>
+            `;
+
+            // Для каталога нужен сценарий "выбрать 1 вариант или снять выбор совсем".
+            // Именно поэтому используем уже существующий multi-toggle с maxSelected=1.
+            initMultiToggle({
+                containerSelector: "#catalog-consultation-block",
+                buttonSelector: ".catalog-consultation-btn",
+                hiddenInputsContainerSelector: "#catalog-consultation-hidden-inputs",
+                inputName: "consultation_type",
+                initialValues: activeConsultationType ? [activeConsultationType] : [],
+                maxSelected: 1,
+            });
+
+            const consultationBlock = document.getElementById("catalog-consultation-block");
+            if (consultationBlock) {
+                consultationBlock.addEventListener("click", (event) => {
+                    if (!event.target.closest(".catalog-consultation-btn")) return;
+
+                    window.requestAnimationFrame(() => {
+                        scheduleApplyButtonPreviewRefresh();
+                    });
+                });
+            }
+
+            scheduleApplyButtonPreviewRefresh();
             return;
         }
 
-        const isApplied = await applyConsultationTypeFilter(getModalSelectedConsultationType());
-        if (isApplied) {
-            closeModal();
+        if (filterName === "Симптомы") {
+            const selectedTopicIds = normalizeTopicIds(catalogRuntimeState.filters.topic_ids);
+            modalContent.innerHTML = buildTopicsModalHtml(selectedTopicIds);
+
+            initCollapsibleTopicGroups({
+                rootSelector: "#catalog-topic-groups-root",
+                visibleCount: 0,
+            });
+
+            const topicsRoot = document.getElementById("catalog-topic-groups-root");
+            if (topicsRoot) {
+                topicsRoot.addEventListener("change", (event) => {
+                    if (!event.target.closest(".catalog-topic-checkbox")) return;
+                    scheduleApplyButtonPreviewRefresh();
+                });
+            }
+
+            scheduleApplyButtonPreviewRefresh();
+            return;
         }
+
+        modalContent.innerHTML = `
+            <p class="text-sm text-gray-500 leading-relaxed">
+                Этот фильтр будет подключен на следующем шаге. Сейчас можно закрыть модалку.
+            </p>
+        `;
+        applyButton.textContent = APPLY_RESULTS_LABEL;
+    }
+
+    async function applyCurrentFilter() {
+        if (openedFilterName === "Вид консультации") {
+            const isApplied = await applyCatalogFilters({
+                consultation_type: getModalSelectedConsultationType(),
+            });
+            if (isApplied) closeModal();
+            return;
+        }
+
+        if (openedFilterName === "Симптомы") {
+            const isApplied = await applyCatalogFilters({
+                topic_ids: getModalSelectedTopicIds(),
+            });
+            if (isApplied) closeModal();
+            return;
+        }
+
+        closeModal();
     }
 
     filterButtons.forEach((button) => {

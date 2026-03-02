@@ -1,4 +1,5 @@
 import json
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -7,9 +8,15 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import TemplateView
 from django_ratelimit.decorators import ratelimit
-from aggregator._web.services.basic_filter_catalog import CONSULTATION_TYPE_CHOICES, build_consultation_type_counts
+
+from aggregator._web.services.basic_filter_catalog import \
+    CONSULTATION_TYPE_CHOICES
 from core.services.experience_label import build_experience_label
-from core.services.mixins_ps_catalog import CatalogBackLinkMixin, CatalogLayoutModeMixin, CatalogPageDataMixin
+from core.services.mixins_ps_catalog import (CatalogBackLinkMixin,
+                                             CatalogLayoutModeMixin,
+                                             CatalogPageDataMixin)
+from core.services.topic_groups import (build_topics_grouped_by_type,
+                                        serialize_topics_grouped_by_type)
 from users.models import PsychologistProfile
 
 
@@ -25,7 +32,8 @@ class PsychologistCatalogFilterAjaxView(LoginRequiredMixin, CatalogLayoutModeMix
     Основная логика:
         - принимает текущие фильтры каталога в JSON;
         - возвращает уже отфильтрованные карточки и метаданные пагинации;
-        - ничего не сохраняет в БД и не меняет ClientProfile."""
+        - ничего не сохраняет в БД и не меняет ClientProfile.
+    """
 
     http_method_names = ["post"]
 
@@ -47,17 +55,26 @@ class PsychologistCatalogFilterAjaxView(LoginRequiredMixin, CatalogLayoutModeMix
             - page: какую страницу нужно получить;
             - order_key: существующий random order key или null;
             - restore_mode: нужно ли вернуть все карточки до текущей страницы;
-            - layout_mode: sidebar/menu для корректных ссылок внутри карточек."""
+            - layout_mode: sidebar/menu для корректных ссылок внутри карточек;
+            - preview_only: если true, возвращаем только количество найденных специалистов.
+        """
         payload = self._read_payload()
 
         filters_state = self._extract_filters_state(payload.get("filters"))
         requested_page = self._parse_positive_int(payload.get("page"), fallback=1)
         random_order_key = self._parse_non_negative_int(payload.get("order_key"), fallback=None)
         restore_mode = bool(payload.get("restore_mode"))
+        preview_only = bool(payload.get("preview_only"))
         layout_mode = payload.get("layout_mode")
 
         if layout_mode not in {"sidebar", "menu"}:
             layout_mode = self._resolve_layout_mode()
+
+        if preview_only:
+            return JsonResponse(
+                self._build_preview_response_payload(filters_state=filters_state),
+                status=200,
+            )
 
         page_data = self._build_catalog_page_data(
             filters_state=filters_state,
@@ -93,7 +110,8 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
         - первый запрос формирует случайный порядок карточек и закрепляет этот порядок в рамках текущей сессии
           через "ключ случайного порядка", чтобы при пагинации не было дублей и "прыгающего" списка;
         - дальнейшая фильтрация и восстановление состояния идут через AJAX, поэтому в HTML-странице не держим
-          фильтры в query-параметрах."""
+          фильтры в query-параметрах.
+    """
 
     template_name = "core/client_pages/my_account/psychologist_catalog.html"
 
@@ -109,13 +127,14 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
             - menu_variant: дополнительный флаг для шаблона base/menu, если страница открыта без sidebar;
             - catalog_detail_query: короткая query-строка для перехода из каталога в detail с сохранением layout;
             - consultation_type_choices: справочник вариантов фильтра "Вид консультации";
-            - consultation_type_counts: предрассчитанные количества психологов по вариантам фильтра;
+            - catalog_topics_by_type: JSON-совместимый словарь со сгруппированными темами для фильтра "Симптомы";
             - catalog_filter_endpoint: URL AJAX-endpoint для временной фильтрации каталога;
             - current_sidebar_key: ключ для серверной подсветки активного пункта боковой навигации;
             - profiles: карточки психологов для текущей страницы каталога;
             - has_next / next_page_number: состояние пагинации для кнопки "Показать еще";
             - current_page_number / total_pages / total_count: метаданные текущей выдачи каталога;
-            - random_order_key: ключ стабильного случайного порядка карточек для догрузки и restore-сценария."""
+            - random_order_key: ключ стабильного случайного порядка карточек для догрузки и restore-сценария.
+        """
         context = super().get_context_data(**kwargs)
 
         context["title_psychologist_catalog_page_view"] = "Каталог психологов на Опора — запись на приём к психологу"
@@ -130,7 +149,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
             context["menu_variant"] = "without-sidebar"
 
         context["consultation_type_choices"] = CONSULTATION_TYPE_CHOICES
-        context["consultation_type_counts"] = build_consultation_type_counts(self.get_queryset())
+        context["catalog_topics_by_type"] = serialize_topics_grouped_by_type(build_topics_grouped_by_type())
         context["catalog_filter_endpoint"] = reverse("core:psychologist-catalog-filter")
 
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
@@ -157,7 +176,8 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, CatalogLayoutModeMixin,
     Используемые миксины:
         - CatalogLayoutModeMixin: чтобы детальная карточка открывалась в том же layout-режиме как был
           открыт изначально каталог (с sidebar или с menu);
-        - CatalogBackLinkMixin: чтобы собрать короткий server fallback для кнопки "Назад в каталог"."""
+        - CatalogBackLinkMixin: чтобы собрать короткий server fallback для кнопки "Назад в каталог".
+    """
 
     template_name = "core/client_pages/my_account/psychologist_card_detail.html"
 
@@ -170,7 +190,8 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, CatalogLayoutModeMixin,
             - show_sidebar: нужно ли показывать левую навигацию;
             - menu_variant: дополнительный флаг для шаблона base/menu, если страница открыта без sidebar;
             - catalog_back_url: короткий server fallback URL для кнопки "Назад в каталог";
-            - current_sidebar_key: ключ для серверной подсветки активного пункта боковой навигации."""
+            - current_sidebar_key: ключ для серверной подсветки активного пункта боковой навигации.
+        """
         context = super().get_context_data(**kwargs)
 
         profile_slug = kwargs["profile_slug"]
