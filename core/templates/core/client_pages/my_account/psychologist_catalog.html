@@ -108,6 +108,7 @@
                     <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
                 <button type="button"
                         data-filter-chip
+                        data-filter-key="topic_ids"
                         data-filter-name="Симптомы"
                         class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
                          hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Симптомы
@@ -219,7 +220,7 @@
 </section>
 
 {{ consultation_type_choices|json_script:"catalog-consultation-type-choices-data" }}
-{{ consultation_type_counts|json_script:"catalog-consultation-type-counts-data" }}
+{{ catalog_topics_by_type|json_script:"catalog-topics-by-type-data" }}
 
 <script>window.CSRF_TOKEN = "{{ csrf_token }}";</script>
 <script type="module" src="{% static 'js/pages/psychologist_catalog.js' %}"></script>

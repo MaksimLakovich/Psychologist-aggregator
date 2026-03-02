@@ -6,7 +6,8 @@ from django.views.generic.edit import FormView
 from core.forms.client.specialist_matching.form_personal_questions import \
     ClientPersonalQuestionsForm
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
-from users.models import ClientProfile, Method, Topic
+from core.services.topic_groups import build_topics_grouped_by_type
+from users.models import ClientProfile, Method
 
 
 class ClientPersonalQuestionsPageView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, FormView):
@@ -77,19 +78,7 @@ class ClientPersonalQuestionsPageView(SpecialistMatchingLayoutMixin, LoginRequir
                 }
             }
         """
-        topics = Topic.objects.all().order_by("type", "group_name", "name")
-
-        result = {
-            "Индивидуальная": {},
-            "Парная": {}
-        }
-
-        for topic in topics:
-            bucket = result[topic.type]
-            bucket.setdefault(topic.group_name, [])
-            bucket[topic.group_name].append(topic)
-
-        return result
+        return build_topics_grouped_by_type()
 
     def get_success_url(self):
         """Формирует URL следующего шага с сохранением текущего layout."""
