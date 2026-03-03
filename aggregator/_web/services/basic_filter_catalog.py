@@ -133,6 +133,8 @@ def extract_age_range(raw_age_min, raw_age_max, age_bounds=None):
     bounds_min = age_bounds.get("min", DEFAULT_CATALOG_AGE_MIN)
     bounds_max = age_bounds.get("max", DEFAULT_CATALOG_AGE_MAX)
 
+    # Шаг 1: Инициализируем границы.
+    # Если в age_bounds пусто, то берутся значения которые установлены по умолчанию (DEFAULT_CATALOG_AGE_MIN/MAX)
     try:
         bounds_min = int(bounds_min)
     except (TypeError, ValueError):
@@ -143,18 +145,24 @@ def extract_age_range(raw_age_min, raw_age_max, age_bounds=None):
     except (TypeError, ValueError):
         bounds_max = DEFAULT_CATALOG_AGE_MAX
 
+    # Шаг 2: Страховка на случай, если кто-то перепутал границы местами (например, min=50, max=20), то меняем местами
     if bounds_min > bounds_max:
         bounds_min, bounds_max = bounds_max, bounds_min
 
     def parse_age_value(raw_value):
+        """Внутренняя вспомогательная функция для обработки конкретного числа, введенного пользователем."""
+        # 1) Если поле пустое, возвращаем None (значит, пользователь не ограничивал этот край)
         if raw_value in {"", None}:
             return None
 
+        # 2) Пытается превратить ввод пользователя в число. Если ввели "привет", фильтр просто игнорируется (None)
         try:
             parsed_value = int(raw_value)
         except (TypeError, ValueError):
             return None
 
+        # 3) Прижимает значения по краям: если пользователь хочет найти психолога 12 лет,
+        # а min_age в системе 18 - то ставится 18. Если хочет 200-го соответственно ставится максимум (например, 99)
         if parsed_value < bounds_min:
             return bounds_min
 
