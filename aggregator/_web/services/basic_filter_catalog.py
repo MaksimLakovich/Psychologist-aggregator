@@ -113,7 +113,68 @@ def filter_topics(queryset, topic_ids):
     return queryset.filter(topics__in=normalized_topic_ids).distinct()
 
 
-# 3. Фильтр "Возраст": фильтрация по возрасту психолога
+# 3. Фильтр "Подход": фильтрация по выбранным методам психолога
+
+def extract_method_ids(raw_values):
+    """Возвращает нормализованный список выбранных method-id для фильтра "Подход".
+
+    Простая логика:
+        - принимаем список строк/чисел;
+        - оставляем только положительные целые id;
+        - убираем дубли, сохраняя исходный порядок.
+
+    Почему здесь возвращаем список строк:
+        - во frontend state и в DOM нам удобнее работать со строками;
+        - в Django-фильтре methods__in строки id тоже безопасно преобразуются в числа.
+    """
+    if not isinstance(raw_values, (list, tuple)):
+        return []
+
+    normalized_method_ids = []
+    seen_method_ids = set()
+
+    for raw_value in raw_values:
+        try:
+            parsed_value = int(raw_value)
+        except (TypeError, ValueError):
+            continue
+
+        if parsed_value <= 0:
+            continue
+
+        normalized_value = str(parsed_value)
+        if normalized_value in seen_method_ids:
+            continue
+
+        seen_method_ids.add(normalized_value)
+        normalized_method_ids.append(normalized_value)
+
+    return normalized_method_ids
+
+
+def filter_methods(queryset, method_ids):
+    """Применяет к QuerySet фильтр "Подход".
+
+    Если method_ids пустой список:
+        - фильтр не активен;
+        - возвращаем исходный QuerySet без сужения выдачи.
+
+    Если method_ids заполнен:
+        - оставляем психологов, у которых есть хотя бы один из выбранных методов.
+
+    Важный момент:
+        - здесь используется логика OR, а не AND.
+        - То есть если клиент выбрал 3 подхода, психолог попадет в выдачу,
+          если у него в профиле есть хотя бы один из этих подходов.
+    """
+    normalized_method_ids = extract_method_ids(method_ids)
+    if not normalized_method_ids:
+        return queryset
+
+    return queryset.filter(methods__in=normalized_method_ids).distinct()
+
+
+# 4. Фильтр "Возраст": фильтрация по возрасту психолога
 
 def extract_age_range(raw_age_min, raw_age_max, age_bounds=None):
     """Возвращает безопасный диапазон возраста для фильтра "Возраст".
@@ -219,12 +280,14 @@ def apply_catalog_basic_filters(queryset, filters_state, age_bounds=None):
     На текущем шаге подключены фильтры:
         - consultation_type.
         - topic_ids.
+        - method_ids.
         - age_min / age_max.
 
     Формат filters_state:
         {
             "consultation_type": "individual" | "couple" | None,
             "topic_ids": ["1", "2"] | [],
+            "method_ids": ["3", "7"] | [],
             "age_min": 25 | None,
             "age_max": 40 | None,
         }
@@ -236,6 +299,7 @@ def apply_catalog_basic_filters(queryset, filters_state, age_bounds=None):
         filters_state.get("consultation_type")
     )
     topic_ids = extract_topic_ids(filters_state.get("topic_ids"))
+    method_ids = extract_method_ids(filters_state.get("method_ids"))
     age_min, age_max = extract_age_range(
         filters_state.get("age_min"),
         filters_state.get("age_max"),
@@ -244,6 +308,7 @@ def apply_catalog_basic_filters(queryset, filters_state, age_bounds=None):
 
     queryset = filter_topic_type(queryset, consultation_type)
     queryset = filter_topics(queryset, topic_ids)
+    queryset = filter_methods(queryset, method_ids)
     queryset = filter_age(queryset, age_min, age_max)
 
     return queryset

@@ -9,7 +9,7 @@ from django.urls import reverse
 from aggregator._web.services.basic_filter_catalog import (
     DEFAULT_CATALOG_AGE_MAX, DEFAULT_CATALOG_AGE_MIN,
     apply_catalog_basic_filters, extract_age_range, extract_consultation_type,
-    extract_topic_ids)
+    extract_method_ids, extract_topic_ids)
 from core.constants import CARDS_PER_PAGE
 from core.services.experience_label import build_experience_label
 from users.models import PsychologistProfile
@@ -225,6 +225,7 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
             {
                 "consultation_type": "individual" | "couple" | None,
                 "topic_ids": ["1", "2"] | [],
+                "method_ids": ["3", "7"] | [],
                 "age_min": 25 | None,
                 "age_max": 40 | None,
             }
@@ -243,6 +244,9 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
             ),
             "topic_ids": extract_topic_ids(
                 raw_filters_state.get("topic_ids")
+            ),
+            "method_ids": extract_method_ids(
+                raw_filters_state.get("method_ids")
             ),
             "age_min": age_min,
             "age_max": age_max,

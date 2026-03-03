@@ -17,6 +17,15 @@ import {
     getCatalogAgeModalValues,
 } from "../modules/catalog_filter_age.js";
 import {
+    buildCatalogMethodsTentativeFilters,
+    CATALOG_METHODS_FILTER_KEY,
+    CATALOG_METHODS_FILTER_NAME,
+    getCatalogMethodsModalValues,
+    isCatalogMethodsFilterActive,
+    normalizeCatalogMethodIds,
+    renderCatalogMethodsModal,
+} from "../modules/catalog_filter_methods.js";
+import {
     buildCatalogTopicTypeTentativeFilters,
     CATALOG_TOPIC_TYPE_FILTER_KEY,
     CATALOG_TOPIC_TYPE_FILTER_NAME,
@@ -66,6 +75,7 @@ const catalogRuntimeState = {
     filters: {
         consultation_type: null,
         topic_ids: [],
+        method_ids: [],
         age_min: null,
         age_max: null,
     },
@@ -109,11 +119,13 @@ function normalizeCatalogFilters(rawFilters = {}) {
         consultationType,
         readJsonScript,
     });
+    const methodIds = normalizeCatalogMethodIds(rawFilters?.method_ids);
     const ageRange = normalizeCatalogAgeRange(rawFilters?.age_min, rawFilters?.age_max, { readJsonScript });
 
     return {
         consultation_type: consultationType,
         topic_ids: topicIds,
+        method_ids: methodIds,
         age_min: ageRange.age_min,
         age_max: ageRange.age_max,
     };
@@ -174,6 +186,33 @@ const CATALOG_FILTER_REGISTRY = {
         readModalFilters() {
             return {
                 topic_ids: getCatalogTopicsModalValues(),
+            };
+        },
+    },
+    [CATALOG_METHODS_FILTER_KEY]: {
+        key: CATALOG_METHODS_FILTER_KEY,
+        name: CATALOG_METHODS_FILTER_NAME,
+        isActive(filters) {
+            return isCatalogMethodsFilterActive(filters);
+        },
+        renderModal({ modalContent, schedulePreviewRefresh }) {
+            renderCatalogMethodsModal({
+                modalContent,
+                catalogRuntimeState,
+                schedulePreviewRefresh,
+                escapeHtml,
+                readJsonScript,
+            });
+        },
+        buildTentativeFilters() {
+            return buildCatalogMethodsTentativeFilters({
+                catalogRuntimeState,
+                normalizeCatalogFilters,
+            });
+        },
+        readModalFilters() {
+            return {
+                method_ids: getCatalogMethodsModalValues(),
             };
         },
     },
@@ -280,7 +319,7 @@ function renderApplyButtonWithCount(applyButton, totalCount) {
     if (!applyButton) return;
 
     const safeCount = toNonNegativeInt(totalCount, 0);
-    const specialistWord = pluralizeRu(safeCount, "терапевт", "терапевта", "терапевтов");
+    const specialistWord = pluralizeRu(safeCount, "специалист", "специалиста", "специалистов");
 
     applyButton.innerHTML = `
         ${APPLY_RESULTS_LABEL}
@@ -411,6 +450,7 @@ function hydrateRuntimeStateFromDom() {
     catalogRuntimeState.filters = normalizeCatalogFilters({
         consultation_type: null,
         topic_ids: [],
+        method_ids: [],
         age_min: null,
         age_max: null,
     });

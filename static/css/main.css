@@ -2746,6 +2746,10 @@ input:checked + .toggle-bg {
   justify-content: space-between;
 }
 
+.justify-items-center {
+  justify-items: center;
+}
+
 .gap-0 {
   gap: 0px;
 }
@@ -2806,6 +2810,10 @@ input:checked + .toggle-bg {
 
 .gap-y-6 {
   row-gap: 1.5rem;
+}
+
+.gap-y-1 {
+  row-gap: 0.25rem;
 }
 
 .-space-x-2 > :not([hidden]) ~ :not([hidden]) {

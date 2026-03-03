@@ -17,7 +17,7 @@ from core.services.mixins_ps_catalog import (CatalogBackLinkMixin,
                                              CatalogPageDataMixin)
 from core.services.topic_groups import (build_topics_grouped_by_type,
                                         serialize_topics_grouped_by_type)
-from users.models import PsychologistProfile
+from users.models import Method, PsychologistProfile
 
 
 @method_decorator(ratelimit(key="user_or_ip", rate="60/m", block=True), name="post")
@@ -61,6 +61,7 @@ class PsychologistCatalogFilterAjaxView(LoginRequiredMixin, CatalogLayoutModeMix
         На текущем шаге filters может содержать:
             - consultation_type;
             - topic_ids;
+            - method_ids;
             - age_min;
             - age_max.
         """
@@ -134,6 +135,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
             - catalog_detail_query: короткая query-строка для перехода из каталога в detail с сохранением layout;
             - consultation_type_choices: справочник вариантов фильтра "Вид консультации";
             - catalog_topics_by_type: JSON-совместимый словарь со сгруппированными темами для фильтра "Симптомы";
+            - catalog_methods: JSON-совместимый список методов для фильтра "Подход";
             - catalog_age_bounds: реальные возрастные границы каталога для фильтра "Возраст";
             - catalog_filter_endpoint: URL AJAX-endpoint для временной фильтрации каталога;
             - current_sidebar_key: ключ для серверной подсветки активного пункта боковой навигации;
@@ -157,6 +159,13 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
 
         context["consultation_type_choices"] = CONSULTATION_TYPE_CHOICES
         context["catalog_topics_by_type"] = serialize_topics_grouped_by_type(build_topics_grouped_by_type())
+        context["catalog_methods"] = [
+            {
+                "id": str(method.pk),
+                "name": method.name,
+            }
+            for method in Method.objects.all().order_by("name")
+        ]
         context["catalog_age_bounds"] = self._build_catalog_age_bounds()
         context["catalog_filter_endpoint"] = reverse("core:psychologist-catalog-filter")
 
@@ -169,6 +178,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
             filters_state={
                 "consultation_type": None,
                 "topic_ids": [],
+                "method_ids": [],
                 "age_min": None,
                 "age_max": None,
             },
