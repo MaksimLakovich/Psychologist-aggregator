@@ -2,12 +2,13 @@ import random
 from urllib.parse import urlencode
 
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Case, IntegerField, Value, When
+from django.db.models import Case, IntegerField, Max, Min, Value, When
 from django.template.loader import render_to_string
 from django.urls import reverse
 
 from aggregator._web.services.basic_filter_catalog import (
-    apply_catalog_basic_filters, extract_consultation_type, extract_topic_ids)
+    DEFAULT_CATALOG_AGE_MAX, DEFAULT_CATALOG_AGE_MIN, apply_catalog_basic_filters,
+    extract_age_range, extract_consultation_type, extract_topic_ids)
 from core.constants import CARDS_PER_PAGE
 from core.services.experience_label import build_experience_label
 from users.models import PsychologistProfile
@@ -104,6 +105,31 @@ class CatalogPsychologistQuerysetMixin:
         profile.slug = generate_unique_slug(profile, source_value)
         profile.save(update_fields=["slug"])
 
+    def _build_catalog_age_bounds(self):
+        """Возвращает реальные возрастные границы каталога по данным из БД.
+
+        Простая бизнес-логика:
+            - берем только тех специалистов, которые уже участвуют в каталоге;
+            - считаем минимальный и максимальный возраст среди них;
+            - если каталог пустой или данные по какой-то причине отсутствуют,
+              возвращаем безопасные fallback-границы модели AppUser.
+        """
+        age_aggregate = self.get_queryset().aggregate(
+            min_age=Min("user__age"),
+            max_age=Max("user__age"),
+        )
+
+        min_age = age_aggregate.get("min_age") or DEFAULT_CATALOG_AGE_MIN
+        max_age = age_aggregate.get("max_age") or DEFAULT_CATALOG_AGE_MAX
+
+        if min_age > max_age:
+            min_age, max_age = max_age, min_age
+
+        return {
+            "min": min_age,
+            "max": max_age,
+        }
+
 
 class CatalogDetailLinkMixin:
     """Собирает короткие ссылки между каталогом и детальной карточкой (detail)."""
@@ -187,8 +213,7 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
         """
         return random.randrange(10**9)
 
-    @staticmethod
-    def _extract_filters_state(raw_filters_state=None):
+    def _extract_filters_state(self, raw_filters_state=None, age_bounds=None):
         """Собирает текущее состояние фильтров каталога в едином формате.
 
         Для чего делаем это отдельным шагом:
@@ -199,9 +224,17 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
             {
                 "consultation_type": "individual" | "couple" | None,
                 "topic_ids": ["1", "2"] | [],
+                "age_min": 25 | None,
+                "age_max": 40 | None,
             }
         """
         raw_filters_state = raw_filters_state or {}
+        age_bounds = age_bounds or self._build_catalog_age_bounds()
+        age_min, age_max = extract_age_range(
+            raw_filters_state.get("age_min"),
+            raw_filters_state.get("age_max"),
+            age_bounds=age_bounds,
+        )
 
         return {
             "consultation_type": extract_consultation_type(
@@ -210,6 +243,8 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
             "topic_ids": extract_topic_ids(
                 raw_filters_state.get("topic_ids")
             ),
+            "age_min": age_min,
+            "age_max": age_max,
         }
 
     def _build_catalog_page_data(self, *, filters_state, requested_page=1, random_order_key=None, restore_mode=False):
@@ -229,9 +264,11 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
             3) берем только нужный кусок страницы (например, 1-18 или 19-36);
             4) вторым запросом в БД забираем данные только по этим id.
         """
+        age_bounds = self._build_catalog_age_bounds()
         queryset = apply_catalog_basic_filters(
             self.get_queryset(),
-            self._extract_filters_state(filters_state),
+            self._extract_filters_state(filters_state, age_bounds=age_bounds),
+            age_bounds=age_bounds,
         )
 
         safe_random_order_key = self._parse_non_negative_int(
@@ -361,6 +398,8 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
             - пустое состояние каталога;
             - активность фильтр-чипов.
         """
+        age_bounds = self._build_catalog_age_bounds()
+
         return {
             "status": "ok",
             "cards_html": self._render_cards_html(page_data=page_data, layout_mode=layout_mode),
@@ -370,7 +409,7 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
             "total_pages": page_data["total_pages"],
             "total_count": page_data["total_count"],
             "random_order_key": page_data["random_order_key"],
-            "active_filters": self._extract_filters_state(filters_state),
+            "active_filters": self._extract_filters_state(filters_state, age_bounds=age_bounds),
         }
 
     def _build_preview_response_payload(self, *, filters_state):
@@ -379,13 +418,15 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
         Этот режим нужен для модалок фильтров, когда пользователь еще не применил изменения,
         но уже хочет увидеть, сколько специалистов будет найдено.
         """
+        age_bounds = self._build_catalog_age_bounds()
         filtered_queryset = apply_catalog_basic_filters(
             self.get_queryset(),
-            self._extract_filters_state(filters_state),
+            self._extract_filters_state(filters_state, age_bounds=age_bounds),
+            age_bounds=age_bounds,
         )
 
         return {
             "status": "ok",
             "total_count": filtered_queryset.count(),
-            "active_filters": self._extract_filters_state(filters_state),
+            "active_filters": self._extract_filters_state(filters_state, age_bounds=age_bounds),
         }

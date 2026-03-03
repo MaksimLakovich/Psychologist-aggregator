@@ -5,6 +5,8 @@ from aggregator._web.services.topic_type_mapping import \
 
 # Используем уже существующий mapping-слой как единый источник истины для допустимых ключей фильтра "Вид консультации"
 CONSULTATION_TYPE_CHOICES = CLIENT_TO_TOPIC_TYPE_MAP
+DEFAULT_CATALOG_AGE_MIN = 18
+DEFAULT_CATALOG_AGE_MAX = 120
 
 
 # 1. Фильтр "Вид консультации": фильтрация по ТИПУ тем (Индивидуальная/Парная)
@@ -111,19 +113,112 @@ def filter_topics(queryset, topic_ids):
     return queryset.filter(topics__in=normalized_topic_ids).distinct()
 
 
+# 3. Фильтр "Возраст": фильтрация по возрасту психолога
+
+def extract_age_range(raw_age_min, raw_age_max, age_bounds=None):
+    """Возвращает безопасный диапазон возраста для фильтра "Возраст".
+
+    Простая логика:
+        - берем возрастные границы каталога (min/max) из БД или из fallback-констант;
+        - пытаемся преобразовать входные значения в целые числа;
+        - если значение выходит за границы каталога, прижимаем его к этим границам;
+        - если после нормализации выбран весь диапазон целиком, возвращаем (None, None),
+          то есть считаем фильтр неактивным.
+
+    Значения None здесь означают:
+        - возрастной фильтр не выбран;
+        - каталог должен показывать специалистов любого возраста.
+    """
+    age_bounds = age_bounds or {}
+    bounds_min = age_bounds.get("min", DEFAULT_CATALOG_AGE_MIN)
+    bounds_max = age_bounds.get("max", DEFAULT_CATALOG_AGE_MAX)
+
+    try:
+        bounds_min = int(bounds_min)
+    except (TypeError, ValueError):
+        bounds_min = DEFAULT_CATALOG_AGE_MIN
+
+    try:
+        bounds_max = int(bounds_max)
+    except (TypeError, ValueError):
+        bounds_max = DEFAULT_CATALOG_AGE_MAX
+
+    if bounds_min > bounds_max:
+        bounds_min, bounds_max = bounds_max, bounds_min
+
+    def parse_age_value(raw_value):
+        if raw_value in {"", None}:
+            return None
+
+        try:
+            parsed_value = int(raw_value)
+        except (TypeError, ValueError):
+            return None
+
+        if parsed_value < bounds_min:
+            return bounds_min
+
+        if parsed_value > bounds_max:
+            return bounds_max
+
+        return parsed_value
+
+    age_min = parse_age_value(raw_age_min)
+    age_max = parse_age_value(raw_age_max)
+
+    if age_min is not None and age_max is not None and age_min > age_max:
+        age_min, age_max = age_max, age_min
+
+    if age_min == bounds_min:
+        age_min = None
+
+    if age_max == bounds_max:
+        age_max = None
+
+    return age_min, age_max
+
+
+def filter_age(queryset, age_min, age_max):
+    """Применяет к QuerySet фильтр "Возраст".
+
+    Если age_min и age_max одновременно равны None:
+        - фильтр не активен;
+        - возвращаем исходный QuerySet без сужения выдачи.
+
+    Если передан age_min:
+        - оставляем психологов не младше указанного возраста.
+
+    Если передан age_max:
+        - оставляем психологов не старше указанного возраста.
+    """
+    if age_min is None and age_max is None:
+        return queryset
+
+    if age_min is not None:
+        queryset = queryset.filter(user__age__gte=age_min)
+
+    if age_max is not None:
+        queryset = queryset.filter(user__age__lte=age_max)
+
+    return queryset
+
+
 # ЗАПУСК ФИЛЬТРАЦИИ
 
-def apply_catalog_basic_filters(queryset, filters_state):
+def apply_catalog_basic_filters(queryset, filters_state, age_bounds=None):
     """Агрегирует базовые фильтры каталога и применяет их к QuerySet.
 
     На текущем шаге подключены фильтры:
         - consultation_type.
         - topic_ids.
+        - age_min / age_max.
 
     Формат filters_state:
         {
             "consultation_type": "individual" | "couple" | None,
             "topic_ids": ["1", "2"] | [],
+            "age_min": 25 | None,
+            "age_max": 40 | None,
         }
     """
     if not isinstance(filters_state, dict):
@@ -133,8 +228,14 @@ def apply_catalog_basic_filters(queryset, filters_state):
         filters_state.get("consultation_type")
     )
     topic_ids = extract_topic_ids(filters_state.get("topic_ids"))
+    age_min, age_max = extract_age_range(
+        filters_state.get("age_min"),
+        filters_state.get("age_max"),
+        age_bounds=age_bounds,
+    )
 
     queryset = filter_topic_type(queryset, consultation_type)
     queryset = filter_topics(queryset, topic_ids)
+    queryset = filter_age(queryset, age_min, age_max)
 
     return queryset

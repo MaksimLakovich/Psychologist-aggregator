@@ -8,6 +8,15 @@ import {
 } from "../modules/catalog_state.js";
 import { pluralizeRu } from "../utils/pluralize_ru.js";
 import {
+    buildCatalogAgeTentativeFilters,
+    CATALOG_AGE_FILTER_KEY,
+    CATALOG_AGE_FILTER_NAME,
+    isCatalogAgeFilterActive,
+    normalizeCatalogAgeRange,
+    renderCatalogAgeModal,
+    getCatalogAgeModalValues,
+} from "../modules/catalog_filter_age.js";
+import {
     buildCatalogTopicTypeTentativeFilters,
     CATALOG_TOPIC_TYPE_FILTER_KEY,
     CATALOG_TOPIC_TYPE_FILTER_NAME,
@@ -57,6 +66,8 @@ const catalogRuntimeState = {
     filters: {
         consultation_type: null,
         topic_ids: [],
+        age_min: null,
+        age_max: null,
     },
 };
 
@@ -98,10 +109,13 @@ function normalizeCatalogFilters(rawFilters = {}) {
         consultationType,
         readJsonScript,
     });
+    const ageRange = normalizeCatalogAgeRange(rawFilters?.age_min, rawFilters?.age_max, { readJsonScript });
 
     return {
         consultation_type: consultationType,
         topic_ids: topicIds,
+        age_min: ageRange.age_min,
+        age_max: ageRange.age_max,
     };
 }
 
@@ -161,6 +175,31 @@ const CATALOG_FILTER_REGISTRY = {
             return {
                 topic_ids: getCatalogTopicsModalValues(),
             };
+        },
+    },
+    [CATALOG_AGE_FILTER_KEY]: {
+        key: CATALOG_AGE_FILTER_KEY,
+        name: CATALOG_AGE_FILTER_NAME,
+        isActive(filters) {
+            return isCatalogAgeFilterActive(filters, { readJsonScript });
+        },
+        renderModal({ modalContent, schedulePreviewRefresh }) {
+            renderCatalogAgeModal({
+                modalContent,
+                catalogRuntimeState,
+                schedulePreviewRefresh,
+                readJsonScript,
+            });
+        },
+        buildTentativeFilters() {
+            return buildCatalogAgeTentativeFilters({
+                catalogRuntimeState,
+                normalizeCatalogFilters,
+                readJsonScript,
+            });
+        },
+        readModalFilters() {
+            return getCatalogAgeModalValues({ readJsonScript });
         },
     },
 };
@@ -372,6 +411,8 @@ function hydrateRuntimeStateFromDom() {
     catalogRuntimeState.filters = normalizeCatalogFilters({
         consultation_type: null,
         topic_ids: [],
+        age_min: null,
+        age_max: null,
     });
 }
 

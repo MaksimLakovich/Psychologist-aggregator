@@ -57,6 +57,12 @@ class PsychologistCatalogFilterAjaxView(LoginRequiredMixin, CatalogLayoutModeMix
             - restore_mode: нужно ли вернуть все карточки до текущей страницы;
             - layout_mode: sidebar/menu для корректных ссылок внутри карточек;
             - preview_only: если true, возвращаем только количество найденных специалистов.
+
+        На текущем шаге filters может содержать:
+            - consultation_type;
+            - topic_ids;
+            - age_min;
+            - age_max.
         """
         payload = self._read_payload()
 
@@ -128,6 +134,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
             - catalog_detail_query: короткая query-строка для перехода из каталога в detail с сохранением layout;
             - consultation_type_choices: справочник вариантов фильтра "Вид консультации";
             - catalog_topics_by_type: JSON-совместимый словарь со сгруппированными темами для фильтра "Симптомы";
+            - catalog_age_bounds: реальные возрастные границы каталога для фильтра "Возраст";
             - catalog_filter_endpoint: URL AJAX-endpoint для временной фильтрации каталога;
             - current_sidebar_key: ключ для серверной подсветки активного пункта боковой навигации;
             - profiles: карточки психологов для текущей страницы каталога;
@@ -150,6 +157,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
 
         context["consultation_type_choices"] = CONSULTATION_TYPE_CHOICES
         context["catalog_topics_by_type"] = serialize_topics_grouped_by_type(build_topics_grouped_by_type())
+        context["catalog_age_bounds"] = self._build_catalog_age_bounds()
         context["catalog_filter_endpoint"] = reverse("core:psychologist-catalog-filter")
 
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
@@ -158,7 +166,12 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
         # ВАЖНО: обязательно добавляем page_data в context.
         # Иначе шаблон не получит profiles/has_next/total_count и карточки не отобразятся
         page_data = self._build_catalog_page_data(
-            filters_state={"consultation_type": None},
+            filters_state={
+                "consultation_type": None,
+                "topic_ids": [],
+                "age_min": None,
+                "age_max": None,
+            },
             requested_page=1,
             random_order_key=self._generate_random_order_key(),
             restore_mode=False,
