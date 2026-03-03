@@ -35,13 +35,13 @@ export function initDualRangeSlider({
 
     const minInput = getSliderElement(minInputSelector);
     const maxInput = getSliderElement(maxInputSelector);
-    const minDisplay = getSliderElement(minDisplaySelector);
-    const maxDisplay = getSliderElement(maxDisplaySelector);
+    const minDisplay = minDisplaySelector ? getSliderElement(minDisplaySelector) : null;
+    const maxDisplay = maxDisplaySelector ? getSliderElement(maxDisplaySelector) : null;
     const minBubble = getSliderElement(minBubbleSelector);
     const maxBubble = getSliderElement(maxBubbleSelector);
     const fill = getSliderElement(fillSelector);
 
-    if (!minInput || !maxInput || !minDisplay || !maxDisplay || !minBubble || !maxBubble || !fill) {
+    if (!minInput || !maxInput || !minBubble || !maxBubble || !fill) {
         return null;
     }
 
@@ -78,8 +78,12 @@ export function initDualRangeSlider({
 
     // Обновляет подписи и заливку активного диапазона после любого изменения ползунка.
     function renderSliderState(currentMin, currentMax) {
-        minDisplay.textContent = String(currentMin);
-        maxDisplay.textContent = String(currentMax);
+        if (minDisplay) {
+            minDisplay.textContent = String(currentMin);
+        }
+        if (maxDisplay) {
+            maxDisplay.textContent = String(currentMax);
+        }
         minBubble.textContent = String(currentMin);
         maxBubble.textContent = String(currentMax);
 

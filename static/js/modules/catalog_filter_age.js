@@ -112,7 +112,7 @@ function getCatalogAgeSliderValues({ catalogRuntimeState, readJsonScript }) {
 }
 
 // Собирает HTML содержимого модалки фильтра "Возраст".
-// Простыми словами: рисует пользователю текущий диапазон, подписи над бегунками и сам двойной ползунок.
+// Простыми словами: рисует пользователю сам двойной ползунок и значения прямо на бегунках
 export function buildCatalogAgeModalHtml({ catalogRuntimeState, readJsonScript }) {
     const ageBounds = getCatalogAgeBounds({ readJsonScript });
     const sliderValues = getCatalogAgeSliderValues({ catalogRuntimeState, readJsonScript });
@@ -123,25 +123,14 @@ export function buildCatalogAgeModalHtml({ catalogRuntimeState, readJsonScript }
                 Выберите возрастной диапазон психологов, которых хотите видеть в каталоге.
             </p>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                    <p class="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">От</p>
-                    <p id="catalog-age-current-min" class="mt-1 text-2xl font-black text-indigo-700">${sliderValues.min}</p>
-                </div>
-                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-right">
-                    <p class="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">До</p>
-                    <p id="catalog-age-current-max" class="mt-1 text-2xl font-black text-indigo-700">${sliderValues.max}</p>
-                </div>
-            </div>
-
-            <div id="catalog-age-slider-root" class="catalog-dual-range relative px-1 pt-12 pb-3">
+            <div id="catalog-age-slider-root" class="catalog-dual-range relative px-10 pt-12 pb-3">
                 <div class="absolute left-1 right-1 top-12 h-2 rounded-full bg-slate-200"></div>
                 <div id="catalog-age-slider-fill" class="absolute top-12 h-2 rounded-full bg-indigo-500"></div>
 
-                <div id="catalog-age-bubble-min" class="absolute top-0 -translate-x-1/2 rounded-xl bg-indigo-600 px-3 py-1 text-xs font-bold text-white shadow-md">
+                <div id="catalog-age-bubble-min" class="absolute top-0 -translate-x-1/2 rounded-xl bg-indigo-600 px-3 py-1 text-base font-bold text-white shadow-md">
                     ${sliderValues.min}
                 </div>
-                <div id="catalog-age-bubble-max" class="absolute top-0 -translate-x-1/2 rounded-xl bg-indigo-600 px-3 py-1 text-xs font-bold text-white shadow-md">
+                <div id="catalog-age-bubble-max" class="absolute top-0 -translate-x-1/2 rounded-xl bg-indigo-600 px-3 py-1 text-base font-bold text-white shadow-md">
                     ${sliderValues.max}
                 </div>
 
@@ -205,8 +194,6 @@ export function renderCatalogAgeModal({
         rootSelector: "#catalog-age-slider-root",
         minInputSelector: "#catalog-age-range-min",
         maxInputSelector: "#catalog-age-range-max",
-        minDisplaySelector: "#catalog-age-current-min",
-        maxDisplaySelector: "#catalog-age-current-max",
         minBubbleSelector: "#catalog-age-bubble-min",
         maxBubbleSelector: "#catalog-age-bubble-max",
         fillSelector: "#catalog-age-slider-fill",
