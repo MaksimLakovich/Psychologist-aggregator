@@ -22,6 +22,8 @@ export function initDualRangeSlider({
     maxBound,
     initialMin,
     initialMax,
+    formatMinLabel,
+    formatMaxLabel,
     onChange,
 }) {
     const root = document.querySelector(rootSelector);
@@ -43,6 +45,19 @@ export function initDualRangeSlider({
 
     if (!minInput || !maxInput || !minBubble || !maxBubble || !fill) {
         return null;
+    }
+
+    // Держит сверху тот бегунок, с которым пользователь работает прямо сейчас.
+    // Это нужно, чтобы при встрече бегунков один из них не блокировал второй.
+    function setActiveHandle(handleName) {
+        if (handleName === "min") {
+            minInput.style.zIndex = "3";
+            maxInput.style.zIndex = "2";
+            return;
+        }
+
+        maxInput.style.zIndex = "3";
+        minInput.style.zIndex = "2";
     }
 
     // Приводит пару значений к безопасному диапазону ползунка.
@@ -76,6 +91,19 @@ export function initDualRangeSlider({
         return ((value - minBound) / (maxBound - minBound)) * 100;
     }
 
+    // Разводит подписи над бегунками, если диапазон стал слишком узким и текст начал налезать друг на друга.
+    function updateBubblePositions(minPercent, maxPercent) {
+        minBubble.style.top = "0";
+        maxBubble.style.top = "0";
+        minBubble.style.transform = "translateX(-50%)";
+        maxBubble.style.transform = "translateX(-50%)";
+
+        if (Math.abs(maxPercent - minPercent) < 24) {
+            minBubble.style.transform = "translateX(calc(-100% - 0.4rem))";
+            maxBubble.style.transform = "translateX(0.4rem)";
+        }
+    }
+
     // Обновляет подписи и заливку активного диапазона после любого изменения ползунка.
     function renderSliderState(currentMin, currentMax) {
         if (minDisplay) {
@@ -84,8 +112,12 @@ export function initDualRangeSlider({
         if (maxDisplay) {
             maxDisplay.textContent = String(currentMax);
         }
-        minBubble.textContent = String(currentMin);
-        maxBubble.textContent = String(currentMax);
+        minBubble.textContent = typeof formatMinLabel === "function"
+            ? formatMinLabel(currentMin)
+            : String(currentMin);
+        maxBubble.textContent = typeof formatMaxLabel === "function"
+            ? formatMaxLabel(currentMax)
+            : String(currentMax);
 
         const minPercent = toPercent(currentMin);
         const maxPercent = toPercent(currentMax);
@@ -95,6 +127,7 @@ export function initDualRangeSlider({
 
         minBubble.style.left = `${minPercent}%`;
         maxBubble.style.left = `${maxPercent}%`;
+        updateBubblePositions(minPercent, maxPercent);
     }
 
     // Устанавливает новое состояние ползунка и при необходимости сообщает о нем наружу.
@@ -115,11 +148,13 @@ export function initDualRangeSlider({
 
     // Обрабатывает изменение левого бегунка "от".
     function handleMinInput() {
+        setActiveHandle("min");
         applyRangeValues(minInput.value, maxInput.value, { emitChange: true });
     }
 
     // Обрабатывает изменение правого бегунка "до".
     function handleMaxInput() {
+        setActiveHandle("max");
         let nextMin = Number.parseInt(minInput.value, 10);
         let nextMax = Number.parseInt(maxInput.value, 10);
 
@@ -130,9 +165,15 @@ export function initDualRangeSlider({
         applyRangeValues(nextMin, nextMax, { emitChange: true });
     }
 
+    minInput.addEventListener("pointerdown", () => setActiveHandle("min"));
+    maxInput.addEventListener("pointerdown", () => setActiveHandle("max"));
+    minInput.addEventListener("focus", () => setActiveHandle("min"));
+    maxInput.addEventListener("focus", () => setActiveHandle("max"));
+
     minInput.addEventListener("input", handleMinInput);
     maxInput.addEventListener("input", handleMaxInput);
 
+    setActiveHandle("max");
     applyRangeValues(initialMin, initialMax);
 
     // Возвращаем наружу простой API, чтобы фильтр мог при необходимости прочитать текущее состояние.

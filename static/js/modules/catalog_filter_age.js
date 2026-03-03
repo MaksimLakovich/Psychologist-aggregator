@@ -201,6 +201,12 @@ export function renderCatalogAgeModal({
         maxBound: ageBounds.max,
         initialMin: sliderValues.min,
         initialMax: sliderValues.max,
+        formatMinLabel(value) {
+            return `От ${value}`;
+        },
+        formatMaxLabel(value) {
+            return `До ${value}`;
+        },
         onChange() {
             schedulePreviewRefresh();
         },
