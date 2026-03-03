@@ -71,6 +71,17 @@ import {
     normalizeCatalogPriceFilters,
     renderCatalogPriceModal,
 } from "../modules/catalog_filter_price.js";
+import {
+    buildCatalogSessionTimeTentativeFilters,
+    CATALOG_SESSION_TIME_FILTER_KEY,
+    CATALOG_SESSION_TIME_FILTER_NAME,
+    getCatalogSessionTimeModalMode,
+    getCatalogSessionTimeModalSelectedSlots,
+    isCatalogSessionTimeFilterActive,
+    normalizeCatalogSelectedSessionSlots,
+    normalizeCatalogSessionTimeMode,
+    renderCatalogSessionTimeModal,
+} from "../modules/catalog_filter_session_time.js";
 
 /**
  * Главный файл страницы каталога психологов.
@@ -110,6 +121,8 @@ const catalogRuntimeState = {
         age_max: null,
         experience_min: null,
         experience_max: null,
+        session_time_mode: "any",
+        selected_session_slots: [],
     },
 };
 
@@ -165,6 +178,8 @@ function normalizeCatalogFilters(rawFilters = {}) {
         rawFilters?.experience_max,
         { readJsonScript },
     );
+    const sessionTimeMode = normalizeCatalogSessionTimeMode(rawFilters?.session_time_mode);
+    const selectedSessionSlots = normalizeCatalogSelectedSessionSlots(rawFilters?.selected_session_slots);
 
     return {
         consultation_type: consultationType,
@@ -177,6 +192,8 @@ function normalizeCatalogFilters(rawFilters = {}) {
         age_max: ageRange.age_max,
         experience_min: experienceRange.experience_min,
         experience_max: experienceRange.experience_max,
+        session_time_mode: sessionTimeMode,
+        selected_session_slots: selectedSessionSlots,
     };
 }
 
@@ -372,6 +389,33 @@ const CATALOG_FILTER_REGISTRY = {
             return getCatalogExperienceModalValues({ readJsonScript });
         },
     },
+    [CATALOG_SESSION_TIME_FILTER_KEY]: {
+        key: CATALOG_SESSION_TIME_FILTER_KEY,
+        name: CATALOG_SESSION_TIME_FILTER_NAME,
+        isActive(filters) {
+            return isCatalogSessionTimeFilterActive(filters);
+        },
+        renderModal({ modalContent, schedulePreviewRefresh }) {
+            renderCatalogSessionTimeModal({
+                modalContent,
+                catalogRuntimeState,
+                schedulePreviewRefresh,
+                domainSlotsEndpoint: resolveCatalogDomainSlotsEndpoint(),
+            });
+        },
+        buildTentativeFilters() {
+            return buildCatalogSessionTimeTentativeFilters({
+                catalogRuntimeState,
+                normalizeCatalogFilters,
+            });
+        },
+        readModalFilters() {
+            return {
+                session_time_mode: getCatalogSessionTimeModalMode(),
+                selected_session_slots: getCatalogSessionTimeModalSelectedSlots(),
+            };
+        },
+    },
 };
 
 // Возвращает конфиг поддерживаемого фильтра по ключу или имени.
@@ -394,6 +438,12 @@ function getLoadMoreButton() {
 function resolveCatalogFilterEndpoint() {
     const loadMoreButton = getLoadMoreButton();
     return loadMoreButton?.dataset.filterEndpoint || "";
+}
+
+// Возвращает read-only endpoint доменных слотов для фильтра "Время сессии".
+function resolveCatalogDomainSlotsEndpoint() {
+    const loadMoreButton = getLoadMoreButton();
+    return loadMoreButton?.dataset.domainSlotsEndpoint || "";
 }
 
 // Собирает заголовки для POST-запросов каталога.
@@ -589,6 +639,8 @@ function hydrateRuntimeStateFromDom() {
         age_max: null,
         experience_min: null,
         experience_max: null,
+        session_time_mode: "any",
+        selected_session_slots: [],
     });
 }
 

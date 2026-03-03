@@ -240,6 +240,7 @@
                     <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
                 <button type="button"
                         data-filter-chip
+                        data-filter-key="session_time"
                         data-filter-name="Время сессии"
                         class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
                          hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Время сессии
@@ -283,6 +284,7 @@
                     id="catalog-load-more-btn"
                     type="button"
                     data-filter-endpoint="{{ catalog_filter_endpoint }}"
+                    data-domain-slots-endpoint="{{ catalog_domain_slots_endpoint }}"
                     data-next-page="{{ next_page_number|default:'' }}"
                     data-current-page="{{ current_page_number|default:1 }}"
                     data-total-pages="{{ total_pages|default:0 }}"

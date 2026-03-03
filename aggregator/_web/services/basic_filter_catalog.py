@@ -1,11 +1,18 @@
-from datetime import date
+from datetime import date, tzinfo
+from zoneinfo import ZoneInfo
 
 from django.db.models import Q
+from django.utils.dateparse import parse_datetime
+from django.utils.timezone import is_naive, make_aware, now
 
 from aggregator._web.selectors.psychologist_selectors import \
     filter_by_topic_type
 from aggregator._web.services.topic_type_mapping import \
     CLIENT_TO_TOPIC_TYPE_MAP
+from calendar_engine.application.factories.generate_specialist_schedule_factory import \
+    build_generate_specialist_schedule_use_case
+from calendar_engine.application.mappers.preferred_slots_mapper import \
+    map_preferred_slots_to_domain
 from users.constants import GENDER_CHOICES
 
 # Используем уже существующий mapping-слой как единый источник истины для допустимых ключей фильтра "Вид консультации"
@@ -15,6 +22,7 @@ DEFAULT_CATALOG_AGE_MAX = 120
 DEFAULT_CATALOG_EXPERIENCE_MIN = 0
 DEFAULT_CATALOG_EXPERIENCE_MAX = max(date.today().year - 1900, 0)
 ALLOWED_GENDER_VALUES = {value for value, _label in GENDER_CHOICES}
+ALLOWED_SESSION_TIME_MODES = {"any", "specific"}
 
 
 # 1. Фильтр "Вид консультации": фильтрация по ТИПУ тем (Индивидуальная/Парная)
@@ -481,6 +489,124 @@ def filter_experience(queryset, experience_min, experience_max):
     return queryset
 
 
+# 8. Фильтр "Время сессии": фильтрация по выбранным доменным слотам
+
+def extract_session_time_mode(raw_value):
+    """Возвращает валидный режим фильтра "Время сессии" или значение по умолчанию.
+
+    Простая логика:
+        - если пришел валидный режим "any" или "specific", возвращаем его;
+        - если значение пустое или битое, возвращаем "any".
+
+    Почему по умолчанию именно "any":
+        - это соответствует сценарию "Любое";
+        - без этого фильтра каталог не должен дополнительно сужать выдачу.
+    """
+    if raw_value in ALLOWED_SESSION_TIME_MODES:
+        return raw_value
+    return "any"
+
+
+def extract_selected_session_slots(raw_values):
+    """Возвращает нормализованный список выбранных доменных слотов для фильтра "Время сессии".
+
+    Простая логика:
+        - принимаем список ISO-строк datetime;
+        - оставляем только корректные timezone-aware datetime не в прошлом;
+        - убираем дубли, сохраняя исходный порядок.
+
+    Почему слоты фильтруем от значений в прошлом:
+        - пользователь не должен случайно восстановить или отправить уже неактуальные слоты;
+        - фильтр каталога должен работать только с будущими окнами записи.
+    """
+    if not isinstance(raw_values, (list, tuple)):
+        return []
+
+    normalized_slots = []
+    seen_slot_values = set()
+    current_time = now()
+
+    for raw_value in raw_values:
+        if not isinstance(raw_value, str):
+            continue
+
+        parsed_dt = parse_datetime(raw_value)
+        if parsed_dt is None:
+            continue
+
+        if is_naive(parsed_dt):
+            parsed_dt = make_aware(parsed_dt)
+
+        if parsed_dt < current_time:
+            continue
+
+        normalized_value = parsed_dt.isoformat()
+        if normalized_value in seen_slot_values:
+            continue
+
+        seen_slot_values.add(normalized_value)
+        normalized_slots.append(normalized_value)
+
+    return normalized_slots
+
+
+def filter_session_time(queryset, session_time_mode, selected_session_slots):
+    """Применяет к QuerySet фильтр "Время сессии".
+
+    Бизнес-логика:
+        - режим "any" ничего не фильтрует;
+        - режим "specific" без выбранных слотов тоже не фильтрует, потому что пользователь еще не указал конкретное время;
+        - если слоты выбраны, оставляем только тех специалистов, у которых эти доменные слоты пересекаются
+          с их рабочим расписанием и исключениями availability.
+
+    На текущем этапе бронирования еще нет, поэтому проверяем только:
+        - AvailabilityRule;
+        - AvailabilityException;
+        - доменные временные слоты календарного движка.
+    """
+    normalized_mode = extract_session_time_mode(session_time_mode)
+    normalized_slots = extract_selected_session_slots(selected_session_slots)
+
+    if normalized_mode != "specific" or not normalized_slots:
+        return queryset
+
+    selected_slot_datetimes = map_preferred_slots_to_domain(normalized_slots)
+    matched_profile_ids = []
+
+    for profile in queryset:
+        schedule_use_case = build_generate_specialist_schedule_use_case(profile)
+        if schedule_use_case is None:
+            continue
+
+        available_slots = schedule_use_case.execute()
+        specialist_tz_value = getattr(profile.user, "timezone", None)
+        if isinstance(specialist_tz_value, str):
+            specialist_tz = ZoneInfo(specialist_tz_value)
+        elif isinstance(specialist_tz_value, tzinfo):
+            specialist_tz = specialist_tz_value
+        else:
+            specialist_tz = None
+
+        normalized_selected_slot_keys = set()
+        for selected_dt in selected_slot_datetimes:
+            localized_dt = selected_dt.astimezone(specialist_tz) if specialist_tz else selected_dt
+            normalized_selected_slot_keys.add(
+                (localized_dt.date(), localized_dt.time().replace(second=0, microsecond=0))
+            )
+
+        has_match = any(
+            (slot.day, slot.start) in normalized_selected_slot_keys
+            for slot in available_slots
+        )
+        if has_match:
+            matched_profile_ids.append(profile.pk)
+
+    if not matched_profile_ids:
+        return queryset.none()
+
+    return queryset.filter(pk__in=matched_profile_ids)
+
+
 # ЗАПУСК ФИЛЬТРАЦИИ
 
 def apply_catalog_basic_filters(queryset, filters_state, age_bounds=None, experience_bounds=None):
@@ -494,6 +620,7 @@ def apply_catalog_basic_filters(queryset, filters_state, age_bounds=None, experi
         - price_individual_values / price_couple_values.
         - age_min / age_max.
         - experience_min / experience_max.
+        - session_time_mode / selected_session_slots.
 
     Формат filters_state:
         {
@@ -507,6 +634,8 @@ def apply_catalog_basic_filters(queryset, filters_state, age_bounds=None, experi
             "age_max": 40 | None,
             "experience_min": 3 | None,
             "experience_max": 15 | None,
+            "session_time_mode": "any" | "specific",
+            "selected_session_slots": ["2026-01-22T19:00:00+03:00"] | [],
         }
     """
     if not isinstance(filters_state, dict):
@@ -530,6 +659,12 @@ def apply_catalog_basic_filters(queryset, filters_state, age_bounds=None, experi
         filters_state.get("experience_max"),
         experience_bounds=experience_bounds,
     )
+    session_time_mode = extract_session_time_mode(
+        filters_state.get("session_time_mode")
+    )
+    selected_session_slots = extract_selected_session_slots(
+        filters_state.get("selected_session_slots")
+    )
 
     queryset = filter_topic_type(queryset, consultation_type)
     queryset = filter_topics(queryset, topic_ids)
@@ -543,5 +678,10 @@ def apply_catalog_basic_filters(queryset, filters_state, age_bounds=None, experi
     )
     queryset = filter_age(queryset, age_min, age_max)
     queryset = filter_experience(queryset, experience_min, experience_max)
+    queryset = filter_session_time(
+        queryset,
+        session_time_mode,
+        selected_session_slots,
+    )
 
     return queryset

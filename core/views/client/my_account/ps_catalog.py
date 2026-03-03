@@ -70,6 +70,8 @@ class PsychologistCatalogFilterAjaxView(LoginRequiredMixin, CatalogLayoutModeMix
             - age_max.
             - experience_min;
             - experience_max.
+            - session_time_mode;
+            - selected_session_slots.
         """
         payload = self._read_payload()
 
@@ -146,6 +148,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
             - catalog_price_choices: JSON-совместимый словарь цен для фильтра "Цена";
             - catalog_age_bounds: реальные возрастные границы каталога для фильтра "Возраст";
             - catalog_experience_bounds: реальные границы стажа каталога для фильтра "Опыт";
+            - catalog_domain_slots_endpoint: URL read-only эндпоинта доменных слотов для фильтра "Время сессии";
             - catalog_filter_endpoint: URL AJAX-endpoint для временной фильтрации каталога;
             - current_sidebar_key: ключ для серверной подсветки активного пункта боковой навигации;
             - profiles: карточки психологов для текущей страницы каталога;
@@ -182,6 +185,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
         context["catalog_price_choices"] = self._build_catalog_price_choices()
         context["catalog_age_bounds"] = self._build_catalog_age_bounds()
         context["catalog_experience_bounds"] = self._build_catalog_experience_bounds()
+        context["catalog_domain_slots_endpoint"] = reverse("users:api:get-domain-slots")
         context["catalog_filter_endpoint"] = reverse("core:psychologist-catalog-filter")
 
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
@@ -201,6 +205,8 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
                 "age_max": None,
                 "experience_min": None,
                 "experience_max": None,
+                "session_time_mode": "any",
+                "selected_session_slots": [],
             },
             requested_page=1,
             random_order_key=self._generate_random_order_key(),

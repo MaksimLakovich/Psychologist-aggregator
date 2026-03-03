@@ -12,7 +12,8 @@ from aggregator._web.services.basic_filter_catalog import (
     DEFAULT_CATALOG_EXPERIENCE_MAX, DEFAULT_CATALOG_EXPERIENCE_MIN,
     apply_catalog_basic_filters, extract_age_range, extract_consultation_type,
     extract_experience_range, extract_gender, extract_method_ids,
-    extract_price_values, extract_topic_ids)
+    extract_price_values, extract_selected_session_slots,
+    extract_session_time_mode, extract_topic_ids)
 from core.constants import CARDS_PER_PAGE
 from core.services.experience_label import build_experience_label
 from users.models import PsychologistProfile
@@ -309,6 +310,8 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
                 "age_max": 40 | None,
                 "experience_min": 3 | None,
                 "experience_max": 15 | None,
+                "session_time_mode": "any" | "specific",
+                "selected_session_slots": ["2026-01-22T19:00:00+03:00"] | [],
             }
         """
         raw_filters_state = raw_filters_state or {}
@@ -348,6 +351,12 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
             "age_max": age_max,
             "experience_min": experience_min,
             "experience_max": experience_max,
+            "session_time_mode": extract_session_time_mode(
+                raw_filters_state.get("session_time_mode")
+            ),
+            "selected_session_slots": extract_selected_session_slots(
+                raw_filters_state.get("selected_session_slots")
+            ),
         }
 
     def _build_catalog_page_data(self, *, filters_state, requested_page=1, random_order_key=None, restore_mode=False):
