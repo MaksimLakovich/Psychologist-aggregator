@@ -1,41 +1,5 @@
 {% load static %}
 
-{% block extra_style %}
-<style>
-    /* 1. content-visibility: auto - современная технология для сверхплавного скролла 10 000+ элементов */
-    article[data-catalog-card] {
-        content-visibility: auto;
-        contain-intrinsic-size: 1px 500px;
-    }
-
-    /* 2. Жесткий сброс фонов для табов и управление границами */
-    .catalog-tab-btn {
-        background: transparent !important; /* Убираем любой фон принудительно */
-        outline: none !important;
-        border-bottom-width: 4px !important;
-        border-bottom-color: transparent !important;
-        transition: all 0.4s ease;
-    }
-
-    /* Состояние: Активный таб (по умолчанию/при переключении) */
-    .catalog-tab-btn[aria-selected="true"] {
-        border-bottom-color: #64748b !important; /* slate-500 */
-        color: #475569 !important; /* slate-600 */
-    }
-
-    /* Состояние: При наведении на ВСЮ карточку - активный таб становится индиго */
-    article:hover .catalog-tab-btn[aria-selected="true"] {
-        border-bottom-color: #5145CD !important; /* indigo-700 */
-        color: #5145CD !important;
-    }
-
-    /* Состояние: Наведение непосредственно на кнопку таба */
-    .catalog-tab-btn:hover {
-        color: #5145CD !important;
-    }
-</style>
-{% endblock %}
-
 {% for profile in profiles %}
 <article
     id="psychologist-card-{{ profile.slug }}"

@@ -97,6 +97,38 @@
     .catalog-range-bubble.is-ready {
         transition: left 180ms ease, top 180ms ease, transform 180ms ease;
     }
+
+    /* Карточки каталога: включаем content-visibility для более плавного скролла длинного списка */
+    article[data-catalog-card] {
+        content-visibility: auto;
+        contain-intrinsic-size: 1px 500px;
+    }
+
+    /* Кнопки табов в краткой карточке: убираем случайные фоны и управляем нижней границей вручную */
+    .catalog-tab-btn {
+        background: transparent !important;
+        outline: none !important;
+        border-bottom-width: 4px !important;
+        border-bottom-color: transparent !important;
+        transition: all 0.4s ease;
+    }
+
+    /* Активный таб в обычном состоянии карточки */
+    .catalog-tab-btn[aria-selected="true"] {
+        border-bottom-color: #64748b !important;
+        color: #475569 !important;
+    }
+
+    /* Активный таб при наведении на всю карточку */
+    article:hover .catalog-tab-btn[aria-selected="true"] {
+        border-bottom-color: #5145CD !important;
+        color: #5145CD !important;
+    }
+
+    /* Цвет текста при наведении на саму кнопку таба */
+    .catalog-tab-btn:hover {
+        color: #5145CD !important;
+    }
 </style>
 {% endblock %}
 
