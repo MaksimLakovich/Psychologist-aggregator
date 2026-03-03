@@ -280,7 +280,7 @@ function renderApplyButtonWithCount(applyButton, totalCount) {
     if (!applyButton) return;
 
     const safeCount = toNonNegativeInt(totalCount, 0);
-    const specialistWord = pluralizeRu(safeCount, "специалист", "специалиста", "специалистов");
+    const specialistWord = pluralizeRu(safeCount, "терапевт", "терапевта", "терапевтов");
 
     applyButton.innerHTML = `
         ${APPLY_RESULTS_LABEL}
