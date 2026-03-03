@@ -105,14 +105,27 @@
 
     <!-- 4) Стоимость -->
     <div class="mt-5 rounded-2xl p-4 border border-slate-100 group-hover:bg-slate-200/40 group-hover:border-indigo-100 transition-all">
-        <div class="flex justify-between items-center">
-            <span class="text-sm font-semibold text-slate-500 tracking-wide">Индивидуальная сессия · 50 мин</span>
-            <span class="text-base font-black text-slate-600">{{ profile.price_individual|floatformat:0 }} <span class="text-xs font-medium opacity-50">{{ profile.price_currency }}</span></span>
-        </div>
-        <div class="mt-2 pt-2 border-t border-slate-200/50 flex justify-between items-center">
-            <span class="text-sm font-semibold text-slate-500 tracking-wide">Парная сессия · 1.5 часа</span>
-            <span class="text-base font-black text-slate-600">{{ profile.price_couples|floatformat:0 }} <span class="text-xs font-medium opacity-50">{{ profile.price_currency }}</span></span>
-        </div>
+        {% if catalog_selected_consultation_type == "couple" %}
+            <div class="flex justify-between items-center">
+                <span class="text-sm font-semibold text-slate-500 tracking-wide">Парная сессия · 1.5 часа</span>
+                <span class="text-base font-black text-slate-600">{{ profile.price_couples|floatformat:0 }} <span class="text-xs font-medium opacity-50">{{ profile.price_currency }}</span></span>
+            </div>
+        {% elif profile.price_individual %}
+            <div class="flex justify-between items-center">
+                <span class="text-sm font-semibold text-slate-500 tracking-wide">Индивидуальная сессия · 50 мин</span>
+                <span class="text-base font-black text-slate-600">{{ profile.price_individual|floatformat:0 }} <span class="text-xs font-medium opacity-50">{{ profile.price_currency }}</span></span>
+            </div>
+        {% elif profile.price_couples %}
+            <div class="flex justify-between items-center">
+                <span class="text-sm font-semibold text-slate-500 tracking-wide">Парная сессия · 1.5 часа</span>
+                <span class="text-base font-black text-slate-600">{{ profile.price_couples|floatformat:0 }} <span class="text-xs font-medium opacity-50">{{ profile.price_currency }}</span></span>
+            </div>
+        {% else %}
+            <div class="flex justify-between items-center">
+                <span class="text-sm font-semibold text-slate-500 tracking-wide">Стоимость уточняется</span>
+                <span class="text-base font-black text-slate-600">По запросу</span>
+            </div>
+        {% endif %}
     </div>
 
     <!-- 5) Два пункта: Основное / О себе -->

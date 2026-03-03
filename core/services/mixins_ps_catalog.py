@@ -480,7 +480,7 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
             "random_order_key": safe_random_order_key,
         }
 
-    def _render_cards_html(self, *, page_data, layout_mode):
+    def _render_cards_html(self, *, page_data, layout_mode, selected_consultation_type=None):
         """Рендерит HTML карточек для AJAX-ответа.
 
         Здесь используем тот же partial-шаблон, что и у полной страницы,
@@ -492,6 +492,7 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
                 "profiles": page_data["profiles"],
                 "layout_mode": layout_mode,
                 "catalog_detail_query": self._build_catalog_detail_query(layout_mode),
+                "catalog_selected_consultation_type": selected_consultation_type,
                 "show_sidebar": layout_mode == "sidebar",
             },
             request=self.request,
@@ -512,7 +513,11 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
 
         return {
             "status": "ok",
-            "cards_html": self._render_cards_html(page_data=page_data, layout_mode=layout_mode),
+            "cards_html": self._render_cards_html(
+                page_data=page_data,
+                layout_mode=layout_mode,
+                selected_consultation_type=filters_state.get("consultation_type"),
+            ),
             "has_next": page_data["has_next"],
             "next_page_number": page_data["next_page_number"],
             "current_page_number": page_data["current_page_number"],

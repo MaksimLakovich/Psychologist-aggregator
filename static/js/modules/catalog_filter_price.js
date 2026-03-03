@@ -34,6 +34,22 @@ export function getCatalogPriceChoices({ readJsonScript }) {
     return cachedCatalogPriceChoices;
 }
 
+// Собирает один общий список цен без дублей.
+// Это нужно для сценария, когда "Вид консультации" не выбран и пользователь должен увидеть один общий ряд кнопок.
+function getCombinedCatalogPriceChoices({ readJsonScript }) {
+    const priceChoices = getCatalogPriceChoices({ readJsonScript });
+    const combinedPriceValues = [
+        ...priceChoices.individual,
+        ...priceChoices.couple,
+    ];
+
+    return Array.from(new Set(
+        combinedPriceValues
+            .map((value) => Number.parseInt(String(value), 10))
+            .filter((value) => Number.isInteger(value) && value > 0),
+    )).sort((leftValue, rightValue) => leftValue - rightValue);
+}
+
 // Приводит выбранные цены к чистому и безопасному виду.
 // Простыми словами: оставляем только те цены, которые реально доступны в каталоге, и убираем дубли.
 export function normalizeCatalogPriceValues(rawValues, allowedValues) {
@@ -117,12 +133,24 @@ export function isCatalogPriceFilterActive(filters, { readJsonScript }) {
 // Читает текущее выбранное состояние цены прямо из открытой модалки фильтра.
 // Это нужно и для применения фильтра, и для предварительного подсчета количества найденных специалистов.
 export function getCatalogPriceModalValues({ consultationType, readJsonScript }) {
+    const commonValues = Array.from(
+        document.querySelectorAll("#catalog-price-common-hidden-inputs input"),
+    ).map((input) => input.value);
     const individualValues = Array.from(
         document.querySelectorAll("#catalog-price-individual-hidden-inputs input"),
     ).map((input) => input.value);
     const coupleValues = Array.from(
         document.querySelectorAll("#catalog-price-couple-hidden-inputs input"),
     ).map((input) => input.value);
+
+    if (!consultationType) {
+        return normalizeCatalogPriceFilters({
+            consultationType,
+            priceIndividualValues: commonValues,
+            priceCoupleValues: commonValues,
+            readJsonScript,
+        });
+    }
 
     return normalizeCatalogPriceFilters({
         consultationType,
@@ -133,7 +161,7 @@ export function getCatalogPriceModalValues({ consultationType, readJsonScript })
 }
 
 // Определяет, какие секции цен нужно показать пользователю в модалке.
-// Если уже выбран "Вид консультации", показываем только нужный формат. Если не выбран, показываем обе секции.
+// Если уже выбран "Вид консультации", показываем только нужный формат. Если не выбран, показываем один общий ряд цен без дублей.
 function getVisiblePriceSections({ catalogRuntimeState }) {
     if (catalogRuntimeState.filters.consultation_type === "individual") {
         return ["individual"];
@@ -143,7 +171,7 @@ function getVisiblePriceSections({ catalogRuntimeState }) {
         return ["couple"];
     }
 
-    return ["individual", "couple"];
+    return ["common"];
 }
 
 // Превращает число цены в аккуратную подпись на кнопке.
@@ -156,6 +184,7 @@ function formatPriceLabel(priceValue) {
 // Простыми словами: превращает список фиксированных цен в набор кнопок, по которым пользователь может быстро выбрать нужные значения.
 export function buildCatalogPriceModalHtml({
     catalogRuntimeState,
+    normalizedPriceFilters,
     escapeHtml,
     readJsonScript,
 }) {
@@ -171,13 +200,38 @@ export function buildCatalogPriceModalHtml({
     }
 
     const sectionsHtml = visibleSections.map((sectionKey) => {
-        const priceValues = Array.isArray(priceChoices[sectionKey]) ? priceChoices[sectionKey] : [];
-        const typeTitle = resolveCatalogTopicTypeLabel(sectionKey, { readJsonScript }) || sectionKey;
-        const blockId = sectionKey === "individual" ? "catalog-price-individual-block" : "catalog-price-couple-block";
-        const buttonClass = sectionKey === "individual" ? "catalog-price-individual-btn" : "catalog-price-couple-btn";
+        const priceValues = sectionKey === "common"
+            ? getCombinedCatalogPriceChoices({ readJsonScript })
+            : Array.isArray(priceChoices[sectionKey]) ? priceChoices[sectionKey] : [];
+        const typeTitle = sectionKey === "common"
+            ? "Все форматы"
+            : resolveCatalogTopicTypeLabel(sectionKey, { readJsonScript }) || sectionKey;
+        const blockId = sectionKey === "individual"
+            ? "catalog-price-individual-block"
+            : sectionKey === "couple"
+                ? "catalog-price-couple-block"
+                : "catalog-price-common-block";
+        const buttonClass = sectionKey === "individual"
+            ? "catalog-price-individual-btn"
+            : sectionKey === "couple"
+                ? "catalog-price-couple-btn"
+                : "catalog-price-common-btn";
         const hiddenWrapId = sectionKey === "individual"
             ? "catalog-price-individual-hidden-inputs"
-            : "catalog-price-couple-hidden-inputs";
+            : sectionKey === "couple"
+                ? "catalog-price-couple-hidden-inputs"
+                : "catalog-price-common-hidden-inputs";
+        const selectedValues = sectionKey === "individual"
+            ? normalizedPriceFilters.price_individual_values
+            : sectionKey === "couple"
+                ? normalizedPriceFilters.price_couple_values
+                : normalizeCatalogPriceValues(
+                    [
+                        ...normalizedPriceFilters.price_individual_values,
+                        ...normalizedPriceFilters.price_couple_values,
+                    ],
+                    getCombinedCatalogPriceChoices({ readJsonScript }),
+                );
 
         const buttonsHtml = priceValues.map((priceValue) => `
             <button
@@ -206,7 +260,7 @@ export function buildCatalogPriceModalHtml({
 
     const helperText = catalogRuntimeState.filters.consultation_type
         ? "Показаны цены только для выбранного вида консультации"
-        : "Можно выбрать цены как для индивидуальной, так и для парной консультации";
+        : "Показаны все доступные цены без разделения по виду консультации";
 
     return `
         <div class="space-y-4">
@@ -255,6 +309,7 @@ export function renderCatalogPriceModal({
 
     modalContent.innerHTML = buildCatalogPriceModalHtml({
         catalogRuntimeState,
+        normalizedPriceFilters,
         escapeHtml,
         readJsonScript,
     });
@@ -281,9 +336,35 @@ export function renderCatalogPriceModal({
         });
     }
 
+    if (visibleSections.includes("common")) {
+        const commonInitialValues = normalizeCatalogPriceValues(
+            [
+                ...normalizedPriceFilters.price_individual_values,
+                ...normalizedPriceFilters.price_couple_values,
+            ],
+            getCombinedCatalogPriceChoices({ readJsonScript }),
+        );
+
+        initMultiToggle({
+            containerSelector: "#catalog-price-common-block",
+            buttonSelector: ".catalog-price-common-btn",
+            hiddenInputsContainerSelector: "#catalog-price-common-hidden-inputs",
+            inputName: "price_common_values",
+            initialValues: commonInitialValues,
+        });
+    }
+
     visibleSections.forEach((sectionKey) => {
-        const blockId = sectionKey === "individual" ? "catalog-price-individual-block" : "catalog-price-couple-block";
-        const buttonClass = sectionKey === "individual" ? ".catalog-price-individual-btn" : ".catalog-price-couple-btn";
+        const blockId = sectionKey === "individual"
+            ? "catalog-price-individual-block"
+            : sectionKey === "couple"
+                ? "catalog-price-couple-block"
+                : "catalog-price-common-block";
+        const buttonClass = sectionKey === "individual"
+            ? ".catalog-price-individual-btn"
+            : sectionKey === "couple"
+                ? ".catalog-price-couple-btn"
+                : ".catalog-price-common-btn";
         const sectionBlock = document.getElementById(blockId);
         if (!sectionBlock) return;
 
