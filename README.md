@@ -179,7 +179,9 @@
 │    │    │    ├── dual_range_slider.js                # Общий модуль двойного ПОЛЗУНКА диапазона
 │    │    │    ├── catalog_filter_age.js               # Фильтр каталога "Возраст"
 │    │    │    ├── catalog_filter_methods.js           # Фильтр каталога "Подход"
-│    │    │    ├── 
+│    │    │    ├── catalog_filter_gender.js
+catalog_filter_experience.js
+catalog_filter_price.js
 │    │    │    └── ...
 │    │    ├── pages/                            # 💡 Оркестратор для страниц
 │    │    │    ├── personal_questions.js               # Страничный файл - собираем те JS, которые нужны для страницы "Личные вопросы"

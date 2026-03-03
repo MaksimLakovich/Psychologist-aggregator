@@ -1,12 +1,20 @@
+from datetime import date
+
+from django.db.models import Q
+
 from aggregator._web.selectors.psychologist_selectors import \
     filter_by_topic_type
 from aggregator._web.services.topic_type_mapping import \
     CLIENT_TO_TOPIC_TYPE_MAP
+from users.constants import GENDER_CHOICES
 
 # Используем уже существующий mapping-слой как единый источник истины для допустимых ключей фильтра "Вид консультации"
 CONSULTATION_TYPE_CHOICES = CLIENT_TO_TOPIC_TYPE_MAP
 DEFAULT_CATALOG_AGE_MIN = 18
 DEFAULT_CATALOG_AGE_MAX = 120
+DEFAULT_CATALOG_EXPERIENCE_MIN = 0
+DEFAULT_CATALOG_EXPERIENCE_MAX = max(date.today().year - 1900, 0)
+ALLOWED_GENDER_VALUES = {value for value, _label in GENDER_CHOICES}
 
 
 # 1. Фильтр "Вид консультации": фильтрация по ТИПУ тем (Индивидуальная/Парная)
@@ -272,24 +280,233 @@ def filter_age(queryset, age_min, age_max):
     return queryset
 
 
+# 5. Фильтр "Пол": фильтрация по полу психолога
+
+def extract_gender(raw_value):
+    """Возвращает валидное значение фильтра "Пол" или None.
+
+    Простая логика:
+        - если ключ есть в справочнике GENDER_CHOICES, возвращаем его как есть;
+        - если ключ пустой или невалидный, возвращаем None.
+
+    Значение None здесь означает:
+        - фильтр пола не выбран;
+        - в каталоге нужно показывать и мужчин, и женщин.
+    """
+    if raw_value in ALLOWED_GENDER_VALUES:
+        return raw_value
+    return None
+
+
+def filter_gender(queryset, gender):
+    """Применяет к QuerySet фильтр "Пол".
+
+    Если gender=None:
+        - фильтр не активен;
+        - возвращаем исходный QuerySet без сужения выдачи.
+
+    Если gender валиден:
+        - оставляем только психологов указанного пола.
+    """
+    if not gender:
+        return queryset
+
+    return queryset.filter(gender=gender)
+
+
+# 6. Фильтр "Цена": фильтрация по фиксированным значениям стоимости
+
+def extract_price_values(raw_values):
+    """Возвращает нормализованный список выбранных цен для фильтра "Цена".
+
+    Простая логика:
+        - принимаем список строк/чисел;
+        - оставляем только положительные целые значения;
+        - убираем дубли, сохраняя исходный порядок.
+
+    Почему здесь возвращаем список строк:
+        - во frontend state и в DOM нам удобнее работать со строками;
+        - Django безопасно преобразует такие значения при фильтрации DecimalField через __in.
+    """
+    if not isinstance(raw_values, (list, tuple)):
+        return []
+
+    normalized_price_values = []
+    seen_price_values = set()
+
+    for raw_value in raw_values:
+        try:
+            parsed_value = int(raw_value)
+        except (TypeError, ValueError):
+            continue
+
+        if parsed_value <= 0:
+            continue
+
+        normalized_value = str(parsed_value)
+        if normalized_value in seen_price_values:
+            continue
+
+        seen_price_values.add(normalized_value)
+        normalized_price_values.append(normalized_value)
+
+    return normalized_price_values
+
+
+def filter_price(queryset, consultation_type, price_individual_values, price_couple_values):
+    """Применяет к QuerySet фильтр "Цена".
+
+    Бизнес-логика здесь такая:
+        - если выбран "Индивидуальная", фильтруем только по price_individual;
+        - если выбран "Парная", фильтруем только по price_couples;
+        - если вид консультации не выбран, разрешаем фильтр по обоим полям и объединяем их через OR.
+
+    Это нужно, чтобы фильтр "Цена" корректно работал и сам по себе, и в связке с фильтром "Вид консультации".
+    """
+    normalized_individual_values = extract_price_values(price_individual_values)
+    normalized_couple_values = extract_price_values(price_couple_values)
+
+    if consultation_type == "individual":
+        if not normalized_individual_values:
+            return queryset
+        return queryset.filter(price_individual__in=normalized_individual_values)
+
+    if consultation_type == "couple":
+        if not normalized_couple_values:
+            return queryset
+        return queryset.filter(price_couples__in=normalized_couple_values)
+
+    if not normalized_individual_values and not normalized_couple_values:
+        return queryset
+
+    price_query = Q()
+    if normalized_individual_values:
+        price_query |= Q(price_individual__in=normalized_individual_values)
+    if normalized_couple_values:
+        price_query |= Q(price_couples__in=normalized_couple_values)
+
+    return queryset.filter(price_query)
+
+
+# 7. Фильтр "Опыт": фильтрация по диапазону стажа
+
+def extract_experience_range(raw_experience_min, raw_experience_max, experience_bounds=None):
+    """Возвращает безопасный диапазон опыта для фильтра "Опыт".
+
+    Простая логика:
+        - берем реальные границы стажа каталога (min/max) из БД или из fallback-констант;
+        - пытаемся преобразовать входные значения в целые числа;
+        - если значение выходит за границы каталога, прижимаем его к этим границам;
+        - если после нормализации выбран весь диапазон целиком, возвращаем (None, None),
+          то есть считаем фильтр неактивным.
+
+    Значения None здесь означают:
+        - фильтр опыта не выбран;
+        - каталог должен показывать специалистов с любым стажем.
+    """
+    experience_bounds = experience_bounds or {}
+    bounds_min = experience_bounds.get("min", DEFAULT_CATALOG_EXPERIENCE_MIN)
+    bounds_max = experience_bounds.get("max", DEFAULT_CATALOG_EXPERIENCE_MAX)
+
+    try:
+        bounds_min = int(bounds_min)
+    except (TypeError, ValueError):
+        bounds_min = DEFAULT_CATALOG_EXPERIENCE_MIN
+
+    try:
+        bounds_max = int(bounds_max)
+    except (TypeError, ValueError):
+        bounds_max = DEFAULT_CATALOG_EXPERIENCE_MAX
+
+    if bounds_min > bounds_max:
+        bounds_min, bounds_max = bounds_max, bounds_min
+
+    def parse_experience_value(raw_value):
+        """Внутренняя вспомогательная функция для обработки одного значения опыта."""
+        if raw_value in {"", None}:
+            return None
+
+        try:
+            parsed_value = int(raw_value)
+        except (TypeError, ValueError):
+            return None
+
+        if parsed_value < bounds_min:
+            return bounds_min
+
+        if parsed_value > bounds_max:
+            return bounds_max
+
+        return parsed_value
+
+    experience_min = parse_experience_value(raw_experience_min)
+    experience_max = parse_experience_value(raw_experience_max)
+
+    if experience_min is not None and experience_max is not None and experience_min > experience_max:
+        experience_min, experience_max = experience_max, experience_min
+
+    if experience_min == bounds_min:
+        experience_min = None
+
+    if experience_max == bounds_max:
+        experience_max = None
+
+    return experience_min, experience_max
+
+
+def filter_experience(queryset, experience_min, experience_max):
+    """Применяет к QuerySet фильтр "Опыт".
+
+    Важно:
+        - в модели хранится не сам стаж, а год начала практики;
+        - поэтому для фильтрации переводим стаж обратно в диапазон годов.
+
+    Пример:
+        - если нужен опыт от 10 лет, значит practice_start_year должен быть не позже current_year - 10;
+        - если нужен опыт до 3 лет, значит practice_start_year должен быть не раньше current_year - 3.
+    """
+    if experience_min is None and experience_max is None:
+        return queryset
+
+    current_year = date.today().year
+
+    if experience_min is not None:
+        max_start_year = current_year - experience_min
+        queryset = queryset.filter(practice_start_year__lte=max_start_year)
+
+    if experience_max is not None:
+        min_start_year = current_year - experience_max
+        queryset = queryset.filter(practice_start_year__gte=min_start_year)
+
+    return queryset
+
+
 # ЗАПУСК ФИЛЬТРАЦИИ
 
-def apply_catalog_basic_filters(queryset, filters_state, age_bounds=None):
+def apply_catalog_basic_filters(queryset, filters_state, age_bounds=None, experience_bounds=None):
     """Агрегирует базовые фильтры каталога и применяет их к QuerySet.
 
     На текущем шаге подключены фильтры:
         - consultation_type.
         - topic_ids.
         - method_ids.
+        - gender.
+        - price_individual_values / price_couple_values.
         - age_min / age_max.
+        - experience_min / experience_max.
 
     Формат filters_state:
         {
             "consultation_type": "individual" | "couple" | None,
             "topic_ids": ["1", "2"] | [],
             "method_ids": ["3", "7"] | [],
+            "gender": "male" | "female" | None,
+            "price_individual_values": ["2500", "3500"] | [],
+            "price_couple_values": ["3500", "4500"] | [],
             "age_min": 25 | None,
             "age_max": 40 | None,
+            "experience_min": 3 | None,
+            "experience_max": 15 | None,
         }
     """
     if not isinstance(filters_state, dict):
@@ -300,15 +517,31 @@ def apply_catalog_basic_filters(queryset, filters_state, age_bounds=None):
     )
     topic_ids = extract_topic_ids(filters_state.get("topic_ids"))
     method_ids = extract_method_ids(filters_state.get("method_ids"))
+    gender = extract_gender(filters_state.get("gender"))
+    price_individual_values = extract_price_values(filters_state.get("price_individual_values"))
+    price_couple_values = extract_price_values(filters_state.get("price_couple_values"))
     age_min, age_max = extract_age_range(
         filters_state.get("age_min"),
         filters_state.get("age_max"),
         age_bounds=age_bounds,
     )
+    experience_min, experience_max = extract_experience_range(
+        filters_state.get("experience_min"),
+        filters_state.get("experience_max"),
+        experience_bounds=experience_bounds,
+    )
 
     queryset = filter_topic_type(queryset, consultation_type)
     queryset = filter_topics(queryset, topic_ids)
     queryset = filter_methods(queryset, method_ids)
+    queryset = filter_gender(queryset, gender)
+    queryset = filter_price(
+        queryset,
+        consultation_type,
+        price_individual_values,
+        price_couple_values,
+    )
     queryset = filter_age(queryset, age_min, age_max)
+    queryset = filter_experience(queryset, experience_min, experience_max)
 
     return queryset

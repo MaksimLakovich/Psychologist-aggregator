@@ -17,6 +17,7 @@ from core.services.mixins_ps_catalog import (CatalogBackLinkMixin,
                                              CatalogPageDataMixin)
 from core.services.topic_groups import (build_topics_grouped_by_type,
                                         serialize_topics_grouped_by_type)
+from users.constants import GENDER_CHOICES
 from users.models import Method, PsychologistProfile
 
 
@@ -62,8 +63,13 @@ class PsychologistCatalogFilterAjaxView(LoginRequiredMixin, CatalogLayoutModeMix
             - consultation_type;
             - topic_ids;
             - method_ids;
+            - gender;
+            - price_individual_values;
+            - price_couple_values;
             - age_min;
             - age_max.
+            - experience_min;
+            - experience_max.
         """
         payload = self._read_payload()
 
@@ -136,7 +142,10 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
             - consultation_type_choices: справочник вариантов фильтра "Вид консультации";
             - catalog_topics_by_type: JSON-совместимый словарь со сгруппированными темами для фильтра "Симптомы";
             - catalog_methods: JSON-совместимый список методов для фильтра "Подход";
+            - catalog_gender_choices: JSON-совместимый справочник вариантов фильтра "Пол";
+            - catalog_price_choices: JSON-совместимый словарь цен для фильтра "Цена";
             - catalog_age_bounds: реальные возрастные границы каталога для фильтра "Возраст";
+            - catalog_experience_bounds: реальные границы стажа каталога для фильтра "Опыт";
             - catalog_filter_endpoint: URL AJAX-endpoint для временной фильтрации каталога;
             - current_sidebar_key: ключ для серверной подсветки активного пункта боковой навигации;
             - profiles: карточки психологов для текущей страницы каталога;
@@ -166,7 +175,13 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
             }
             for method in Method.objects.all().order_by("name")
         ]
+        context["catalog_gender_choices"] = {
+            value: "Мужчина" if value == "male" else "Женщина" if value == "female" else label.title()
+            for value, label in GENDER_CHOICES
+        }
+        context["catalog_price_choices"] = self._build_catalog_price_choices()
         context["catalog_age_bounds"] = self._build_catalog_age_bounds()
+        context["catalog_experience_bounds"] = self._build_catalog_experience_bounds()
         context["catalog_filter_endpoint"] = reverse("core:psychologist-catalog-filter")
 
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
@@ -179,8 +194,13 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
                 "consultation_type": None,
                 "topic_ids": [],
                 "method_ids": [],
+                "gender": None,
+                "price_individual_values": [],
+                "price_couple_values": [],
                 "age_min": None,
                 "age_max": None,
+                "experience_min": None,
+                "experience_max": None,
             },
             requested_page=1,
             random_order_key=self._generate_random_order_key(),

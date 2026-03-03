@@ -11,11 +11,29 @@ import {
     buildCatalogAgeTentativeFilters,
     CATALOG_AGE_FILTER_KEY,
     CATALOG_AGE_FILTER_NAME,
+    getCatalogAgeModalValues,
     isCatalogAgeFilterActive,
     normalizeCatalogAgeRange,
     renderCatalogAgeModal,
-    getCatalogAgeModalValues,
 } from "../modules/catalog_filter_age.js";
+import {
+    buildCatalogExperienceTentativeFilters,
+    CATALOG_EXPERIENCE_FILTER_KEY,
+    CATALOG_EXPERIENCE_FILTER_NAME,
+    getCatalogExperienceModalValues,
+    isCatalogExperienceFilterActive,
+    normalizeCatalogExperienceRange,
+    renderCatalogExperienceModal,
+} from "../modules/catalog_filter_experience.js";
+import {
+    buildCatalogGenderTentativeFilters,
+    CATALOG_GENDER_FILTER_KEY,
+    CATALOG_GENDER_FILTER_NAME,
+    getCatalogGenderModalValue,
+    isCatalogGenderFilterActive,
+    normalizeCatalogGender,
+    renderCatalogGenderModal,
+} from "../modules/catalog_filter_gender.js";
 import {
     buildCatalogMethodsTentativeFilters,
     CATALOG_METHODS_FILTER_KEY,
@@ -44,6 +62,15 @@ import {
     normalizeCatalogTopicIds,
     renderCatalogTopicsModal,
 } from "../modules/catalog_filter_topics.js";
+import {
+    buildCatalogPriceTentativeFilters,
+    CATALOG_PRICE_FILTER_KEY,
+    CATALOG_PRICE_FILTER_NAME,
+    getCatalogPriceModalValues,
+    isCatalogPriceFilterActive,
+    normalizeCatalogPriceFilters,
+    renderCatalogPriceModal,
+} from "../modules/catalog_filter_price.js";
 
 /**
  * Главный файл страницы каталога психологов.
@@ -76,8 +103,13 @@ const catalogRuntimeState = {
         consultation_type: null,
         topic_ids: [],
         method_ids: [],
+        gender: null,
+        price_individual_values: [],
+        price_couple_values: [],
         age_min: null,
         age_max: null,
+        experience_min: null,
+        experience_max: null,
     },
 };
 
@@ -120,14 +152,31 @@ function normalizeCatalogFilters(rawFilters = {}) {
         readJsonScript,
     });
     const methodIds = normalizeCatalogMethodIds(rawFilters?.method_ids);
+    const gender = normalizeCatalogGender(rawFilters?.gender, { readJsonScript });
+    const normalizedPriceFilters = normalizeCatalogPriceFilters({
+        consultationType,
+        priceIndividualValues: rawFilters?.price_individual_values,
+        priceCoupleValues: rawFilters?.price_couple_values,
+        readJsonScript,
+    });
     const ageRange = normalizeCatalogAgeRange(rawFilters?.age_min, rawFilters?.age_max, { readJsonScript });
+    const experienceRange = normalizeCatalogExperienceRange(
+        rawFilters?.experience_min,
+        rawFilters?.experience_max,
+        { readJsonScript },
+    );
 
     return {
         consultation_type: consultationType,
         topic_ids: topicIds,
         method_ids: methodIds,
+        gender,
+        price_individual_values: normalizedPriceFilters.price_individual_values,
+        price_couple_values: normalizedPriceFilters.price_couple_values,
         age_min: ageRange.age_min,
         age_max: ageRange.age_max,
+        experience_min: experienceRange.experience_min,
+        experience_max: experienceRange.experience_max,
     };
 }
 
@@ -216,6 +265,63 @@ const CATALOG_FILTER_REGISTRY = {
             };
         },
     },
+    [CATALOG_GENDER_FILTER_KEY]: {
+        key: CATALOG_GENDER_FILTER_KEY,
+        name: CATALOG_GENDER_FILTER_NAME,
+        isActive(filters) {
+            return isCatalogGenderFilterActive(filters, { readJsonScript });
+        },
+        renderModal({ modalContent, schedulePreviewRefresh }) {
+            renderCatalogGenderModal({
+                modalContent,
+                catalogRuntimeState,
+                schedulePreviewRefresh,
+                escapeHtml,
+                readJsonScript,
+            });
+        },
+        buildTentativeFilters() {
+            return buildCatalogGenderTentativeFilters({
+                catalogRuntimeState,
+                normalizeCatalogFilters,
+                readJsonScript,
+            });
+        },
+        readModalFilters() {
+            return {
+                gender: getCatalogGenderModalValue({ readJsonScript }),
+            };
+        },
+    },
+    [CATALOG_PRICE_FILTER_KEY]: {
+        key: CATALOG_PRICE_FILTER_KEY,
+        name: CATALOG_PRICE_FILTER_NAME,
+        isActive(filters) {
+            return isCatalogPriceFilterActive(filters, { readJsonScript });
+        },
+        renderModal({ modalContent, schedulePreviewRefresh }) {
+            renderCatalogPriceModal({
+                modalContent,
+                catalogRuntimeState,
+                schedulePreviewRefresh,
+                escapeHtml,
+                readJsonScript,
+            });
+        },
+        buildTentativeFilters() {
+            return buildCatalogPriceTentativeFilters({
+                catalogRuntimeState,
+                normalizeCatalogFilters,
+                readJsonScript,
+            });
+        },
+        readModalFilters() {
+            return getCatalogPriceModalValues({
+                consultationType: catalogRuntimeState.filters.consultation_type,
+                readJsonScript,
+            });
+        },
+    },
     [CATALOG_AGE_FILTER_KEY]: {
         key: CATALOG_AGE_FILTER_KEY,
         name: CATALOG_AGE_FILTER_NAME,
@@ -239,6 +345,31 @@ const CATALOG_FILTER_REGISTRY = {
         },
         readModalFilters() {
             return getCatalogAgeModalValues({ readJsonScript });
+        },
+    },
+    [CATALOG_EXPERIENCE_FILTER_KEY]: {
+        key: CATALOG_EXPERIENCE_FILTER_KEY,
+        name: CATALOG_EXPERIENCE_FILTER_NAME,
+        isActive(filters) {
+            return isCatalogExperienceFilterActive(filters, { readJsonScript });
+        },
+        renderModal({ modalContent, schedulePreviewRefresh }) {
+            renderCatalogExperienceModal({
+                modalContent,
+                catalogRuntimeState,
+                schedulePreviewRefresh,
+                readJsonScript,
+            });
+        },
+        buildTentativeFilters() {
+            return buildCatalogExperienceTentativeFilters({
+                catalogRuntimeState,
+                normalizeCatalogFilters,
+                readJsonScript,
+            });
+        },
+        readModalFilters() {
+            return getCatalogExperienceModalValues({ readJsonScript });
         },
     },
 };
@@ -451,8 +582,13 @@ function hydrateRuntimeStateFromDom() {
         consultation_type: null,
         topic_ids: [],
         method_ids: [],
+        gender: null,
+        price_individual_values: [],
+        price_couple_values: [],
         age_min: null,
         age_max: null,
+        experience_min: null,
+        experience_max: null,
     });
 }
 
