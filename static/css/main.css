@@ -2003,6 +2003,10 @@ input:checked + .toggle-bg {
   z-index: 100;
 }
 
+.z-\[150\] {
+  z-index: 150;
+}
+
 .order-1 {
   order: 1;
 }
@@ -5087,6 +5091,10 @@ input:checked + .toggle-bg {
 
   .md\:w-auto {
     width: auto;
+  }
+
+  .md\:max-w-2xl {
+    max-width: 42rem;
   }
 
   .md\:flex-1 {

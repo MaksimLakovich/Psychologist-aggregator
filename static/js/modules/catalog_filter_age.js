@@ -120,7 +120,7 @@ export function buildCatalogAgeModalHtml({ catalogRuntimeState, readJsonScript }
     return `
         <div class="space-y-5">
             <p class="text-sm text-gray-500 leading-relaxed">
-                Выберите возрастной диапазон психологов, которых хотите видеть в каталоге.
+                Выберите возрастной диапазон психологов, которых хотите видеть в каталоге
             </p>
 
             <div id="catalog-age-slider-root" class="catalog-dual-range relative px-10 pt-12 pb-14">
@@ -155,7 +155,7 @@ export function buildCatalogAgeModalHtml({ catalogRuntimeState, readJsonScript }
             </div>
 
             <p class="text-xs text-gray-400">
-                Двигайте левый и правый бегунок, чтобы задать диапазон возраста. Если оставить полный диапазон, фильтр не будет ограничивать каталог.
+                Двигайте левый и правый бегунок, чтобы задать диапазон возраста. Если оставить полный диапазон, фильтр не будет ограничивать каталог
             </p>
         </div>
     `;

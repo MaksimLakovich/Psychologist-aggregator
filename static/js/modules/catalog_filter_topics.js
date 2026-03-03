@@ -149,7 +149,7 @@ export function buildTopicsModalHtml({
                         class="catalog-topic-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                         ${selectedTopicIds.includes(String(topic.id)) ? "checked" : ""}
                     >
-                    <span class="text-base font-medium text-gray-900">${escapeHtml(topic.name)}</span>
+                    <span class="text-sm sm:text-base font-medium text-gray-900">${escapeHtml(topic.name)}</span>
                 </label>
             `).join("");
 
@@ -186,13 +186,13 @@ export function buildTopicsModalHtml({
     }).join("");
 
     const helperText = catalogRuntimeState.filters.consultation_type
-        ? "Показаны темы только для выбранного вида консультации."
-        : "Можно выбрать темы как для индивидуальной, так и для парной консультации.";
+        ? "Показаны темы только для выбранного вида консультации"
+        : "Можно выбрать темы как для индивидуальной, так и для парной консультации";
 
     return `
         <div class="space-y-4">
             <p class="text-sm text-gray-500 leading-relaxed">
-                Выберите симптомы и запросы, с которыми должен работать психолог.
+                Выберите симптомы и запросы, с которыми должен работать психолог
             </p>
             <div id="catalog-topic-groups-root" class="max-h-[28rem] overflow-y-auto pr-1 space-y-5">
                 ${sectionsHtml}
