@@ -42,6 +42,8 @@ export function initDualRangeSlider({
     const minBubble = getSliderElement(minBubbleSelector);
     const maxBubble = getSliderElement(maxBubbleSelector);
     const fill = getSliderElement(fillSelector);
+    const minBubbleTop = "4.2rem";
+    const maxBubbleTop = "0.2rem";
 
     if (!minInput || !maxInput || !minBubble || !maxBubble || !fill) {
         return null;
@@ -91,17 +93,42 @@ export function initDualRangeSlider({
         return ((value - minBound) / (maxBound - minBound)) * 100;
     }
 
-    // Разводит подписи над бегунками, если диапазон стал слишком узким и текст начал налезать друг на друга.
+    // Зажимает центр bubble-лейбла внутри доступной ширины ползунка.
+    // Это нужно, чтобы подписи на крайних значениях не выходили за левую и правую границу модалки.
+    function clampBubbleCenter(centerPx, bubbleWidth, rootWidth) {
+        const halfWidth = bubbleWidth / 2;
+        const minCenter = halfWidth;
+        const maxCenter = Math.max(rootWidth - halfWidth, halfWidth);
+
+        return Math.min(Math.max(centerPx, minCenter), maxCenter);
+    }
+
+    // Выставляет bubble-лейблы так, чтобы они не выходили за края модалки.
+    // Бизнес-правило здесь простое и постоянное:
+    // - значение min всегда показываем под своим бегунком;
+    // - значение max всегда показываем над своим бегунком.
+    // Благодаря этому при встрече бегунков подписи остаются читаемыми и не требуют дополнительного "разведения".
     function updateBubblePositions(minPercent, maxPercent) {
-        minBubble.style.top = "0";
-        maxBubble.style.top = "0";
+        const rootWidth = root.clientWidth || 0;
+        const minWidth = minBubble.offsetWidth || 0;
+        const maxWidth = maxBubble.offsetWidth || 0;
+
+        if (rootWidth <= 0) {
+            return;
+        }
+
+        const minCenterPx = (minPercent / 100) * rootWidth;
+        const maxCenterPx = (maxPercent / 100) * rootWidth;
+
+        const safeMinCenterPx = clampBubbleCenter(minCenterPx, minWidth, rootWidth);
+        const safeMaxCenterPx = clampBubbleCenter(maxCenterPx, maxWidth, rootWidth);
+
+        minBubble.style.left = `${safeMinCenterPx}px`;
+        maxBubble.style.left = `${safeMaxCenterPx}px`;
+        minBubble.style.top = minBubbleTop;
+        maxBubble.style.top = maxBubbleTop;
         minBubble.style.transform = "translateX(-50%)";
         maxBubble.style.transform = "translateX(-50%)";
-
-        if (Math.abs(maxPercent - minPercent) < 24) {
-            minBubble.style.transform = "translateX(calc(-100% - 0.4rem))";
-            maxBubble.style.transform = "translateX(0.4rem)";
-        }
     }
 
     // Обновляет подписи и заливку активного диапазона после любого изменения ползунка.
@@ -125,8 +152,6 @@ export function initDualRangeSlider({
         fill.style.left = `${minPercent}%`;
         fill.style.width = `${Math.max(maxPercent - minPercent, 0)}%`;
 
-        minBubble.style.left = `${minPercent}%`;
-        maxBubble.style.left = `${maxPercent}%`;
         updateBubblePositions(minPercent, maxPercent);
     }
 
@@ -175,6 +200,14 @@ export function initDualRangeSlider({
 
     setActiveHandle("max");
     applyRangeValues(initialMin, initialMax);
+
+    // После открытия модалки браузеру нужен один кадр, чтобы посчитать реальную ширину скрытого ранее контейнера.
+    // Повторный рендер на следующем кадре ставит bubble-лейблы на правильные позиции сразу после показа модалки.
+    window.requestAnimationFrame(() => {
+        applyRangeValues(minInput.value, maxInput.value);
+        minBubble.classList.add("is-ready");
+        maxBubble.classList.add("is-ready");
+    });
 
     // Возвращаем наружу простой API, чтобы фильтр мог при необходимости прочитать текущее состояние.
     return {

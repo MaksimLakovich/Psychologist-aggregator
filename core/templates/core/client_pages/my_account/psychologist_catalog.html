@@ -86,6 +86,17 @@
         box-shadow: 0 6px 14px rgba(79, 70, 229, 0.18);
         cursor: pointer;
     }
+
+    .catalog-range-bubble {
+        max-width: calc(100% - 1rem);
+        pointer-events: none;
+        white-space: nowrap;
+        will-change: left, top, transform;
+    }
+
+    .catalog-range-bubble.is-ready {
+        transition: left 180ms ease, top 180ms ease, transform 180ms ease;
+    }
 </style>
 {% endblock %}
 

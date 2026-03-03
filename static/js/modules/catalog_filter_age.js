@@ -123,14 +123,14 @@ export function buildCatalogAgeModalHtml({ catalogRuntimeState, readJsonScript }
                 Выберите возрастной диапазон психологов, которых хотите видеть в каталоге.
             </p>
 
-            <div id="catalog-age-slider-root" class="catalog-dual-range relative px-10 pt-12 pb-3">
+            <div id="catalog-age-slider-root" class="catalog-dual-range relative px-10 pt-12 pb-14">
                 <div class="absolute left-1 right-1 top-12 h-2 rounded-full bg-slate-200"></div>
                 <div id="catalog-age-slider-fill" class="absolute top-12 h-2 rounded-full bg-indigo-500"></div>
 
-                <div id="catalog-age-bubble-min" class="absolute top-0 -translate-x-1/2 rounded-xl bg-indigo-600 px-3 py-1 text-base font-bold text-white shadow-md">
+                <div id="catalog-age-bubble-min" style="top: 4.2rem;" class="catalog-range-bubble absolute -translate-x-1/2 rounded-xl bg-indigo-600 px-3 py-1 text-base font-bold text-white shadow-md">
                     ${sliderValues.min}
                 </div>
-                <div id="catalog-age-bubble-max" class="absolute top-0 -translate-x-1/2 rounded-xl bg-indigo-600 px-3 py-1 text-base font-bold text-white shadow-md">
+                <div id="catalog-age-bubble-max" style="top: 0.2rem;" class="catalog-range-bubble absolute -translate-x-1/2 rounded-xl bg-indigo-600 px-3 py-1 text-base font-bold text-white shadow-md">
                     ${sliderValues.max}
                 </div>
 
