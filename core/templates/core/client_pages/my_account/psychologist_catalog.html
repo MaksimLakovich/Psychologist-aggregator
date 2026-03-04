@@ -36,20 +36,7 @@
         animation: fadeInUp 0.7s ease-out forwards;
     }
 
-    /* ??? */
-    .catalog-filter-drag-track {
-        cursor: grab;
-        user-select: none;
-    }
-
-    .catalog-filter-drag-track.is-dragging {
-        cursor: grabbing;
-    }
-
-    .catalog-filter-drag-thumb {
-        min-width: 3rem;
-    }
-
+    /* Чипы фильтров выровнены по scroll-snap, чтобы горизонтальный скролл ощущался предсказуемо на тач-устройствах */
     #catalog-filter-scroll-area [data-filter-chip] {
         scroll-snap-align: start;
     }
