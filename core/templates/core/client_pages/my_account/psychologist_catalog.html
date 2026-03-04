@@ -37,6 +37,30 @@
     }
 
     /* Чипы фильтров выровнены по scroll-snap, чтобы горизонтальный скролл ощущался предсказуемо на тач-устройствах */
+    #catalog-filter-scroll-area {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(129, 140, 248, 0.7) rgba(224, 231, 255, 0.32);
+    }
+
+    #catalog-filter-scroll-area::-webkit-scrollbar {
+        height: 0.55rem;
+    }
+
+    #catalog-filter-scroll-area::-webkit-scrollbar-track {
+        background: rgba(224, 231, 255, 0.32);
+        border-radius: 9999px;
+    }
+
+    #catalog-filter-scroll-area::-webkit-scrollbar-thumb {
+        background: rgba(129, 140, 248, 0.7);
+        border: 2px solid rgba(255, 255, 255, 0.45);
+        border-radius: 9999px;
+    }
+
+    #catalog-filter-scroll-area::-webkit-scrollbar-thumb:hover {
+        background: rgba(129, 140, 248, 0.85);
+    }
+
     #catalog-filter-scroll-area [data-filter-chip] {
         scroll-snap-align: start;
     }
@@ -194,23 +218,30 @@
                     <div
                         id="catalog-filter-scroll-area"
                         data-filter-icon-src="{% static 'images/menu/filter-icon.svg' %}"
-                        class="flex overflow-x-auto pb-4 gap-3 pr-6"
+                        class="flex overflow-x-auto pb-4 gap-3 pr-2"
                         style="scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;"
                     ></div>
                 </div>
 
-                <button
-                    id="catalog-reset-filters-btn"
-                    type="button"
-                    class="inline-flex flex-shrink-0 items-center rounded-2xl
-                    px-4 py-3 text-sm font-bold text-rose-400/40 bg-rose-200/25 transition-all
-                    hover:bg-rose-200/40 hover:text-rose-400/60
-                    disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                    Сбросить фильтры
-                </button>
+                <!-- Контейнер кнопки с "мягким" краем -->
+                <div class="relative flex-shrink-0 flex items-start">
+                    <!-- Градиентное размытие белого фона (1 см / 40px) -->
+                    <div class="absolute inset-y-0 -left-10 w-10 pointer-events-none bg-gradient-to-r from-transparent via-white/70 to-white"></div>
+
+                    <button
+                        id="catalog-reset-filters-btn"
+                        type="button"
+                        class="relative z-10 inline-flex items-center rounded-2xl
+                        px-4 py-3 text-sm font-bold text-rose-400/40 bg-rose-200/25 transition-all
+                        hover:bg-rose-200/40 hover:text-rose-400/60
+                        disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        Сбросить фильтры
+                    </button>
+                </div>
             </div>
         </div>
+
 
         <!-- Сетка карточек: 1 на mobile, 2 на tablet, 3 на desktop -->
         <div
