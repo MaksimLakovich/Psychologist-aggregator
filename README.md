@@ -173,15 +173,22 @@
 │    │    │    ├── menu_client_profile.js              # Добавления эффектов в "МЕНЮ" для ClientProfile
 │    │    │    ├── navigation_client_accordion.js      # Модуль управления аккордеоном в боковой "НАВИГАЦИИ" для ClientProfile
 │    │    │    ├── edit_client_profile.js              # Скрипт управляет режимами просмотра/редактирования формы профиля клиента
+│    │    │    ├── catalog_api.js                      # API-слой каталога. Задача: собирать HTTP-запрос к backend в одном месте; давать page-слою единый метод для preview-count, фильтрации, догрузки и restore-flow
+│    │    │    ├── catalog_restore.js                  # Restore-flow каталога. Отвечает за: запись текущего списка в sessionStorage; восстановление списка и позиции после возврата из detail; привязку кликов по ссылкам в detail
+│    │    │    ├── catalog_filter_registry.js          # Единый реестр фильтров каталога
+│    │    │    ├── catalog_page_runtime.js             # Общее runtime-состояние страницы каталога. Здесь живут только данные и инфраструктурные helper-функции, которые нужны сразу нескольким модулям страницы
+│    │    │    ├── catalog_ui.js                       # UI-слой каталога. Здесь живут только функции рендера и инициализации DOM-элементов, без knowledge о transport-слое и restore-flow
+│    │    │    ├── catalog_page.js                     # Оркестратор страницы каталога психологов
 │    │    │    ├── catalog_state.js                    # Общий модуль для хранения/чтения состояния каталога психологов в sessionStorage, чтобы не дублировать один и тот же код в нескольких файлах: psychologist_catalog.js, psychologist_catalog_detail.js
 │    │    │    ├── catalog_filter_topic_type.js        # Фильтр каталога "Вид консультации" (фильтр по типу тем - "Индивидуальная/Парная")
 │    │    │    ├── catalog_filter_topics.js            # Фильтр каталога "Симптомы"
 │    │    │    ├── dual_range_slider.js                # Общий модуль двойного ПОЛЗУНКА диапазона
 │    │    │    ├── catalog_filter_age.js               # Фильтр каталога "Возраст"
 │    │    │    ├── catalog_filter_methods.js           # Фильтр каталога "Подход"
-│    │    │    ├── catalog_filter_gender.js
-catalog_filter_experience.js
-catalog_filter_price.js
+│    │    │    ├── catalog_filter_gender.js            # Фильтр каталога "Пол"
+│    │    │    ├── catalog_filter_experience.js        # Фильтр каталога "Опыт"
+│    │    │    ├── catalog_filter_price.js             # Фильтр каталога "Цена"
+│    │    │    ├── catalog_filter_session_time.js      # Фильтр каталога "Время сессии"
 │    │    │    └── ...
 │    │    ├── pages/                            # 💡 Оркестратор для страниц
 │    │    │    ├── personal_questions.js               # Страничный файл - собираем те JS, которые нужны для страницы "Личные вопросы"
