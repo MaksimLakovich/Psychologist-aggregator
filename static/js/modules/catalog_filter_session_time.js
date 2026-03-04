@@ -73,12 +73,12 @@ export function buildCatalogSessionTimeModalHtml({
     const sessionTimeMode = normalizeCatalogSessionTimeMode(catalogRuntimeState.filters.session_time_mode);
     const slotsWrapperClass = sessionTimeMode === "specific" ? "mt-4 rounded-2xl bg-gray-50" : "hidden mt-4 rounded-2xl bg-gray-50";
     const helperText = sessionTimeMode === "specific"
-        ? "Выберите один или несколько доменных временных слотов, чтобы показать специалистов с подходящим расписанием"
+        ? "Будут показаны специалисты, к которым можно записаться в указанное вами день и время"
         : "Если оставить режим \"Любое\", каталог не будет дополнительно фильтроваться по времени";
 
     return `
         <div class="space-y-4">
-            <p class="text-sm text-gray-500 leading-relaxed">
+            <p class="text-sm pb-4 text-gray-500 leading-relaxed">
                 Выберите, нужно ли учитывать конкретное время сессии при фильтрации каталога
             </p>
 
@@ -118,10 +118,6 @@ export function buildCatalogSessionTimeModalHtml({
                     <div id="ts-hidden-inputs" class="hidden"></div>
                 </div>
 
-                <p class="text-sm text-center text-gray-500 py-6 px-6">
-                    Сначала будут показаны специалисты, к которым можно записаться в указанное вами день и время.
-                    Когда приложение бронирования будет полностью готово, фильтр учтет и занятые встречи.
-                </p>
             </div>
 
             <p class="text-xs text-gray-400">

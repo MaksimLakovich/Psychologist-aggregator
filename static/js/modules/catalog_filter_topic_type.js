@@ -75,7 +75,7 @@ export function renderCatalogTopicTypeModal({
             <p class="text-sm pb-4 text-gray-500 leading-relaxed">
                 Выберите формат консультации для фильтрации карточек
             </p>
-            <div id="catalog-consultation-block" class="grid grid-cols-2 pb-4 gap-3 max-w-md">
+            <div id="catalog-consultation-block" class="grid grid-cols-2 gap-3 max-w-md">
                 <button type="button" data-value="individual" class="catalog-consultation-btn px-4 py-2 rounded-lg border text-base font-medium">
                     ${escapeHtml(individualLabel)}
                 </button>
