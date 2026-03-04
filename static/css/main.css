@@ -3062,6 +3062,10 @@ input:checked + .toggle-bg {
   border-radius: 3rem;
 }
 
+.rounded-\[1\.75rem\] {
+  border-radius: 1.75rem;
+}
+
 .rounded-e-lg {
   border-start-end-radius: 0.5rem;
   border-end-end-radius: 0.5rem;
@@ -3255,6 +3259,16 @@ input:checked + .toggle-bg {
 
 .border-rose-100\/70 {
   border-color: rgb(255 228 230 / 0.7);
+}
+
+.border-amber-100 {
+  --tw-border-opacity: 1;
+  border-color: rgb(254 243 199 / var(--tw-border-opacity, 1));
+}
+
+.border-indigo-600 {
+  --tw-border-opacity: 1;
+  border-color: rgb(88 80 236 / var(--tw-border-opacity, 1));
 }
 
 .\!bg-gray-50 {
@@ -3557,6 +3571,24 @@ input:checked + .toggle-bg {
 
 .bg-rose-200\/25 {
   background-color: rgb(254 205 211 / 0.25);
+}
+
+.bg-amber-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 243 199 / var(--tw-bg-opacity, 1));
+}
+
+.bg-indigo-50\/60 {
+  background-color: rgb(240 245 255 / 0.6);
+}
+
+.bg-slate-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(241 245 249 / var(--tw-bg-opacity, 1));
+}
+
+.bg-slate-50\/60 {
+  background-color: rgb(248 250 252 / 0.6);
 }
 
 .bg-gradient-to-br {
@@ -4292,6 +4324,16 @@ input:checked + .toggle-bg {
   color: rgb(251 113 133 / 0.4);
 }
 
+.text-amber-500 {
+  --tw-text-opacity: 1;
+  color: rgb(245 158 11 / var(--tw-text-opacity, 1));
+}
+
+.text-amber-700 {
+  --tw-text-opacity: 1;
+  color: rgb(180 83 9 / var(--tw-text-opacity, 1));
+}
+
 .line-through {
   text-decoration-line: line-through;
 }
@@ -4916,6 +4958,11 @@ input:checked + .toggle-bg {
 
 .hover\:text-rose-400\/60:hover {
   color: rgb(251 113 133 / 0.6);
+}
+
+.hover\:text-slate-700:hover {
+  --tw-text-opacity: 1;
+  color: rgb(51 65 85 / var(--tw-text-opacity, 1));
 }
 
 .hover\:underline:hover {
