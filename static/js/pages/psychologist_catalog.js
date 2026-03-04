@@ -110,7 +110,16 @@ const catalogRuntimeState = {
     order_key: null,
     anchor: null,
     scroll_y: 0,
-    filters: {
+    filters: {},
+};
+
+// Храним id последнего preview-запроса, чтобы старый ответ не перерисовал кнопку поверх нового состояния модалки.
+let activePreviewRequestId = 0;
+
+// Возвращает дефолтное состояние всех фильтров каталога.
+// Это один общий источник правды для первого рендера страницы и для кнопки "Сбросить фильтры".
+function buildDefaultCatalogFilters() {
+    return {
         consultation_type: null,
         topic_ids: [],
         method_ids: [],
@@ -123,11 +132,10 @@ const catalogRuntimeState = {
         experience_max: null,
         session_time_mode: "any",
         selected_session_slots: [],
-    },
-};
+    };
+}
 
-// Храним id последнего preview-запроса, чтобы старый ответ не перерисовал кнопку поверх нового состояния модалки.
-let activePreviewRequestId = 0;
+catalogRuntimeState.filters = buildDefaultCatalogFilters();
 
 // Преобразует текст в безопасный HTML.
 // Это нужно, потому что часть текста приходит из БД и не должна вставляться в DOM как сырой HTML.
@@ -538,6 +546,21 @@ function renderFilterChipStates() {
     });
 }
 
+// Проверяет, есть ли в каталоге хотя бы один реально активный фильтр.
+// Это нужно для кнопки "Сбросить фильтры", чтобы она была активна только тогда, когда сбрасывать действительно есть что.
+function hasActiveCatalogFilters(filters) {
+    return Object.values(CATALOG_FILTER_REGISTRY).some((filterConfig) => filterConfig.isActive(filters));
+}
+
+// Обновляет состояние кнопки "Сбросить фильтры".
+// Когда фильтры не установлены, делаем кнопку неактивной и визуально спокойной.
+function renderResetFiltersButtonState() {
+    const resetButton = document.getElementById("catalog-reset-filters-btn");
+    if (!resetButton) return;
+
+    resetButton.disabled = !hasActiveCatalogFilters(catalogRuntimeState.filters);
+}
+
 // Обновляет текстовый индикатор текущей страницы каталога.
 function renderCurrentPageIndicator(currentPage, totalPages) {
     const indicator = document.getElementById("catalog-page-indicator");
@@ -628,20 +651,7 @@ function hydrateRuntimeStateFromDom() {
     catalogRuntimeState.current_page = toPositiveInt(loadMoreButton.dataset.currentPage, 1);
     catalogRuntimeState.total_pages = toNonNegativeInt(loadMoreButton.dataset.totalPages, 0);
     catalogRuntimeState.order_key = toNonNegativeInt(loadMoreButton.dataset.randomOrderKey, null);
-    catalogRuntimeState.filters = normalizeCatalogFilters({
-        consultation_type: null,
-        topic_ids: [],
-        method_ids: [],
-        gender: null,
-        price_individual_values: [],
-        price_couple_values: [],
-        age_min: null,
-        age_max: null,
-        experience_min: null,
-        experience_max: null,
-        session_time_mode: "any",
-        selected_session_slots: [],
-    });
+    catalogRuntimeState.filters = normalizeCatalogFilters(buildDefaultCatalogFilters());
 }
 
 // Сохраняет текущее состояние каталога в sessionStorage.
@@ -686,6 +696,7 @@ function applyCatalogResponse(data, { appendMode = false } = {}) {
     renderCurrentPageIndicator(catalogRuntimeState.current_page, catalogRuntimeState.total_pages);
     renderEmptyState(data.total_count);
     renderFilterChipStates();
+    renderResetFiltersButtonState();
     persistCatalogState();
 }
 
@@ -750,15 +761,6 @@ async function applyCatalogFilters(partialFilters = {}) {
     }
 }
 
-// Возвращает стандартный текст-заглушку для фильтров, которые еще не подключены.
-function buildUnsupportedFilterHtml() {
-    return `
-        <p class="text-sm text-gray-500 leading-relaxed">
-            Этот фильтр будет подключен на следующем шаге. Сейчас можно закрыть модалку.
-        </p>
-    `;
-}
-
 // Инициализирует общую модалку фильтров каталога.
 // Здесь живет только оболочка модалки и диспетчеризация, а контент и бизнес-логика конкретных фильтров остаются в catalog_filter_*.js.
 function initCatalogFiltersModal() {
@@ -808,6 +810,8 @@ function initCatalogFiltersModal() {
         const filterName = filterButton.dataset.filterName || "Фильтр";
 
         openedFilterConfig = getCatalogFilterConfig({ filterKey, filterName });
+        if (!openedFilterConfig) return;
+
         modalTitle.textContent = filterName;
         renderOpenedFilterModal();
         modal.classList.remove("hidden");
@@ -852,14 +856,8 @@ function initCatalogFiltersModal() {
     }
 
     // Отрисовывает контент для открытого фильтра.
-    // Если конкретный фильтр еще не подключен, показываем стандартную заглушку.
+    // В этот момент конфиг фильтра уже найден, поэтому здесь остается только вызвать нужный filter-модуль и обновить preview-count.
     function renderOpenedFilterModal() {
-        if (!openedFilterConfig) {
-            modalContent.innerHTML = buildUnsupportedFilterHtml();
-            applyButton.textContent = APPLY_RESULTS_LABEL;
-            return;
-        }
-
         openedFilterConfig.renderModal({
             modalContent,
             schedulePreviewRefresh,
@@ -899,11 +897,10 @@ function initCatalogFiltersModal() {
 
 // Инициализирует кнопку "Показать еще" для догрузки следующих страниц каталога.
 function initLoadMore() {
-    const grid = document.getElementById("catalog-cards-grid");
     const loadMoreButton = getLoadMoreButton();
     const errorLabel = document.getElementById("catalog-load-more-error");
 
-    if (!grid || !loadMoreButton) return;
+    if (!loadMoreButton) return;
 
     loadMoreButton.addEventListener("click", async () => {
         const requestedPage = toPositiveInt(loadMoreButton.dataset.nextPage, null);
@@ -938,6 +935,113 @@ function initScrollToTopButton() {
     if (!scrollTopButton) return;
 
     scrollTopButton.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+}
+
+// Инициализирует нижнюю drag-полоску для горизонтального ряда фильтров.
+// Бизнес-смысл: даем пользователю понятную область, которую можно "схватить" мышкой и протянуть влево-вправо.
+function initCatalogFilterDragTrack() {
+    const scroller = document.getElementById("catalog-filter-scroll-area");
+    const dragTrack = document.getElementById("catalog-filter-drag-track");
+    const dragThumb = document.getElementById("catalog-filter-drag-thumb");
+    if (!scroller || !dragTrack || !dragThumb) return;
+
+    let isDragging = false;
+
+    // Синхронизирует ширину и положение бегунка с реальным горизонтальным скроллом ряда фильтров.
+    function syncDragThumb() {
+        const maxScrollLeft = Math.max(scroller.scrollWidth - scroller.clientWidth, 0);
+        const hasOverflow = maxScrollLeft > 0;
+
+        dragTrack.classList.toggle("hidden", !hasOverflow);
+        if (!hasOverflow) {
+            dragThumb.style.width = "100%";
+            dragThumb.style.transform = "translateX(0)";
+            return;
+        }
+
+        const trackWidth = dragTrack.clientWidth;
+        const visibleRatio = scroller.clientWidth / scroller.scrollWidth;
+        const thumbWidth = Math.max(trackWidth * visibleRatio, 48);
+        const maxThumbOffset = Math.max(trackWidth - thumbWidth, 0);
+        const thumbOffset = maxScrollLeft > 0
+            ? (scroller.scrollLeft / maxScrollLeft) * maxThumbOffset
+            : 0;
+
+        dragThumb.style.width = `${thumbWidth}px`;
+        dragThumb.style.transform = `translateX(${thumbOffset}px)`;
+    }
+
+    // Переводит позицию курсора внутри полоски в scrollLeft реального ряда фильтров.
+    function updateScrollFromPointer(clientX) {
+        const trackRect = dragTrack.getBoundingClientRect();
+        const maxScrollLeft = Math.max(scroller.scrollWidth - scroller.clientWidth, 0);
+        if (trackRect.width <= 0 || maxScrollLeft <= 0) return;
+
+        const thumbWidth = dragThumb.offsetWidth;
+        const maxThumbOffset = Math.max(trackRect.width - thumbWidth, 0);
+        const rawOffset = clientX - trackRect.left - thumbWidth / 2;
+        const boundedOffset = Math.min(Math.max(rawOffset, 0), maxThumbOffset);
+        const scrollRatio = maxThumbOffset > 0 ? boundedOffset / maxThumbOffset : 0;
+
+        scroller.scrollLeft = scrollRatio * maxScrollLeft;
+    }
+
+    dragTrack.addEventListener("pointerdown", (event) => {
+        isDragging = true;
+        dragTrack.classList.add("is-dragging");
+        dragTrack.setPointerCapture(event.pointerId);
+        updateScrollFromPointer(event.clientX);
+    });
+
+    dragTrack.addEventListener("pointermove", (event) => {
+        if (!isDragging) return;
+        updateScrollFromPointer(event.clientX);
+    });
+
+    function stopDragging(event) {
+        if (!isDragging) return;
+        isDragging = false;
+        dragTrack.classList.remove("is-dragging");
+        if (typeof event.pointerId !== "undefined") {
+            dragTrack.releasePointerCapture(event.pointerId);
+        }
+    }
+
+    dragTrack.addEventListener("pointerup", stopDragging);
+    dragTrack.addEventListener("pointercancel", stopDragging);
+    scroller.addEventListener("scroll", syncDragThumb, { passive: true });
+    window.addEventListener("resize", syncDragThumb);
+
+    syncDragThumb();
+}
+
+// Инициализирует кнопку "Сбросить фильтры".
+// При нажатии возвращаем каталог к начальному состоянию: все фильтры снимаются и снова показываются все специалисты.
+function initResetFiltersButton() {
+    const resetButton = document.getElementById("catalog-reset-filters-btn");
+    const errorLabel = document.getElementById("catalog-load-more-error");
+    if (!resetButton) return;
+
+    renderResetFiltersButtonState();
+
+    resetButton.addEventListener("click", async () => {
+        if (resetButton.disabled) return;
+
+        resetButton.disabled = true;
+        if (errorLabel) {
+            errorLabel.classList.add("hidden");
+        }
+
+        const isApplied = await applyCatalogFilters(buildDefaultCatalogFilters());
+        if (!isApplied) {
+            renderResetFiltersButtonState();
+            return;
+        }
+
+        catalogRuntimeState.anchor = null;
+        catalogRuntimeState.scroll_y = 0;
         window.scrollTo({ top: 0, behavior: "smooth" });
     });
 }
@@ -1019,11 +1123,14 @@ async function bootstrapCatalogPage() {
     hydrateRuntimeStateFromDom();
     renderCurrentPageIndicator(catalogRuntimeState.current_page, catalogRuntimeState.total_pages);
     renderFilterChipStates();
+    renderResetFiltersButtonState();
 
     initCatalogFiltersModal();
     initCardTabs();
     initLoadMore();
     initScrollToTopButton();
+    initCatalogFilterDragTrack();
+    initResetFiltersButton();
 
     await restoreCatalogIfNeeded();
     initCatalogStatePersistence();

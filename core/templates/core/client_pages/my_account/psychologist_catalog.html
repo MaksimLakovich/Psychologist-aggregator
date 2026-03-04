@@ -36,9 +36,23 @@
         animation: fadeInUp 0.7s ease-out forwards;
     }
 
-    /* Скрытие скроллбара для панели фильтров */
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* ??? */
+    .catalog-filter-drag-track {
+        cursor: grab;
+        user-select: none;
+    }
+
+    .catalog-filter-drag-track.is-dragging {
+        cursor: grabbing;
+    }
+
+    .catalog-filter-drag-thumb {
+        min-width: 3rem;
+    }
+
+    #catalog-filter-scroll-area [data-filter-chip] {
+        scroll-snap-align: start;
+    }
 
     /* Общий стиль двойного ползунка диапазона для фильтров каталога */
     .catalog-dual-range input[type="range"] {
@@ -188,63 +202,78 @@
                 <span class="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Настройка поиска</span>
             </div>
 
-            <div class="no-scrollbar flex overflow-x-auto pb-4 gap-3">
-                <button type="button"
-                        data-filter-chip
-                        data-filter-key="consultation_type"
-                        data-filter-name="Вид консультации"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 border border-slate-100 rounded-2xl text-sm font-bold bg-slate-200/40 text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Вид консультации
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button type="button"
-                        data-filter-chip
-                        data-filter-key="topic_ids"
-                        data-filter-name="Симптомы"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Симптомы
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button type="button"
-                        data-filter-chip
-                        data-filter-key="age_range"
-                        data-filter-name="Возраст"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Возраст
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button type="button"
-                        data-filter-chip
-                        data-filter-key="method_ids"
-                        data-filter-name="Подход"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Подход
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button type="button"
-                        data-filter-chip
-                        data-filter-key="gender"
-                        data-filter-name="Пол"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Пол
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button type="button"
-                        data-filter-chip
-                        data-filter-key="price_filter"
-                        data-filter-name="Цена"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Цена
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button type="button"
-                        data-filter-chip
-                        data-filter-key="experience_range"
-                        data-filter-name="Опыт"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Опыт
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button type="button"
-                        data-filter-chip
-                        data-filter-key="session_time"
-                        data-filter-name="Время сессии"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Время сессии
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+            <div class="flex items-start justify-between gap-3">
+                <div class="relative min-w-0 flex-1">
+                    <div id="catalog-filter-scroll-area" class="flex overflow-x-auto pb-4 gap-3 pr-6" style="scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;">
+                        <button type="button"
+                                data-filter-chip
+                                data-filter-key="consultation_type"
+                                data-filter-name="Вид консультации"
+                                class="inline-flex gap-1 flex-shrink-0 px-3 py-3 border border-slate-100 rounded-2xl text-sm font-bold bg-slate-200/40 text-slate-600
+                                 hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Вид консультации
+                            <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+                        <button type="button"
+                                data-filter-chip
+                                data-filter-key="topic_ids"
+                                data-filter-name="Симптомы"
+                                class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
+                                 hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Симптомы
+                            <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+                        <button type="button"
+                                data-filter-chip
+                                data-filter-key="age_range"
+                                data-filter-name="Возраст"
+                                class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
+                                 hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Возраст
+                            <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+                        <button type="button"
+                                data-filter-chip
+                                data-filter-key="method_ids"
+                                data-filter-name="Подход"
+                                class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
+                                 hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Подход
+                            <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+                        <button type="button"
+                                data-filter-chip
+                                data-filter-key="gender"
+                                data-filter-name="Пол"
+                                class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
+                                 hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Пол
+                            <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+                        <button type="button"
+                                data-filter-chip
+                                data-filter-key="price_filter"
+                                data-filter-name="Цена"
+                                class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
+                                 hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Цена
+                            <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+                        <button type="button"
+                                data-filter-chip
+                                data-filter-key="experience_range"
+                                data-filter-name="Опыт"
+                                class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
+                                 hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Опыт
+                            <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+                        <button type="button"
+                                data-filter-chip
+                                data-filter-key="session_time"
+                                data-filter-name="Время сессии"
+                                class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
+                                 hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Время сессии
+                            <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+                    </div>
+                </div>
+
+                <button
+                    id="catalog-reset-filters-btn"
+                    type="button"
+                    class="inline-flex flex-shrink-0 items-center rounded-2xl
+                    px-4 py-3 text-sm font-bold text-rose-400/40 bg-rose-200/25 transition-all
+                    hover:bg-rose-200/40 hover:text-rose-400/60
+                    disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                    Сбросить фильтры
+                </button>
             </div>
         </div>
 
@@ -270,8 +299,8 @@
         </div>
 
         <!-- Нижняя панель: слева номер страницы, по центру "Показать еще", справа "Вернуться в начало" -->
-        <div class="mt-20 grid items-center gap-6 text-zinc-400 md:grid-cols-3 border-t border-indigo-100/50 pt-10">
-            <p id="catalog-page-indicator" class="text-sm font-bold uppercase tracking-widest md:justify-self-start text-indigo-900/40">
+        <div class="mt-20 grid grid-cols-[auto_1fr_auto] items-center gap-3 border-t border-indigo-100/50 pt-10 text-zinc-400 md:grid-cols-3 md:gap-6">
+            <p id="catalog-page-indicator" class="text-xs font-bold uppercase tracking-widest text-indigo-900/40 md:justify-self-start md:text-sm">
                 {% if total_pages %}
                     Страница <span class="text-indigo-600">{{ current_page_number|default:1 }}</span> из {{ total_pages }}
                 {% else %}
@@ -290,7 +319,8 @@
                     data-total-pages="{{ total_pages|default:0 }}"
                     data-random-order-key="{{ random_order_key }}"
                     data-layout="{{ layout_mode }}"
-                    class="rounded-2xl bg-indigo-600 px-10 py-4 text-base font-black tracking-wide text-white transition
+                    class="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-black tracking-wide text-white transition
+                    sm:px-10 sm:py-4 sm:text-base
                     hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                     {% if not has_next %}hidden{% endif %}
                 >
@@ -302,7 +332,7 @@
                 </p>
             </div>
 
-            <div class="flex justify-start md:justify-self-end">
+            <div class="flex justify-end md:justify-self-end">
                 <button
                     id="catalog-scroll-top-btn"
                     type="button"
