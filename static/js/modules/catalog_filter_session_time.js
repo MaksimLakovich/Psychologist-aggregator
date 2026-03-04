@@ -19,6 +19,14 @@ export function normalizeCatalogSessionTimeMode(rawValue) {
     return rawValue === "specific" ? "specific" : "any";
 }
 
+// Возвращает поясняющий текст для текущего режима фильтра "Время сессии".
+// Это нужно, чтобы одна и та же бизнес-формулировка использовалась и при первой отрисовке модалки, и при переключении режима внутри нее.
+function resolveCatalogSessionTimeHelperText(sessionTimeMode) {
+    return sessionTimeMode === "specific"
+        ? "Будут показаны специалисты, к которым можно записаться в указанное вами день и время"
+        : "Если оставить режим \"Любое\", каталог не будет дополнительно фильтроваться по времени";
+}
+
 // Приводит выбранные доменные слоты к чистому и безопасному виду.
 // Простыми словами: оставляем только валидные ISO-значения datetime, убираем дубли и получаем предсказуемый набор для каталога и backend.
 export function normalizeCatalogSelectedSessionSlots(rawValues) {
@@ -68,13 +76,10 @@ export function getCatalogSessionTimeModalSelectedSlots() {
 // Простыми словами: рисует две кнопки выбора режима и контейнер для уже существующего UI доменных слотов.
 export function buildCatalogSessionTimeModalHtml({
     catalogRuntimeState,
-    domainSlotsEndpoint,
 }) {
     const sessionTimeMode = normalizeCatalogSessionTimeMode(catalogRuntimeState.filters.session_time_mode);
     const slotsWrapperClass = sessionTimeMode === "specific" ? "mt-4 rounded-2xl bg-gray-50" : "hidden mt-4 rounded-2xl bg-gray-50";
-    const helperText = sessionTimeMode === "specific"
-        ? "Будут показаны специалисты, к которым можно записаться в указанное вами день и время"
-        : "Если оставить режим \"Любое\", каталог не будет дополнительно фильтроваться по времени";
+    const helperText = resolveCatalogSessionTimeHelperText(sessionTimeMode);
 
     return `
         <div class="space-y-4">
@@ -100,7 +105,6 @@ export function buildCatalogSessionTimeModalHtml({
             <div
                 id="catalog-time-slots-wrapper"
                 class="${slotsWrapperClass}"
-                data-domain-slots-endpoint="${domainSlotsEndpoint}"
             >
                 <div
                     id="ts-days-row"
@@ -120,7 +124,7 @@ export function buildCatalogSessionTimeModalHtml({
 
             </div>
 
-            <p class="text-xs text-gray-400">
+            <p id="catalog-session-time-helper-text" class="text-xs text-gray-400">
                 ${helperText}
             </p>
         </div>
@@ -154,7 +158,6 @@ export function renderCatalogSessionTimeModal({
 
     modalContent.innerHTML = buildCatalogSessionTimeModalHtml({
         catalogRuntimeState,
-        domainSlotsEndpoint,
     });
 
     initToggleGroup({
@@ -171,6 +174,22 @@ export function renderCatalogSessionTimeModal({
     const anyButton = document.getElementById("catalog-session-time-any-btn");
     const specificButton = document.getElementById("catalog-session-time-specific-btn");
     const slotsWrapper = document.getElementById("catalog-time-slots-wrapper");
+    const helperText = document.getElementById("catalog-session-time-helper-text");
+
+    // Синхронизирует UI открытой модалки с текущим режимом "Любое/Конкретное".
+    // Простыми словами: сразу переключает видимость блока слотов и поясняющий текст, не дожидаясь повторного открытия модалки.
+    function syncSessionTimeModeUi() {
+        const currentMode = getCatalogSessionTimeModalMode();
+        const isSpecificMode = currentMode === "specific";
+
+        if (slotsWrapper) {
+            slotsWrapper.classList.toggle("hidden", !isSpecificMode);
+        }
+
+        if (helperText) {
+            helperText.textContent = resolveCatalogSessionTimeHelperText(currentMode);
+        }
+    }
 
     function initSlotsPickerIfNeeded() {
         if (!slotsWrapper || slotsWrapper.dataset.initialized === "true" || !domainSlotsEndpoint) {
@@ -193,9 +212,12 @@ export function renderCatalogSessionTimeModal({
         initSlotsPickerIfNeeded();
     }
 
+    syncSessionTimeModeUi();
+
     if (anyButton) {
         anyButton.addEventListener("click", () => {
             window.requestAnimationFrame(() => {
+                syncSessionTimeModeUi();
                 schedulePreviewRefresh();
             });
         });
@@ -205,6 +227,7 @@ export function renderCatalogSessionTimeModal({
         specificButton.addEventListener("click", () => {
             initSlotsPickerIfNeeded();
             window.requestAnimationFrame(() => {
+                syncSessionTimeModeUi();
                 schedulePreviewRefresh();
             });
         });
