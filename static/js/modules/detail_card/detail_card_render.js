@@ -19,36 +19,55 @@ import {
  * Клиент принимает решение о записи внутри одной цельной карточки специалиста.
  * Модуль отвечает за полную отрисовку этой карточки и за "живую" часть
  * (подгрузка расписания, выбор слота, активация CTA).
+ *
+ * Почему это важно для бизнеса:
+ * - все ключевые сигналы доверия (опыт, методы, образование, свободные слоты)
+ *   клиент видит в одном экране;
+ * - единый runtime снижает стоимость поддержки и риск расхождений между страницами;
+ * - корректная работа CTA напрямую влияет на конверсию в запись.
  */
 
 // Функция для формата выбранного слота для подписи на кнопке ("Выбрать 11 февраля 10:00")
 function formatSelectedSlotLabel(slot, timeZone) {
+    // Используем общий форматтер частей даты/времени, чтобы подпись
+    // в кнопке и расписании выглядела одинаково для клиента.
     const parts = formatSlotParts(slot, timeZone);
     if (!parts) return null;
     return `${parts.datePart} ${parts.timePart}`;
 }
 
 function formatPriceAmount(value) {
+    // Приводим любые входные значения цены (string/number/null) к безопасному числу.
     const parsed = Number.parseFloat(String(value));
+    // Если данных нет или формат битый, в UI выводим "0", а не NaN.
     if (!Number.isFinite(parsed)) return "0";
+    // Для карточки используем целые значения без копеек.
     return parsed.toFixed(0);
 }
 
 // Основной рендер карточки психолога (структура/стили)
 export function renderPsychologistCard(ps, options = {}) {
+    // Точка монтирования карточки. Если контейнер не найден, дальше работать нельзя.
     const container = document.getElementById("psychologist-card");
     if (!container || !ps) return;
 
+    // Базовый static URL нужен для иконок/изображений внутри HTML-шаблона карточки.
     const staticUrl = container.dataset.staticUrl;
     // Получаем из Django проброшенный timezone в dataset для использования в JS при рендере тут карточки специалиста
     const clientTimezone = container.dataset.clientTimezone || "не указан";
     // Получаем URL из атрибута в home_client_choice_psychologist.html (data-back-url="{% url 'core:personal-questions' %}")
     const backUrl = container.dataset.backUrl; // ПОЛУЧАЕМ НАШ URL ИЗ АТРИБУТА
+    // Режим определяет, какую бизнес-логику карточки применяем:
+    // - matching-choice: сценарий подбора после анкеты;
+    // - catalog-detail: сценарий детальной карточки из каталога.
     const renderMode = options.mode === "catalog-detail" ? "catalog-detail" : "matching-choice";
+    // Тип консультации из состояния каталога (если есть) влияет на показ цены.
     const consultationType = options.consultationType === "individual" || options.consultationType === "couple"
         ? options.consultationType
         : null;
+    // Поле с темами задаем опцией, чтобы один runtime поддерживал и matched_topics, и topics.
     const topicsField = typeof options.topicsField === "string" ? options.topicsField : "matched_topics";
+    // Заголовок блока тем также настраивается опцией под бизнес-сценарий.
     const topicsTitle = typeof options.topicsTitle === "string"
         ? options.topicsTitle
         : "Работает с темами вашей анкеты";
@@ -63,16 +82,19 @@ export function renderPsychologistCard(ps, options = {}) {
 
     // 1) Логика для отображения и сортировки Education: сначала с year_end, потом "в процессе"
     const renderEducations = (educations = []) => {
+        // Пустой state показываем явно, чтобы клиент не думал, что блок "сломался".
         if (!educations.length) {
             return `<p class="text-gray-500 text-sm">Информация об образовании не указана</p>`;
         }
 
+        // Вверху показываем завершенные этапы обучения с более свежим годом окончания.
         const sorted = [...educations].sort((a, b) => {
             if (!a.year_end) return 1;
             if (!b.year_end) return -1;
             return b.year_end - a.year_end;
         });
 
+        // Если записей много, даем клиенту компактный режим с кнопкой "Показать больше".
         const hasMoreThanTwo = sorted.length > 2;
 
         return `
@@ -101,11 +123,13 @@ export function renderPsychologistCard(ps, options = {}) {
 
     // 2) Логика для отображения БЕЙДЖЕВ в КОЛОНКУ (например, Topics)
     const COLOR_MAP = {
+        // Цветовые пресеты бейджей для визуального разделения смысловых групп.
         indigo: "bg-indigo-200 text-indigo-700",
         green: "bg-green-200 text-green-700",
     };
 
     const renderBadges = (items = [], color = "indigo", direction = "row") => {
+        // Явный fallback-текст защищает UX при пустых данных профиля.
         if (!items.length) {
             return `<p class="text-gray-500 text-sm">Не указано</p>`;
         }
@@ -146,6 +170,9 @@ export function renderPsychologistCard(ps, options = {}) {
     // Если поле по какой-то причине отсутствует, выводим нейтральный текст.
     const experienceLabel = ps.experience_label || "Опыт не указан";
 
+    // Валюту и суммы приводим к универсальному виду:
+    // - в matching приходят ps.price.value/currency;
+    // - в catalog-detail приходят price_individual/price_couples/price_currency.
     const currency = ps.price_currency || ps.price?.currency || "RUB";
     const individualPriceValue = formatPriceAmount(ps.price_individual);
     const couplePriceValue = formatPriceAmount(ps.price_couples);
@@ -155,6 +182,9 @@ export function renderPsychologistCard(ps, options = {}) {
     // - catalog-detail: показываем цену по выбранному consultation_type или обе цены, если тип не выбран.
     let sessionPriceHtml = "";
     if (renderMode === "catalog-detail") {
+        // Для каталога:
+        // - если выбран фильтр консультации, показываем только релевантный ценник;
+        // - если фильтра нет, показываем обе цены, чтобы клиент видел полный прайс психолога.
         if (consultationType === "individual") {
             sessionPriceHtml = `
                 <div class="rounded-xl bg-transparent p-0">
@@ -184,6 +214,7 @@ export function renderPsychologistCard(ps, options = {}) {
             `;
         }
     } else {
+        // Для matching-сценария оставляем прежнее поведение "один выбранный формат сессии".
         const isCoupleSession = ps.session_type === "couple";
         const sessionLabel = isCoupleSession
             ? "Парная сессия · 1,5 часа"
@@ -201,7 +232,9 @@ export function renderPsychologistCard(ps, options = {}) {
         `;
     }
 
+    // Источник тем зависит от сценария: matched_topics (подбор) или topics (каталог).
     const topics = Array.isArray(ps[topicsField]) ? ps[topicsField] : [];
+    // Нижняя "Назад" управляется отдельной опцией, чтобы не дублировать UX в каталоге.
     const backButtonHtml = showBottomBackButton
         ? `
                     <div class="pt-6">
@@ -215,19 +248,23 @@ export function renderPsychologistCard(ps, options = {}) {
 
     // 7) Подгружаем РАСПИСАНИЕ и БЛИЖАЙШЕЕ ВРЕМЯ для выбранного специалиста
     const currentPsId = ps.id;
+    // Сохраняем id в DOM, чтобы отсекать "гонки" при быстром переключении карточек.
     container.dataset.psId = String(currentPsId);
+    // Ключ выбранного слота внутри текущего расписания.
     let selectedSlotKey = null;
 
     // Сбрасываем выбор при переключении на другого специалиста
     updateChooseButton(null);
     setSelectedAppointmentSlot(currentPsId, null);
 
+    // Получаем актуальное расписание психолога.
     fetch(`/users/api/psychologists/${currentPsId}/schedule/`)
         .then(response => response.json())
         .then(data => {
             // Защита от гонок: если карточка уже переключена на другого психолога - игнорируем
             if (container.dataset.psId !== String(currentPsId)) return;
 
+            // Если API не дал корректный ответ, показываем "без слотов" и не даем перейти по CTA.
             if (!data || data.status !== "ok") {
                 updateNearestSlotUI("Нет доступных слотов");
                 updateScheduleUI([], null);
@@ -235,17 +272,23 @@ export function renderPsychologistCard(ps, options = {}) {
                 return;
             }
 
+            // Нормализуем payload расписания и ближайшего времени.
             const schedule = data.schedule || [];
             const nearestText = formatNearestSlot(data.nearest_slot, clientTimezone);
             updateNearestSlotUI(nearestText || "Нет доступных слотов");
 
+            // Группировка по дням нужна для "Показать больше/меньше" на уровне дней, а не отдельных кнопок.
             const grouped = groupScheduleByDay(schedule);
+            // Список дней в стабильном порядке для предсказуемого UX.
             const allDays = Object.keys(grouped).sort();
+            // По умолчанию показываем только первые N дней, чтобы карточка не становилась слишком длинной.
             const defaultVisibleDays = 3;
+            // Локальный флаг текущего состояния кнопки "Показать больше/меньше".
             let isExpanded = false;
 
             updateScheduleUI(schedule, selectedSlotKey, defaultVisibleDays);
 
+            // Контейнер расписания, внутри которого делегируем все клики по слотам.
             const scheduleEl = document.getElementById("psychologist-schedule-list");
             if (!scheduleEl) return;
 
@@ -261,6 +304,8 @@ export function renderPsychologistCard(ps, options = {}) {
                 scheduleEl.after(toggleBtn);
 
                 toggleBtn.addEventListener("click", () => {
+                    // Переключаем "свернуто/развернуто" только для расписания,
+                    // не затрагивая другие блоки карточки.
                     isExpanded = !isExpanded;
                     updateScheduleToggleButton(toggleBtn, isExpanded);
                     updateScheduleUI(
@@ -272,12 +317,14 @@ export function renderPsychologistCard(ps, options = {}) {
             }
 
             scheduleEl.onclick = event => {
+                // Делегирование клика: обрабатываем только кнопки слотов.
                 const btn = event.target.closest("button[data-slot-key]");
                 if (!btn) return;
 
                 const newKey = btn.dataset.slotKey;
                 if (!newKey) return;
 
+                // Фиксируем новый выбранный слот и обновляем визуальное выделение.
                 selectedSlotKey = newKey;
 
                 scheduleEl.querySelectorAll("button[data-slot-key]").forEach(el => {
@@ -286,19 +333,25 @@ export function renderPsychologistCard(ps, options = {}) {
 
                 applySlotButtonState(btn, true);
 
+                // После выбора:
+                // 1) обновляем подпись CTA;
+                // 2) сохраняем слот в sessionStorage для следующего шага.
                 const slotObj = schedule.find(slot => getSlotKey(slot) === newKey);
                 updateChooseButton(formatSelectedSlotLabel(slotObj, clientTimezone));
                 setSelectedAppointmentSlot(currentPsId, slotObj);
             };
         })
         .catch(() => {
+            // Сетевые ошибки не должны ломать карточку: показываем контролируемый fallback UI.
             if (container.dataset.psId !== String(currentPsId)) return;
             updateNearestSlotUI("Нет доступных слотов");
             updateScheduleUI([], null);
             updateChooseButton(null);
         });
 
-    // HTML-ШАБЛОН
+    // HTML-шаблон карточки.
+    // Важно: рендерим его после запуска fetch, чтобы скелетон сразу заменился на контент,
+    // а данные расписания доехали асинхронно и мягко обновили нужные зоны.
     container.innerHTML = `
         <div class="mt-8 rounded-2xl border-2 border-indigo-100 bg-indigo-50 shadow-2xl shadow-indigo-300">
 
