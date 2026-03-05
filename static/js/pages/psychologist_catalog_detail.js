@@ -51,30 +51,35 @@ function cameFromCatalogInSameTab() {
 //   мы не должны пытаться восстановить каталог без сохраненного состояния;
 // - поэтому restore-флаг ставим только тогда, когда состояние реально есть.
 function initCatalogBackLink() {
-    const backLink = document.querySelector("[data-catalog-back-link]");
-    if (!backLink) return;
+    // На странице может быть несколько кнопок "Назад в каталог" (вверху и внизу).
+    // Важно, чтобы обе работали одинаково и не сбрасывали фильтры.
+    const backLinks = Array.from(document.querySelectorAll("[data-catalog-back-link]"));
+    if (!backLinks.length) return;
 
-    const catalogBaseUrl = backLink.dataset.catalogUrl || "/psychologist_catalog/";
     const stateFromStorage = readCatalogState();
-    if (stateFromStorage) {
-        backLink.setAttribute("href", buildCatalogFallbackUrl(catalogBaseUrl, stateFromStorage));
-    }
 
-    backLink.addEventListener("click", (event) => {
-        if (cameFromCatalogInSameTab() && window.history.length > 1) {
+    backLinks.forEach((backLink) => {
+        const catalogBaseUrl = backLink.dataset.catalogUrl || "/psychologist_catalog/";
+        if (stateFromStorage) {
+            backLink.setAttribute("href", buildCatalogFallbackUrl(catalogBaseUrl, stateFromStorage));
+        }
+
+        backLink.addEventListener("click", (event) => {
+            if (cameFromCatalogInSameTab() && window.history.length > 1) {
+                event.preventDefault();
+                window.history.back();
+                return;
+            }
+
+            const fallbackState = readCatalogState();
+            if (!fallbackState) {
+                return;
+            }
+
             event.preventDefault();
-            window.history.back();
-            return;
-        }
-
-        const fallbackState = readCatalogState();
-        if (!fallbackState) {
-            return;
-        }
-
-        event.preventDefault();
-        markCatalogRestorePending();
-        window.location.href = buildCatalogFallbackUrl(catalogBaseUrl, fallbackState);
+            markCatalogRestorePending();
+            window.location.href = buildCatalogFallbackUrl(catalogBaseUrl, fallbackState);
+        });
     });
 }
 
