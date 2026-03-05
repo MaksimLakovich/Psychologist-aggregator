@@ -221,10 +221,17 @@ export function renderPsychologistCard(ps) {
             updateChooseButton(null);
         });
 
+    // HTML-ШАБЛОН
     container.innerHTML = `
         <div class="mt-8 rounded-2xl border-2 border-indigo-100 bg-indigo-50 shadow-2xl shadow-indigo-300">
+
             <div class="relative grid grid-cols-1 md:grid-cols-12 gap-6 p-6 pt-16">
-                <div class="md:col-span-4 flex flex-col items-center md:sticky self-start" style="top: var(--choice-header-offset);">
+
+                <!-- LEFT COLUMN -->
+                <div
+                    class="md:col-span-4 flex flex-col items-center md:sticky self-start"
+                    style="top: var(--choice-header-offset);"
+                >
                     <img
                         src="${ps.photo}"
                         alt="Фото психолога"
@@ -234,36 +241,71 @@ export function renderPsychologistCard(ps) {
                             hover:scale-[1.01] hover:shadow-2xl
                         "
                     />
-                    <div id="ps-left-companion" class="mt-6 w-full space-y-4 transition-all duration-300"></div>
+                    <!-- SLOT: сюда будет переезжать Header + Price при скролле страницы вниз/вверх-->
+                    <div
+                        id="ps-left-companion"
+                        class="mt-6 w-full space-y-4 transition-all duration-300"
+                    ></div>
                 </div>
 
+                <!-- RIGHT COLUMN -->
                 <div class="md:col-span-8 space-y-6 md:pl-6 md:pr-6 lg:pl-8 lg:pr-12">
+
+                    <!-- Оборачиваем Header + Price чтоб потом можно было перенести под фото при скролле -->
                     <div id="ps-main-header">
+
+                        <!-- Header -->
                         <div class="pb-4">
-                            <h2 class="text-3xl font-semibold text-gray-900 pb-2">${ps.full_name}</h2>
+                            <h2 class="text-3xl font-semibold text-gray-900 pb-2">
+                                ${ps.full_name}
+                            </h2>
                             <div class="inline-flex items-center gap-3">
                                 <div class="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-2 mt-3 hover:bg-indigo-200 transition">
-                                    <img src="${staticUrl}images/psychologist_profile/goal-svgrepo-com.svg" alt="goal_icon" />
-                                    <span class="text-lg text-gray-700 font-medium">${ps.rating} из 10</span>
+                                    <img
+                                        src="${staticUrl}images/psychologist_profile/goal-svgrepo-com.svg"
+                                        alt="goal_icon"
+                                    />
+                                    <span class="text-lg text-gray-700 font-medium">
+                                        ${ps.rating} из 10
+                                    </span>
                                 </div>
                                 <div class="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-2 mt-3 hover:bg-indigo-200 transition">
-                                    <img src="${staticUrl}images/psychologist_profile/seal-check.svg" alt="check_icon" />
-                                    <span class="text-lg text-gray-700 font-medium">${experienceLabel}</span>
+                                    <img
+                                        src="${staticUrl}images/psychologist_profile/seal-check.svg"
+                                        alt="check_icon"
+                                    />
+                                    <span class="text-lg text-gray-700 font-medium">
+                                        ${experienceLabel}
+                                    </span>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Price -->
                         <div class="rounded-xl bg-transparent p-0">
-                            <p class="text-lg font-medium text-gray-700 dark:text-gray-200">${sessionLabel}</p>
-                            <p class="mt-0 text-xl font-semibold text-gray-700">${priceValue} ₽</p>
+                            <p class="text-lg font-medium text-gray-700 dark:text-gray-200">
+                                ${sessionLabel}
+                            </p>
+                            <p class="mt-0 text-xl font-semibold text-gray-700">
+                                ${priceValue} ₽
+                            </p>
                         </div>
+
                     </div>
 
+                    <!-- Nearest slot -->
                     <div class="pb-7">
                         <div class="gap-0 rounded-xl bg-transparent p-0 pb-2">
                             <div class="inline-flex items-center gap-1">
-                                <p class="text-lg font-medium text-gray-700 dark:text-gray-200">Ближайшая запись</p>
-                                <p class="mt-0 text-lg font-semibold text-indigo-700 hover:text-indigo-800 transition cursor-pointer" onclick="document.getElementById('psychologist-schedule')?.scrollIntoView({behavior: 'smooth'})">
+                                <p
+                                    class="text-lg font-medium text-gray-700 dark:text-gray-200"
+                                >
+                                    Ближайшая запись
+                                </p>
+                                <p
+                                    class="mt-0 text-lg font-semibold text-indigo-700 hover:text-indigo-800 transition cursor-pointer"
+                                    onclick="document.getElementById('psychologist-schedule')?.scrollIntoView({behavior: 'smooth'})"
+                                >
                                     <span id="ps-nearest-slot">Загружаем...</span>
                                 </p>
                             </div>
@@ -277,10 +319,16 @@ export function renderPsychologistCard(ps) {
                         </button>
                     </div>
 
+                    <!-- Biography -->
                     <div class="pb-7">
-                        <h3 class="text-xl font-semibold text-gray-900">О специалисте</h3>
+                        <h3 class="text-xl font-semibold text-gray-900">
+                            О специалисте
+                        </h3>
                         <div class="relative mt-2">
-                            <p class="biography-text text-lg text-gray-700 leading-relaxed overflow-hidden transition-all" data-collapsed="true">
+                            <p
+                                class="biography-text text-lg text-gray-700 leading-relaxed overflow-hidden transition-all"
+                                data-collapsed="true"
+                            >
                                 ${ps.biography || "Описание специалиста не указано"}
                             </p>
                             <div class="biography-fade pointer-events-none"></div>
@@ -294,32 +342,53 @@ export function renderPsychologistCard(ps) {
                         </button>
                     </div>
 
+                    <!-- Education -->
                     <div class="pb-7">
-                        <h3 class="text-xl font-semibold text-gray-900">Образование</h3>
+                        <h3 class="text-xl font-semibold text-gray-900">
+                            Образование
+                        </h3>
                         ${renderEducations(ps.educations)}
                     </div>
 
+                    <!-- Methods -->
                     <div class="pb-7">
+
                         <div class="flex inline-flex items-center gap-2">
-                            <h3 class="text-xl font-semibold text-gray-900">Методы терапии</h3>
+                            <h3 class="text-xl font-semibold text-gray-900">
+                                Методы терапии
+                            </h3>
                             <button
                                 type="button"
                                 class="text-sm font-medium text-indigo-500 hover:text-indigo-900 transition"
                                 onclick="openMethodsInfoModal(${ps.id})"
                             >
-                                <img src="${staticUrl}images/psychologist_profile/info.svg" alt="info_icon" />
+                                <img
+                                    src="${staticUrl}images/psychologist_profile/info.svg"
+                                    alt="info_icon"
+                                />
                             </button>
                         </div>
+
                         ${renderVerticalList(ps.methods)}
+
                     </div>
 
+                    <!-- Topics -->
                     <div class="pb-7">
-                        <h3 class="text-xl font-semibold text-gray-900">Работает с темами вашей анкеты</h3>
+                        <h3 class="text-xl font-semibold text-gray-900">
+                            Работает с темами вашей анкеты
+                        </h3>
                         ${renderBadges(ps.matched_topics, "indigo", "column")}
                     </div>
 
-                    <div id="psychologist-schedule" class="pb-7">
-                        <h3 class="text-xl font-semibold text-gray-900">Расписание</h3>
+                    <!-- Schedule -->
+                    <div
+                        id="psychologist-schedule"
+                        class="pb-7"
+                    >
+                        <h3 class="text-xl font-semibold text-gray-900">
+                            Расписание
+                        </h3>
                         <div class="flex items-center gap-1 mt-2">
                             <img
                                 src="${staticUrl}images/psychologist_profile/time-zone.svg"
@@ -327,22 +396,26 @@ export function renderPsychologistCard(ps) {
                                 aria-hidden="true"
                                 class="w-5 h-5"
                             />
-                            <p class="text-lg text-gray-700 leading-relaxed">Часовой пояс: ${clientTimezone}</p>
+                            <p class="text-lg text-gray-700 leading-relaxed">
+                                Часовой пояс: ${clientTimezone}
+                            </p>
                         </div>
                         <div id="psychologist-schedule-list" class="mt-2"></div>
                     </div>
+
                 </div>
             </div>
 
+            <!-- ========== КНОПКА + ЮРИДИЧЕСКИЙ ТЕКСТ ========== -->
             <div class="pt-6 pb-16 flex justify-center">
                 <div class="w-full max-w-md text-center">
                     <p class="mt-0 text-xs text-gray-500 leading-relaxed">
                         Нажимая кнопку, вы подтверждаете, что ознакомлены и согласны с
                         <button
-                            type="button"
-                            class="text-xs font-medium text-indigo-500 hover:text-indigo-900 transition"
-                            onclick="openServiceAgreementModal(${ps.id})"
-                        >
+                                type="button"
+                                class="text-xs font-medium text-indigo-500 hover:text-indigo-900 transition"
+                                onclick="openServiceAgreementModal(${ps.id})"
+                            >
                             договором оказания услуг
                         </button>
                         и даёте согласие на обработку персональных данных психологу
@@ -356,15 +429,14 @@ export function renderPsychologistCard(ps) {
                         Выбрать время сессии
                     </button>
                     <div class="pt-6">
-                        <a
-                            href="${backUrl}"
-                            class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-200 text-xl text-white font-extrabold tracking-wide hover:bg-indigo-300 transition"
-                        >
+                        <a href="${backUrl}"
+                           class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-200 text-xl text-white font-extrabold tracking-wide hover:bg-indigo-300 transition">
                             Назад
                         </a>
                     </div>
                 </div>
             </div>
+
         </div>
     `;
 }
