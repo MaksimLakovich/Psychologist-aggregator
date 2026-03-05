@@ -19,6 +19,7 @@ export function initDetailCardModals({ getPsychologistsList } = {}) {
         psychologistsProvider = getPsychologistsList;
     }
 
+// МОДАЛКА ДЛЯ ОТОБРАЖАНЕИЯ ОПИСАНИЯ МЕТОДОВ
     window.openMethodsInfoModal = function (psychologistId) {
         const psychologists = getPsychologists();
         const ps = psychologists.find(item => item.id === psychologistId);
@@ -46,6 +47,7 @@ export function initDetailCardModals({ getPsychologistsList } = {}) {
         modal.classList.remove("flex");
     };
 
+// МОДАЛКА ДЛЯ ОТОБРАЖАНЕИЯ ДОГОВОРА ОБ ОКАЗАНИИ УСЛУГ
     window.openServiceAgreementModal = function (psychologistId) {
         const psychologists = getPsychologists();
         const ps = psychologists.find(item => item.id === psychologistId);
