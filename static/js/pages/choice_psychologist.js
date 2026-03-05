@@ -1,23 +1,10 @@
 import { initPsychologistsChoice } from "../modules/match_ps_choice.js";
+import { applyChoiceHeaderOffset } from "../modules/detail_card/detail_card_header_offset.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-
-
-    // 1. Получаем карточки отфильтрованных психологов по указанным клиентом параметрам
+    // 1. Загружаем подбор психологов по указанным клиентом параметрам и отрисовываем карточку выбранного специалиста.
     initPsychologistsChoice();
 
-
-    // 2. Вычисляем высоту header для блока "<!-- LEFT COLUMN -->" в match_ps_choice.js чтоб фото психолога не скроллилось вниз
-    const header = document.getElementById("choice-sticky-header");
-
-    if (header) {
-        const rect = header.getBoundingClientRect();
-        const buffer = 64; // 4rem визуального воздуха (1rem = 16 / 64 = 4rem)
-
-        document.documentElement.style.setProperty(
-            "--choice-header-offset",
-            `${rect.height + buffer}px`
-        );
-    }
-
+    // 2. Вычисляем отступ липкой колонки относительно верхней дорожной карты шагов, чтоб фото психолога не скроллилось вниз
+    applyChoiceHeaderOffset();
 });
