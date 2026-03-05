@@ -1,4 +1,4 @@
-import { bootstrapCatalogPage } from "../modules/catalog_page.js";
+import { bootstrapCatalogPage } from "../modules/catalog/catalog_page.js";
 
 /**
  * Тонкий entry-point страницы каталога.

@@ -1,7 +1,7 @@
 import {
     markCatalogRestorePending,
     readCatalogState,
-} from "../modules/catalog_state.js";
+} from "../modules/catalog/catalog_state.js";
 import { initGlobalTextToggleHandlers } from "../modules/detail_card/detail_card_content_toggle.js";
 import { initDetailCardModals } from "../modules/detail_card/detail_card_modals.js";
 import { renderPsychologistCard } from "../modules/detail_card/detail_card_render.js";
