@@ -18,6 +18,28 @@ let currentOffset = 0;
 const PAGE_SIZE = 10;
 let selectedPsychologistId = null;
 
+// Восстанавливаем "страницу" аватаров по выбранному психологу.
+// Бизнес-смысл: если клиент уже выбрал специалиста на 2/3/... наборе,
+// после обновления страницы или возврата назад он должен видеть тот же набор,
+// а не первый экран аватаров.
+function syncOffsetToSelectedPsychologist() {
+    if (!psychologists.length || !selectedPsychologistId) {
+        currentOffset = 0;
+        return;
+    }
+
+    const selectedIndex = psychologists.findIndex(
+        ps => String(ps.id) === String(selectedPsychologistId)
+    );
+
+    if (selectedIndex < 0) {
+        currentOffset = 0;
+        return;
+    }
+
+    currentOffset = Math.floor(selectedIndex / PAGE_SIZE) * PAGE_SIZE;
+}
+
 // Плавно скроллим вверх и дожидаемся фактической остановки,
 // чтобы перерисовка карточки не происходила в середине движения экрана.
 function scrollToTopThen(callback) {
@@ -81,6 +103,7 @@ function fetchPsychologists() {
             selectedPsychologistId = selected.id;
             // Синхронизируем выбранного психолога с sessionStorage (важно при новом подборе)
             sessionStorage.setItem("selectedPsychologistId", selectedPsychologistId);
+            syncOffsetToSelectedPsychologist();
 
             renderAvatars();
 
