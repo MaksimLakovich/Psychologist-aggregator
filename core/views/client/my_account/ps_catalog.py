@@ -191,8 +191,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
         context["current_sidebar_key"] = "psychologist-catalog"
 
-        # ВАЖНО: обязательно добавляем page_data в context.
-        # Иначе шаблон не получит profiles/has_next/total_count и карточки не отобразятся
+        # ВАЖНО: page_data для рендеринга страницы детальной карточки
         page_data = self._build_catalog_page_data(
             filters_state={
                 "consultation_type": None,
@@ -260,8 +259,7 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, CatalogLayoutModeMixin,
         profile.experience_label = build_experience_label(profile.work_experience_years)
         context["profile"] = profile
 
-        # Готовим JSON-контракт одного психолога для JS-рендера detail-карточки.
-        # Это дает 100% переиспользование карточного runtime, как на странице подбора.
+        # JSON-контракт одного психолога для JS-рендера detail-карточки
         educations = Education.objects.filter(creator=profile.user).order_by("-year_start")
         context["detail_profile_payload"] = {
             "id": profile.id,
