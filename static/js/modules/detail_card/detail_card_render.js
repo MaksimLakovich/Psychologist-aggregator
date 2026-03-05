@@ -28,8 +28,14 @@ function formatSelectedSlotLabel(slot, timeZone) {
     return `${parts.datePart} ${parts.timePart}`;
 }
 
+function formatPriceAmount(value) {
+    const parsed = Number.parseFloat(String(value));
+    if (!Number.isFinite(parsed)) return "0";
+    return parsed.toFixed(0);
+}
+
 // Основной рендер карточки психолога (структура/стили)
-export function renderPsychologistCard(ps) {
+export function renderPsychologistCard(ps, options = {}) {
     const container = document.getElementById("psychologist-card");
     if (!container || !ps) return;
 
@@ -38,6 +44,20 @@ export function renderPsychologistCard(ps) {
     const clientTimezone = container.dataset.clientTimezone || "не указан";
     // Получаем URL из атрибута в home_client_choice_psychologist.html (data-back-url="{% url 'core:personal-questions' %}")
     const backUrl = container.dataset.backUrl; // ПОЛУЧАЕМ НАШ URL ИЗ АТРИБУТА
+    const renderMode = options.mode === "catalog-detail" ? "catalog-detail" : "matching-choice";
+    const consultationType = options.consultationType === "individual" || options.consultationType === "couple"
+        ? options.consultationType
+        : null;
+    const topicsField = typeof options.topicsField === "string" ? options.topicsField : "matched_topics";
+    const topicsTitle = typeof options.topicsTitle === "string"
+        ? options.topicsTitle
+        : "Работает с темами вашей анкеты";
+    // Управляем завершающим CTA без изменения поведения matching-flow:
+    // - submit: переход к следующему шагу (выбор психолога после анкеты);
+    // - button: заглушка без перехода (детальная карточка из каталога).
+    const chooseSessionButtonType = options.chooseSessionButtonType === "button" ? "button" : "submit";
+    // В каталоге нижняя кнопка "Назад" дублирует верхний "Назад в каталог", поэтому прячем её опционально.
+    const showBottomBackButton = options.showBottomBackButton !== false;
 
     // HELPERS
 
@@ -126,15 +146,72 @@ export function renderPsychologistCard(ps) {
     // Если поле по какой-то причине отсутствует, выводим нейтральный текст.
     const experienceLabel = ps.experience_label || "Опыт не указан";
 
-    // 5) Логика отображения PRICE в зависимости от "individual/couple"
-    const isCoupleSession = ps.session_type === "couple";
+    const currency = ps.price_currency || ps.price?.currency || "RUB";
+    const individualPriceValue = formatPriceAmount(ps.price_individual);
+    const couplePriceValue = formatPriceAmount(ps.price_couples);
 
-    const sessionLabel = isCoupleSession
-        ? "Парная сессия · 1,5 часа"
-        : "Индивидуальная сессия · 50 минут";
+    // 5) Логика отображения PRICE в зависимости от сценария:
+    // - matching-choice: показываем одну цену выбранного типа (как раньше);
+    // - catalog-detail: показываем цену по выбранному consultation_type или обе цены, если тип не выбран.
+    let sessionPriceHtml = "";
+    if (renderMode === "catalog-detail") {
+        if (consultationType === "individual") {
+            sessionPriceHtml = `
+                <div class="rounded-xl bg-transparent p-0">
+                    <p class="text-lg font-medium text-gray-700 dark:text-gray-200">Индивидуальная сессия · 50 минут</p>
+                    <p class="mt-0 text-xl font-semibold text-gray-700">${individualPriceValue} ${currency}</p>
+                </div>
+            `;
+        } else if (consultationType === "couple") {
+            sessionPriceHtml = `
+                <div class="rounded-xl bg-transparent p-0">
+                    <p class="text-lg font-medium text-gray-700 dark:text-gray-200">Парная сессия · 1,5 часа</p>
+                    <p class="mt-0 text-xl font-semibold text-gray-700">${couplePriceValue} ${currency}</p>
+                </div>
+            `;
+        } else {
+            sessionPriceHtml = `
+                <div class="rounded-xl bg-transparent p-0 space-y-2">
+                    <div>
+                        <p class="text-lg font-medium text-gray-700 dark:text-gray-200">Индивидуальная сессия · 50 минут</p>
+                        <p class="mt-0 text-xl font-semibold text-gray-700">${individualPriceValue} ${currency}</p>
+                    </div>
+                    <div>
+                        <p class="text-lg font-medium text-gray-700 dark:text-gray-200">Парная сессия · 1,5 часа</p>
+                        <p class="mt-0 text-xl font-semibold text-gray-700">${couplePriceValue} ${currency}</p>
+                    </div>
+                </div>
+            `;
+        }
+    } else {
+        const isCoupleSession = ps.session_type === "couple";
+        const sessionLabel = isCoupleSession
+            ? "Парная сессия · 1,5 часа"
+            : "Индивидуальная сессия · 50 минут";
+        const priceValue = Number(ps.price.value).toFixed(0);
+        sessionPriceHtml = `
+            <div class="rounded-xl bg-transparent p-0">
+                <p class="text-lg font-medium text-gray-700 dark:text-gray-200">
+                    ${sessionLabel}
+                </p>
+                <p class="mt-0 text-xl font-semibold text-gray-700">
+                    ${priceValue} ₽
+                </p>
+            </div>
+        `;
+    }
 
-    // 6) Убираем копейки в стоимости сессии
-    const priceValue = Number(ps.price.value).toFixed(0);
+    const topics = Array.isArray(ps[topicsField]) ? ps[topicsField] : [];
+    const backButtonHtml = showBottomBackButton
+        ? `
+                    <div class="pt-6">
+                        <a href="${backUrl}"
+                           class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-200 text-xl text-white font-extrabold tracking-wide hover:bg-indigo-300 transition">
+                            Назад
+                        </a>
+                    </div>
+        `
+        : "";
 
     // 7) Подгружаем РАСПИСАНИЕ и БЛИЖАЙШЕЕ ВРЕМЯ для выбранного специалиста
     const currentPsId = ps.id;
@@ -230,7 +307,7 @@ export function renderPsychologistCard(ps) {
                 <!-- LEFT COLUMN -->
                 <div
                     class="md:col-span-4 flex flex-col items-center md:sticky self-start"
-                    style="top: var(--choice-header-offset);"
+                    style="top: var(--choice-header-offset, 1rem);"
                 >
                     <img
                         src="${ps.photo}"
@@ -282,14 +359,7 @@ export function renderPsychologistCard(ps) {
                         </div>
 
                         <!-- Price -->
-                        <div class="rounded-xl bg-transparent p-0">
-                            <p class="text-lg font-medium text-gray-700 dark:text-gray-200">
-                                ${sessionLabel}
-                            </p>
-                            <p class="mt-0 text-xl font-semibold text-gray-700">
-                                ${priceValue} ₽
-                            </p>
-                        </div>
+                        ${sessionPriceHtml}
 
                     </div>
 
@@ -376,9 +446,9 @@ export function renderPsychologistCard(ps) {
                     <!-- Topics -->
                     <div class="pb-7">
                         <h3 class="text-xl font-semibold text-gray-900">
-                            Работает с темами вашей анкеты
+                            ${topicsTitle}
                         </h3>
-                        ${renderBadges(ps.matched_topics, "indigo", "column")}
+                        ${renderBadges(topics, "indigo", "column")}
                     </div>
 
                     <!-- Schedule -->
@@ -421,19 +491,14 @@ export function renderPsychologistCard(ps) {
                         и даёте согласие на обработку персональных данных психологу
                     </p>
                     <button
-                        type="submit"
+                        type="${chooseSessionButtonType}"
                         class="mt-6 w-full px-10 py-3.5 rounded-xl bg-gray-300 text-xl text-gray-500 font-extrabold tracking-wide cursor-not-allowed transition shadow"
                         data-choose-session-btn
                         disabled
                     >
                         Выбрать время сессии
                     </button>
-                    <div class="pt-6">
-                        <a href="${backUrl}"
-                           class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-200 text-xl text-white font-extrabold tracking-wide hover:bg-indigo-300 transition">
-                            Назад
-                        </a>
-                    </div>
+                    ${backButtonHtml}
                 </div>
             </div>
 

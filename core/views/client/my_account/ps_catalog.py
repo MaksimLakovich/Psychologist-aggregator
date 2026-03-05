@@ -18,7 +18,7 @@ from core.services.mixins_ps_catalog import (CatalogBackLinkMixin,
 from core.services.topic_groups import (build_topics_grouped_by_type,
                                         serialize_topics_grouped_by_type)
 from users.constants import GENDER_CHOICES
-from users.models import Method, PsychologistProfile
+from users.models import Education, Method, PsychologistProfile
 
 
 @method_decorator(ratelimit(key="user_or_ip", rate="60/m", block=True), name="post")
@@ -259,6 +259,45 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, CatalogLayoutModeMixin,
 
         profile.experience_label = build_experience_label(profile.work_experience_years)
         context["profile"] = profile
+
+        # Готовим JSON-контракт одного психолога для JS-рендера detail-карточки.
+        # Это дает 100% переиспользование карточного runtime, как на странице подбора.
+        educations = Education.objects.filter(creator=profile.user).order_by("-year_start")
+        context["detail_profile_payload"] = {
+            "id": profile.id,
+            "full_name": f"{profile.user.first_name} {profile.user.last_name}".strip(),
+            "photo": profile.photo.url if profile.photo else "/static/images/menu/user-circle.svg",
+            "rating": str(profile.rating),
+            "experience_label": profile.experience_label,
+            "biography": profile.biography or "",
+            "methods": [
+                {
+                    "id": method.id,
+                    "name": method.name,
+                    "description": method.description,
+                }
+                for method in profile.methods.all()
+            ],
+            "topics": [
+                {
+                    "id": topic.id,
+                    "name": topic.name,
+                }
+                for topic in profile.topics.all()
+            ],
+            "educations": [
+                {
+                    "year_start": edu.year_start,
+                    "year_end": edu.year_end,
+                    "institution": edu.institution,
+                    "specialisation": edu.specialisation,
+                }
+                for edu in educations
+            ],
+            "price_individual": str(profile.price_individual),
+            "price_couples": str(profile.price_couples),
+            "price_currency": profile.price_currency,
+        }
 
         # Логика управления отображением сайдбара
         layout_mode = self._resolve_layout_mode()

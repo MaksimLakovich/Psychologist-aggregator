@@ -2,20 +2,19 @@ import {
     markCatalogRestorePending,
     readCatalogState,
 } from "../modules/catalog_state.js";
+import { initGlobalTextToggleHandlers } from "../modules/detail_card/detail_card_content_toggle.js";
+import { initDetailCardModals } from "../modules/detail_card/detail_card_modals.js";
+import { renderPsychologistCard } from "../modules/detail_card/detail_card_render.js";
+import { initSessionChoiceState } from "../modules/detail_card/detail_card_session_choice.js";
+import { initStickyHeaderBehavior } from "../modules/detail_card/detail_card_sticky_companion.js";
 
 /**
- * Логика страницы детального профиля психолога.
+ * Логика страницы детального профиля психолога из каталога.
  *
  * Главная задача:
  * - по кнопке "Назад в каталог" вернуть клиента туда, где он был в каталоге;
- * - при этом не тащить длинные фильтр-параметры в URL detail-страницы.
- *
- * Как работает возврат:
- * 1) если браузерный history.back() действительно ведет в каталог, используем его;
- * 2) если history.back() не подходит, включаем fallback:
- *    - ставим одноразовый флаг "нужно восстановить каталог";
- *    - переходим на чистый URL каталога;
- *    - каталог сам восстановит фильтры и позицию по sessionStorage.
+ * - при этом не тащить длинные фильтр-параметры в URL detail-страницы;
+ * - отрисовать карточку тем же runtime, что и на странице выбора психолога.
  */
 
 // Проверяет, что клиент пришел именно из каталога в этой же вкладке.
@@ -89,7 +88,63 @@ function warmCatalogStateTtlGuard() {
     readCatalogState();
 }
 
+function readDetailPsychologistPayload() {
+    const payloadNode = document.getElementById("catalog-detail-psychologist-data");
+    if (!payloadNode) return null;
+
+    try {
+        const parsed = JSON.parse(payloadNode.textContent || "{}");
+        if (!parsed || typeof parsed !== "object") return null;
+        return parsed;
+    } catch (error) {
+        return null;
+    }
+}
+
+function resolveCatalogConsultationType() {
+    const state = readCatalogState();
+    const value = state?.filters?.consultation_type;
+    return value === "individual" || value === "couple" ? value : null;
+}
+
+function initCatalogDetailCard() {
+    const psPayload = readDetailPsychologistPayload();
+    if (!psPayload) return;
+
+    const consultationType = resolveCatalogConsultationType();
+
+    const psychologists = [
+        {
+            ...psPayload,
+            // Для переиспользования существующего шаблона карточки в runtime
+            // заполняем matched_topics полным списком тем из БД психолога.
+            matched_topics: psPayload.topics || [],
+        },
+    ];
+
+    initGlobalTextToggleHandlers();
+    initDetailCardModals({
+        getPsychologistsList: () => psychologists,
+    });
+    initSessionChoiceState();
+
+    renderPsychologistCard(psychologists[0], {
+        mode: "catalog-detail",
+        consultationType,
+        topicsField: "topics",
+        topicsTitle: "С чем работает",
+        // В каталоге пока нет перехода в общий payment-flow подбора.
+        // Поэтому кнопка становится активной после выбора слота, но остается заглушкой без submit.
+        chooseSessionButtonType: "button",
+        // Нижняя кнопка "Назад" не нужна: используем только верхний "Назад в каталог".
+        showBottomBackButton: false,
+    });
+
+    initStickyHeaderBehavior();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     warmCatalogStateTtlGuard();
     initCatalogBackLink();
+    initCatalogDetailCard();
 });
