@@ -5407,6 +5407,10 @@ input:checked + .toggle-bg {
     margin-top: 2rem;
   }
 
+  .sm\:mt-4 {
+    margin-top: 1rem;
+  }
+
   .sm\:hidden {
     display: none;
   }
@@ -5562,6 +5566,10 @@ input:checked + .toggle-bg {
 
   .md\:mb-8 {
     margin-bottom: 2rem;
+  }
+
+  .md\:mt-8 {
+    margin-top: 2rem;
   }
 
   .md\:block {
