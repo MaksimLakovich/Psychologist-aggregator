@@ -4466,6 +4466,11 @@ input:checked + .toggle-bg {
   --tw-shadow: var(--tw-shadow-colored);
 }
 
+.shadow-indigo-50 {
+  --tw-shadow-color: #F0F5FF;
+  --tw-shadow: var(--tw-shadow-colored);
+}
+
 .outline {
   outline-style: solid;
 }
@@ -5944,6 +5949,18 @@ input:checked + .toggle-bg {
 
   .lg\:pt-20 {
     padding-top: 5rem;
+  }
+
+  .lg\:pr-24 {
+    padding-right: 6rem;
+  }
+
+  .lg\:pl-24 {
+    padding-left: 6rem;
+  }
+
+  .lg\:pl-12 {
+    padding-left: 3rem;
   }
 }
 

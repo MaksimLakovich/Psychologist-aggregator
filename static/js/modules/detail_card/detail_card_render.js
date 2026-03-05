@@ -352,8 +352,9 @@ export function renderPsychologistCard(ps, options = {}) {
     // HTML-шаблон карточки.
     // Важно: рендерим его после запуска fetch, чтобы скелетон сразу заменился на контент,
     // а данные расписания доехали асинхронно и мягко обновили нужные зоны.
+    // "mt-8 rounded-2xl border-2 border-indigo-100 bg-indigo-50 shadow-2xl shadow-indigo-300"
     container.innerHTML = `
-        <div class="mt-8 rounded-2xl border-2 border-indigo-100 bg-indigo-50 shadow-2xl shadow-indigo-300">
+        <div class="mt-8">
 
             <div class="relative grid grid-cols-1 md:grid-cols-12 gap-6 p-6 pt-16">
 
@@ -379,7 +380,7 @@ export function renderPsychologistCard(ps, options = {}) {
                 </div>
 
                 <!-- RIGHT COLUMN -->
-                <div class="md:col-span-8 space-y-6 md:pl-6 md:pr-6 lg:pl-8 lg:pr-12">
+                <div class="md:col-span-8 space-y-6 md:pl-6 md:pr-6 lg:pl-12 lg:pr-12">
 
                     <!-- Оборачиваем Header + Price чтоб потом можно было перенести под фото при скролле -->
                     <div id="ps-main-header">
