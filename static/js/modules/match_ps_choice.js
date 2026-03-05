@@ -1,9 +1,6 @@
 import { initStickyHeaderBehavior } from "./detail_card/detail_card_sticky_companion.js";
 import { initDetailCardModals } from "./detail_card/detail_card_modals.js";
-import {
-    initGlobalTextToggleHandlers,
-    scrollToTopThen,
-} from "./detail_card/detail_card_content_toggle.js";
+import { initGlobalTextToggleHandlers } from "./detail_card/detail_card_content_toggle.js";
 import { renderPsychologistCard } from "./detail_card/detail_card_render.js";
 import { initSessionChoiceState } from "./detail_card/detail_card_session_choice.js";
 
@@ -20,6 +17,40 @@ let psychologists = [];
 let currentOffset = 0;
 const PAGE_SIZE = 10;
 let selectedPsychologistId = null;
+
+// Плавно скроллим вверх и дожидаемся фактической остановки,
+// чтобы перерисовка карточки не происходила в середине движения экрана.
+function scrollToTopThen(callback) {
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+    });
+
+    let lastY = window.scrollY;
+    let sameCount = 0;
+
+    const check = () => {
+        const currentY = window.scrollY;
+
+        if (currentY === lastY) {
+            sameCount += 1;
+        } else {
+            sameCount = 0;
+            lastY = currentY;
+        }
+
+        if (sameCount >= 3) {
+            if (typeof callback === "function") {
+                callback();
+            }
+            return;
+        }
+
+        requestAnimationFrame(check);
+    };
+
+    requestAnimationFrame(check);
+}
 
 function getPsychologistsList() {
     return psychologists;
