@@ -2186,6 +2186,10 @@ input:checked + .toggle-bg {
   margin-top: 1.75rem;
 }
 
+.mb-7 {
+  margin-bottom: 1.75rem;
+}
+
 .line-clamp-\[6\] {
   overflow: hidden;
   display: -webkit-box;
@@ -3688,6 +3692,27 @@ input:checked + .toggle-bg {
   background-color: rgb(243 244 246 / 0.7);
 }
 
+.bg-indigo-700\/90 {
+  background-color: rgb(81 69 205 / 0.9);
+}
+
+.bg-indigo-300 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(180 198 252 / var(--tw-bg-opacity, 1));
+}
+
+.bg-indigo-300\/70 {
+  background-color: rgb(180 198 252 / 0.7);
+}
+
+.bg-indigo-300\/60 {
+  background-color: rgb(180 198 252 / 0.6);
+}
+
+.bg-indigo-300\/50 {
+  background-color: rgb(180 198 252 / 0.5);
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
@@ -4527,6 +4552,14 @@ input:checked + .toggle-bg {
 
 .text-indigo-900\/85 {
   color: rgb(54 47 120 / 0.85);
+}
+
+.text-indigo-900\/10 {
+  color: rgb(54 47 120 / 0.1);
+}
+
+.text-white\/50 {
+  color: rgb(255 255 255 / 0.5);
 }
 
 .underline {
@@ -5780,6 +5813,14 @@ input:checked + .toggle-bg {
     padding: 2rem;
   }
 
+  .sm\:p-2 {
+    padding: 0.5rem;
+  }
+
+  .sm\:p-4 {
+    padding: 1rem;
+  }
+
   .sm\:px-10 {
     padding-left: 2.5rem;
     padding-right: 2.5rem;
@@ -6329,6 +6370,16 @@ input:checked + .toggle-bg {
   .lg\:text-5xl {
     font-size: 3rem;
     line-height: 1;
+  }
+
+  .lg\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+
+  .lg\:text-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
   }
 }
 

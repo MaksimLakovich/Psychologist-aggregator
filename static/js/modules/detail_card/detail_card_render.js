@@ -189,14 +189,14 @@ export function renderPsychologistCard(ps, options = {}) {
         if (consultationType === "individual") {
             sessionPriceHtml = `
                 <div class="rounded-xl bg-transparent p-0">
-                    <p class="text-lg font-medium text-gray-700 dark:text-gray-200">Индивидуальная сессия · 50 минут</p>
+                    <p class="text-lg font-medium text-gray-700 ">Индивидуальная сессия · 50 минут</p>
                     <p class="mt-0 text-xl font-semibold text-gray-700">${individualPriceValue} ${currency}</p>
                 </div>
             `;
         } else if (consultationType === "couple") {
             sessionPriceHtml = `
                 <div class="rounded-xl bg-transparent p-0">
-                    <p class="text-lg font-medium text-gray-700 dark:text-gray-200">Парная сессия · 1,5 часа</p>
+                    <p class="text-lg font-medium text-gray-700 ">Парная сессия · 1,5 часа</p>
                     <p class="mt-0 text-xl font-semibold text-gray-700">${couplePriceValue} ${currency}</p>
                 </div>
             `;
@@ -204,11 +204,11 @@ export function renderPsychologistCard(ps, options = {}) {
             sessionPriceHtml = `
                 <div class="rounded-xl bg-transparent p-0 space-y-2">
                     <div>
-                        <p class="text-lg font-medium text-gray-700 dark:text-gray-200">Индивидуальная сессия · 50 минут</p>
+                        <p class="text-lg font-medium text-gray-700 ">Индивидуальная сессия · 50 минут</p>
                         <p class="mt-0 text-xl font-semibold text-gray-700">${individualPriceValue} ${currency}</p>
                     </div>
                     <div>
-                        <p class="text-lg font-medium text-gray-700 dark:text-gray-200">Парная сессия · 1,5 часа</p>
+                        <p class="text-lg font-medium text-gray-700 ">Парная сессия · 1,5 часа</p>
                         <p class="mt-0 text-xl font-semibold text-gray-700">${couplePriceValue} ${currency}</p>
                     </div>
                 </div>
@@ -223,7 +223,7 @@ export function renderPsychologistCard(ps, options = {}) {
         const priceValue = Number(ps.price.value).toFixed(0);
         sessionPriceHtml = `
             <div class="rounded-xl bg-transparent p-0">
-                <p class="text-lg font-medium text-gray-700 dark:text-gray-200">
+                <p class="text-lg font-medium text-gray-700 ">
                     ${sessionLabel}
                 </p>
                 <p class="mt-0 text-xl font-semibold text-gray-700">
@@ -387,26 +387,26 @@ export function renderPsychologistCard(ps, options = {}) {
                     <div id="ps-main-header">
 
                         <!-- Header -->
-                        <div class="pb-8">
+                        <div class="pb-7">
                             <h2 class="pb-4 text-3xl md:text-4xl lg:text-5xl font-black text-indigo-900/85 tracking-wide">
                                 ${ps.full_name}
                             </h2>
                             <div class="inline-flex items-center gap-3">
-                                <div class="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-2 mt-4 hover:bg-indigo-200 transition">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-indigo-300/50 px-3 py-2 mt-4 hover:bg-indigo-200 shadow transition">
                                     <img
                                         src="${staticUrl}images/psychologist_profile/goal-svgrepo-com.svg"
                                         alt="goal_icon"
                                     />
-                                    <span class="text-lg text-gray-700 font-medium">
+                                    <span class="text-lg text-indigo-900/85 tracking-wide font-semibold">
                                         ${ps.rating} из 10
                                     </span>
                                 </div>
-                                <div class="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-2 mt-4 hover:bg-indigo-200 transition">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-indigo-300/50 px-3 py-2 mt-4 hover:bg-indigo-200 shadow transition">
                                     <img
                                         src="${staticUrl}images/psychologist_profile/seal-check.svg"
                                         alt="check_icon"
                                     />
-                                    <span class="text-lg text-gray-700 font-medium">
+                                    <span class="text-lg text-indigo-900/85 tracking-wide font-semibold">
                                         ${experienceLabel}
                                     </span>
                                 </div>
@@ -419,29 +419,22 @@ export function renderPsychologistCard(ps, options = {}) {
                     </div>
 
                     <!-- Nearest slot -->
-                    <div class="pb-7">
-                        <div class="gap-0 rounded-xl bg-transparent p-0 pb-2">
-                            <div class="inline-flex items-center gap-1">
-                                <p
-                                    class="text-lg font-medium text-gray-700 dark:text-gray-200"
-                                >
-                                    Ближайшая запись
-                                </p>
-                                <p
-                                    class="mt-0 text-lg font-semibold text-indigo-700 hover:text-indigo-800 transition cursor-pointer"
-                                    onclick="document.getElementById('psychologist-schedule')?.scrollIntoView({behavior: 'smooth'})"
-                                >
-                                    <span id="ps-nearest-slot">Загружаем...</span>
+                    <div class="pb-7 mb-7">
+                        <div class="bg-indigo-300/50 rounded-3xl p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div>
+                                <p class="text-sm md:text-sm lg:text-base font-black text-white mb-1">Ближайшее свободное время</p>
+                                <p class="text-xl sm:text-2xl font-black text-indigo-900/85 tracking-wide cursor-pointer hover:opacity-80 transition-opacity" id="ps-nearest-slot" onclick="document.getElementById('psychologist-schedule')?.scrollIntoView({behavior: 'smooth'})">
+                                    Загружаем...
                                 </p>
                             </div>
+                            <button
+                                type="button"
+                                class="w-full sm:w-auto px-6 py-3.5 bg-indigo-500 hover:bg-indigo-900 text-white rounded-xl text-sm font-semibold tracking-wide shadow transition-colors shrink-0"
+                                onclick="document.getElementById('psychologist-schedule')?.scrollIntoView({behavior: 'smooth'})"
+                            >
+                                Выбрать время
+                            </button>
                         </div>
-                        <button
-                            type="button"
-                            class="rounded-xl bg-indigo-500 border-indigo-900 px-6 py-2.5 text-white text-lg font-medium hover:bg-indigo-900 transition"
-                            onclick="document.getElementById('psychologist-schedule')?.scrollIntoView({behavior: 'smooth'})"
-                        >
-                            Выбрать время сессии
-                        </button>
                     </div>
 
                     <!-- Biography -->
