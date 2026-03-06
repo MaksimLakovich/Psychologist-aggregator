@@ -120,10 +120,10 @@ function getSlotButtonClass(isSelected) {
     ];
 
     const selectedClasses = [
-        "bg-indigo-700",
+        "bg-indigo-500",
         "text-white",
         "border-transparent",
-        "hover:bg-indigo-900",
+        "hover:bg-indigo-500",
     ];
 
     const idleClasses = [
