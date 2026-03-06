@@ -3591,6 +3591,22 @@ input:checked + .toggle-bg {
   background-color: rgb(248 250 252 / 0.6);
 }
 
+.bg-slate-100\/75 {
+  background-color: rgb(241 245 249 / 0.75);
+}
+
+.bg-gray-100\/75 {
+  background-color: rgb(243 244 246 / 0.75);
+}
+
+.bg-gray-100\/65 {
+  background-color: rgb(243 244 246 / 0.65);
+}
+
+.bg-gray-200\/35 {
+  background-color: rgb(229 231 235 / 0.35);
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
@@ -4032,6 +4048,10 @@ input:checked + .toggle-bg {
 
 .font-semibold {
   font-weight: 600;
+}
+
+.font-normal {
+  font-weight: 400;
 }
 
 .uppercase {

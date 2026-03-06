@@ -124,8 +124,9 @@ export function renderPsychologistCard(ps, options = {}) {
     // 2) Логика для отображения БЕЙДЖЕВ в КОЛОНКУ (например, Topics)
     const COLOR_MAP = {
         // Цветовые пресеты бейджей для визуального разделения смысловых групп.
-        indigo: "bg-indigo-200 text-indigo-700",
-        green: "bg-green-200 text-green-700",
+        indigo: "bg-indigo-200 text-lg text-indigo-700",
+        green: "bg-green-200 text-lg text-green-700",
+        light_gray: "bg-gray-200/35 text-lg text-gray-700"
     };
 
     const renderBadges = (items = [], color = "indigo", direction = "row") => {
@@ -140,7 +141,7 @@ export function renderPsychologistCard(ps, options = {}) {
         return `
             <div class="mt-3 flex flex-wrap gap-2 ${directionClass}">
                 ${items.map(item => `
-                    <span class="rounded-full px-3 py-1 text-base font-medium tracking-wider ${COLOR_MAP[color]}">
+                    <span class="rounded-full px-3 py-1 font-normal tracking-wider ${COLOR_MAP[color]}">
                         ${item.name}
                     </span>
                 `).join("")}
@@ -157,7 +158,7 @@ export function renderPsychologistCard(ps, options = {}) {
         return `
             <ul class="relative mt-2 space-y-2">
                 ${items.map(item => `
-                    <li class="flex items-center gap-2 text-lg text-gray-700">
+                    <li class="flex items-center gap-2 text-lg text-gray-700 font-normal tracking-wider">
                         <span class="h-2 w-2 rounded-full bg-indigo-400 flex-shrink-0"></span>
                         <span>${item.name}</span>
                     </li>
@@ -502,7 +503,7 @@ export function renderPsychologistCard(ps, options = {}) {
                         <h3 class="text-xl font-semibold text-gray-900">
                             ${topicsTitle}
                         </h3>
-                        ${renderBadges(topics, "indigo", "column")}
+                        ${renderBadges(topics, "light_gray", "column")}
                     </div>
 
                     <!-- Schedule -->
