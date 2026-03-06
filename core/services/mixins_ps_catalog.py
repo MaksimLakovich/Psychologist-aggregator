@@ -1,13 +1,19 @@
 import random
+from datetime import date
 from urllib.parse import urlencode
 
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Case, IntegerField, Value, When
+from django.db.models import Case, IntegerField, Max, Min, Value, When
 from django.template.loader import render_to_string
 from django.urls import reverse
 
 from aggregator._web.services.basic_filter_catalog import (
-    apply_catalog_basic_filters, extract_consultation_type, extract_topic_ids)
+    DEFAULT_CATALOG_AGE_MAX, DEFAULT_CATALOG_AGE_MIN,
+    DEFAULT_CATALOG_EXPERIENCE_MAX, DEFAULT_CATALOG_EXPERIENCE_MIN,
+    apply_catalog_basic_filters, extract_age_range, extract_consultation_type,
+    extract_experience_range, extract_gender, extract_method_ids,
+    extract_price_values, extract_selected_session_slots,
+    extract_session_time_mode, extract_topic_ids)
 from core.constants import CARDS_PER_PAGE
 from core.services.experience_label import build_experience_label
 from users.models import PsychologistProfile
@@ -104,6 +110,104 @@ class CatalogPsychologistQuerysetMixin:
         profile.slug = generate_unique_slug(profile, source_value)
         profile.save(update_fields=["slug"])
 
+    def _build_catalog_age_bounds(self):
+        """Возвращает реальные возрастные границы каталога по данным из БД.
+
+        Простая бизнес-логика:
+            - берем только тех специалистов, которые уже участвуют в каталоге;
+            - считаем минимальный и максимальный возраст среди них;
+            - если каталог пустой или данные по какой-то причине отсутствуют,
+              возвращаем безопасные fallback-границы модели AppUser.
+        """
+        age_aggregate = self.get_queryset().aggregate(
+            min_age=Min("user__age"),
+            max_age=Max("user__age"),
+        )
+
+        min_age = age_aggregate.get("min_age") or DEFAULT_CATALOG_AGE_MIN
+        max_age = age_aggregate.get("max_age") or DEFAULT_CATALOG_AGE_MAX
+
+        if min_age > max_age:
+            min_age, max_age = max_age, min_age
+
+        return {
+            "min": min_age,
+            "max": max_age,
+        }
+
+    def _build_catalog_price_choices(self):
+        """Возвращает реальные фиксированные значения цен для каталога по данным из БД.
+
+        Простая бизнес-логика:
+            - берем только тех специалистов, которые уже участвуют в каталоге;
+            - собираем уникальные цены отдельно для индивидуальной и парной консультации;
+            - сразу сортируем их по возрастанию, чтобы кнопки в модалке шли в понятном порядке.
+        """
+        base_queryset = self.get_queryset()
+
+        individual_prices = [
+            int(price)
+            for price in (
+                base_queryset
+                .filter(price_individual__gt=0)
+                .values_list("price_individual", flat=True)
+                .distinct()
+                .order_by("price_individual")
+            )
+        ]
+        couple_prices = [
+            int(price)
+            for price in (
+                base_queryset
+                .filter(price_couples__gt=0)
+                .values_list("price_couples", flat=True)
+                .distinct()
+                .order_by("price_couples")
+            )
+        ]
+
+        return {
+            "individual": individual_prices,
+            "couple": couple_prices,
+        }
+
+    def _build_catalog_experience_bounds(self):
+        """Возвращает реальные границы стажа каталога по данным из БД.
+
+        Важно:
+            - в модели хранится год начала практики, а не готовый стаж;
+            - поэтому переводим min/max годов в min/max лет опыта относительно текущего года.
+        """
+        current_year = date.today().year
+        experience_aggregate = (
+            self.get_queryset()
+            .exclude(practice_start_year__isnull=True)
+            .aggregate(
+                min_start_year=Min("practice_start_year"),
+                max_start_year=Max("practice_start_year"),
+            )
+        )
+
+        min_start_year = experience_aggregate.get("min_start_year")
+        max_start_year = experience_aggregate.get("max_start_year")
+
+        if min_start_year is None or max_start_year is None:
+            return {
+                "min": DEFAULT_CATALOG_EXPERIENCE_MIN,
+                "max": DEFAULT_CATALOG_EXPERIENCE_MAX,
+            }
+
+        min_experience = max(current_year - max_start_year, 0)
+        max_experience = max(current_year - min_start_year, 0)
+
+        if min_experience > max_experience:
+            min_experience, max_experience = max_experience, min_experience
+
+        return {
+            "min": min_experience,
+            "max": max_experience,
+        }
+
 
 class CatalogDetailLinkMixin:
     """Собирает короткие ссылки между каталогом и детальной карточкой (detail)."""
@@ -187,8 +291,7 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
         """
         return random.randrange(10**9)
 
-    @staticmethod
-    def _extract_filters_state(raw_filters_state=None):
+    def _extract_filters_state(self, raw_filters_state=None, age_bounds=None, experience_bounds=None):
         """Собирает текущее состояние фильтров каталога в едином формате.
 
         Для чего делаем это отдельным шагом:
@@ -199,9 +302,31 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
             {
                 "consultation_type": "individual" | "couple" | None,
                 "topic_ids": ["1", "2"] | [],
+                "method_ids": ["3", "7"] | [],
+                "gender": "male" | "female" | None,
+                "price_individual_values": ["2500", "3500"] | [],
+                "price_couple_values": ["3500", "4500"] | [],
+                "age_min": 25 | None,
+                "age_max": 40 | None,
+                "experience_min": 3 | None,
+                "experience_max": 15 | None,
+                "session_time_mode": "any" | "specific",
+                "selected_session_slots": ["2026-01-22T19:00:00+03:00"] | [],
             }
         """
         raw_filters_state = raw_filters_state or {}
+        age_bounds = age_bounds or self._build_catalog_age_bounds()
+        experience_bounds = experience_bounds or self._build_catalog_experience_bounds()
+        age_min, age_max = extract_age_range(
+            raw_filters_state.get("age_min"),
+            raw_filters_state.get("age_max"),
+            age_bounds=age_bounds,
+        )
+        experience_min, experience_max = extract_experience_range(
+            raw_filters_state.get("experience_min"),
+            raw_filters_state.get("experience_max"),
+            experience_bounds=experience_bounds,
+        )
 
         return {
             "consultation_type": extract_consultation_type(
@@ -209,6 +334,28 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
             ),
             "topic_ids": extract_topic_ids(
                 raw_filters_state.get("topic_ids")
+            ),
+            "method_ids": extract_method_ids(
+                raw_filters_state.get("method_ids")
+            ),
+            "gender": extract_gender(
+                raw_filters_state.get("gender")
+            ),
+            "price_individual_values": extract_price_values(
+                raw_filters_state.get("price_individual_values")
+            ),
+            "price_couple_values": extract_price_values(
+                raw_filters_state.get("price_couple_values")
+            ),
+            "age_min": age_min,
+            "age_max": age_max,
+            "experience_min": experience_min,
+            "experience_max": experience_max,
+            "session_time_mode": extract_session_time_mode(
+                raw_filters_state.get("session_time_mode")
+            ),
+            "selected_session_slots": extract_selected_session_slots(
+                raw_filters_state.get("selected_session_slots")
             ),
         }
 
@@ -229,9 +376,17 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
             3) берем только нужный кусок страницы (например, 1-18 или 19-36);
             4) вторым запросом в БД забираем данные только по этим id.
         """
+        age_bounds = self._build_catalog_age_bounds()
+        experience_bounds = self._build_catalog_experience_bounds()
         queryset = apply_catalog_basic_filters(
             self.get_queryset(),
-            self._extract_filters_state(filters_state),
+            self._extract_filters_state(
+                filters_state,
+                age_bounds=age_bounds,
+                experience_bounds=experience_bounds,
+            ),
+            age_bounds=age_bounds,
+            experience_bounds=experience_bounds,
         )
 
         safe_random_order_key = self._parse_non_negative_int(
@@ -334,7 +489,7 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
             "random_order_key": safe_random_order_key,
         }
 
-    def _render_cards_html(self, *, page_data, layout_mode):
+    def _render_cards_html(self, *, page_data, layout_mode, selected_consultation_type=None):
         """Рендерит HTML карточек для AJAX-ответа.
 
         Здесь используем тот же partial-шаблон, что и у полной страницы,
@@ -346,6 +501,7 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
                 "profiles": page_data["profiles"],
                 "layout_mode": layout_mode,
                 "catalog_detail_query": self._build_catalog_detail_query(layout_mode),
+                "catalog_selected_consultation_type": selected_consultation_type,
                 "show_sidebar": layout_mode == "sidebar",
             },
             request=self.request,
@@ -361,16 +517,27 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
             - пустое состояние каталога;
             - активность фильтр-чипов.
         """
+        age_bounds = self._build_catalog_age_bounds()
+        experience_bounds = self._build_catalog_experience_bounds()
+
         return {
             "status": "ok",
-            "cards_html": self._render_cards_html(page_data=page_data, layout_mode=layout_mode),
+            "cards_html": self._render_cards_html(
+                page_data=page_data,
+                layout_mode=layout_mode,
+                selected_consultation_type=filters_state.get("consultation_type"),
+            ),
             "has_next": page_data["has_next"],
             "next_page_number": page_data["next_page_number"],
             "current_page_number": page_data["current_page_number"],
             "total_pages": page_data["total_pages"],
             "total_count": page_data["total_count"],
             "random_order_key": page_data["random_order_key"],
-            "active_filters": self._extract_filters_state(filters_state),
+            "active_filters": self._extract_filters_state(
+                filters_state,
+                age_bounds=age_bounds,
+                experience_bounds=experience_bounds,
+            ),
         }
 
     def _build_preview_response_payload(self, *, filters_state):
@@ -379,13 +546,25 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
         Этот режим нужен для модалок фильтров, когда пользователь еще не применил изменения,
         но уже хочет увидеть, сколько специалистов будет найдено.
         """
+        age_bounds = self._build_catalog_age_bounds()
+        experience_bounds = self._build_catalog_experience_bounds()
         filtered_queryset = apply_catalog_basic_filters(
             self.get_queryset(),
-            self._extract_filters_state(filters_state),
+            self._extract_filters_state(
+                filters_state,
+                age_bounds=age_bounds,
+                experience_bounds=experience_bounds,
+            ),
+            age_bounds=age_bounds,
+            experience_bounds=experience_bounds,
         )
 
         return {
             "status": "ok",
             "total_count": filtered_queryset.count(),
-            "active_filters": self._extract_filters_state(filters_state),
+            "active_filters": self._extract_filters_state(
+                filters_state,
+                age_bounds=age_bounds,
+                experience_bounds=experience_bounds,
+            ),
         }
