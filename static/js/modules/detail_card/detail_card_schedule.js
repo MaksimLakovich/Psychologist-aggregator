@@ -223,7 +223,7 @@ export function renderScheduleList(
                                     aria-hidden="true"
                                     class="w-4 h-4 object-contain"
                                 />
-                                <span class="text-sm font-medium text-gray-400">${label}</span>
+                                <span class="text-sm font-medium text-indigo-400">${label}</span>
                             </div>
                             <div class="flex-1">
                                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-4">
