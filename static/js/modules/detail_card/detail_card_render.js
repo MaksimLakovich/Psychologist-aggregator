@@ -268,7 +268,7 @@ export function renderPsychologistCard(ps, options = {}) {
             // Если API не дал корректный ответ, показываем "без слотов" и не даем перейти по CTA.
             if (!data || data.status !== "ok") {
                 updateNearestSlotUI("Нет доступных слотов");
-                updateScheduleUI([], null);
+                updateScheduleUI([], null, null, staticUrl);
                 updateChooseButton(null);
                 return;
             }
@@ -287,7 +287,7 @@ export function renderPsychologistCard(ps, options = {}) {
             // Локальный флаг текущего состояния кнопки "Показать больше/меньше".
             let isExpanded = false;
 
-            updateScheduleUI(schedule, selectedSlotKey, defaultVisibleDays);
+            updateScheduleUI(schedule, selectedSlotKey, defaultVisibleDays, staticUrl);
 
             // Контейнер расписания, внутри которого делегируем все клики по слотам.
             const scheduleEl = document.getElementById("psychologist-schedule-list");
@@ -312,7 +312,8 @@ export function renderPsychologistCard(ps, options = {}) {
                     updateScheduleUI(
                         schedule,
                         selectedSlotKey,
-                        isExpanded ? null : defaultVisibleDays
+                        isExpanded ? null : defaultVisibleDays,
+                        staticUrl
                     );
                 });
             }
@@ -346,7 +347,7 @@ export function renderPsychologistCard(ps, options = {}) {
             // Сетевые ошибки не должны ломать карточку: показываем контролируемый fallback UI.
             if (container.dataset.psId !== String(currentPsId)) return;
             updateNearestSlotUI("Нет доступных слотов");
-            updateScheduleUI([], null);
+            updateScheduleUI([], null, null, staticUrl);
             updateChooseButton(null);
         });
 

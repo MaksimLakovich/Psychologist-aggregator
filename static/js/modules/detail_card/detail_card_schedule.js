@@ -27,22 +27,31 @@ function getTimeOfDay(startTime) {
     if (!startTime) return null;
     const hour = parseInt(startTime.split(':')[0], 10);
 
-    // SVG-иконки в стиле outline, stroke-width="1.5"
+    // Бизнес-правило периодов:
+    // - Утро: 06:00-11:59
+    // - День: 12:00-17:59
+    // - Вечер: 18:00-23:59
+    // - Ночь: 00:00-05:59
+    // Важно: 23:00 относится к "Вечеру" (а не к "Ночи"), чтобы порядок
+    // внутри дня оставался интуитивным для клиента.
+
+    // Возвращаем подпись группы и имя SVG-файла, чтобы UI использовал
+    // централизованные иконки из static/images/psychologist_profile.
     if (hour >= 6 && hour < 12) return {
         label: "Утро",
-        icon: `<svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>`
+        iconFile: "morning.svg",
     };
     if (hour >= 12 && hour < 18) return {
         label: "День",
-        icon: `<svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>`
+        iconFile: "midday.svg",
     };
-    if (hour >= 18 && hour < 23) return {
+    if (hour >= 18 && hour <= 23) return {
         label: "Вечер",
-        icon: `<svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>`
+        iconFile: "evening.svg",
     };
     return {
         label: "Ночь",
-        icon: `<svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>`
+        iconFile: "night.svg",
     };
 }
 
@@ -106,6 +115,7 @@ export function getSlotKey(slot) {
 function getSlotButtonClass(isSelected) {
     const baseClasses = [
         "w-full",
+        "min-w-0",
         "flex",
         "items-center",
         "justify-center",
@@ -145,7 +155,12 @@ export function applySlotButtonState(btn, isSelected) {
 }
 
 // Рендерим HTML блока "Расписание" (группировка по дням + кнопки слотов)
-export function renderScheduleList(schedule = [], selectedSlotKey = null, daysToShow = null) {
+export function renderScheduleList(
+    schedule = [],
+    selectedSlotKey = null,
+    daysToShow = null,
+    staticUrl = "/static/"
+) {
     if (!schedule.length) {
         return `
             <div class="flex flex-col items-center justify-center py-12 px-4 rounded-3xl bg-gray-50 border border-gray-100">
@@ -190,32 +205,47 @@ export function renderScheduleList(schedule = [], selectedSlotKey = null, daysTo
 
         const groupsHtml = Object.entries(timeOfDayGroups)
             .filter(([_, slots]) => slots.length > 0)
-            .map(([label, slots]) => {
-                const icon = getTimeOfDay(slots[0].start_time).icon;
+            .map(([label, slots], groupIndex) => {
+                const tod = getTimeOfDay(slots[0].start_time);
+                const iconSrc = `${staticUrl}images/psychologist_profile/${tod.iconFile}`;
                 return `
-                    <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-6 first:mt-4">
-                        <div class="sm:w-24 flex-shrink-0 flex items-center gap-2 pt-2">
-                            ${icon}
-                            <span class="text-sm font-medium text-gray-400">${label}</span>
-                        </div>
-                        <div class="flex-1 grid grid-cols-3 lg:grid-cols-6 gap-3">
-                            ${slots.map(slot => {
-                                const slotKey = getSlotKey(slot);
-                                const isSelected = selectedSlotKey && slotKey === selectedSlotKey;
+                    <div class="mt-6 first:mt-4">
+                        ${
+                            groupIndex > 0
+                                ? '<div class="hidden sm:block border-t border-gray-200/70 my-4"></div>'
+                                : ""
+                        }
+                        <div class="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
+                            <div class="sm:w-24 flex-shrink-0 flex items-center gap-2 sm:pt-2">
+                                <img
+                                    src="${iconSrc}"
+                                    alt=""
+                                    aria-hidden="true"
+                                    class="w-4 h-4 object-contain"
+                                />
+                                <span class="text-sm font-medium text-gray-400">${label}</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-4">
+                                ${slots.map(slot => {
+                                    const slotKey = getSlotKey(slot);
+                                    const isSelected = selectedSlotKey && slotKey === selectedSlotKey;
 
-                                return `
-                                    <button
-                                        type="button"
-                                        class="${getSlotButtonClass(isSelected)}"
-                                        data-slot-key="${slotKey}"
-                                        data-day="${slot.day || ""}"
-                                        data-start-time="${slot.start_time || ""}"
-                                        data-start-iso="${slot.start_iso || ""}"
-                                    >
-                                        ${slot.start_time}
-                                    </button>
-                                `;
-                            }).join("")}
+                                    return `
+                                        <button
+                                            type="button"
+                                            class="${getSlotButtonClass(isSelected)}"
+                                            data-slot-key="${slotKey}"
+                                            data-day="${slot.day || ""}"
+                                            data-start-time="${slot.start_time || ""}"
+                                            data-start-iso="${slot.start_iso || ""}"
+                                        >
+                                            ${slot.start_time}
+                                        </button>
+                                    `;
+                                }).join("")}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -240,10 +270,15 @@ export function updateNearestSlotUI(nearestSlotText) {
 }
 
 // Обновляем блок расписания (контейнер расписания)
-export function updateScheduleUI(schedule, selectedSlotKey = null, daysToShow = null) {
+export function updateScheduleUI(
+    schedule,
+    selectedSlotKey = null,
+    daysToShow = null,
+    staticUrl = "/static/"
+) {
     const scheduleEl = document.getElementById("psychologist-schedule-list");
     if (!scheduleEl) return;
-    scheduleEl.innerHTML = renderScheduleList(schedule, selectedSlotKey, daysToShow);
+    scheduleEl.innerHTML = renderScheduleList(schedule, selectedSlotKey, daysToShow, staticUrl);
 }
 
 // Функция для кнопки СВЕРНУТЬ / РАЗВЕРНУТЬ (расписание - ДНИ / СЛОТЫ)
