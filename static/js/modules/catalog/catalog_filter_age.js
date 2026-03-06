@@ -1,4 +1,4 @@
-import { initDualRangeSlider } from "./dual_range_slider.js";
+import { initDualRangeSlider } from "../dual_range_slider.js";
 
 /**
  * Фильтр каталога "Возраст".

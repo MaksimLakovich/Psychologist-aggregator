@@ -1,4 +1,4 @@
-import { initCollapsibleList } from "./collapsible_methods_list.js";
+import { initCollapsibleList } from "../collapsible_methods_list.js";
 
 /**
  * Фильтр каталога "Подход".

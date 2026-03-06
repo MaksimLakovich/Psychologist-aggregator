@@ -1,4 +1,4 @@
-import { initMultiToggle } from "./toggle_group_multi_choice.js";
+import { initMultiToggle } from "../toggle_group_multi_choice.js";
 import { resolveCatalogTopicTypeLabel } from "./catalog_filter_topic_type.js";
 
 /**

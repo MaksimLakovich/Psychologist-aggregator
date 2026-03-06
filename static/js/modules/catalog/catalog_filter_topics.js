@@ -1,4 +1,4 @@
-import { initCollapsibleTopicGroups } from "./collapsible_topics_list.js";
+import { initCollapsibleTopicGroups } from "../collapsible_topics_list.js";
 import { resolveCatalogTopicTypeLabel } from "./catalog_filter_topic_type.js";
 
 /**

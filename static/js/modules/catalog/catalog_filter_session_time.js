@@ -1,5 +1,5 @@
-import { initToggleGroup } from "./toggle_group_single_choice.js";
-import { initTimeSlotsPicker } from "./time_slots_picker.js";
+import { initToggleGroup } from "../toggle_group_single_choice.js";
+import { initTimeSlotsPicker } from "../time_slots_picker.js";
 
 /**
  * Фильтр каталога "Время сессии".

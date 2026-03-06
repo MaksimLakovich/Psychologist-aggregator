@@ -1,4 +1,4 @@
-import { pluralizeRu } from "../utils/pluralize_ru.js";
+import { pluralizeRu } from "../../utils/pluralize_ru.js";
 import {
     APPLY_RESULTS_LABEL,
     PREVIEW_RESULTS_LABEL,
