@@ -387,12 +387,12 @@ export function renderPsychologistCard(ps, options = {}) {
                     <div id="ps-main-header">
 
                         <!-- Header -->
-                        <div class="pb-4">
-                            <h2 class="text-3xl font-semibold text-gray-900 pb-2">
+                        <div class="pb-8">
+                            <h2 class="pb-4 text-3xl md:text-4xl lg:text-5xl font-black text-indigo-900/85 tracking-wide">
                                 ${ps.full_name}
                             </h2>
                             <div class="inline-flex items-center gap-3">
-                                <div class="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-2 mt-3 hover:bg-indigo-200 transition">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-2 mt-4 hover:bg-indigo-200 transition">
                                     <img
                                         src="${staticUrl}images/psychologist_profile/goal-svgrepo-com.svg"
                                         alt="goal_icon"
@@ -401,7 +401,7 @@ export function renderPsychologistCard(ps, options = {}) {
                                         ${ps.rating} из 10
                                     </span>
                                 </div>
-                                <div class="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-2 mt-3 hover:bg-indigo-200 transition">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-2 mt-4 hover:bg-indigo-200 transition">
                                     <img
                                         src="${staticUrl}images/psychologist_profile/seal-check.svg"
                                         alt="check_icon"
@@ -446,7 +446,7 @@ export function renderPsychologistCard(ps, options = {}) {
 
                     <!-- Biography -->
                     <div class="pb-7">
-                        <h3 class="text-xl font-semibold text-gray-900">
+                        <h3 class="text-xl md:text-2xl font-semibold text-indigo-700/90 tracking-wide">
                             О специалисте
                         </h3>
                         <div class="relative mt-2">
@@ -469,7 +469,7 @@ export function renderPsychologistCard(ps, options = {}) {
 
                     <!-- Education -->
                     <div class="pb-7">
-                        <h3 class="text-xl font-semibold text-gray-900">
+                        <h3 class="text-xl md:text-2xl font-semibold text-indigo-700/90 tracking-wide">
                             Образование
                         </h3>
                         ${renderEducations(ps.educations)}
@@ -479,7 +479,7 @@ export function renderPsychologistCard(ps, options = {}) {
                     <div class="pb-7">
 
                         <div class="flex inline-flex items-center gap-2">
-                            <h3 class="text-xl font-semibold text-gray-900">
+                            <h3 class="text-xl md:text-2xl font-semibold text-indigo-700/90 tracking-wide">
                                 Методы терапии
                             </h3>
                             <button
@@ -500,7 +500,7 @@ export function renderPsychologistCard(ps, options = {}) {
 
                     <!-- Topics -->
                     <div class="pb-7">
-                        <h3 class="text-xl font-semibold text-gray-900">
+                        <h3 class="text-xl md:text-2xl font-semibold text-indigo-700/90 tracking-wide">
                             ${topicsTitle}
                         </h3>
                         ${renderBadges(topics, "light_gray", "column")}
@@ -511,7 +511,7 @@ export function renderPsychologistCard(ps, options = {}) {
                         id="psychologist-schedule"
                         class="pb-7"
                     >
-                        <h3 class="text-xl font-semibold text-gray-900">
+                        <h3 class="text-xl md:text-2xl font-semibold text-indigo-700/90 tracking-wide">
                             Расписание
                         </h3>
                         <div class="flex items-center gap-1 mt-2">
@@ -525,7 +525,7 @@ export function renderPsychologistCard(ps, options = {}) {
                                 Часовой пояс: ${clientTimezone}
                             </p>
                         </div>
-                        <div id="psychologist-schedule-list" class="mt-2"></div>
+                        <div id="psychologist-schedule-list" class="mt-7"></div>
                     </div>
 
                 </div>
