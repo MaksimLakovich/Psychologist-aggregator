@@ -36,9 +36,124 @@
         animation: fadeInUp 0.7s ease-out forwards;
     }
 
-    /* Скрытие скроллбара для панели фильтров */
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* Чипы фильтров выровнены по scroll-snap, чтобы горизонтальный скролл ощущался предсказуемо на тач-устройствах */
+    #catalog-filter-scroll-area {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(129, 140, 248, 0.7) rgba(224, 231, 255, 0.32);
+    }
+
+    #catalog-filter-scroll-area::-webkit-scrollbar {
+        height: 0.55rem;
+    }
+
+    #catalog-filter-scroll-area::-webkit-scrollbar-track {
+        background: rgba(224, 231, 255, 0.32);
+        border-radius: 9999px;
+    }
+
+    #catalog-filter-scroll-area::-webkit-scrollbar-thumb {
+        background: rgba(129, 140, 248, 0.7);
+        border: 2px solid rgba(255, 255, 255, 0.45);
+        border-radius: 9999px;
+    }
+
+    #catalog-filter-scroll-area::-webkit-scrollbar-thumb:hover {
+        background: rgba(129, 140, 248, 0.85);
+    }
+
+    #catalog-filter-scroll-area [data-filter-chip] {
+        scroll-snap-align: start;
+    }
+
+    /* Общий стиль двойного ползунка диапазона для фильтров каталога */
+    .catalog-dual-range input[type="range"] {
+        position: absolute;
+        left: 0;
+        top: 2.55rem;
+        width: 100%;
+        margin: 0;
+        pointer-events: none;
+        -webkit-appearance: none;
+        appearance: none;
+        background: transparent;
+    }
+
+    .catalog-dual-range input[type="range"]::-webkit-slider-runnable-track {
+        height: 0.5rem;
+        background: transparent;
+    }
+
+    .catalog-dual-range input[type="range"]::-webkit-slider-thumb {
+        pointer-events: auto;
+        -webkit-appearance: none;
+        appearance: none;
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 9999px;
+        background: #ffffff;
+        border: 2px solid #4f46e5;
+        box-shadow: 0 6px 14px rgba(79, 70, 229, 0.18);
+        cursor: pointer;
+    }
+
+    .catalog-dual-range input[type="range"]::-moz-range-track {
+        height: 0.5rem;
+        background: transparent;
+    }
+
+    .catalog-dual-range input[type="range"]::-moz-range-thumb {
+        pointer-events: auto;
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 9999px;
+        background: #ffffff;
+        border: 2px solid #4f46e5;
+        box-shadow: 0 6px 14px rgba(79, 70, 229, 0.18);
+        cursor: pointer;
+    }
+
+    .catalog-range-bubble {
+        max-width: calc(100% - 1rem);
+        pointer-events: none;
+        white-space: nowrap;
+        will-change: left, top, transform;
+    }
+
+    .catalog-range-bubble.is-ready {
+        transition: left 180ms ease, top 180ms ease, transform 180ms ease;
+    }
+
+    /* Карточки каталога: включаем content-visibility для более плавного скролла длинного списка */
+    article[data-catalog-card] {
+        content-visibility: auto;
+        contain-intrinsic-size: 1px 500px;
+    }
+
+    /* Кнопки табов в краткой карточке: убираем случайные фоны и управляем нижней границей вручную */
+    .catalog-tab-btn {
+        background: transparent !important;
+        outline: none !important;
+        border-bottom-width: 4px !important;
+        border-bottom-color: transparent !important;
+        transition: all 0.4s ease;
+    }
+
+    /* Активный таб в обычном состоянии карточки */
+    .catalog-tab-btn[aria-selected="true"] {
+        border-bottom-color: #64748b !important;
+        color: #475569 !important;
+    }
+
+    /* Активный таб при наведении на всю карточку */
+    article:hover .catalog-tab-btn[aria-selected="true"] {
+        border-bottom-color: #5145CD !important;
+        color: #5145CD !important;
+    }
+
+    /* Цвет текста при наведении на саму кнопку таба */
+    .catalog-tab-btn:hover {
+        color: #5145CD !important;
+    }
 </style>
 {% endblock %}
 
@@ -49,7 +164,7 @@
 <div id="filter-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 sm:p-6">
     <div id="filter-modal-overlay" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"></div>
 
-    <div class="relative w-full max-w-lg overflow-hidden rounded-[2.5rem] bg-white shadow-2xl">
+    <div class="relative w-full max-w-lg md:max-w-2xl overflow-hidden rounded-[2.5rem] bg-white shadow-2xl">
         <div class="p-8">
             <div class="flex items-center justify-between mb-6">
                 <h3 id="modal-title" class="text-2xl font-bold text-indigo-900 tracking-tight">Фильтр</h3>
@@ -98,59 +213,35 @@
                 <span class="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Настройка поиска</span>
             </div>
 
-            <div class="no-scrollbar flex overflow-x-auto pb-4 gap-3">
-                <button type="button"
-                        data-filter-chip
-                        data-filter-key="consultation_type"
-                        data-filter-name="Вид консультации"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 border border-slate-100 rounded-2xl text-sm font-bold bg-slate-200/40 text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Вид консультации
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button type="button"
-                        data-filter-chip
-                        data-filter-key="topic_ids"
-                        data-filter-name="Симптомы"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Симптомы
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button type="button"
-                        data-filter-chip
-                        data-filter-name="Возраст"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Возраст
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button type="button"
-                        data-filter-chip
-                        data-filter-name="Психотерапевтический подход"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Подход
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button type="button"
-                        data-filter-chip
-                        data-filter-name="Пол"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Пол
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button type="button"
-                        data-filter-chip
-                        data-filter-name="Цена"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Цена
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button type="button"
-                        data-filter-chip
-                        data-filter-name="Опыт"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Опыт
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
-                <button type="button"
-                        data-filter-chip
-                        data-filter-name="Время сессии"
-                        class="inline-flex gap-1 flex-shrink-0 px-3 py-3 bg-slate-200/40 border border-slate-100 rounded-2xl text-sm font-bold text-slate-600
-                         hover:border-slate-100 hover:text-indigo-600 hover:bg-slate-50 transition-all shadow-sm">Время сессии
-                    <img src="{% static 'images/menu/filter-icon.svg' %}" alt="filter" class="w-5 h-5"></button>
+            <div class="flex items-start justify-between gap-3">
+                <div class="relative min-w-0 flex-1">
+                    <div
+                        id="catalog-filter-scroll-area"
+                        data-filter-icon-src="{% static 'images/menu/filter-icon.svg' %}"
+                        class="flex overflow-x-auto pb-4 gap-3 pr-2"
+                        style="scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;"
+                    ></div>
+                </div>
+
+                <!-- Контейнер кнопки с "мягким" краем -->
+                <div class="relative flex-shrink-0 flex items-start">
+                    <!-- Градиентное размытие белого фона (1 см / 40px) -->
+                    <div class="absolute inset-y-0 -left-10 w-10 pointer-events-none bg-gradient-to-r from-transparent via-white/70 to-white"></div>
+
+                    <button
+                        id="catalog-reset-filters-btn"
+                        type="button"
+                        class="relative z-10 inline-flex items-center rounded-2xl
+                        px-4 py-3 text-sm font-bold text-rose-400/40 bg-rose-200/25 transition-all
+                        hover:bg-rose-200/40 hover:text-rose-400/60
+                        disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        Сбросить фильтры
+                    </button>
+                </div>
             </div>
         </div>
+
 
         <!-- Сетка карточек: 1 на mobile, 2 на tablet, 3 на desktop -->
         <div
@@ -158,7 +249,7 @@
             class="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3 animate-fade-in-up"
             style="animation-delay: 0.2s;"
         >
-            {% include 'core/client_pages/my_account/short_cards.html' with profiles=profiles layout_mode=layout_mode catalog_detail_query=catalog_detail_query show_sidebar=show_sidebar %}
+            {% include 'core/client_pages/my_account/short_cards.html' with profiles=profiles layout_mode=layout_mode catalog_detail_query=catalog_detail_query catalog_selected_consultation_type=None show_sidebar=show_sidebar %}
         </div>
 
         <!-- Пустое состояние каталога -->
@@ -174,8 +265,8 @@
         </div>
 
         <!-- Нижняя панель: слева номер страницы, по центру "Показать еще", справа "Вернуться в начало" -->
-        <div class="mt-20 grid items-center gap-6 text-zinc-400 md:grid-cols-3 border-t border-indigo-100/50 pt-10">
-            <p id="catalog-page-indicator" class="text-sm font-bold uppercase tracking-widest md:justify-self-start text-indigo-900/40">
+        <div class="mt-20 grid grid-cols-[auto_1fr_auto] items-center gap-3 border-t border-indigo-100/50 pt-10 text-zinc-400 md:grid-cols-3 md:gap-6">
+            <p id="catalog-page-indicator" class="text-xs font-bold uppercase tracking-widest text-indigo-900/40 md:justify-self-start md:text-sm">
                 {% if total_pages %}
                     Страница <span class="text-indigo-600">{{ current_page_number|default:1 }}</span> из {{ total_pages }}
                 {% else %}
@@ -188,12 +279,14 @@
                     id="catalog-load-more-btn"
                     type="button"
                     data-filter-endpoint="{{ catalog_filter_endpoint }}"
+                    data-domain-slots-endpoint="{{ catalog_domain_slots_endpoint }}"
                     data-next-page="{{ next_page_number|default:'' }}"
                     data-current-page="{{ current_page_number|default:1 }}"
                     data-total-pages="{{ total_pages|default:0 }}"
                     data-random-order-key="{{ random_order_key }}"
                     data-layout="{{ layout_mode }}"
-                    class="rounded-2xl bg-indigo-600 px-10 py-4 text-base font-black tracking-wide text-white transition
+                    class="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-black tracking-wide text-white transition
+                    sm:px-10 sm:py-4 sm:text-base
                     hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                     {% if not has_next %}hidden{% endif %}
                 >
@@ -205,11 +298,11 @@
                 </p>
             </div>
 
-            <div class="flex justify-start md:justify-self-end">
+            <div class="flex justify-end md:justify-self-end">
                 <button
                     id="catalog-scroll-top-btn"
                     type="button"
-                    class="inline-flex items-center rounded-xl border border-zinc-200 px-5 py-2 text-xs font-bold uppercase tracking-widest text-zinc-400 transition hover:border-indigo-400 hover:text-indigo-600"
+                    class="inline-flex items-center rounded-xl border border-transparent px-5 py-2 text-xs font-bold uppercase tracking-widest text-zinc-400 transition hover:border-indigo-600 hover:text-indigo-600"
                 >
                     В начало
                 </button>
@@ -221,6 +314,11 @@
 
 {{ consultation_type_choices|json_script:"catalog-consultation-type-choices-data" }}
 {{ catalog_topics_by_type|json_script:"catalog-topics-by-type-data" }}
+{{ catalog_methods|json_script:"catalog-methods-data" }}
+{{ catalog_gender_choices|json_script:"catalog-gender-choices-data" }}
+{{ catalog_price_choices|json_script:"catalog-price-choices-data" }}
+{{ catalog_age_bounds|json_script:"catalog-age-bounds-data" }}
+{{ catalog_experience_bounds|json_script:"catalog-experience-bounds-data" }}
 
 <script>window.CSRF_TOKEN = "{{ csrf_token }}";</script>
 <script type="module" src="{% static 'js/pages/psychologist_catalog.js' %}"></script>
