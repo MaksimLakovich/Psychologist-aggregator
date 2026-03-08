@@ -8,13 +8,15 @@ EVENT_TYPE_CHOICES = [
     ("group_event", "Группа встреч"),
 ]
 
+# ВАЖНО:
+# archived НЕ должен быть business status события.
+# Архивность - это способ отображения данных на UI (past/current/upcoming), а не отдельный этап жизненного цикла
 EVENT_STATUS_CHOICES = [
     ("draft", "Черновик"),
     ("planned", "Запланировано"),
     ("started", "Начато"),
     ("completed", "Завершено"),
     ("cancelled", "Отменено"),
-    ("archived", "Архивировано"),
 ]
 
 EVENT_VISIBILITY_CHOICES = [
@@ -40,7 +42,6 @@ SLOT_STATUS_CHOICES = [
     ("started", "Начато"),
     ("completed", "Завершено"),
     ("cancelled", "Отменено"),
-    ("archived", "Архивировано"),
 ]
 
 PARTICIPANT_EVENT_ROLE_CHOICES = [
@@ -54,7 +55,7 @@ PARTICIPANT_EVENT_STATUS_CHOICES = [
     ("invited", "Приглашен"),
     ("accepted", "Принято"),
     ("declined", "Отклонено"),
-    ("left", "Покинул"),
+    ("removed", "Удален"),
 ]
 
 PARTICIPANT_SLOT_ROLE_CHOICES = [
@@ -71,6 +72,14 @@ PARTICIPANT_SLOT_STATUS_CHOICES = [
     ("left_early", "Покинул раньше"),
     ("attended", "Посещено"),
     ("missed", "Пропущено"),
+    ("cancelled", "Отменено"),
+]
+
+# Эти категории нужны НЕ для business lifecycle, а для группировки встреч на UI
+EVENT_DISPLAY_BUCKET_CHOICES = [
+    ("upcoming", "Будущие"),
+    ("current", "Текущие"),
+    ("past", "Прошедшие"),
 ]
 
 WEEKDAYS_CHOICES = [

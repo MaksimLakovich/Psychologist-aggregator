@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
 from django.http import JsonResponse

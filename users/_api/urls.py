@@ -1,8 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from users._api.views import (AppUserRetrieveUpdateView,
-                              ChangePasswordView,
+from users._api.views import (AppUserRetrieveUpdateView, ChangePasswordView,
                               ClientProfileRetrieveUpdateView,
                               CustomTokenObtainPairView,
                               EducationListCreateView,
