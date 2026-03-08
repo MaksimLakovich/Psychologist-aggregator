@@ -1,5 +1,10 @@
+from django.urls import include, path
+
 from calendar_engine.apps import AppCalendarConfig
 
 app_name = AppCalendarConfig.name
 
-urlpatterns = []
+urlpatterns = [
+    # API (DRF + AJAX)
+    path("calendar/api/", include("calendar_engine._api.urls", namespace="api")),
+]
