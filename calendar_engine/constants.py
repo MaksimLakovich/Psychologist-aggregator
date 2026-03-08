@@ -3,13 +3,16 @@ from datetime import time
 from calendar_engine.domain.time_policy.policy import DomainTimePolicy
 
 # ====== ДЛЯ МОДЕЛЕЙ ======
+
 EVENT_TYPE_CHOICES = [
-    ("event", "Встреча"),
-    ("group_event", "Группа встреч"),
+    ("session_individual", "Индивидуальная сессия"),
+    ("session_couple", "Парная сессия"),
+    ("session_group", "Групповая сессия"),
+    ("blocked_time", "Блокировка времени"),
+    ("external_busy", "Внешняя занятость"),
 ]
 
-# ВАЖНО:
-# archived НЕ должен быть business status события.
+# ВАЖНО: archived НЕ должен быть business status события.
 # Архивность - это способ отображения данных на UI (past/current/upcoming), а не отдельный этап жизненного цикла
 EVENT_STATUS_CHOICES = [
     ("draft", "Черновик"),
@@ -17,6 +20,15 @@ EVENT_STATUS_CHOICES = [
     ("started", "Начато"),
     ("completed", "Завершено"),
     ("cancelled", "Отменено"),
+]
+
+# ВАЖНО: cancel_reason_type используется только как дополнительное пояснение бизнес-смысла отмены.
+# Это позволяет оставить lifecycle компактным (cancelled), но при этом не терять важный сценарий:
+# отменил пользователь, перенес встречу или отменил администратор.
+EVENT_CANCEL_REASON_TYPE_CHOICES = [
+    ("cancelled_by_user", "Отменено пользователем"),
+    ("rescheduled", "Перенесено"),
+    ("cancelled_by_admin", "Отменено администратором"),
 ]
 
 EVENT_VISIBILITY_CHOICES = [
@@ -106,6 +118,7 @@ EXCEPTION_TYPE_CHOICES = [
 ]
 
 # ====== ДЛЯ ДОМЕННОЙ ПОЛИТИКИ ======
+
 DOMAIN_TIME_POLICY = DomainTimePolicy(
     day_time_start=time(0, 0),
     day_time_end=time(0, 0),  # день заканчивается в 00:00 следующего дня

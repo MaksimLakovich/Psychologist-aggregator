@@ -9,6 +9,7 @@ from django.db import models
 from timezone_field import TimeZoneField
 
 from calendar_engine.constants import (AVAILABILITY_EXCEPTION_CHOICES,
+                                       EVENT_CANCEL_REASON_TYPE_CHOICES,
                                        EVENT_SOURCE_CHOICES,
                                        EVENT_STATUS_CHOICES,
                                        EVENT_TYPE_CHOICES,
@@ -73,7 +74,7 @@ class CalendarEvent(TimeStampedModel):
     )
     event_type = models.CharField(
         choices=EVENT_TYPE_CHOICES,
-        default="event",
+        default="session_individual",
         max_length=32,
         null=False,
         blank=False,
@@ -89,11 +90,19 @@ class CalendarEvent(TimeStampedModel):
         verbose_name="Статус события",
         help_text="Укажите статус события",
     )
+    cancel_reason_type = models.CharField(
+        choices=EVENT_CANCEL_REASON_TYPE_CHOICES,
+        max_length=32,
+        null=True,
+        blank=True,
+        verbose_name="Тип причины отмены события",
+        help_text="Укажите тип причины отмены события (например: отменено пользователем, перенос, отменено админом)",
+    )
     cancel_reason = models.TextField(
         null=True,
         blank=True,
         verbose_name="Причина отмены события",
-        help_text="Укажите причину отмены события",
+        help_text="Укажите текстовое пояснение причины отмены события",
     )
     visibility = models.CharField(
         choices=EVENT_VISIBILITY_CHOICES,
@@ -117,14 +126,14 @@ class CalendarEvent(TimeStampedModel):
         verbose_name="Повторяющееся события",
         help_text="Флаг повторяющегося события",
     )
-    previous_event_id = models.ForeignKey(
+    previous_event = models.ForeignKey(
         to="self",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="rescheduled_events",
         verbose_name="Предыдущее событие при переносе",
-        help_text="Связь с предыдущим событием при переносе (перенос = archived текущего события + planned новое)",
+        help_text="Связь с предыдущим событием при переносе",
     )
     source = models.CharField(
         choices=EVENT_SOURCE_CHOICES,
