@@ -22,6 +22,10 @@ from calendar_engine.constants import (AVAILABILITY_EXCEPTION_CHOICES,
                                        PARTICIPANT_SLOT_STATUS_CHOICES,
                                        SLOT_STATUS_CHOICES, WEEKDAYS_CHOICES)
 
+# =====
+# СОБЫТИЕ / СЛОТЫ
+# =====
+
 
 class TimeStampedModel(models.Model):
     """Абстрактная базовая модель для дальнейшего создания *created_at* и *updated_at*
@@ -155,6 +159,58 @@ class CalendarEvent(TimeStampedModel):
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
         return f"{self.id} - {self.title}"
+
+    def clean(self):
+        """Модельная валидация бизнес-инвариантов события.
+
+        2 ключевых сценария:
+            1) Обычное активное или завершенное событие:
+                - НЕ должно содержать причину отмены;
+                - НЕ должно содержать тип причины отмены.
+            2) Отмененное событие:
+                - ОБЯЗАНО содержать тип причины отмены;
+                - ОБЯЗАНО содержать текстовое пояснение причины отмены.
+
+        Дополнительно:
+            - previous_event хранится в НОВОМ событии после переноса, а не в старом отмененном;
+            - событие не может ссылаться само на себя как на previous_event.
+        """
+        super().clean()
+
+        errors = {}
+
+        if self.status == "cancelled":
+            if not self.cancel_reason_type:
+                errors["cancel_reason_type"] = (
+                    "Для отмененного события обязательно нужно указать тип причины отмены"
+                )
+
+            if not self.cancel_reason:
+                errors["cancel_reason"] = (
+                    "Для отмененного события обязательно нужно указать текстовое пояснение причины отмены"
+                )
+        else:
+            if self.cancel_reason_type:
+                errors["cancel_reason_type"] = (
+                    "Тип причины отмены можно указывать только для события со статусом cancelled"
+                )
+
+            if self.cancel_reason:
+                errors["cancel_reason"] = (
+                    "Текстовую причину отмены можно указывать только для события со статусом cancelled"
+                )
+
+        if self.previous_event_id:
+            if self.pk and self.previous_event_id == self.pk:
+                errors["previous_event"] = "Событие не может ссылаться само на себя как на previous_event"
+
+            if self.status == "cancelled":
+                errors["previous_event"] = (
+                    "previous_event нужно хранить в новом событии после переноса, а не в старом отмененном событии"
+                )
+
+        if errors:
+            raise ValidationError(errors)
 
     class Meta:
         verbose_name = "Событие"
@@ -500,11 +556,18 @@ class SlotParticipant(TimeStampedModel):
         ordering = ["pk", "slot__start_datetime", "slot", "user"]
 
 
+# =====
+# РАБОЧИЙ ГРАФИК
+# =====
+
+
 class AvailabilityRule(TimeStampedModel):
     """Правила доступности специалиста (рабочее расписание).
+
     Например: Пн-Пт, с набором рабочих окон внутри дня:
         - одно окно с 09:00 до 18:00;
-        - или несколько окон с 06:00 до 11:00 и с 16:00 до 22:00."""
+        - или несколько окон с 06:00 до 11:00 и с 16:00 до 22:00.
+    """
 
     creator = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
@@ -554,6 +617,13 @@ class AvailabilityRule(TimeStampedModel):
         verbose_name="Перерыв между сессиями (минуты)",
         help_text="Укажите перерыв между сессиями (минуты)",
     )
+    minimum_booking_notice_hours = models.PositiveSmallIntegerField(
+        default=1,
+        null=False,
+        blank=False,
+        verbose_name="Минимальное количество часов до ближайшего доступного слота для записи",
+        help_text="Укажите, за сколько минимум часов до начала слота клиенту можно показывать слот для записи",
+    )
     is_active = models.BooleanField(
         default=True,
         null=False,
@@ -601,7 +671,8 @@ class AvailabilityRuleTimeWindow(TimeStampedModel):
     def clean(self):
         """Метод валидации для двух сценариев:
             1) 'start_time = end_time': круглосуточный рабочий график;
-            2) 'start_time > end_time': проверка, что время начала не может быть раньше, чем время окончания."""
+            2) 'start_time > end_time': проверка, что время начала не может быть раньше, чем время окончания.
+        """
         if self.start_time == self.end_time and self.start_time != time(0, 0):
             raise ValidationError(
                 "start_time и end_time могут совпадать только для 24/7 (00:00–00:00)"
@@ -684,6 +755,12 @@ class AvailabilityException(TimeStampedModel):
         verbose_name="Перерыв между сессиями согласно исключения (минуты)",
         help_text="Укажите перерыв между сессиями согласно исключения (минуты)",
     )
+    override_minimum_booking_notice_hours = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Новое минимальное количество часов до ближайшего доступного слота для записи",
+        help_text="Укажите новое минимальное количество часов до старта слота для записи на период исключения",
+    )
     is_active = models.BooleanField(
         default=True,
         null=False,
@@ -691,6 +768,31 @@ class AvailabilityException(TimeStampedModel):
         verbose_name="Признак действия исключения",
         help_text="Флаг действия исключения",
     )
+
+    def clean(self):
+        """Модельная валидация исключения из рабочего расписания.
+
+        Бизнес-смысл нового параметра такой:
+            - базовое правило специалиста задает общий minimum_booking_notice_hours;
+            - exception_type="override" может временно переопределить это значение;
+            - exception_type="unavailable" полностью закрывает дату/диапазон дат, поэтому отдельный minimum notice
+              для него не нужен и только запутает смысл данных.
+        """
+        super().clean()
+
+        errors = {}
+
+        if self.exception_end < self.exception_start:
+            errors["exception_end"] = "Дата окончания исключения не может быть раньше даты начала исключения."
+
+        if self.exception_type == "unavailable" and self.override_minimum_booking_notice_hours is not None:
+            errors["override_minimum_booking_notice_hours"] = (
+                "Для exception_type='unavailable' нельзя указывать override_minimum_booking_notice_hours, "
+                "потому что день и так полностью закрыт."
+            )
+
+        if errors:
+            raise ValidationError(errors)
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
@@ -733,7 +835,8 @@ class AvailabilityExceptionTimeWindow(TimeStampedModel):
         """Метод валидации для двух сценариев:
             1) 'override_start_time = override_end_time': круглосуточный рабочий график;
             2) 'override_start_time > override_end_time': проверка, что время начала не может быть раньше,
-                чем время окончания."""
+                чем время окончания.
+        """
         if self.override_start_time and self.override_end_time:
 
             if (self.override_start_time == self.override_end_time

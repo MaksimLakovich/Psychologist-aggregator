@@ -232,13 +232,12 @@ calendar_engine/
 | `started`   | Событие началось                                |
 | `completed` | Событие успешно завершено                       |
 | `cancelled` | Событие отменено                                |
-| `archived`  | Событие заархивировано (например, при переносе) |
 
 Принципы:
 
 - **Событие** - это бизнес-сущность, описывающая намерение провести встречу
 - Событие может содержать один или несколько слотов
-- При переносе создается новое событие, а старое переводится в archived
+- При переносе создается новое событие, а старое переводится в cancelled
 - Исторические события не участвуют в блокировке времени
 
 ### 2. Статусы слотов (`TimeSlot.status`)
@@ -249,13 +248,12 @@ calendar_engine/
 | `started`   | Слот в процессе      |
 | `completed` | Слот завершен        |
 | `cancelled` | Слот отменен         |
-| `archived`  | Слот заархивирован   |
 
 Принципы:
 
 - **Слот** - это атом времени, именно он блокирует календарь
 - Double booking (наложение встреч) предотвращается ТОЛЬКО для слотов со статусами planned и started (т.е., только
-  для активных слотов (запланированных/начатых). Исторические слоты (completed, canceled, archived) не блокируют
+  для активных слотов (запланированных/начатых). Исторические слоты (completed, canceled) не блокируют
   доступность. Это реализовано через ExclusionConstraint в PostgreSQL.
 
 ### 3. Роли и статусы участников
@@ -274,7 +272,7 @@ calendar_engine/
     - invited
     - accepted
     - declined
-    - left
+    - removed
 
 #### 3.2. Участники слота (`SlotParticipant`)
 
@@ -286,6 +284,7 @@ calendar_engine/
     - participant
     - speaker
     - moderator
+    - observer
 
 - **Статусы (status):**
     - planned
@@ -293,6 +292,7 @@ calendar_engine/
     - left_early
     - attended
     - missed
+    - cancelled
 
 ---
 
@@ -355,21 +355,22 @@ calendar_engine/
    Корень агрегата - событие календаря. Может содержать 1 или несколько временных слотов (т.е., если составное событие,
    то будет N-записей с одним ID события и разными ID слотов).
 
-| Поле               | Тип                  | Описание                |
-|--------------------|----------------------|-------------------------|
-| `id`               | UUID                 | Публичный идентификатор |
-| `creator`          | FK(AppUser)          | Организатор события     |
-| `title`            | CharField            | Название                |
-| `description`      | TextField            | Описание                |
-| `event_type`       | CharField(choices)   | Тип события             |
-| `status`           | CharField(choices)   | Статус                  |
-| `cancel_reason`    | TextField            | Причина отмены          |
-| `visibility`       | CharField(choices)   | Видимость               |
-| `capacity`         | PositiveSmallInteger | Лимит участников        |
-| `is_recurring`     | Boolean              | Повторяющееся           |
-| `previous_event_id` | FK(self)             | Связь при переносе      |
-| `source`           | CharField            | Источник                |
-| `external_id`      | CharField            | ID во внешнем календаре |
+| Поле              | Тип                  | Описание                   |
+|-------------------|----------------------|----------------------------|
+| `id`              | UUID                 | Публичный идентификатор    |
+| `creator`         | FK(AppUser)          | Организатор события        |
+| `title`           | CharField            | Название                   |
+| `description`     | TextField            | Описание                   |
+| `event_type`      | CharField(choices)   | Тип события                |
+| `status`          | CharField(choices)   | Статус                     |
+| `cancel_reason_type` | CharField(choices)   | Тип причины отмены события |
+| `cancel_reason`   | TextField            | Причина отмены             |
+| `visibility`      | CharField(choices)   | Видимость                  |
+| `capacity`        | PositiveSmallInteger | Лимит участников           |
+| `is_recurring`    | Boolean              | Повторяющееся              |
+| `previous_event`  | FK(self)             | Связь при переносе         |
+| `source`          | CharField            | Источник                   |
+| `external_id`     | CharField            | ID во внешнем календаре    |
 
 3. Модель `RecurrenceRule`:  
    Правила для повторяющегося события.
@@ -446,16 +447,17 @@ calendar_engine/
     Правила доступности специалиста (рабочее расписание).
     Например: Пн-Пт, с набором рабочих окон внутри дня (AvailabilityRuleTimeWindow).
 
-| Поле                     | Тип                       | Описание                        |
-|--------------------------|---------------------------|---------------------------------|
-| `creator`                | FK(AppUser)               | Пользователь                    |
-| `timezone`               | TimeZoneField             | Часовой пояс                    |
-| `rule_start`             | Date                      | Начало                          |
-| `rule_end`               | Date                      | Конец                           |
-| `weekdays`               | Array(choices)            | Дни недели                      |
-| `slot_duration`          | PositiveSmallIntegerField | Длительность сессии (минуты)    |
-| `break_between_sessions` | PositiveSmallIntegerField | Перерыв между сессиями (минуты) |
-| `is_active`              | Boolean                   | Признак действия правила        |
+| Поле                           | Тип                       | Описание                                                               |
+|--------------------------------|---------------------------|------------------------------------------------------------------------|
+| `creator`                      | FK(AppUser)               | Пользователь                                                           |
+| `timezone`                     | TimeZoneField             | Часовой пояс                                                           |
+| `rule_start`                   | Date                      | Начало                                                                 |
+| `rule_end`                     | Date                      | Конец                                                                  |
+| `weekdays`                     | Array(choices)            | Дни недели                                                             |
+| `slot_duration`                | PositiveSmallIntegerField | Длительность сессии (минуты)                                           |
+| `break_between_sessions`       | PositiveSmallIntegerField | Перерыв между сессиями (минуты)                                        |
+| `minimum_booking_notice_hours` | PositiveSmallIntegerField | Минимальное количество часов до ближайшего доступного слота для записи |
+| `is_active`                    | Boolean                   | Признак действия правила                                               |
 
 8. Модель `AvailabilityRuleTimeWindow`:  
    Временное окно доступности внутри рабочего дня из AvailabilityRule:
@@ -471,17 +473,18 @@ calendar_engine/
 9. Модель `AvailabilityException`:  
    Исключения из правил доступности специалиста (отпуск, болезнь, выходной)
 
-| Поле                              | Тип                 | Описание                                                |
-|-----------------------------------|---------------------|---------------------------------------------------------|
-| `creator`                         | FK(AppUser)         | Пользователь                                            |
-| `rule`                            | FK(AvailabilityRule) | Правило для которого устанавливается исключение         |
-| `exception_start`                 | Date                | Дата старта действия исключения                         |
-| `exception_end`                   | Date                | Дата окончания действия исключения                      |
-| `reason`                          | CharField(choices)  | Выбор причины                                           |
-| `exception_type`                  | CharField(choices)  | Тип исключения: unavailable / override                  |
-| `override_slot_duration`          | Time                | Продолжительность 1 сессии согласно исключения (минуты) |
-| `override_break_between_sessions` | Time                | Перерыв между сессиями согласно исключения (минуты)     |
-| `is_active`                       | Boolean             | Признак действия исключения                             |
+| Поле                                    | Тип                       | Описание                                                                     |
+|-----------------------------------------|---------------------------|------------------------------------------------------------------------------|
+| `creator`                               | FK(AppUser)               | Пользователь                                                                 |
+| `rule`                                  | FK(AvailabilityRule)      | Правило для которого устанавливается исключение                              |
+| `exception_start`                       | Date                      | Дата старта действия исключения                                              |
+| `exception_end`                         | Date                      | Дата окончания действия исключения                                           |
+| `reason`                                | CharField(choices)        | Выбор причины                                                                |
+| `exception_type`                        | CharField(choices)        | Тип исключения: unavailable / override                                       |
+| `override_slot_duration`                | PositiveSmallIntegerField | Продолжительность 1 сессии согласно исключения (минуты)                      |
+| `override_break_between_sessions`       | PositiveSmallIntegerField | Перерыв между сессиями согласно исключения (минуты)                          |
+| `override_minimum_booking_notice_hours` | PositiveSmallIntegerField | Новое минимальное количество часов до ближайшего доступного слота для записи |
+| `is_active`                             | Boolean                   | Признак действия исключения                                                  |
 
 10. Модель `AvailabilityExceptionTimeWindow`:  
    Переопределенное временное окно доступности внутри рабочего дня из AvailabilityException (например, "с 09:00 до 18:00").
