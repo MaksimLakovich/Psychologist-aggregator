@@ -83,6 +83,7 @@ class AvailabilityRuleSerializer(serializers.ModelSerializer):
             "available_windows",
             "slot_duration",
             "break_between_sessions",
+            "minimum_booking_notice_hours",
             "is_active",
             "created_at",
             "updated_at",
@@ -218,6 +219,7 @@ class AvailabilityExceptionSerializer(serializers.ModelSerializer):
             "exception_type",
             "override_slot_duration",
             "override_break_between_sessions",
+            "override_minimum_booking_notice_hours",
             "is_active",
             "created_at",
             "updated_at",
@@ -257,6 +259,11 @@ class AvailabilityExceptionSerializer(serializers.ModelSerializer):
         if exception_type == "unavailable":  # Полностью недоступен
             if windows_data:
                 raise ValidationError("Для exception_type='unavailable' override_available_windows недопустимы")
+
+            if attrs.get("override_minimum_booking_notice_hours") is not None:
+                raise ValidationError(
+                    "Для exception_type='unavailable' override_minimum_booking_notice_hours недопустим."
+                )
 
         return attrs
 

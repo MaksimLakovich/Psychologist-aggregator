@@ -400,6 +400,7 @@ class ClientProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
         except ClientProfile.DoesNotExist:
             raise NotFound("У текущего пользователя нет профиля клиента.")
 
+
 # =====
 # ОБЩИЕ СПРАВОЧНИКИ СИСТЕМЫ
 # =====

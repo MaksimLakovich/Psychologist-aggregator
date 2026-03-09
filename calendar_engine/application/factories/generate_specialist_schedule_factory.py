@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from zoneinfo import ZoneInfo
 
 from django.utils.timezone import now
@@ -16,10 +17,25 @@ from calendar_engine.models import AvailabilityException, AvailabilityRule
 from users.models import PsychologistProfile
 
 
+def _iter_days(date_from: date, date_to: date):
+    """Вспомогательный генератор календарных дней (включительно).
+
+    Нужен для сценария, когда одно исключение действует не один день, а диапазон дат.
+    Тогда мы можем развернуть диапазон в словарь по каждому календарному дню и позже быстро понять,
+    нужно ли в конкретный день переопределять minimum booking notice.
+    """
+    current = date_from
+
+    while current <= date_to:
+        yield current
+        current += timedelta(days=1)
+
+
 def build_generate_specialist_schedule_use_case(
         specialist_profile: PsychologistProfile
 ) -> GenerateSpecialistScheduleUseCase | None:
     """Factory сборки use-case генерации расписания специалиста.
+
     Возвращает:
         - use-case, если у специалиста есть активное правило;
         - None, если специалист сейчас недоступен.
@@ -27,7 +43,8 @@ def build_generate_specialist_schedule_use_case(
     :param specialist_profile: На вход именно объект будет поступать в эту функцию из "/api/match-psychologists/".
     :return:
         - GenerateSpecialistScheduleUseCase - если у специалиста есть актуальное расписание;
-        - None - если правило отсутствует (специалист недоступен)."""
+        - None - если правило отсутствует (специалист недоступен).
+    """
 
     # 1) Получаем активное правило доступности специалиста
     rule = (
@@ -69,13 +86,31 @@ def build_generate_specialist_schedule_use_case(
         current_specialist_time = now()
     date_from = current_specialist_time.date()
 
-    # 6) Генератор доменных слотов
+    # 6) Собираем словарь переопределений minimum booking notice по конкретным дням.
+    # Это нужно для сценария, когда специалист на общий период работает по одному правилу, но на отдельные
+    # даты хочет показывать ближайшие слоты только за другое количество часов до старта.
+    override_minimum_booking_notice_hours_by_day = {}
+
+    for exception in exceptions:
+        if exception.exception_type != "override":
+            continue
+
+        if exception.override_minimum_booking_notice_hours is None:
+            continue
+
+        for day in _iter_days(exception.exception_start, exception.exception_end):
+            override_minimum_booking_notice_hours_by_day[day] = exception.override_minimum_booking_notice_hours
+
+    # 7) Генератор доменных слотов
     slot_generator = DomainSlotGenerator()
 
-    # 7) Финальная сборка use-case
+    # 8) Финальная сборка use-case
     return GenerateSpecialistScheduleUseCase(
         slot_generator=slot_generator,
         slot_filter=slot_filter,
         date_from=date_from,
         days_ahead=DAYS_AHEAD_FOR_SHOW_SCHEDULE,
+        current_datetime=current_specialist_time,
+        minimum_booking_notice_hours=rule.minimum_booking_notice_hours,
+        override_minimum_booking_notice_hours_by_day=override_minimum_booking_notice_hours_by_day,
     )
