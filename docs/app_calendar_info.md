@@ -471,17 +471,18 @@ calendar_engine/
     Правила доступности специалиста (рабочее расписание).
     Например: Пн-Пт, с набором рабочих окон внутри дня (AvailabilityRuleTimeWindow).
 
-| Поле                           | Тип                       | Описание                                                               |
-|--------------------------------|---------------------------|------------------------------------------------------------------------|
-| `creator`                      | FK(AppUser)               | Пользователь                                                           |
-| `timezone`                     | TimeZoneField             | Часовой пояс                                                           |
-| `rule_start`                   | Date                      | Начало                                                                 |
-| `rule_end`                     | Date                      | Конец                                                                  |
-| `weekdays`                     | Array(choices)            | Дни недели                                                             |
-| `slot_duration`                | PositiveSmallIntegerField | Длительность сессии (минуты)                                           |
-| `break_between_sessions`       | PositiveSmallIntegerField | Перерыв между сессиями (минуты)                                        |
+| Поле                          | Тип                       | Описание                                                              |
+|-------------------------------|---------------------------|-----------------------------------------------------------------------|
+| `creator`                     | FK(AppUser)               | Пользователь                                                          |
+| `timezone`                    | TimeZoneField             | Часовой пояс                                                          |
+| `rule_start`                  | Date                      | Начало                                                                |
+| `rule_end`                    | Date                      | Конец                                                                 |
+| `weekdays`                    | Array(choices)            | Дни недели                                                            |
+| `session_duration_individual` | PositiveSmallIntegerField | Длительность 1 индивидуальной сессии (минуты)                         |
+| `session_duration_couple`     | PositiveSmallIntegerField | Длительность 1 парной сессии (минуты)                                 |
+| `break_between_sessions`      | PositiveSmallIntegerField | Перерыв между сессиями (минуты)                                       |
 | `minimum_booking_notice_hours` | PositiveSmallIntegerField | Минимальное количество часов до ближайшего доступного слота для записи |
-| `is_active`                    | Boolean                   | Признак действия правила                                               |
+| `is_active`                   | Boolean                   | Признак действия правила                                              |
 
 8. Модель `AvailabilityRuleTimeWindow`:  
    Временное окно доступности внутри рабочего дня из AvailabilityRule:
@@ -497,18 +498,19 @@ calendar_engine/
 9. Модель `AvailabilityException`:  
    Исключения из правил доступности специалиста (отпуск, болезнь, выходной)
 
-| Поле                                    | Тип                       | Описание                                                                     |
-|-----------------------------------------|---------------------------|------------------------------------------------------------------------------|
-| `creator`                               | FK(AppUser)               | Пользователь                                                                 |
-| `rule`                                  | FK(AvailabilityRule)      | Правило для которого устанавливается исключение                              |
-| `exception_start`                       | Date                      | Дата старта действия исключения                                              |
-| `exception_end`                         | Date                      | Дата окончания действия исключения                                           |
-| `reason`                                | CharField(choices)        | Выбор причины                                                                |
-| `exception_type`                        | CharField(choices)        | Тип исключения: unavailable / override                                       |
-| `override_slot_duration`                | PositiveSmallIntegerField | Продолжительность 1 сессии согласно исключения (минуты)                      |
-| `override_break_between_sessions`       | PositiveSmallIntegerField | Перерыв между сессиями согласно исключения (минуты)                          |
+| Поле                                   | Тип                       | Описание                                                                     |
+|----------------------------------------|---------------------------|------------------------------------------------------------------------------|
+| `creator`                              | FK(AppUser)               | Пользователь                                                                 |
+| `rule`                                 | FK(AvailabilityRule)      | Правило для которого устанавливается исключение                              |
+| `exception_start`                      | Date                      | Дата старта действия исключения                                              |
+| `exception_end`                        | Date                      | Дата окончания действия исключения                                           |
+| `reason`                               | CharField(choices)        | Выбор причины                                                                |
+| `exception_type`                       | CharField(choices)        | Тип исключения: unavailable / override                                       |
+| `override_session_duration_individual` | PositiveSmallIntegerField | Продолжительность 1 индивидуальной сессии согласно исключения (минуты)       |
+| `override_session_duration_couple`     | PositiveSmallIntegerField | Продолжительность 1 парной сессии согласно исключения (минуты)               |
+| `override_break_between_sessions`      | PositiveSmallIntegerField | Перерыв между сессиями согласно исключения (минуты)                          |
 | `override_minimum_booking_notice_hours` | PositiveSmallIntegerField | Новое минимальное количество часов до ближайшего доступного слота для записи |
-| `is_active`                             | Boolean                   | Признак действия исключения                                                  |
+| `is_active`                            | Boolean                   | Признак действия исключения                                                  |
 
 10. Модель `AvailabilityExceptionTimeWindow`:  
    Переопределенное временное окно доступности внутри рабочего дня из AvailabilityException (например, "с 09:00 до 18:00").
