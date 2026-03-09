@@ -178,6 +178,21 @@ calendar_engine/
     ├── admin.py
     ├── urls.py
     │
+    ├── _api/                         # ⭐ 
+    │    ├── serializers/               # 
+    │    │    ├── availability.py       # 
+    │    │    └──
+    │    ├── views/                     # 
+    │    │    ├── availability.py       # 
+    │    │    └──
+    │    └── urls.py                    # 
+    │
+    ├── _web/                         # ⭐ 
+    │    ├── views/                     # 
+    │    │    ├──                       # 
+    │    │    └──
+    │    └── urls.py                    # 
+    │
     ├── domain/                       # ⭐ Бизнес-логика (НЕ Django)
     │    ├── time_policy/               # ДОМЕННЫЕ правила временной сетки календаря
     │    │    ├── base.py                 # Абстрактный контракт TimePolicy (доменная временная сетка)
@@ -213,6 +228,15 @@ calendar_engine/
     │    └── factories/
     │         ├── generate_and_match_factory.py              # 💡 ИТОГОВЫЙ ПОДБОР СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - этот модуль использует use-cases, передает на вход "СПЕЦИАЛИСТА + ВЫБРАННЫЕ КЛИЕНТОМ "СЛОТЫ" и запускает ПОДБОР
     │         └── generate_specialist_schedule_factory.py    # 💡 ПОЛУЧИТЬ РАСПИСАНИЕ СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - генерация расписания специалиста
+    │
+    ├── booking/                      # ⭐ 
+    │    ├── use_cases/                 # 
+    │    │    ├──                       # 
+    │    │    └──
+    │    ├── exceptions.py
+    │    ├── selectors.py
+    │    ├── validators.py
+    │    └── 
     ...
 ```
 
