@@ -603,15 +603,22 @@ class AvailabilityRule(TimeStampedModel):
         verbose_name="Рабочие дни недели",
         help_text="Укажите рабочие дни недели",
     )
-    slot_duration = models.PositiveSmallIntegerField(
-        default=60,
+    session_duration_individual = models.PositiveSmallIntegerField(
+        default=50,
         null=False,
         blank=False,
-        verbose_name="Продолжительность 1 сессии (минуты)",
-        help_text="Укажите продолжительность 1 сессии (минуты)",
+        verbose_name="Продолжительность 1 индивидуальной сессии (минуты)",
+        help_text="Укажите продолжительность 1 индивидуальной сессии (минуты)",
+    )
+    session_duration_couple = models.PositiveSmallIntegerField(
+        default=90,
+        null=False,
+        blank=False,
+        verbose_name="Продолжительность 1 парной сессии (минуты)",
+        help_text="Укажите продолжительность 1 парной сессии (минуты)",
     )
     break_between_sessions = models.PositiveSmallIntegerField(
-        default=0,
+        default=10,
         null=True,
         blank=True,
         verbose_name="Перерыв между сессиями (минуты)",
@@ -741,15 +748,22 @@ class AvailabilityException(TimeStampedModel):
         verbose_name="Тип исключения",
         help_text="Укажите тип исключения (полностью недоступен или изменение текущего рабочего правила",
     )
-    override_slot_duration = models.PositiveSmallIntegerField(
-        default=60,
+    override_session_duration_individual = models.PositiveSmallIntegerField(
+        default=50,
         null=True,
         blank=True,
-        verbose_name="Продолжительность 1 сессии согласно исключения (минуты)",
-        help_text="Укажите продолжительность 1 сессии согласно исключения (минуты)",
+        verbose_name="Продолжительность 1 индивидуальной сессии согласно исключения (минуты)",
+        help_text="Укажите продолжительность 1 индивидуальной сессии согласно исключения (минуты)",
+    )
+    override_session_duration_couple = models.PositiveSmallIntegerField(
+        default=90,
+        null=True,
+        blank=True,
+        verbose_name="Продолжительность 1 парной сессии согласно исключения (минуты)",
+        help_text="Укажите продолжительность 1 парной сессии согласно исключения (минуты)",
     )
     override_break_between_sessions = models.PositiveSmallIntegerField(
-        default=0,
+        default=10,
         null=True,
         blank=True,
         verbose_name="Перерыв между сессиями согласно исключения (минуты)",
