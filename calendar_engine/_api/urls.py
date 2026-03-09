@@ -1,11 +1,11 @@
 from django.urls import path
 
-from calendar_engine._api.views import (AvailabilityExceptionDeactivateView,
-                                        AvailabilityExceptionListCreateView,
-                                        AvailabilityRuleDeactivateView,
-                                        AvailabilityRuleListCreateView,
-                                        GetDomainSlotsAjaxView,
-                                        GetSpecialistScheduleAjaxView)
+from calendar_engine._api.views.availability import (AvailabilityExceptionDeactivateView,
+                                                     AvailabilityExceptionListCreateView,
+                                                     AvailabilityRuleDeactivateView,
+                                                     AvailabilityRuleListCreateView,
+                                                     GetDomainSlotsAjaxView,
+                                                     GetSpecialistScheduleAjaxView)
 from calendar_engine.apps import AppCalendarConfig
 
 app_name = AppCalendarConfig.name
