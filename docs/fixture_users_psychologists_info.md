@@ -138,7 +138,8 @@ python manage.py loaddata fixtures/users_ps_availability_rule.json
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 1
     }
   },
   {

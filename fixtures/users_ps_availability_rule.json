@@ -7,12 +7,21 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4,5,6],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
       "slot_duration": 50,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 1
     }
   },
   {
@@ -34,12 +43,21 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4,5,6],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
       "slot_duration": 50,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 2
     }
   },
   {
@@ -61,12 +79,21 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4,5,6],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
       "slot_duration": 50,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 3
     }
   },
   {
@@ -88,12 +115,21 @@
       "timezone": "Europe/Moscow",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4,5,6],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
       "slot_duration": 50,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 4
     }
   },
   {
@@ -115,12 +151,21 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4,5,6],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
       "slot_duration": 50,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 1
     }
   },
   {
@@ -142,12 +187,19 @@
       "timezone": "Europe/Moscow",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
       "slot_duration": 50,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 2
     }
   },
   {
@@ -169,12 +221,19 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
       "slot_duration": 50,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 3
     }
   },
   {
@@ -196,12 +255,19 @@
       "timezone": "Asia/Vladivostok",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
       "slot_duration": 50,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 4
     }
   },
   {
@@ -223,12 +289,19 @@
       "timezone": "Asia/Vladivostok",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
       "slot_duration": 50,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 1
     }
   },
   {
@@ -250,12 +323,19 @@
       "timezone": "Asia/Yekaterinburg",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
       "slot_duration": 50,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 2
     }
   },
   {
@@ -277,12 +357,16 @@
       "timezone": "Asia/Vladivostok",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [5,6],
+      "weekdays": [
+        5,
+        6
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 3
     }
   },
   {
@@ -304,12 +388,16 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [5,6],
+      "weekdays": [
+        5,
+        6
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 4
     }
   },
   {
@@ -331,12 +419,16 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [5,6],
+      "weekdays": [
+        5,
+        6
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 1
     }
   },
   {
@@ -358,12 +450,16 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [5,6],
+      "weekdays": [
+        5,
+        6
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 2
     }
   },
   {
@@ -385,12 +481,16 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [5,6],
+      "weekdays": [
+        5,
+        6
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 3
     }
   },
   {
@@ -412,12 +512,19 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 4
     }
   },
   {
@@ -439,12 +546,19 @@
       "timezone": "Europe/Moscow",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 1
     }
   },
   {
@@ -466,12 +580,18 @@
       "timezone": "Asia/Yekaterinburg",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,2,4,6],
+      "weekdays": [
+        0,
+        2,
+        4,
+        6
+      ],
       "slot_duration": 120,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 2
     }
   },
   {
@@ -493,12 +613,18 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,2,4,6],
+      "weekdays": [
+        0,
+        2,
+        4,
+        6
+      ],
       "slot_duration": 120,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 3
     }
   },
   {
@@ -520,12 +646,18 @@
       "timezone": "Asia/Yekaterinburg",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [1,3,5,6],
+      "weekdays": [
+        1,
+        3,
+        5,
+        6
+      ],
       "slot_duration": 120,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 4
     }
   },
   {
@@ -547,12 +679,16 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [5,6],
+      "weekdays": [
+        5,
+        6
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 1
     }
   },
   {
@@ -574,12 +710,16 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [5,6],
+      "weekdays": [
+        5,
+        6
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 2
     }
   },
   {
@@ -601,12 +741,16 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [5,6],
+      "weekdays": [
+        5,
+        6
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 3
     }
   },
   {
@@ -628,12 +772,16 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [5,6],
+      "weekdays": [
+        5,
+        6
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 4
     }
   },
   {
@@ -655,12 +803,16 @@
       "timezone": "Asia/Yekaterinburg",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [5,6],
+      "weekdays": [
+        5,
+        6
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 1
     }
   },
   {
@@ -682,12 +834,19 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 2
     }
   },
   {
@@ -709,12 +868,19 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 3
     }
   },
   {
@@ -736,12 +902,19 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 4
     }
   },
   {
@@ -763,12 +936,19 @@
       "timezone": "Europe/Moscow",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 1
     }
   },
   {
@@ -790,12 +970,19 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,1,2,3,4],
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
       "slot_duration": 60,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 2
     }
   },
   {
@@ -817,12 +1004,18 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,2,4,6],
+      "weekdays": [
+        0,
+        2,
+        4,
+        6
+      ],
       "slot_duration": 120,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 3
     }
   },
   {
@@ -844,12 +1037,18 @@
       "timezone": "Asia/Yekaterinburg",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,2,4,6],
+      "weekdays": [
+        0,
+        2,
+        4,
+        6
+      ],
       "slot_duration": 120,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 4
     }
   },
   {
@@ -871,12 +1070,18 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,2,4,6],
+      "weekdays": [
+        0,
+        2,
+        4,
+        6
+      ],
       "slot_duration": 120,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 1
     }
   },
   {
@@ -898,12 +1103,18 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,2,4,6],
+      "weekdays": [
+        0,
+        2,
+        4,
+        6
+      ],
       "slot_duration": 120,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 2
     }
   },
   {
@@ -925,12 +1136,18 @@
       "timezone": "Asia/Yekaterinburg",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [0,2,4,6],
+      "weekdays": [
+        0,
+        2,
+        4,
+        6
+      ],
       "slot_duration": 120,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 3
     }
   },
   {
@@ -952,12 +1169,18 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [1,3,5,6],
+      "weekdays": [
+        1,
+        3,
+        5,
+        6
+      ],
       "slot_duration": 120,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 4
     }
   },
   {
@@ -979,12 +1202,18 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [1,3,5,6],
+      "weekdays": [
+        1,
+        3,
+        5,
+        6
+      ],
       "slot_duration": 120,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 1
     }
   },
   {
@@ -1006,12 +1235,18 @@
       "timezone": "Europe/Moscow",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [1,3,5,6],
+      "weekdays": [
+        1,
+        3,
+        5,
+        6
+      ],
       "slot_duration": 120,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 2
     }
   },
   {
@@ -1033,12 +1268,18 @@
       "timezone": "Asia/Yekaterinburg",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [1,3,5,6],
+      "weekdays": [
+        1,
+        3,
+        5,
+        6
+      ],
       "slot_duration": 120,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 3
     }
   },
   {
@@ -1060,12 +1301,18 @@
       "timezone": "Europe/Minsk",
       "rule_start": "2024-01-01",
       "rule_end": null,
-      "weekdays": [1,3,5,6],
+      "weekdays": [
+        1,
+        3,
+        5,
+        6
+      ],
       "slot_duration": 120,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 4
     }
   },
   {
