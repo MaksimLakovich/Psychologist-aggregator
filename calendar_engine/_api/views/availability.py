@@ -14,9 +14,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from calendar_engine._api.serializers.availability import (
-    AvailabilityExceptionSerializer,
-    AvailabilityRuleSerializer,
-)
+    AvailabilityExceptionSerializer, AvailabilityRuleSerializer)
 from calendar_engine.application.factories.generate_specialist_schedule_factory import \
     build_generate_specialist_schedule_use_case
 from calendar_engine.application.use_cases.get_domain_slots_use_case import \
