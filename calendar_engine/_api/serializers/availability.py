@@ -81,7 +81,8 @@ class AvailabilityRuleSerializer(serializers.ModelSerializer):
             "rule_end",
             "weekdays",
             "available_windows",
-            "slot_duration",
+            "session_duration_individual",
+            "session_duration_couple",
             "break_between_sessions",
             "minimum_booking_notice_hours",
             "is_active",
@@ -217,7 +218,8 @@ class AvailabilityExceptionSerializer(serializers.ModelSerializer):
             "override_available_windows",
             "reason",
             "exception_type",
-            "override_slot_duration",
+            "override_session_duration_individual",
+            "override_session_duration_couple",
             "override_break_between_sessions",
             "override_minimum_booking_notice_hours",
             "is_active",
@@ -259,6 +261,21 @@ class AvailabilityExceptionSerializer(serializers.ModelSerializer):
         if exception_type == "unavailable":  # Полностью недоступен
             if windows_data:
                 raise ValidationError("Для exception_type='unavailable' override_available_windows недопустимы")
+
+            if attrs.get("override_session_duration_individual") is not None:
+                raise ValidationError(
+                    "Для exception_type='unavailable' override_session_duration_individual недопустим."
+                )
+
+            if attrs.get("override_session_duration_couple") is not None:
+                raise ValidationError(
+                    "Для exception_type='unavailable' override_session_duration_couple недопустим."
+                )
+
+            if attrs.get("override_break_between_sessions") is not None:
+                raise ValidationError(
+                    "Для exception_type='unavailable' override_break_between_sessions недопустим."
+                )
 
             if attrs.get("override_minimum_booking_notice_hours") is not None:
                 raise ValidationError(

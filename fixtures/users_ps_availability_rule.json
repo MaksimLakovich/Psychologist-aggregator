@@ -16,7 +16,8 @@
         5,
         6
       ],
-      "slot_duration": 50,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -52,7 +53,8 @@
         5,
         6
       ],
-      "slot_duration": 50,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -88,7 +90,8 @@
         5,
         6
       ],
-      "slot_duration": 50,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -124,7 +127,8 @@
         5,
         6
       ],
-      "slot_duration": 50,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -160,7 +164,8 @@
         5,
         6
       ],
-      "slot_duration": 50,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -194,7 +199,8 @@
         3,
         4
       ],
-      "slot_duration": 50,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -228,7 +234,8 @@
         3,
         4
       ],
-      "slot_duration": 50,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -262,7 +269,8 @@
         3,
         4
       ],
-      "slot_duration": 50,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -296,7 +304,8 @@
         3,
         4
       ],
-      "slot_duration": 50,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -330,7 +339,8 @@
         3,
         4
       ],
-      "slot_duration": 50,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -361,7 +371,8 @@
         5,
         6
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -392,7 +403,8 @@
         5,
         6
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -423,7 +435,8 @@
         5,
         6
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -454,7 +467,8 @@
         5,
         6
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -485,7 +499,8 @@
         5,
         6
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -519,7 +534,8 @@
         3,
         4
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -553,7 +569,8 @@
         3,
         4
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -586,7 +603,8 @@
         4,
         6
       ],
-      "slot_duration": 120,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -619,7 +637,8 @@
         4,
         6
       ],
-      "slot_duration": 120,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -652,7 +671,8 @@
         5,
         6
       ],
-      "slot_duration": 120,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -683,7 +703,8 @@
         5,
         6
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -714,7 +735,8 @@
         5,
         6
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -745,7 +767,8 @@
         5,
         6
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -776,7 +799,8 @@
         5,
         6
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -807,7 +831,8 @@
         5,
         6
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -841,7 +866,8 @@
         3,
         4
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -875,7 +901,8 @@
         3,
         4
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -909,7 +936,8 @@
         3,
         4
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -943,7 +971,8 @@
         3,
         4
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -977,7 +1006,8 @@
         3,
         4
       ],
-      "slot_duration": 60,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 0,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -1010,7 +1040,8 @@
         4,
         6
       ],
-      "slot_duration": 120,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -1043,7 +1074,8 @@
         4,
         6
       ],
-      "slot_duration": 120,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -1076,7 +1108,8 @@
         4,
         6
       ],
-      "slot_duration": 120,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -1109,7 +1142,8 @@
         4,
         6
       ],
-      "slot_duration": 120,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -1142,7 +1176,8 @@
         4,
         6
       ],
-      "slot_duration": 120,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -1175,7 +1210,8 @@
         5,
         6
       ],
-      "slot_duration": 120,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -1208,7 +1244,8 @@
         5,
         6
       ],
-      "slot_duration": 120,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -1241,7 +1278,8 @@
         5,
         6
       ],
-      "slot_duration": 120,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -1274,7 +1312,8 @@
         5,
         6
       ],
-      "slot_duration": 120,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
@@ -1307,7 +1346,8 @@
         5,
         6
       ],
-      "slot_duration": 120,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 20,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",

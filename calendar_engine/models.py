@@ -749,21 +749,18 @@ class AvailabilityException(TimeStampedModel):
         help_text="Укажите тип исключения (полностью недоступен или изменение текущего рабочего правила",
     )
     override_session_duration_individual = models.PositiveSmallIntegerField(
-        default=50,
         null=True,
         blank=True,
         verbose_name="Продолжительность 1 индивидуальной сессии согласно исключения (минуты)",
         help_text="Укажите продолжительность 1 индивидуальной сессии согласно исключения (минуты)",
     )
     override_session_duration_couple = models.PositiveSmallIntegerField(
-        default=90,
         null=True,
         blank=True,
         verbose_name="Продолжительность 1 парной сессии согласно исключения (минуты)",
         help_text="Укажите продолжительность 1 парной сессии согласно исключения (минуты)",
     )
     override_break_between_sessions = models.PositiveSmallIntegerField(
-        default=10,
         null=True,
         blank=True,
         verbose_name="Перерыв между сессиями согласно исключения (минуты)",
@@ -788,9 +785,9 @@ class AvailabilityException(TimeStampedModel):
 
         Бизнес-смысл нового параметра такой:
             - базовое правило специалиста задает общий minimum_booking_notice_hours;
-            - exception_type="override" может временно переопределить это значение;
+            - exception_type="override" может временно переопределить duration / break / minimum notice;
             - exception_type="unavailable" полностью закрывает дату/диапазон дат, поэтому отдельный minimum notice
-              для него не нужен и только запутает смысл данных.
+              и прочие override-настройки для него не нужны и только запутают смысл данных.
         """
         super().clean()
 
@@ -799,11 +796,30 @@ class AvailabilityException(TimeStampedModel):
         if self.exception_end < self.exception_start:
             errors["exception_end"] = "Дата окончания исключения не может быть раньше даты начала исключения."
 
-        if self.exception_type == "unavailable" and self.override_minimum_booking_notice_hours is not None:
-            errors["override_minimum_booking_notice_hours"] = (
-                "Для exception_type='unavailable' нельзя указывать override_minimum_booking_notice_hours, "
-                "потому что день и так полностью закрыт."
-            )
+        if self.exception_type == "unavailable":
+            if self.override_session_duration_individual is not None:
+                errors["override_session_duration_individual"] = (
+                    "Для exception_type='unavailable' нельзя указывать override_session_duration_individual, "
+                    "потому что день и так полностью закрыт."
+                )
+
+            if self.override_session_duration_couple is not None:
+                errors["override_session_duration_couple"] = (
+                    "Для exception_type='unavailable' нельзя указывать override_session_duration_couple, "
+                    "потому что день и так полностью закрыт."
+                )
+
+            if self.override_break_between_sessions is not None:
+                errors["override_break_between_sessions"] = (
+                    "Для exception_type='unavailable' нельзя указывать override_break_between_sessions, "
+                    "потому что день и так полностью закрыт."
+                )
+
+            if self.override_minimum_booking_notice_hours is not None:
+                errors["override_minimum_booking_notice_hours"] = (
+                    "Для exception_type='unavailable' нельзя указывать override_minimum_booking_notice_hours, "
+                    "потому что день и так полностью закрыт."
+                )
 
         if errors:
             raise ValidationError(errors)
