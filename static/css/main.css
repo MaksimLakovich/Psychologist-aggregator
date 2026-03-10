@@ -2020,10 +2020,6 @@ input:checked + .toggle-bg {
   order: 2;
 }
 
-.m-4 {
-  margin: 1rem;
-}
-
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -2044,6 +2040,10 @@ input:checked + .toggle-bg {
 
 .mb-1 {
   margin-bottom: 0.25rem;
+}
+
+.mb-10 {
+  margin-bottom: 2.5rem;
 }
 
 .mb-12 {
@@ -2829,6 +2829,12 @@ input:checked + .toggle-bg {
   margin-left: calc(1rem * calc(1 - var(--tw-space-x-reverse)));
 }
 
+.space-y-1 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
+}
+
 .space-y-2 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));
@@ -3012,9 +3018,18 @@ input:checked + .toggle-bg {
   border-top-width: 1px;
 }
 
+.border-dashed {
+  border-style: dashed;
+}
+
 .\!border-primary-700 {
   --tw-border-opacity: 1 !important;
   border-color: rgb(190 24 93 / var(--tw-border-opacity, 1)) !important;
+}
+
+.border-amber-200 {
+  --tw-border-opacity: 1;
+  border-color: rgb(253 230 138 / var(--tw-border-opacity, 1));
 }
 
 .border-blue-600 {
@@ -3030,6 +3045,11 @@ input:checked + .toggle-bg {
 .border-emerald-100 {
   --tw-border-opacity: 1;
   border-color: rgb(209 250 229 / var(--tw-border-opacity, 1));
+}
+
+.border-emerald-200 {
+  --tw-border-opacity: 1;
+  border-color: rgb(167 243 208 / var(--tw-border-opacity, 1));
 }
 
 .border-gray-100 {
@@ -3103,6 +3123,11 @@ input:checked + .toggle-bg {
   border-color: rgb(250 209 232 / var(--tw-border-opacity, 1));
 }
 
+.border-red-200 {
+  --tw-border-opacity: 1;
+  border-color: rgb(251 213 213 / var(--tw-border-opacity, 1));
+}
+
 .border-rose-100 {
   --tw-border-opacity: 1;
   border-color: rgb(255 228 230 / var(--tw-border-opacity, 1));
@@ -3149,6 +3174,11 @@ input:checked + .toggle-bg {
 .\!bg-primary-700 {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(190 24 93 / var(--tw-bg-opacity, 1)) !important;
+}
+
+.bg-amber-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 251 235 / var(--tw-bg-opacity, 1));
 }
 
 .bg-black\/50 {
@@ -3306,6 +3336,11 @@ input:checked + .toggle-bg {
   background-color: rgb(231 70 148 / var(--tw-bg-opacity, 1));
 }
 
+.bg-red-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(253 242 242 / var(--tw-bg-opacity, 1));
+}
+
 .bg-rose-200\/25 {
   background-color: rgb(254 205 211 / 0.25);
 }
@@ -3368,6 +3403,10 @@ input:checked + .toggle-bg {
 
 .bg-white\/60 {
   background-color: rgb(255 255 255 / 0.6);
+}
+
+.bg-white\/75 {
+  background-color: rgb(255 255 255 / 0.75);
 }
 
 .bg-white\/80 {
@@ -3855,6 +3894,11 @@ input:checked + .toggle-bg {
   color: rgb(81 69 205 / var(--tw-text-opacity, 1)) !important;
 }
 
+.text-amber-800 {
+  --tw-text-opacity: 1;
+  color: rgb(146 64 14 / var(--tw-text-opacity, 1));
+}
+
 .text-blue-100 {
   --tw-text-opacity: 1;
   color: rgb(225 239 254 / var(--tw-text-opacity, 1));
@@ -3872,6 +3916,11 @@ input:checked + .toggle-bg {
 
 .text-emerald-700\/90 {
   color: rgb(4 120 87 / 0.9);
+}
+
+.text-emerald-800 {
+  --tw-text-opacity: 1;
+  color: rgb(6 95 70 / var(--tw-text-opacity, 1));
 }
 
 .text-gray-300 {
@@ -3985,6 +4034,11 @@ input:checked + .toggle-bg {
   color: rgb(224 36 36 / var(--tw-text-opacity, 1));
 }
 
+.text-red-700 {
+  --tw-text-opacity: 1;
+  color: rgb(200 30 30 / var(--tw-text-opacity, 1));
+}
+
 .text-rose-400\/40 {
   color: rgb(251 113 133 / 0.4);
 }
@@ -4047,6 +4101,11 @@ input:checked + .toggle-bg {
 .text-zinc-800 {
   --tw-text-opacity: 1;
   color: rgb(39 39 42 / var(--tw-text-opacity, 1));
+}
+
+.text-zinc-900 {
+  --tw-text-opacity: 1;
+  color: rgb(24 24 27 / var(--tw-text-opacity, 1));
 }
 
 .line-through {
@@ -4731,6 +4790,16 @@ input:checked + .toggle-bg {
 
 .disabled\:cursor-not-allowed:disabled {
   cursor: not-allowed;
+}
+
+.disabled\:bg-gray-300:disabled {
+  --tw-bg-opacity: 1;
+  background-color: rgb(209 213 219 / var(--tw-bg-opacity, 1));
+}
+
+.disabled\:text-gray-500:disabled {
+  --tw-text-opacity: 1;
+  color: rgb(107 114 128 / var(--tw-text-opacity, 1));
 }
 
 .disabled\:opacity-30:disabled {
@@ -5516,6 +5585,10 @@ input:checked + .toggle-bg {
 
   .xl\:w-auto {
     width: auto;
+  }
+
+  .xl\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .xl\:grid-cols-3 {
