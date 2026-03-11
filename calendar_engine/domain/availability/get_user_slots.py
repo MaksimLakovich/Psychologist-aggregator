@@ -1,9 +1,10 @@
-from datetime import date, datetime, time, timedelta
+from datetime import date, time
 from typing import Iterable, List
 
 from calendar_engine.domain.availability.base import (AbsAvailabilityException,
                                                       AbsAvailabilityRule)
 from calendar_engine.domain.availability.dto import SlotDTO
+from calendar_engine.services import normalize_range
 
 
 class AvailabilitySlotFilter:
@@ -31,7 +32,7 @@ class AvailabilitySlotFilter:
         self._rule = rule
         self._exceptions = tuple(exceptions)
 
-    def _get_user_time_windows(self, day: date) -> List[tuple[time, time]]:
+    def get_user_time_windows(self, day: date) -> List[tuple[time, time]]:
         """Возвращает итоговые разрешенные временные окна для конкретного дня с учетом приоритета исключений.
         Логика:
             1) Если есть применимое исключение - оно ПОЛНОСТЬЮ переопределяет правило.
@@ -59,31 +60,19 @@ class AvailabilitySlotFilter:
         :param domain_slots: Готовые доменные слоты (из DomainSlotGenerator).
         :return: Подмножество SlotDTO, доступные для данного специалиста."""
 
-        def normalize_range(day: date, start: time, end: time) -> tuple[datetime, datetime]:
-            """Нужно сравнивать datetime, а не time, чтобы корректно учитывать интервалы, пересекающие границу суток.
-            - исключает ситуации, когда 'end < start' и интервал фактически "ломается" (это проблема для слотов
-              с 'end = 00:00' и 'start = 23:00', где получалось что end больше start и получаем баг).
-            - для этого выполняем нормализацию диапазонов в datetime и если 'end <= start' - то считается,
-              что диапазон пересекает полночь и нужно добавить +1 день."""
-            start_dt = datetime.combine(day, start)
-            end_dt = datetime.combine(day, end)
-
-            if end <= start:
-                end_dt += timedelta(days=1)
-
-            return start_dt, end_dt
-
         # 1) Получаем разрешенные временные окна дня
         allowed_slots: List[SlotDTO] = []
 
         for slot in domain_slots:
             day = slot.day  # получаем день из доменных слотов
-            time_windows = self._get_user_time_windows(day)  # получаем временные окна для конкретного дня
+            time_windows = self.get_user_time_windows(day)  # получаем временные окна для конкретного дня
 
             if not time_windows:
                 continue  # день полностью закрыт и идем дальше
 
-            # ПЕРЕД ТЕМ КАК НАЧАТЬ ПРОВЕРЯТЬ ВХОЖДЕНИЕ СЛОТА ВО ВРЕМЕННОЕ ОКНО - ВЫПОЛНЯЕМ НОРМАЛИЗАЦИЮ
+            # ПЕРЕД ТЕМ КАК НАЧАТЬ ПРОВЕРЯТЬ ВХОЖДЕНИЕ СЛОТА ВО ВРЕМЕННОЕ ОКНО - ВЫПОЛНЯЕМ НОРМАЛИЗАЦИЮ, т.е., нужно
+            # сравнивать datetime, а не time, чтобы корректно учитывать интервалы, пересекающие границу суток.
+            # Для этого используем normalize_range()
             slot_start_dt, slot_end_dt = normalize_range(
                 day, slot.start, slot.end
             )

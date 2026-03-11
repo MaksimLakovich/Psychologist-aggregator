@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, tzinfo
 from zoneinfo import ZoneInfo
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -30,6 +31,7 @@ from users.permissions import IsPsychologistOrAdmin
 
 class AvailabilityRuleListCreateView(generics.ListCreateAPIView):
     """Класс-контроллер на основе Generic для управления рабочим расписанием специалиста.
+
     Возможности:
     1) GET (200_OK):
         - по умолчанию возвращает только активное правило (is_active=True)
@@ -37,7 +39,8 @@ class AvailabilityRuleListCreateView(generics.ListCreateAPIView):
     2) POST (201_CREATED):
         - создает новое правило доступности (рабочее расписание)
         - при создании нового автоматически деактивируется предыдущее активное правило
-        - автоматически проставляет creator и timezone"""
+        - автоматически проставляет creator и timezone
+    """
 
     permission_classes = [IsAuthenticated, IsPsychologistOrAdmin]
     serializer_class = AvailabilityRuleSerializer
@@ -82,10 +85,12 @@ class AvailabilityRuleListCreateView(generics.ListCreateAPIView):
 
 class AvailabilityRuleDeactivateView(APIView):
     """Класс-контроллер на основе APIView для явного "закрытия" рабочего расписания специалиста.
+
     Возможности:
     1) PATCH:
         - по умолчанию возвращает только активное правило (is_active=True)
-        - soft-delete: вместо DESTROY-запроса (устанавливаем is_active=False)."""
+        - soft-delete: вместо DESTROY-запроса (устанавливаем is_active=False).
+    """
 
     permission_classes = [IsAuthenticated, IsPsychologistOrAdmin]
 
@@ -112,6 +117,7 @@ class AvailabilityRuleDeactivateView(APIView):
 
 class AvailabilityExceptionListCreateView(generics.ListCreateAPIView):
     """Класс-контроллер на основе Generic для управления исключениями в рабочем расписании специалиста.
+
     Возможности:
     1) GET (200_OK):
         - по умолчанию возвращает только активные исключения (is_active=True)
@@ -119,7 +125,8 @@ class AvailabilityExceptionListCreateView(generics.ListCreateAPIView):
     2) POST (201_CREATED):
         - создает новое исключение из рабочего расписания
         - автоматическая привязка исключения к действующему AvailabilityRule(is_active=True)
-        - автоматически проставляет creator"""
+        - автоматически проставляет creator
+    """
 
     permission_classes = [IsAuthenticated, IsPsychologistOrAdmin]
     serializer_class = AvailabilityExceptionSerializer
@@ -172,10 +179,12 @@ class AvailabilityExceptionDeactivateView(APIView):
         - больничный отменили
         - отпуск сократили
         - day-off перенесли
+
     Возможности:
     1) PATCH:
         - применяется только к действующим активным исключениям (is_active=True)
-        - soft-delete: вместо DESTROY-запроса (устанавливаем is_active=False)."""
+        - soft-delete: вместо DESTROY-запроса (устанавливаем is_active=False).
+    """
 
     permission_classes = [IsAuthenticated, IsPsychologistOrAdmin]
 
@@ -195,6 +204,10 @@ class AvailabilityExceptionDeactivateView(APIView):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+# =====
+# ВСЕ ВОЗМОЖНЫЕ ДОМЕННЫЕ СЛОТЫ + СЛОТЫ ОТФИЛЬТРОВАННЫЕ НА ОСНОВЕ РАБОЧЕГО РАСПИСАНИЯ СПЕЦИАЛИСТА
+# =====
 
 class GetDomainSlotsAjaxView(LoginRequiredMixin, View):
     """Возвращает клиенту на UI все возможные доменные временные слоты (общее правило домена).
@@ -234,11 +247,26 @@ class GetSpecialistScheduleAjaxView(LoginRequiredMixin, View):
     Read-only эндпоинт только для показа доступных слотов из расписания специалиста, без сохранения в БД."""
 
     def get(self, request, *args, **kwargs):
-        """Получить расписание специалиста (доступные слоты) в TZ клиента."""
+        """Получить расписание специалиста (доступные слоты) в TZ клиента.
+
+        Важно: используем 'consultation_type', который нужен для понимания того, какой тип сессии будем
+        использовать при расчете доступности специалиста.
+        Пример:
+            - рабочее окно специалиста: 06:00–08:00
+            - session_duration_individual = 50
+            - session_duration_couple = 120
+        Тогда:
+            - старт 06:00 для individual допустим, потому что сессия закончится в 06:50
+            - старт 07:00 для individual тоже допустим, потому что сессия закончится в 07:50
+            - старт 06:00 для couple еще допустим, потому что закончится в 08:00
+            - старт 07:00 для couple уже НЕДОПУСТИМ, потому что сессия выйдет за границу рабочего окна.
+        Т.е., без consultation_type система не может понять, какой именно duration проверять для этого расписания.
+        """
         user = request.user
         profile_id = kwargs["profile_id"]
+        consultation_type = request.GET.get("consultation_type")
         # Эта вьюха берет profile_id из kwargs и далее использует specialist_profile.user, поэтому нужно
-        # использовать get_object_or_404() и передавать именно объект дальше.
+        # использовать get_object_or_404() и передавать именно объект дальше
         specialist_profile = get_object_or_404(PsychologistProfile, pk=profile_id)
 
         def normalize_tz(tz_value):
@@ -254,8 +282,15 @@ class GetSpecialistScheduleAjaxView(LoginRequiredMixin, View):
         client_tz = normalize_tz(getattr(user, "timezone", None))
         specialist_tz = normalize_tz(getattr(specialist_profile.user, "timezone", None)) or client_tz
 
+        if consultation_type not in ("individual", "couple"):
+            try:
+                consultation_type = user.client_profile.preferred_topic_type
+            except ObjectDoesNotExist:
+                consultation_type = "individual"
+
         use_case = build_generate_specialist_schedule_use_case(
             specialist_profile=specialist_profile,
+            consultation_type=consultation_type,
         )
 
         if use_case is None:
