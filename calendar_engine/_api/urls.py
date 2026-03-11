@@ -4,12 +4,14 @@ from calendar_engine._api.views.availability import (
     AvailabilityExceptionDeactivateView, AvailabilityExceptionListCreateView,
     AvailabilityRuleDeactivateView, AvailabilityRuleListCreateView,
     GetDomainSlotsAjaxView, GetSpecialistScheduleAjaxView)
+from calendar_engine._api.views.events import CalendarTherapySessionListCreateView
 from calendar_engine.apps import AppCalendarConfig
 
 app_name = AppCalendarConfig.name
 
 urlpatterns = [
-    # Рабочее расписание психолога
+
+    # Рабочее расписание психолога (AvailabilityRule + AvailabilityException)
     path(
         "my-availability-rules/", AvailabilityRuleListCreateView.as_view(), name="availability-rules-list-create"
     ),
@@ -25,6 +27,11 @@ urlpatterns = [
         "my-availability-exceptions/<int:pk>/close/",
         AvailabilityExceptionDeactivateView.as_view(),
         name="availability-exceptions-close"
+    ),
+
+    # Работа с событиями / слотами
+    path(
+        "therapy-sessions/", CalendarTherapySessionListCreateView.as_view(), name="therapy-sessions-list-create"
     ),
 
     # AJAX-запрос (fetch) на создание и отображение временных слотов и расписания на html-страницах

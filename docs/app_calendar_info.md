@@ -11,8 +11,8 @@
 [7. Админки для данных](#title7)  
 [8. Ядро сервиса](#title8)  
 [9. Оркестрация процессов](#title9)  
-[10. Инфраструктурные процессы](#title10)  
-[11. API и WEB интерфейс](#title11)
+[10. Booking-процессы](#title10)  
+[11. API-интерфейс](#title11)
 
 ---
 
@@ -179,20 +179,22 @@ calendar_engine/
     ├── services.py                   # Вспомогательные сервисные функции (например, normalize_range(), ...)
     ├── urls.py
     │
-    ├── _api/                         # ⭐ 
-    │    ├── serializers/               # 
-    │    │    ├── availability.py       # РАБОЧИЙ ГРАФИК ПСИХОЛОГА
-    │    │    └──
-    │    ├── views/                     # 
-    │    │    ├── availability.py       # РАБОЧИЙ ГРАФИК ПСИХОЛОГА + ВСЕ ВОЗМОЖНЫЕ ДОМЕННЫЕ СЛОТЫ + СЛОТЫ ОТФИЛЬТРОВАННЫЕ НА ОСНОВЕ РАБОЧЕГО РАСПИСАНИЯ СПЕЦИАЛИСТА
-    │    │    └──
-    │    └── urls.py                    # 
+    ├── _api/                         # ⭐API-сценарии для календаря
+    │    ├── serializers/
+    │    │    ├── availability.py       # Сериализаторы для рабочего расписания специалиста (правило доступности и исключения)
+    │    │    ├── events.py             # Сериализаторы для создания встречи
+    │    │    └── ...
+    │    ├── views/
+    │    │    ├── availability.py       # API-endpoint для работы с рабочим графиком / Получение возможных доменных слотов / Получение отфильтрованных слотов на основе рабочего расписания + брони
+    │    │    ├── events.py             # API-endpoint для клиента по выполнению им сценария создания встречи со специалистом
+    │    │    └── ...
+    │    └── urls.py                    # Маршруты
     │
     ├── _web/                         # ⭐ 
     │    ├── views/                     # 
     │    │    ├──                       # 
-    │    │    └──
-    │    └── urls.py                    # 
+    │    │    └── ...
+    │    └── urls.py                    # Маршруты
     │
     ├── domain/                       # ⭐ Бизнес-логика (НЕ Django)
     │    ├── time_policy/               # ДОМЕННЫЕ правила временной сетки календаря
@@ -230,14 +232,15 @@ calendar_engine/
     │         ├── generate_and_match_factory.py              # 💡 ИТОГОВЫЙ ПОДБОР СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - этот модуль использует use-cases, передает на вход "СПЕЦИАЛИСТА + ВЫБРАННЫЕ КЛИЕНТОМ "СЛОТЫ" и запускает ПОДБОР
     │         └── generate_specialist_schedule_factory.py    # 💡 ПОЛУЧИТЬ РАСПИСАНИЕ СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - генерация расписания специалиста
     │
-    ├── booking/                      # ⭐ 
-    │    ├── use_cases/                 # 
-    │    │    ├──                       # 
-    │    │    └──
-    │    ├── exceptions.py
-    │    ├── selectors.py
-    │    ├── validators.py
-    │    └── 
+    ├── booking/                      # ⭐ Создание встреч/событий и работа с ними
+    │    ├── use_cases/
+    │    │    ├── therapy_session_create.py           # Прикладной сценарий для клиента по созданию встречи (терапевтическая сессия) со специалистом
+    │    │    └── ...
+    │    ├── exceptions.py               # Кастомные исключения для booking-модуля
+    │    ├── services.py                 # Вспомогательные функции
+    │    ├── validators.py               # Кастомные валидаторы для booking-flow
+    │    ├── throttles.py
+    │    └── ...
     ...
 ```
 
@@ -1073,13 +1076,85 @@ calendar_engine/application/factories/
 
 ---
 
-## <a id="title10"> ⚙️ API-функционал </a>
+## <a id="title10"> 📇 Booking-процессы </a>
+
+## 1️⃣ booking/use_cases - функционал бронирования/создания встречи и работы с ними
+
+### 🎯 Цель слоя:
+
+- Задать функционал для бронирования/создания встреч:
+  - терапевтические сессии;
+  - групповые встречи;
+  - встречи между специалистами (супервизии / интервизии);
+  - повторяющиеся встречи;
+  - семинары / вебинары.
+- Задать функционал для работы со встречами:
+  - создание;
+  - перенос;
+  - редактирование;
+  - отмена;
+  - проведение.
+- Задать функционал системы уведомлений.
+
+```bash
+calendar_engine/booking/use_cases/
+├── therapy_session_create.py        # Прикладной сценарий для клиента по созданию встречи (терапевтическая сессия) со специалистом
+└── ...                              # 
+```
+
+---
+
+### `therapy_session_create.py` - терапевтическая сессия
+
+| Класс                         | Описание                                                                                                                                                                                                                                                                                                         |
+|-------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `CreateTherapySessionUseCase` | Текущий use-case: <br/> - клиент выбирает специалиста; - клиент выбирает доступный доменный слот в расписании специалиста; - backend повторно проверяет, что этот старт (слот или слоты, если время сессии > 1 часа) еще реально доступен; - создаются CalendarEvent / TimeSlot / EventParticipant / SlotParticipant. |
+
+---
+
+### calendar_engine/booking/exceptions.py:
+
+- `CreateTherapySessionValidationError(BookingError)` - Ошибка валидации сценария CreateTherapySession. Используется, когда:
+    - клиент передал некорректные входные данные;
+    - выбранный слот уже недоступен;
+    - у специалиста нет рабочего правила;
+    - создание встречи противоречит текущим бизнес-инвариантам.
+
+- `ParseSlotValidationError(BookingError)` - Ошибка валидации преобразования ISO-строки в слотах в aware datetime.
+
+---
+
+### calendar_engine/booking/services.py:
+
+- `get_specialist_profile_for_booking_therapy_session(specialist_profile_id)` - Возвращает профиль специалиста для сценария бронирования терапевтической сессии.
+    - клиент записывается не просто к пользователю, а к конкретному профилю специалиста;
+    - поэтому для booking-flow источником истины выступает именно PsychologistProfile
+
+- `normalize_user_timezone(timezone_value)` - Нормализует timezone пользователя к объекту tzinfo.
+
+- `build_booking_therapy_session_title(specialist_full_name, consultation_type)` - Формирует понятное пользователю название терапевтической сессии.
+
+---
+
+### calendar_engine/booking/validators.py:
+
+- `validate_client_can_create_therapy_session(client_user)` - Проверяет, что операцию создания встречи (терапевтическая сессия) запускает именно клиент.
+
+- `validate_consultation_type_in_therapy_session(consultation_type)` - Проверяет, что формат консультации относится к текущему поддерживаемому scope в рамках therapy_session.
+
+- `parse_requested_slot_start(slot_start_iso)` - Преобразует ISO-строку старта слота в aware datetime.
+
+- `validate_client_has_no_overlapping_therapy_sessions(client_user, slot_start_datetime, slot_end_datetime)` - Проверяет, что у клиента нет другой активной терапевтической сессии с пересечением по времени.
+
+---
+
+## <a id="title11"> ⚙️ API-функционал </a>
 
 ### 1. СЕРИАЛИЗАТОРЫ МОДЕЛЕЙ
 
-### calendar_engine/_api/serializers.py:
-
 Для **API-эндпоинтов** созданы следующие сериализаторы:
+
+### calendar_engine/_api/serializers/:
 
 - Рабочее расписание специалиста (правило рабочего времени / исключения):
   - `AvailabilityRuleTimeWindowSerializer` - временное окно доступности специалиста внутри рабочего дня в AvailabilityRule (например, "с 09:00 до 18:00")
@@ -1087,19 +1162,22 @@ calendar_engine/application/factories/
   - `AvailabilityExceptionTimeWindowSerializer` - переопределенное временное окно доступности внутри рабочего дня из AvailabilityException
   - `AvailabilityExceptionSerializer` - исключение из рабочего расписания психолога
 
+- Терапевтические сессии:
+  - `CreateTherapySessionSerializer` - создание встречи между клиентом и специалистом (терапевтическая сессия).
 
 ### 2. КОНТРОЛЛЕРЫ 
 
-### calendar_engine/_api/views.py:
+### calendar_engine/_api/views/:
 
 #### 1) API 
 
-| № | Название контроллера                     | Тип (ViewSet / Generic)          | Описание функционала (docstring)                                                                                                                                                                                                                                             | Используемые модели                                       | Используемые сериализаторы                                               |
-|---|------------------------------------------|----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|--------------------------------------------------------------------------|
-| 1 | **AvailabilityRuleListCreateView**       | `ListCreateAPIView`              | 1) Создание нового рабочего расписания; 2) Получение рабочего расписания: по умолчанию активное расписание; с параметром include_archived=true все включая архивные правила.                                                                                                 | `AvailabilityRule`, `AppUser`, `PsychologistProfile`      | `AvailabilityRuleSerializer`                                             |
-| 2 | **AvailabilityRuleDeactivateView**       | `APIView`                        | Явное "закрытие" рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                                                                                                                           | `AvailabilityRule`, `AppUser`, `PsychologistProfile`      | -                                                                        |
-| 3 | **AvailabilityExceptionListCreateView**  | `ListCreateAPIView`              | 1) Создание нового исключения из рабочего расписания; 2) Получение исключений: по умолчанию активные исключения; с параметром include_archived=true все включая архивные исключения.                                                                                         | `AvailabilityException`, `AppUser`, `PsychologistProfile` | `AvailabilityExceptionSerializer`                                        |
-| 4 | **AvailabilityExceptionDeactivateView**  | `APIView`                        | Явное "закрытие" исключения из рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                                                                                                             | `AvailabilityException`, `AppUser`, `PsychologistProfile` | -                                                                        |
+| № | Название контроллера                     | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                                                                                                                   | Используемые модели                                      | Используемые сериализаторы       |
+|---|------------------------------------------|------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------|----------------------------------|
+| 1 | **AvailabilityRuleListCreateView**       | `ListCreateAPIView`    | 1) Создание нового рабочего расписания; 2) Получение рабочего расписания: по умолчанию активное расписание; с параметром include_archived=true все включая архивные правила        | `AvailabilityRule`, `AppUser`, `PsychologistProfile`     | `AvailabilityRuleSerializer`     |
+| 2 | **AvailabilityRuleDeactivateView**       | `APIView`              | Явное "закрытие" рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                                 | `AvailabilityRule`, `AppUser`, `PsychologistProfile`     | -                                |
+| 3 | **AvailabilityExceptionListCreateView**  | `ListCreateAPIView`    | 1) Создание нового исключения из рабочего расписания; 2) Получение исключений: по умолчанию активные исключения; с параметром include_archived=true все включая архивные исключения | `AvailabilityException`, `AppUser`, `PsychologistProfile` | `AvailabilityExceptionSerializer` |
+| 4 | **AvailabilityExceptionDeactivateView**  | `APIView`              | Явное "закрытие" исключения из рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                   | `AvailabilityException`, `AppUser`, `PsychologistProfile` | -                                |
+| 5 | **CalendarTherapySessionListCreateView**  | `GenericAPIView`       | Выполнение клиентом сценария создания встречи со специалистом (терапевтическая сессия) - CreateTherapySession                                                                      | `AppUser`                                                | `CreateTherapySessionSerializer` |
 
 #### 2) AJAX-запрос (fetch) на специальный API-endpoint
 
@@ -1115,12 +1193,13 @@ calendar_engine/application/factories/
 
 #### 1) API 
 
-| № | Эндпоинт                                                | HTTP-методы                    | Описание функционала                                                                                                                                                                                                                                                        |
-|---|---------------------------------------------------------|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1 | `/calendar/api/my-availability-rules/`                     | `GET`, `POST`                  | Создать рабочее расписание / Получить список расписаний (текущее + архивные, если указать в адресе `?include_archived=true`)                                                                                                                                                |
-| 2 | `/calendar/api/my-availability-rules/close/`               | `PATCH`                        | Явное "закрытие" рабочего расписания специалиста                                                                                                                                                                                                                            |
-| 3 | `/calendar/api/my-availability-exceptions/`                | `GET`, `POST`                  | Создать исключение в расписании / Получить список исключений (текущее + архивные, если указать в адресе `?include_archived=true`)                                                                                                                                           |
-| 4 | `/calendar/api/my-availability-exceptions/<int:pk>/close/` | `PATCH`                        | Явное "закрытие" исключения                                                                                                                                                                                                                                                 |
+| № | Эндпоинт                                                  | HTTP-методы  | Описание функционала                                                                                                             |
+|---|-----------------------------------------------------------|--------------|----------------------------------------------------------------------------------------------------------------------------------|
+| 1 | `/calendar/api/my-availability-rules/`                    | `GET`, `POST` | Создать рабочее расписание / Получить список расписаний (текущее + архивные, если указать в адресе `?include_archived=true`)     |
+| 2 | `/calendar/api/my-availability-rules/close/`              | `PATCH`      | Явное "закрытие" рабочего расписания специалиста                                                                                 |
+| 3 | `/calendar/api/my-availability-exceptions/`               | `GET`, `POST` | Создать исключение в расписании / Получить список исключений (текущее + архивные, если указать в адресе `?include_archived=true`) |
+| 4 | `/calendar/api/my-availability-exceptions/<int:pk>/close/` | `PATCH`      | Явное "закрытие" исключения                                                                                                      |
+| 5 | `/calendar/api/therapy-sessions/`                         | `POST`       | Cоздание встречи между клиентом и специалистом (терапевтическая сессия)                                                          |
 
 #### 2) AJAX-запросы (fetch) на моментальное сохранение указанных клиентом на html-страницах данных в БД
 
@@ -1161,25 +1240,6 @@ calendar_engine/application/factories/
 - Кэширование
 - Напоминания/Уведомления
 - Интеграции с внешними сервисами
-- ...
-
----
-
-## <a id="title11"> 🖥️ API и WEB интерфейс </a>
-
-    ├── api/                          # ⭐ DRF
-    │    ├── serializers.py
-    │    ├── permissions.py
-    │    ├── views.py
-    │    └── urls.py
-    │
-    ├── web/                          # ⭐️ SSR (рендеринг) + стилизация
-    │    ├── views.py
-    │    ├── urls.py
-    │    └── templates/  
-
-### 🎯 Цель слоя:
-
 - ...
 
 ---
