@@ -550,7 +550,7 @@ def extract_selected_session_slots(raw_values):
     return normalized_slots
 
 
-def filter_session_time(queryset, session_time_mode, selected_session_slots):
+def filter_session_time(queryset, consultation_type, session_time_mode, selected_session_slots):
     """Применяет к QuerySet фильтр "Время сессии".
 
     Бизнес-логика:
@@ -575,7 +575,11 @@ def filter_session_time(queryset, session_time_mode, selected_session_slots):
     matched_profile_ids = []
 
     for profile in queryset:
-        schedule_use_case = build_generate_specialist_schedule_use_case(profile)
+        effective_consultation_type = consultation_type or "individual"
+        schedule_use_case = build_generate_specialist_schedule_use_case(
+            profile,
+            effective_consultation_type,
+        )
         if schedule_use_case is None:
             continue
 
@@ -681,6 +685,7 @@ def apply_catalog_basic_filters(queryset, filters_state, age_bounds=None, experi
     queryset = filter_experience(queryset, experience_min, experience_max)
     queryset = filter_session_time(
         queryset,
+        consultation_type,
         session_time_mode,
         selected_session_slots,
     )
