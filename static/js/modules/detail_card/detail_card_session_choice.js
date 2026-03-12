@@ -32,13 +32,31 @@ export function setSelectedAppointmentSlot(psId, slot) {
     );
 }
 
+// Формируем целевой URL следующего шага booking-flow с уже выбранными параметрами.
+export function buildPaymentStepUrl(baseUrl, { psychologistId, slotStartIso, consultationType }) {
+    if (!baseUrl || !psychologistId || !slotStartIso || !consultationType) {
+        return null;
+    }
+
+    const url = new URL(baseUrl, window.location.origin);
+    url.searchParams.set("specialist_profile_id", String(psychologistId));
+    url.searchParams.set("slot_start_iso", slotStartIso);
+    url.searchParams.set("consultation_type", consultationType);
+
+    return `${url.pathname}${url.search}${url.hash}`;
+}
+
 // Функция для управления АКТИВНО/НЕАКТИВНО в блоке "ШАГИ" чтоб нельзя было перейти на страницу "Запись" без выбранного слота
-function updatePaymentStepLink(isEnabled) {
+function updatePaymentStepLink(isEnabled, targetHref = null) {
     const link = document.querySelector("[data-payment-step-link]");
     if (!link) return;
 
     if (!link.dataset.href) {
         link.dataset.href = link.getAttribute("href") || "";
+    }
+
+    if (targetHref) {
+        link.dataset.href = targetHref;
     }
 
     if (isEnabled) {
@@ -51,6 +69,13 @@ function updatePaymentStepLink(isEnabled) {
     link.setAttribute("href", "#");
     link.classList.add("pointer-events-none", "opacity-50");
     link.setAttribute("aria-disabled", "true");
+}
+
+// Синхронно обновляем ссылку шага "Запись и оплата".
+// Если слот выбран, шаг становится активным и ведет на конкретный URL payment-card.
+// Если слот не выбран, шаг снова блокируется, чтобы клиент не мог перейти дальше раньше времени.
+export function updatePaymentStepTarget(targetHref) {
+    updatePaymentStepLink(Boolean(targetHref), targetHref);
 }
 
 // Функция для управления активностью и синхронно управляем доступностью шага оплаты + формирования подписи в КНОПКЕ: "Выбрать время сессии"

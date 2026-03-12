@@ -9,8 +9,8 @@ import { pluralizeRu } from "../utils/pluralize_ru.js";
 // 1) Формируем подпись типа сессии по типу (индивидуальная/парная)
 export function formatSessionLabel(sessionType) {
     return sessionType === "couple"
-        ? "Сессия · 1,5 часа"
-        : "Сессия · 50 минут";
+        ? "Парная сессия · 1,5 часа"
+        : "Индивидуальная сессия · 50 минут";
 }
 
 // 2) Убираем копейки и формируем цену с валютой
@@ -30,9 +30,37 @@ const API_URL = "/aggregator/api/match-psychologists/";
 const STORAGE_KEY = "selectedPsychologistId";
 const SELECTED_APPOINTMENT_SLOT_KEY = "selectedAppointmentSlot";
 
+// Получаем скрытые поля формы на странице payment-card.
+// Это те значения, которые клиент уже выбрал на предыдущем шаге:
+// - специалист;
+// - время слота;
+// - формат сессии.
+// Они не отображаются как обычные поля ввода, но backend использует их при финальном подтверждении записи.
+function getHiddenBookingInputs() {
+    return {
+        specialistField: document.getElementById("id_specialist_profile_id"),
+        slotField: document.getElementById("id_slot_start_iso"),
+        consultationTypeField: document.getElementById("id_consultation_type"),
+    };
+}
+
+// Считываем начальный набор данных для бронирования прямо из скрытых полей формы.
+// Это нужно, чтобы страница payment-card могла корректно восстановить уже сделанный выбор клиента
+// даже без повторного обращения к предыдущему шагу.
+function getInitialBookingPayload() {
+    const { specialistField, slotField, consultationTypeField } = getHiddenBookingInputs();
+
+    return {
+        specialistProfileId: specialistField?.value || "",
+        slotStartIso: slotField?.value || "",
+        consultationType: consultationTypeField?.value || "",
+    };
+}
+
 // Главная точка входа: получает выбранного специалиста и выбранный слот
 export async function initAddAppointmentAndPaymentCard() {
-    const selectedId = sessionStorage.getItem(STORAGE_KEY);
+    const initialBookingPayload = getInitialBookingPayload();
+    const selectedId = initialBookingPayload.specialistProfileId || sessionStorage.getItem(STORAGE_KEY);
     let selectedSlot = null;
 
     // Читаем выбранный слот из sessionStorage
@@ -40,7 +68,14 @@ export async function initAddAppointmentAndPaymentCard() {
         const rawSlot = sessionStorage.getItem(SELECTED_APPOINTMENT_SLOT_KEY);
         if (rawSlot) {
             const parsed = JSON.parse(rawSlot);
-            if (parsed && String(parsed.psychologistId) === String(selectedId)) {
+            if (
+                parsed
+                && String(parsed.psychologistId) === String(selectedId)
+                && (
+                    !initialBookingPayload.slotStartIso
+                    || parsed.slot?.start_iso === initialBookingPayload.slotStartIso
+                )
+            ) {
                 selectedSlot = parsed.slot || null;
             }
         }
@@ -66,6 +101,12 @@ export async function initAddAppointmentAndPaymentCard() {
         if (!psychologist) {
             console.warn("Выбранный психолог не найден");
             return;
+        }
+
+        if (!selectedSlot && initialBookingPayload.slotStartIso) {
+            selectedSlot = {
+                start_iso: initialBookingPayload.slotStartIso,
+            };
         }
 
         renderAddAppointmentAndPaymentCard(psychologist, selectedSlot);

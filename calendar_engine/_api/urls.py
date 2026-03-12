@@ -4,7 +4,8 @@ from calendar_engine._api.views.availability import (
     AvailabilityExceptionDeactivateView, AvailabilityExceptionListCreateView,
     AvailabilityRuleDeactivateView, AvailabilityRuleListCreateView,
     GetDomainSlotsAjaxView, GetSpecialistScheduleAjaxView)
-from calendar_engine._api.views.events import CalendarTherapySessionListCreateView
+from calendar_engine._api.views.events import \
+    CalendarTherapySessionListCreateView
 from calendar_engine.apps import AppCalendarConfig
 
 app_name = AppCalendarConfig.name

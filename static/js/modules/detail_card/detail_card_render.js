@@ -10,7 +10,9 @@ import {
     updateScheduleUI,
 } from "./detail_card_schedule.js";
 import {
+    buildPaymentStepUrl,
     setSelectedAppointmentSlot,
+    updatePaymentStepTarget,
     updateChooseButton,
 } from "./detail_card_session_choice.js";
 
@@ -71,10 +73,13 @@ export function renderPsychologistCard(ps, options = {}) {
     const topicsTitle = typeof options.topicsTitle === "string"
         ? options.topicsTitle
         : "Работает с темами вашей анкеты";
-    // Управляем завершающим CTA без изменения поведения matching-flow:
-    // - submit: переход к следующему шагу (выбор психолога после анкеты);
-    // - button: заглушка без перехода (детальная карточка из каталога).
-    const chooseSessionButtonType = options.chooseSessionButtonType === "button" ? "button" : "submit";
+    // Главная кнопка записи должна быть именно обычной button-кнопкой, а не submit.
+    // Это важно, потому что переход на payment-card выполняется только после явного выбора слота
+    // и формируется вручную через JS из:
+    // - выбранного специалиста;
+    // - выбранного времени;
+    // - формата сессии.
+    const chooseSessionButtonType = "button";
     // В каталоге нижняя кнопка "Назад" дублирует верхний "Назад в каталог", поэтому прячем её опционально.
     const showBottomBackButton = options.showBottomBackButton !== false;
 
@@ -249,6 +254,9 @@ export function renderPsychologistCard(ps, options = {}) {
 
     // 7) Подгружаем РАСПИСАНИЕ и БЛИЖАЙШЕЕ ВРЕМЯ для выбранного специалиста
     const currentPsId = ps.id;
+    // Базовый URL следующего шага "Запись и оплата", который backend заранее пробросил в HTML-шаблон.
+    // Дальше JS добавляет к нему уже конкретные выбранные параметры: специалиста, слот и формат сессии.
+    const paymentCardUrl = container.dataset.paymentCardUrl;
     // Сохраняем id в DOM, чтобы отсекать "гонки" при быстром переключении карточек.
     container.dataset.psId = String(currentPsId);
     // Ключ выбранного слота внутри текущего расписания.
@@ -257,9 +265,10 @@ export function renderPsychologistCard(ps, options = {}) {
     // Сбрасываем выбор при переключении на другого специалиста
     updateChooseButton(null);
     setSelectedAppointmentSlot(currentPsId, null);
+    updatePaymentStepTarget(null);
 
     // Получаем актуальное расписание психолога.
-    fetch(`/calendar/api/psychologists/${currentPsId}/schedule/`)
+    fetch(`/calendar/api/psychologists/${currentPsId}/schedule/?consultation_type=${encodeURIComponent(ps.session_type || "individual")}`)
         .then(response => response.json())
         .then(data => {
             // Защита от гонок: если карточка уже переключена на другого психолога - игнорируем
@@ -341,6 +350,13 @@ export function renderPsychologistCard(ps, options = {}) {
                 const slotObj = schedule.find(slot => getSlotKey(slot) === newKey);
                 updateChooseButton(formatSelectedSlotLabel(slotObj, clientTimezone));
                 setSelectedAppointmentSlot(currentPsId, slotObj);
+                updatePaymentStepTarget(
+                    buildPaymentStepUrl(paymentCardUrl, {
+                        psychologistId: currentPsId,
+                        slotStartIso: slotObj?.start_iso || "",
+                        consultationType: ps.session_type || "individual",
+                    })
+                );
             };
         })
         .catch(() => {
@@ -430,7 +446,7 @@ export function renderPsychologistCard(ps, options = {}) {
                             </div>
                             <button
                                 type="button"
-                                class="w-full sm:w-auto px-6 py-3.5 bg-indigo-500 hover:bg-indigo-900 text-white rounded-xl text-sm font-semibold tracking-wide shadow transition-colors shrink-0"
+                                class="w-full sm:w-auto px-6 py-3.5 bg-indigo-500 hover:bg-indigo-900 text-white rounded-xl text-sm font-black tracking-wider shadow transition-colors shrink-0"
                                 onclick="document.getElementById('psychologist-schedule')?.scrollIntoView({behavior: 'smooth'})"
                             >
                                 Выбрать время
@@ -553,4 +569,42 @@ export function renderPsychologistCard(ps, options = {}) {
 
         </div>
     `;
+
+    // Отдельно навешиваем обработчик на главную кнопку записи внизу карточки.
+    // Она нужна, чтобы после выбора слота перевести клиента именно на шаг payment-card,
+    // а не пытаться выполнять какой-то другой сценарий.
+    const chooseSessionButton = container.querySelector("[data-choose-session-btn]");
+    if (chooseSessionButton) {
+        chooseSessionButton.addEventListener("click", event => {
+            // Даже при type="button" явно запрещаем default-поведение,
+            // чтобы этот CTA никогда не начал случайно сабмитить outer-form
+            // (то есть не начал неожиданно отправлять внешнюю HTML-форму всей страницы)
+            // при будущих правках шаблона.
+            event.preventDefault();
+
+            const rawSlot = sessionStorage.getItem("selectedAppointmentSlot");
+
+            if (!rawSlot) {
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(rawSlot);
+                const slotStartIso = parsed?.slot?.start_iso;
+
+                if (!slotStartIso || !paymentCardUrl) {
+                    return;
+                }
+
+                const targetUrl = new URL(paymentCardUrl, window.location.origin);
+                targetUrl.searchParams.set("specialist_profile_id", String(currentPsId));
+                targetUrl.searchParams.set("slot_start_iso", slotStartIso);
+                targetUrl.searchParams.set("consultation_type", ps.session_type || "individual");
+
+                window.location.href = `${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`;
+            } catch (error) {
+                console.warn("Не удалось сформировать переход на шаг оплаты:", error);
+            }
+        });
+    }
 }
