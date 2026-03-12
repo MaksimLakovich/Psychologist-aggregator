@@ -112,7 +112,7 @@ export function buildCatalogSessionTimeModalHtml({
                     data-btn-class="w-16 h-16 flex flex-col items-center justify-center rounded-full border text-sm text-indigo-600 font-medium"
                 ></div>
 
-                <div class="mt-4">
+                <div class="mt-4 pb-6">
                     <div
                         id="ts-slots-grid"
                         class="grid grid-cols-4 sm:grid-cols-4 gap-2"

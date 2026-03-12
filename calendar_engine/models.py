@@ -9,6 +9,7 @@ from django.db import models
 from timezone_field import TimeZoneField
 
 from calendar_engine.constants import (AVAILABILITY_EXCEPTION_CHOICES,
+                                       EVENT_CANCEL_REASON_TYPE_CHOICES,
                                        EVENT_SOURCE_CHOICES,
                                        EVENT_STATUS_CHOICES,
                                        EVENT_TYPE_CHOICES,
@@ -20,6 +21,10 @@ from calendar_engine.constants import (AVAILABILITY_EXCEPTION_CHOICES,
                                        PARTICIPANT_SLOT_ROLE_CHOICES,
                                        PARTICIPANT_SLOT_STATUS_CHOICES,
                                        SLOT_STATUS_CHOICES, WEEKDAYS_CHOICES)
+
+# =====
+# СОБЫТИЕ / СЛОТЫ
+# =====
 
 
 class TimeStampedModel(models.Model):
@@ -73,7 +78,7 @@ class CalendarEvent(TimeStampedModel):
     )
     event_type = models.CharField(
         choices=EVENT_TYPE_CHOICES,
-        default="event",
+        default="session_individual",
         max_length=32,
         null=False,
         blank=False,
@@ -89,11 +94,19 @@ class CalendarEvent(TimeStampedModel):
         verbose_name="Статус события",
         help_text="Укажите статус события",
     )
+    cancel_reason_type = models.CharField(
+        choices=EVENT_CANCEL_REASON_TYPE_CHOICES,
+        max_length=32,
+        null=True,
+        blank=True,
+        verbose_name="Тип причины отмены события",
+        help_text="Укажите тип причины отмены события (например: отменено пользователем, перенос, отменено админом)",
+    )
     cancel_reason = models.TextField(
         null=True,
         blank=True,
         verbose_name="Причина отмены события",
-        help_text="Укажите причину отмены события",
+        help_text="Укажите текстовое пояснение причины отмены события",
     )
     visibility = models.CharField(
         choices=EVENT_VISIBILITY_CHOICES,
@@ -117,14 +130,14 @@ class CalendarEvent(TimeStampedModel):
         verbose_name="Повторяющееся события",
         help_text="Флаг повторяющегося события",
     )
-    previous_event_id = models.ForeignKey(
+    previous_event = models.ForeignKey(
         to="self",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="rescheduled_events",
         verbose_name="Предыдущее событие при переносе",
-        help_text="Связь с предыдущим событием при переносе (перенос = archived текущего события + planned новое)",
+        help_text="Связь с предыдущим событием при переносе",
     )
     source = models.CharField(
         choices=EVENT_SOURCE_CHOICES,
@@ -146,6 +159,58 @@ class CalendarEvent(TimeStampedModel):
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
         return f"{self.id} - {self.title}"
+
+    def clean(self):
+        """Модельная валидация бизнес-инвариантов события.
+
+        2 ключевых сценария:
+            1) Обычное активное или завершенное событие:
+                - НЕ должно содержать причину отмены;
+                - НЕ должно содержать тип причины отмены.
+            2) Отмененное событие:
+                - ОБЯЗАНО содержать тип причины отмены;
+                - ОБЯЗАНО содержать текстовое пояснение причины отмены.
+
+        Дополнительно:
+            - previous_event хранится в НОВОМ событии после переноса, а не в старом отмененном;
+            - событие не может ссылаться само на себя как на previous_event.
+        """
+        super().clean()
+
+        errors = {}
+
+        if self.status == "cancelled":
+            if not self.cancel_reason_type:
+                errors["cancel_reason_type"] = (
+                    "Для отмененного события обязательно нужно указать тип причины отмены"
+                )
+
+            if not self.cancel_reason:
+                errors["cancel_reason"] = (
+                    "Для отмененного события обязательно нужно указать текстовое пояснение причины отмены"
+                )
+        else:
+            if self.cancel_reason_type:
+                errors["cancel_reason_type"] = (
+                    "Тип причины отмены можно указывать только для события со статусом cancelled"
+                )
+
+            if self.cancel_reason:
+                errors["cancel_reason"] = (
+                    "Текстовую причину отмены можно указывать только для события со статусом cancelled"
+                )
+
+        if self.previous_event_id:
+            if self.pk and self.previous_event_id == self.pk:
+                errors["previous_event"] = "Событие не может ссылаться само на себя как на previous_event"
+
+            if self.status == "cancelled":
+                errors["previous_event"] = (
+                    "previous_event нужно хранить в новом событии после переноса, а не в старом отмененном событии"
+                )
+
+        if errors:
+            raise ValidationError(errors)
 
     class Meta:
         verbose_name = "Событие"
@@ -491,11 +556,18 @@ class SlotParticipant(TimeStampedModel):
         ordering = ["pk", "slot__start_datetime", "slot", "user"]
 
 
+# =====
+# РАБОЧИЙ ГРАФИК
+# =====
+
+
 class AvailabilityRule(TimeStampedModel):
     """Правила доступности специалиста (рабочее расписание).
+
     Например: Пн-Пт, с набором рабочих окон внутри дня:
         - одно окно с 09:00 до 18:00;
-        - или несколько окон с 06:00 до 11:00 и с 16:00 до 22:00."""
+        - или несколько окон с 06:00 до 11:00 и с 16:00 до 22:00.
+    """
 
     creator = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
@@ -531,19 +603,33 @@ class AvailabilityRule(TimeStampedModel):
         verbose_name="Рабочие дни недели",
         help_text="Укажите рабочие дни недели",
     )
-    slot_duration = models.PositiveSmallIntegerField(
-        default=60,
+    session_duration_individual = models.PositiveSmallIntegerField(
+        default=50,
         null=False,
         blank=False,
-        verbose_name="Продолжительность 1 сессии (минуты)",
-        help_text="Укажите продолжительность 1 сессии (минуты)",
+        verbose_name="Продолжительность 1 индивидуальной сессии (минуты)",
+        help_text="Укажите продолжительность 1 индивидуальной сессии (минуты)",
+    )
+    session_duration_couple = models.PositiveSmallIntegerField(
+        default=90,
+        null=False,
+        blank=False,
+        verbose_name="Продолжительность 1 парной сессии (минуты)",
+        help_text="Укажите продолжительность 1 парной сессии (минуты)",
     )
     break_between_sessions = models.PositiveSmallIntegerField(
-        default=0,
+        default=10,
         null=True,
         blank=True,
         verbose_name="Перерыв между сессиями (минуты)",
         help_text="Укажите перерыв между сессиями (минуты)",
+    )
+    minimum_booking_notice_hours = models.PositiveSmallIntegerField(
+        default=1,
+        null=False,
+        blank=False,
+        verbose_name="Минимальное количество часов до ближайшего доступного слота для записи",
+        help_text="Укажите, за сколько минимум часов до начала слота клиенту можно показывать слот для записи",
     )
     is_active = models.BooleanField(
         default=True,
@@ -592,7 +678,8 @@ class AvailabilityRuleTimeWindow(TimeStampedModel):
     def clean(self):
         """Метод валидации для двух сценариев:
             1) 'start_time = end_time': круглосуточный рабочий график;
-            2) 'start_time > end_time': проверка, что время начала не может быть раньше, чем время окончания."""
+            2) 'start_time > end_time': проверка, что время начала не может быть раньше, чем время окончания.
+        """
         if self.start_time == self.end_time and self.start_time != time(0, 0):
             raise ValidationError(
                 "start_time и end_time могут совпадать только для 24/7 (00:00–00:00)"
@@ -661,19 +748,29 @@ class AvailabilityException(TimeStampedModel):
         verbose_name="Тип исключения",
         help_text="Укажите тип исключения (полностью недоступен или изменение текущего рабочего правила",
     )
-    override_slot_duration = models.PositiveSmallIntegerField(
-        default=60,
+    override_session_duration_individual = models.PositiveSmallIntegerField(
         null=True,
         blank=True,
-        verbose_name="Продолжительность 1 сессии согласно исключения (минуты)",
-        help_text="Укажите продолжительность 1 сессии согласно исключения (минуты)",
+        verbose_name="Продолжительность 1 индивидуальной сессии согласно исключения (минуты)",
+        help_text="Укажите продолжительность 1 индивидуальной сессии согласно исключения (минуты)",
+    )
+    override_session_duration_couple = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Продолжительность 1 парной сессии согласно исключения (минуты)",
+        help_text="Укажите продолжительность 1 парной сессии согласно исключения (минуты)",
     )
     override_break_between_sessions = models.PositiveSmallIntegerField(
-        default=0,
         null=True,
         blank=True,
         verbose_name="Перерыв между сессиями согласно исключения (минуты)",
         help_text="Укажите перерыв между сессиями согласно исключения (минуты)",
+    )
+    override_minimum_booking_notice_hours = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Новое минимальное количество часов до ближайшего доступного слота для записи",
+        help_text="Укажите новое минимальное количество часов до старта слота для записи на период исключения",
     )
     is_active = models.BooleanField(
         default=True,
@@ -682,6 +779,50 @@ class AvailabilityException(TimeStampedModel):
         verbose_name="Признак действия исключения",
         help_text="Флаг действия исключения",
     )
+
+    def clean(self):
+        """Модельная валидация исключения из рабочего расписания.
+
+        Бизнес-смысл нового параметра такой:
+            - базовое правило специалиста задает общий minimum_booking_notice_hours;
+            - exception_type="override" может временно переопределить duration / break / minimum notice;
+            - exception_type="unavailable" полностью закрывает дату/диапазон дат, поэтому отдельный minimum notice
+              и прочие override-настройки для него не нужны и только запутают смысл данных.
+        """
+        super().clean()
+
+        errors = {}
+
+        if self.exception_end < self.exception_start:
+            errors["exception_end"] = "Дата окончания исключения не может быть раньше даты начала исключения."
+
+        if self.exception_type == "unavailable":
+            if self.override_session_duration_individual is not None:
+                errors["override_session_duration_individual"] = (
+                    "Для exception_type='unavailable' нельзя указывать override_session_duration_individual, "
+                    "потому что день и так полностью закрыт."
+                )
+
+            if self.override_session_duration_couple is not None:
+                errors["override_session_duration_couple"] = (
+                    "Для exception_type='unavailable' нельзя указывать override_session_duration_couple, "
+                    "потому что день и так полностью закрыт."
+                )
+
+            if self.override_break_between_sessions is not None:
+                errors["override_break_between_sessions"] = (
+                    "Для exception_type='unavailable' нельзя указывать override_break_between_sessions, "
+                    "потому что день и так полностью закрыт."
+                )
+
+            if self.override_minimum_booking_notice_hours is not None:
+                errors["override_minimum_booking_notice_hours"] = (
+                    "Для exception_type='unavailable' нельзя указывать override_minimum_booking_notice_hours, "
+                    "потому что день и так полностью закрыт."
+                )
+
+        if errors:
+            raise ValidationError(errors)
 
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
@@ -724,7 +865,8 @@ class AvailabilityExceptionTimeWindow(TimeStampedModel):
         """Метод валидации для двух сценариев:
             1) 'override_start_time = override_end_time': круглосуточный рабочий график;
             2) 'override_start_time > override_end_time': проверка, что время начала не может быть раньше,
-                чем время окончания."""
+                чем время окончания.
+        """
         if self.override_start_time and self.override_end_time:
 
             if (self.override_start_time == self.override_end_time

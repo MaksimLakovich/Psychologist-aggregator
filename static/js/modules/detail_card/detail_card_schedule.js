@@ -195,7 +195,7 @@ export function renderScheduleList(
         const sortedSlots = grouped[day].sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""));
 
         const timeOfDayGroups = {
-            "Утро": [], "День": [], "Вечер": [], "Ночь": []
+            "Ночь": [], "Утро": [], "День": [], "Вечер": []
         };
 
         sortedSlots.forEach(slot => {

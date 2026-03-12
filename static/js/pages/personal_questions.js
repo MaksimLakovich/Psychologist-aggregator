@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         initTimeSlotsPicker({
             containerSelector: "#time-slots-wrapper",
-            apiUrl: "/users/api/get-domain-slots/",
+            apiUrl: "/calendar/api/get-domain-slots/",
             csrfToken: window.CSRF_TOKEN,
             initialSelectedSlots: window.PREFERRED_SLOTS || [],
         });

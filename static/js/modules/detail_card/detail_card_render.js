@@ -259,7 +259,7 @@ export function renderPsychologistCard(ps, options = {}) {
     setSelectedAppointmentSlot(currentPsId, null);
 
     // Получаем актуальное расписание психолога.
-    fetch(`/users/api/psychologists/${currentPsId}/schedule/`)
+    fetch(`/calendar/api/psychologists/${currentPsId}/schedule/`)
         .then(response => response.json())
         .then(data => {
             // Защита от гонок: если карточка уже переключена на другого психолога - игнорируем

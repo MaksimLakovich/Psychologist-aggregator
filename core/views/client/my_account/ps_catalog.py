@@ -185,7 +185,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
         context["catalog_price_choices"] = self._build_catalog_price_choices()
         context["catalog_age_bounds"] = self._build_catalog_age_bounds()
         context["catalog_experience_bounds"] = self._build_catalog_experience_bounds()
-        context["catalog_domain_slots_endpoint"] = reverse("users:api:get-domain-slots")
+        context["catalog_domain_slots_endpoint"] = reverse("calendar:api:get-domain-slots")
         context["catalog_filter_endpoint"] = reverse("core:psychologist-catalog-filter")
 
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ

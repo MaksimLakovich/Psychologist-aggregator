@@ -290,13 +290,6 @@
   - `LogoutSerializer` - ***выход (logout)*** пользователя (помещение токена в blacklist refresh token)
 
 
-- Рабочее расписание специалиста (правило рабочего времени / исключения):
-  - `AvailabilityRuleTimeWindowSerializer` - временное окно доступности специалиста внутри рабочего дня в AvailabilityRule (например, "с 09:00 до 18:00")
-  - `AvailabilityRuleSerializer` - рабочее расписание специалиста (правило доступности, например: Пн-Пт, с набором рабочих окон внутри дня)
-  - `AvailabilityExceptionTimeWindowSerializer` - переопределенное временное окно доступности внутри рабочего дня из AvailabilityException
-  - `AvailabilityExceptionSerializer` - исключение из рабочего расписания психолога
-
-
 ### 2. КОНТРОЛЛЕРЫ 
 
 ### users/_api/views.py:
@@ -325,10 +318,6 @@
 | 18 | **PsychologistProfileRetrieveUpdateView** | `RetrieveUpdateAPIView`          | РАБОТА С ПРОФИЛЕМ (психолог): 1) Получить данные профиля психолога (read-сериализатор `PsychologistProfileReadSerializer`); 2) Обновить данные профиля психолога (write-сериализатор `PsychologistProfileWriteSerializer`); 3) Разрешать изменение many2many через списки id | `PsychologistProfile` + справочники                       | `PsychologistProfileReadSerializer`, `PsychologistProfileWriteSerializer` |
 | 19 | **ClientProfileRetrieveUpdateView**      | `RetrieveUpdateAPIView`          | РАБОТА С ПРОФИЛЕМ (клиент): 1) Получить данные профиля клиента (read-сериализатор `ClientProfileReadSerializer`); 2) Обновить данные профиля психолога (write-сериализатор `ClientProfileWriteSerializer`); 3) Разрешать изменение many2many через списки id                 | `ClientProfile` + справочники                             | `ClientProfileReadSerializer`, `ClientProfileWriteSerializer`            |
 | 20 | **PublicPsychologistProfileRetrieveView** | `RetrieveAPIView`                | Публичная карточка психолога (детали, без чувствительных персональных полей)                                                                                                                                                                                                 | `AppUser`, `PsychologistProfile` + справочники            | `PublicPsychologistProfileSerializer`                                    |
-| 21 | **AvailabilityRuleListCreateView**       | `ListCreateAPIView`              | 1) Создание нового рабочего расписания; 2) Получение рабочего расписания: по умолчанию активное расписание; с параметром include_archived=true все включая архивные правила.                                                                                                 | `AvailabilityRule`, `AppUser`, `PsychologistProfile`      | `AvailabilityRuleSerializer`                                             |
-| 22 | **AvailabilityRuleDeactivateView**       | `APIView`                        | Явное "закрытие" рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                                                                                                                           | `AvailabilityRule`, `AppUser`, `PsychologistProfile`      | -                                                                        |
-| 23 | **AvailabilityExceptionListCreateView**  | `ListCreateAPIView`              | 1) Создание нового исключения из рабочего расписания; 2) Получение исключений: по умолчанию активные исключения; с параметром include_archived=true все включая архивные исключения.                                                                                         | `AvailabilityException`, `AppUser`, `PsychologistProfile` | `AvailabilityExceptionSerializer`                                        |
-| 24 | **AvailabilityExceptionDeactivateView**  | `APIView`                        | Явное "закрытие" исключения из рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                                                                                                             | `AvailabilityException`, `AppUser`, `PsychologistProfile` | -                                                                        |
 
 #### 2) AJAX-запрос (fetch) на специальный API-endpoint
 
@@ -342,8 +331,6 @@
 | 6  | **SavePreferredAgeAjaxView**      | `View`                 | Моментальное сохранение выбранных клиентом значений в preferred_ps_age на html-страницах                                                                                                         | `ClientProfile` + справочники |
 | 7  | **SaveHasTimePreferencesAjaxView** | `View`                 | Моментальное сохранение значения has_time_preferences выбранного клиентом на html-странице                                                                                                       | `ClientProfile` + справочники |
 | 8  | **SavePreferredSlotsAjaxView**    | `View`                 | Моментальное сохранение выбранных клиентом значений в preferred_slots на html-странице                                                                                                           | `ClientProfile` + справочники |
-| 9  | **GetDomainSlotsAjaxView**        | `View`                 | Возвращает клиенту на UI все возможные доменные временные слоты (общее правило домена). <br/> Read-only эндпоинт только для показа возможных слотов на странице пользователя, без сохранения в БД | Без использования БД         |
-| 10 | **GetSpecialistScheduleAjaxView** | `View`                 | Возвращает клиенту на UI в карточке конкретного специалиста актуальное расписание данного специалиста: <br/> 1) ближайший доступный слот; <br/> 2) все доступные слоты в блоке "Расписание"      | Без использования БД         |
 
 
 ### 3. МАРШРУТЫ (РОУТЫ)
@@ -376,10 +363,6 @@
 | 20 | `/users/api/my-psychologist-profile/`                   | `GET`, `PUT`, `PATCH`          | Получить / обновить своего `PsychologistProfile` (auth required, role=psychologist)                                                                                                                                                                                         |
 | 21 | `/users/api/my-client-profile/`                         | `GET`, `PUT`, `PATCH`          | Получить / обновить своего `ClientProfile` (auth required, role=client)                                                                                                                                                                                                     |
 | 22 | `/users/api/psychologists/<uuid:uuid>/`                 | `GET`                          | Получить публичную карточку психолога (без чувствительных персональных данных)                                                                                                                                                                                              |
-| 23 | `/users/api/my-availability-rules/`                     | `GET`, `POST`                  | Создать рабочее расписание / Получить список расписаний (текущее + архивные, если указать в адресе `?include_archived=true`)                                                                                                                                                |
-| 24 | `/users/api/my-availability-rules/close/`               | `PATCH`                        | Явное "закрытие" рабочего расписания специалиста                                                                                                                                                                                                                            |
-| 25 | `/users/api/my-availability-exceptions/`                | `GET`, `POST`                  | Создать исключение в расписании / Получить список исключений (текущее + архивные, если указать в адресе `?include_archived=true`)                                                                                                                                           |
-| 26 | `/users/api/my-availability-exceptions/<int:pk>/close/` | `PATCH`                        | Явное "закрытие" исключения                                                                                                                                                                                                                                                 |
 
 #### 2) AJAX-запросы (fetch) на моментальное сохранение указанных клиентом на html-страницах данных в БД
 
@@ -393,8 +376,6 @@
 | 6  | `/users/api/save-preferred-age/`                      | `POST`     | Моментальное сохранение выбранных клиентом значений в preferred_ps_age на html-страницах   |
 | 7  | `/users/api/save-has-time-preferences/`               | `POST`     | Моментальное сохранение значения has_time_preferences выбранного клиентом на html-страницах |
 | 8  | `/users/api/save-preferred-slots/`                    | `POST`     | Моментальное сохранение выбранных клиентом значений в preferred_slots на html-страницах    |
-| 9  | `/users/api/get-domain-slots/`                        | `GET`      | Показать все возможные доменные временные слоты на ближайшие N-дней                        |
-| 10 | `/users/api/psychologists/<int:profile_id>/schedule/` | `GET`      | Показать расписание специалиста (доступное время для записи)                               |
 
 ---
 

@@ -7,6 +7,10 @@ from calendar_engine.models import (AvailabilityException,
                                     EventParticipant, RecurrenceRule,
                                     SlotParticipant, TimeSlot)
 
+# =====
+# СОБЫТИЕ / СЛОТЫ
+# =====
+
 
 class CreatorAndReadonlyFields(admin.ModelAdmin):
     """Базовый класс для админок, чтоб не дублировать в них повторяющийся код
@@ -25,8 +29,10 @@ class CreatorAndReadonlyFields(admin.ModelAdmin):
 class CalendarEventAdmin(CreatorAndReadonlyFields):
     """Настройка отображения модели CalendarEvent в админке."""
 
-    list_display = ("id", "creator", "title", "event_type", "status", "visibility", "is_recurring", "source")
-    list_filter = ("event_type", "status", "visibility", "is_recurring", "source")
+    list_display = (
+        "id", "creator", "title", "event_type", "status", "cancel_reason_type", "visibility", "is_recurring", "source"
+    )
+    list_filter = ("event_type", "status", "cancel_reason_type", "visibility", "is_recurring", "source")
     search_fields = ("title", "description", "creator__email", "creator__last_name")
     ordering = ("creator__email", "-created_at")
     list_display_links = ("id", "title")  # чтобы кликать на название вместо ID
@@ -76,6 +82,11 @@ class SlotParticipantAdmin(admin.ModelAdmin):
     raw_id_fields = ("slot", "user",)
 
 
+# =====
+# РАБОЧИЙ ГРАФИК
+# =====
+
+
 @admin.register(AvailabilityRuleTimeWindow)
 class AvailabilityRuleTimeWindowAdmin(admin.ModelAdmin):
     """Настройка отображения модели AvailabilityRuleTimeWindow в админке."""
@@ -102,7 +113,16 @@ class AvailabilityRuleAdmin(CreatorAndReadonlyFields):
     """Настройка отображения модели AvailabilityRule в админке."""
 
     list_display = (
-        "id", "creator", "rule_start", "rule_end", "weekdays", "slot_duration", "break_between_sessions", "is_active"
+        "id",
+        "creator",
+        "rule_start",
+        "rule_end",
+        "weekdays",
+        "session_duration_individual",
+        "session_duration_couple",
+        "break_between_sessions",
+        "minimum_booking_notice_hours",
+        "is_active",
     )
     list_filter = ("is_active",)
     search_fields = ("creator__email", "creator__last_name")
@@ -143,8 +163,10 @@ class AvailabilityExceptionAdmin(CreatorAndReadonlyFields):
         "exception_end",
         "reason",
         "exception_type",
-        "override_slot_duration",
+        "override_session_duration_individual",
+        "override_session_duration_couple",
         "override_break_between_sessions",
+        "override_minimum_booking_notice_hours",
         "is_active",
     )
     list_filter = ("is_active", "reason", "exception_type")

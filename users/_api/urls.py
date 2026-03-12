@@ -1,18 +1,12 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from users._api.views import (AppUserRetrieveUpdateView,
-                              AvailabilityExceptionDeactivateView,
-                              AvailabilityExceptionListCreateView,
-                              AvailabilityRuleDeactivateView,
-                              AvailabilityRuleListCreateView,
-                              ChangePasswordView,
+from users._api.views import (AppUserRetrieveUpdateView, ChangePasswordView,
                               ClientProfileRetrieveUpdateView,
                               CustomTokenObtainPairView,
                               EducationListCreateView,
                               EducationRetrieveUpdateDestroyView,
-                              EmailVerificationView, GetDomainSlotsAjaxView,
-                              GetSpecialistScheduleAjaxView, LogoutAPIView,
+                              EmailVerificationView, LogoutAPIView,
                               MethodDetailView, MethodListView,
                               PasswordResetConfirmView, PasswordResetView,
                               PsychologistProfileRetrieveUpdateView,
@@ -59,24 +53,6 @@ urlpatterns = [
     path("password-reset/", PasswordResetView.as_view(), name="password-reset"),
     path("password-reset-confirm/", PasswordResetConfirmView.as_view(), name="password-reset-confirm"),
 
-    # Рабочее расписание психолога
-    path(
-        "my-availability-rules/", AvailabilityRuleListCreateView.as_view(), name="availability-rules-list-create"
-    ),
-    path(
-        "my-availability-rules/close/", AvailabilityRuleDeactivateView.as_view(), name="availability-rules-close"
-    ),
-    path(
-        "my-availability-exceptions/",
-        AvailabilityExceptionListCreateView.as_view(),
-        name="availability-exceptions-list-create"
-    ),
-    path(
-        "my-availability-exceptions/<int:pk>/close/",
-        AvailabilityExceptionDeactivateView.as_view(),
-        name="availability-exceptions-close"
-    ),
-
     # Topic (справочник)
     path("topics/", TopicListView.as_view(), name="topic-list"),
     path("topics/<slug:slug>/", TopicDetailView.as_view(), name="topic-detail"),
@@ -107,11 +83,4 @@ urlpatterns = [
     ),
     path("save-preferred-slots/", SavePreferredSlotsAjaxView.as_view(), name="save-preferred-slots"),
 
-    # AJAX-запрос (fetch) на создание и отображение временных слотов и расписания на html-страницах
-    path("get-domain-slots/", GetDomainSlotsAjaxView.as_view(), name="get-domain-slots"),
-    path(
-        "psychologists/<int:profile_id>/schedule/",
-        GetSpecialistScheduleAjaxView.as_view(),
-        name="get-psychologist-schedule"
-    ),
 ]
