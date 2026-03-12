@@ -1,0 +1,145 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %} {{ title_client_account_view|default:"ОПОРА" }} {% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Плавный фон */
+    body {
+        background-image: url('{% static "images/background/background-start.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed; /* красиво фиксирует фон */
+    }
+
+    /* Анимации входа блоков (как на странице редактирования профиля) */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .animate-fade-in-up {
+        opacity: 0;
+        animation: fadeInUp 1.0s ease-out forwards;
+    }
+    .animate-fade-in-left {
+        opacity: 0;
+        animation: fadeInLeft 0.9s ease-out forwards;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+<section class="relative overflow-hidden min-h-screen bg-white/80 backdrop-blur-[2px] w-full">
+
+    <!-- Фоновое ЛОГО в нижний правый угол -->
+    <div class="hidden lg:block absolute bottom-10 right-10 p-8 pointer-events-none z-0 select-none opacity-10 blur-[2px]">
+        <img src="{% static 'images/menu/opora-base.png' %}"
+             alt=""
+             class="w-80 h-auto">
+    </div>
+
+    <div class="relative z-10 w-full px-6 sm:px-8 py-10
+        {% if show_sidebar %} lg:px-24 {% else %} lg:px-40 xl:px-80 {% endif %}">
+
+        <!-- Уведомления -->
+        {% if messages %}
+            <div class="mb-8 space-y-3 max-w-3xl">
+                {% for message in messages %}
+                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-800 shadow-sm">
+                        <p class="text-base font-semibold">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Шапка страницы -->
+        <div class="animate-fade-in-left mb-12 md:mb-16 max-w-5xl">
+            <header class="w-full">
+                <h1 class="text-4xl md:text-5xl font-black text-indigo-900 tracking-tight leading-tight break-words">
+                    Запланированные <span class="text-indigo-600">сессии</span>
+                </h1>
+                <p class="mt-4 text-lg md:text-xl text-zinc-600 font-medium leading-relaxed">
+                    Здесь отображаются ваши ближайшие встречи, которые уже были успешно созданы в системе
+                </p>
+            </header>
+        </div>
+
+        <!-- ===== Отображение списка запланированных встреч ===== -->
+        {% if planned_events %}
+            <div class="animate-fade-in-up grid grid-cols-1 xl:grid-cols-2 gap-6">
+                {% for item in planned_events %}
+                    <article class="rounded-3xl border border-indigo-100 bg-white/75 p-6 shadow-sm backdrop-blur-md">
+                        {% if item.is_recently_created %}
+                            <div class="mb-4 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700">
+                                Только что создано
+                            </div>
+                        {% endif %}
+
+                        <h2 class="text-2xl font-bold text-indigo-900">
+                            {{ item.event.title }}
+                        </h2>
+
+                        <div class="mt-5 space-y-3 text-zinc-700">
+                            <p class="text-base">
+                                <span class="font-semibold text-zinc-900">Статус:</span>
+                                {{ item.event.get_status_display }}
+                            </p>
+
+                            <p class="text-base">
+                                <span class="font-semibold text-zinc-900">Специалист:</span>
+                                {% if item.counterpart_user %}
+                                    {{ item.counterpart_user.get_full_name|default:item.counterpart_user.email }}
+                                {% else %}
+                                    Участник будет указан позже
+                                {% endif %}
+                            </p>
+
+                            {% if item.primary_slot %}
+                                <p class="text-base">
+                                    <span class="font-semibold text-zinc-900">Дата и время:</span>
+                                    {{ item.primary_slot.start_datetime|date:"d.m.Y H:i" }} - {{ item.primary_slot.end_datetime|date:"H:i" }}
+                                </p>
+                                <p class="text-base">
+                                    <span class="font-semibold text-zinc-900">Часовой пояс:</span>
+                                    {{ item.primary_slot.timezone|default:"не указан" }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <div class="animate-fade-in-up max-w-4xl rounded-3xl p-8">
+                <h2 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">Запланированных встреч пока нет</h2>
+                <p class="mt-3 text-lg text-zinc-600 font-medium leading-relaxed">
+                    Когда вы выберете специалиста и успешно завершите запись, встреча появится здесь
+                </p>
+                <a
+                    href="{% url 'core:general-questions' %}{{ layout_query }}"
+                    class="inline-flex items-center justify-center w-full sm:w-auto mt-6 px-6 py-2 gap-3
+                    border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
+                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                    transition-all duration-200 shadow-md hover:shadow-lg">
+                    Подобрать специалиста
+                    <img src="{% static 'images/menu/look-for-white.svg' %}" alt="look-for" class="w-8 h-8">
+                </a>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endblock %}
