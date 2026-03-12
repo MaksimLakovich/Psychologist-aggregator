@@ -4,19 +4,22 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils import timezone
 
-from calendar_engine.application.factories.generate_specialist_schedule_factory import build_specialist_schedule_runtime_context
-from calendar_engine.application.use_cases.specialist_schedule import GenerateSpecialistScheduleUseCase
-from calendar_engine.booking.exceptions import CreateTherapySessionValidationError
-from calendar_engine.booking.services import (build_booking_therapy_session_title,
-                                              get_specialist_profile_for_booking_therapy_session,
-                                              normalize_user_timezone)
+from calendar_engine.application.factories.generate_specialist_schedule_factory import \
+    build_specialist_schedule_runtime_context
+from calendar_engine.application.use_cases.specialist_schedule import \
+    GenerateSpecialistScheduleUseCase
+from calendar_engine.booking.exceptions import \
+    CreateTherapySessionValidationError
+from calendar_engine.booking.services import (
+    build_booking_therapy_session_title,
+    get_specialist_profile_for_booking_therapy_session,
+    normalize_user_timezone)
 from calendar_engine.booking.validators import (
-    parse_requested_slot_start,
-    validate_client_can_create_therapy_session,
+    parse_requested_slot_start, validate_client_can_create_therapy_session,
     validate_client_has_no_overlapping_therapy_sessions,
-    validate_consultation_type_in_therapy_session,
-)
-from calendar_engine.models import CalendarEvent, EventParticipant, SlotParticipant, TimeSlot
+    validate_consultation_type_in_therapy_session)
+from calendar_engine.models import (CalendarEvent, EventParticipant,
+                                    SlotParticipant, TimeSlot)
 
 
 class CreateTherapySessionUseCase:

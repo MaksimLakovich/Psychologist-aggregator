@@ -78,13 +78,19 @@
                     </svg>
                 </button>
                 <ul id="dropdown-session"
-                    class="space-y-2 overflow-hidden transition-all duration-300 ease-out transform max-h-0 opacity-0 -translate-y-1 pointer-events-none">
+                    class="space-y-2 overflow-hidden transition-all duration-300 ease-out transform
+                        {% if current_sidebar_key == 'session-planned' or current_sidebar_key == 'session-archive' %}
+                        max-h-80 opacity-100 translate-y-0 pointer-events-auto py-2
+                        {% else %}
+                        max-h-0 opacity-0 -translate-y-1 pointer-events-none
+                        {% endif %}">
                     <li>
-                        <a href="#"
+                        <a href="{% url 'core:client-planned-sessions' %}?layout=sidebar"
                            data-nav-item
                            data-nav-key="session-planned"
                            data-nav-parent-group="session"
-                           class="{{ nav_sub_item_classes }}">
+                           class="{{ nav_sub_item_classes }} {% if current_sidebar_key == 'session-planned' %}bg-gray-300/25 !text-indigo-700{% endif %}"
+                           {% if current_sidebar_key == 'session-planned' %}data-nav-active-server="1" aria-current="page"{% endif %}>
                             <img src="{% static 'images/menu/num_point.svg' %}"
                                  alt="point"
                                  class="transition-transform duration-200 group-hover:scale-110">

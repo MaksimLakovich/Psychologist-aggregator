@@ -1,6 +1,7 @@
 from zoneinfo import ZoneInfo
 
-from calendar_engine.booking.exceptions import CreateTherapySessionValidationError
+from calendar_engine.booking.exceptions import \
+    CreateTherapySessionValidationError
 from users.models import PsychologistProfile
 
 
