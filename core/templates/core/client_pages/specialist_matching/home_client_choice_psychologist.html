@@ -158,6 +158,7 @@
                         id="psychologist-card"
                         data-static-url="{% static '' %}"
                         data-back-url="{% url 'core:personal-questions' %}{{ layout_query }}"
+                        data-payment-card-url="{% url 'core:payment-card' %}{{ layout_query }}"
                         data-client-timezone="{{ request.user.timezone|default_if_none:'' }}"
                         data-reset-choice="{% if reset_choice_psychologist %}1{% else %}0{% endif %}"
                     >

@@ -53,9 +53,38 @@
             <form method="post" action="" class="w-full space-y-6 lg:space-y-8">
 
                 {% csrf_token %}
+                {{ form.specialist_profile_id }}
+                {{ form.slot_start_iso }}
+                {{ form.consultation_type }}
 
                 <!-- ========== ВАЖНО для открытия либо САЙДБАРА либо МЕНЮ ========== -->
                 <input type="hidden" name="layout" value="{{ layout_mode }}">
+
+                <!-- Общие ошибки -->
+                {% if form.non_field_errors or form.errors %}
+                <div class="rounded-2xl border border-rose-100 shadow-sm bg-rose-50 px-5 py-4 text-rose-700">
+                    <p class="text-base font-semibold">Не удалось создать бронирование</p>
+                    <ul class="mt-2 space-y-1 text-sm">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if not booking_selection_ready %}
+                <div class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-amber-800">
+                    <p class="text-base font-semibold">Сначала выберите специалиста и время сессии</p>
+                    <p class="mt-2 text-sm">
+                        Эта страница подтверждает уже выбранный слот. Вернитесь на шаг выбора психолога и выберите время
+                    </p>
+                </div>
+                {% endif %}
 
                 <!-- ========== ШАГИ / ЭТАПЫ ========== -->
                 <div class="space-y-6 sm:space-y-8 pb-0">
@@ -196,8 +225,9 @@
                                         </a>
                                         <button
                                                 type="submit"
+                                                {% if not booking_selection_ready %}disabled{% endif %}
                                                 class="px-10 py-3.5 rounded-xl bg-indigo-700 text-xl text-white font-extrabold tracking-wide
-                                                hover:bg-indigo-900 transition shadow">
+                                                hover:bg-indigo-900 transition shadow disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed">
                                             Добавить карту и записаться
                                         </button>
                                     </div>
