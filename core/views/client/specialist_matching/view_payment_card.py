@@ -3,9 +3,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.views.generic import FormView
 
-from calendar_engine.booking.exceptions import CreateTherapySessionValidationError
-from calendar_engine.booking.use_cases.therapy_session_create import CreateTherapySessionUseCase
-from core.forms.client.specialist_matching.form_payment_card import ClientAddPaymentCardForm
+from calendar_engine.booking.exceptions import \
+    CreateTherapySessionValidationError
+from calendar_engine.booking.use_cases.therapy_session_create import \
+    CreateTherapySessionUseCase
+from core.forms.client.specialist_matching.form_payment_card import \
+    ClientAddPaymentCardForm
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 
 

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from calendar_engine.booking.use_cases.therapy_session_create import CreateTherapySessionUseCase
+from calendar_engine.booking.use_cases.therapy_session_create import \
+    CreateTherapySessionUseCase
 from users.constants import PREFERRED_TOPIC_TYPE_CHOICES
 
 # =====

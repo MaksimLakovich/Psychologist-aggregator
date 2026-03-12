@@ -3,8 +3,10 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from calendar_engine._api.serializers.events import CreateTherapySessionSerializer
-from calendar_engine.booking.exceptions import CreateTherapySessionValidationError
+from calendar_engine._api.serializers.events import \
+    CreateTherapySessionSerializer
+from calendar_engine.booking.exceptions import \
+    CreateTherapySessionValidationError
 from calendar_engine.booking.throttles import CreateTherapySessionThrottle
 
 
