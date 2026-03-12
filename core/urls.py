@@ -2,6 +2,8 @@ from django.urls import path
 
 from core.apps import CoreConfig
 from core.views.client.my_account.main_account_page import ClientAccountView
+from core.views.client.my_account.planned_sessions_page import \
+    ClientPlannedSessionsView
 from core.views.client.my_account.ps_catalog import (
     PsychologistCardDetailPageView, PsychologistCatalogFilterAjaxView,
     PsychologistCatalogPageView)
@@ -20,22 +22,18 @@ from core.views.start_view import StartPageView
 app_name = CoreConfig.name
 
 urlpatterns = [
-    # КЛИЕНТ: общая стартовая страница + общие информативные
+    # Общая стартовая страница + разные общие информативные страницы приложения
     path("", StartPageView.as_view(), name="start-page"),
     path("faq/", CommonQuestionPageView.as_view(), name="faq-page"),
 
-    # КЛИЕНТ: этапы подбора/фильтрации необходимых специалистов
+    # Этапы подбора/фильтрации необходимых специалистов по заданным клиентом параметрам
     path("general-questions/", ClientGeneralQuestionsPageView.as_view(), name="general-questions"),
     path("personal-questions/", ClientPersonalQuestionsPageView.as_view(), name="personal-questions"),
     path("choice-psychologist/", ClientChoicePsychologistPageView.as_view(), name="choice-psychologist"),
     path("payment-card/", ClientAddPaymentCardPageView.as_view(), name="payment-card"),
 
-    # КЛИЕНТ: работа с профилем
-    path("client-account/", ClientAccountView.as_view(), name="client-account"),
-
-    # КЛИЕНТ: каталог психологов
+    # Работа с КАТАЛОГОМ психологов
     path("psychologist_catalog/", PsychologistCatalogPageView.as_view(), name="psychologist-catalog"),
-    path("<slug:profile_slug>/", PsychologistCardDetailPageView.as_view(), name="psychologist-card-detail"),
 
     # AJAX для каталога: фильтры
     path(
@@ -43,4 +41,16 @@ urlpatterns = [
         PsychologistCatalogFilterAjaxView.as_view(),
         name="psychologist-catalog-filter"
     ),
+
+    # Работа с личным КАБИНЕТОМ
+    path("client-account/", ClientAccountView.as_view(), name="client-account"),
+    path(
+        "client-account/sessions/planned/", ClientPlannedSessionsView.as_view(), name="client-planned-sessions"
+    ),
+
+    # Детальная карточка психолога в КАТАЛОГЕ должна быть последней, потому что это catch-all slug route.
+    # Если поставить ее выше конкретных URL, например "client-account/", Django начнет ошибочно
+    # воспринимать такие адреса как profile_slug.
+    path("<slug:profile_slug>/", PsychologistCardDetailPageView.as_view(), name="psychologist-card-detail"),
+
 ]
