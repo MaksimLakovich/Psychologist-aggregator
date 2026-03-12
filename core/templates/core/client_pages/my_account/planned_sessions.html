@@ -77,6 +77,7 @@
         <!-- ===== Отображение списка запланированных встреч ===== -->
         {% if planned_events %}
             <div class="animate-fade-in-up grid grid-cols-1 xl:grid-cols-2 gap-6">
+
                 {% for item in planned_events %}
                     <article class="rounded-3xl border border-indigo-100 bg-white/75 p-6 shadow-sm backdrop-blur-md">
                         {% if item.is_recently_created %}
@@ -95,15 +96,6 @@
                                 {{ item.event.get_status_display }}
                             </p>
 
-                            <p class="text-base">
-                                <span class="font-semibold text-zinc-900">Специалист:</span>
-                                {% if item.counterpart_user %}
-                                    {{ item.counterpart_user.get_full_name|default:item.counterpart_user.email }}
-                                {% else %}
-                                    Участник будет указан позже
-                                {% endif %}
-                            </p>
-
                             {% if item.primary_slot %}
                                 <p class="text-base">
                                     <span class="font-semibold text-zinc-900">Дата и время:</span>
@@ -114,6 +106,16 @@
                                     {{ item.primary_slot.timezone|default:"не указан" }}
                                 </p>
                             {% endif %}
+
+                            <p class="text-base">
+                                <span class="font-semibold text-zinc-900">Специалист:</span>
+                                {% if item.counterpart_user %}
+                                    {{ item.counterpart_user.get_full_name|default:item.counterpart_user.first_name }}
+                                {% else %}
+                                    Участник будет указан позже
+                                {% endif %}
+                            </p>
+
                         </div>
                     </article>
                 {% endfor %}
