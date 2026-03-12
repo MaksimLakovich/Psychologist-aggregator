@@ -1,0 +1,7 @@
+from django.urls import path
+
+from calendar_engine.apps import AppCalendarConfig
+
+app_name = AppCalendarConfig.name
+
+urlpatterns = []

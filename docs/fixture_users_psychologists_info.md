@@ -134,11 +134,13 @@ python manage.py loaddata fixtures/users_ps_availability_rule.json
       "rule_start": "2024-01-01",
       "rule_end": null,
       "weekdays": [0,1,2,3,4,5,6],
-      "slot_duration": 50,
+      "session_duration_individual": 50,
+      "session_duration_couple": 90,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
-      "updated_at": "2026-01-20T12:00:00.000Z"
+      "updated_at": "2026-01-20T12:00:00.000Z",
+      "minimum_booking_notice_hours": 1
     }
   },
   {

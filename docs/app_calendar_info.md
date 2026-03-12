@@ -11,8 +11,8 @@
 [7. Админки для данных](#title7)  
 [8. Ядро сервиса](#title8)  
 [9. Оркестрация процессов](#title9)  
-[10. Инфраструктурные процессы](#title10)  
-[11. API и WEB интерфейс](#title11)
+[10. Booking-процессы](#title10)  
+[11. API-интерфейс](#title11)
 
 ---
 
@@ -176,7 +176,25 @@ calendar_engine/
     ├── constants.py                  # Параметры доменной политики (базовые размеры слотов) + значения справочников
     ├── models.py
     ├── admin.py
+    ├── services.py                   # Вспомогательные сервисные функции (например, normalize_range(), ...)
     ├── urls.py
+    │
+    ├── _api/                         # ⭐API-сценарии для календаря
+    │    ├── serializers/
+    │    │    ├── availability.py       # Сериализаторы для рабочего расписания специалиста (правило доступности и исключения)
+    │    │    ├── events.py             # Сериализаторы для создания встречи
+    │    │    └── ...
+    │    ├── views/
+    │    │    ├── availability.py       # API-endpoint для работы с рабочим графиком / Получение возможных доменных слотов / Получение отфильтрованных слотов на основе рабочего расписания + брони
+    │    │    ├── events.py             # API-endpoint для клиента по выполнению им сценария создания встречи со специалистом
+    │    │    └── ...
+    │    └── urls.py                    # Маршруты
+    │
+    ├── _web/                         # ⭐ 
+    │    ├── views/                     # 
+    │    │    ├──                       # 
+    │    │    └── ...
+    │    └── urls.py                    # Маршруты
     │
     ├── domain/                       # ⭐ Бизнес-логика (НЕ Django)
     │    ├── time_policy/               # ДОМЕННЫЕ правила временной сетки календаря
@@ -213,6 +231,16 @@ calendar_engine/
     │    └── factories/
     │         ├── generate_and_match_factory.py              # 💡 ИТОГОВЫЙ ПОДБОР СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - этот модуль использует use-cases, передает на вход "СПЕЦИАЛИСТА + ВЫБРАННЫЕ КЛИЕНТОМ "СЛОТЫ" и запускает ПОДБОР
     │         └── generate_specialist_schedule_factory.py    # 💡 ПОЛУЧИТЬ РАСПИСАНИЕ СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - генерация расписания специалиста
+    │
+    ├── booking/                      # ⭐ Создание встреч/событий и работа с ними
+    │    ├── use_cases/
+    │    │    ├── therapy_session_create.py           # Прикладной сценарий для клиента по созданию встречи (терапевтическая сессия) со специалистом
+    │    │    └── ...
+    │    ├── exceptions.py               # Кастомные исключения для booking-модуля
+    │    ├── services.py                 # Вспомогательные функции
+    │    ├── validators.py               # Кастомные валидаторы для booking-flow
+    │    ├── throttles.py
+    │    └── ...
     ...
 ```
 
@@ -232,13 +260,12 @@ calendar_engine/
 | `started`   | Событие началось                                |
 | `completed` | Событие успешно завершено                       |
 | `cancelled` | Событие отменено                                |
-| `archived`  | Событие заархивировано (например, при переносе) |
 
 Принципы:
 
 - **Событие** - это бизнес-сущность, описывающая намерение провести встречу
 - Событие может содержать один или несколько слотов
-- При переносе создается новое событие, а старое переводится в archived
+- При переносе создается новое событие, а старое переводится в cancelled
 - Исторические события не участвуют в блокировке времени
 
 ### 2. Статусы слотов (`TimeSlot.status`)
@@ -249,13 +276,12 @@ calendar_engine/
 | `started`   | Слот в процессе      |
 | `completed` | Слот завершен        |
 | `cancelled` | Слот отменен         |
-| `archived`  | Слот заархивирован   |
 
 Принципы:
 
 - **Слот** - это атом времени, именно он блокирует календарь
 - Double booking (наложение встреч) предотвращается ТОЛЬКО для слотов со статусами planned и started (т.е., только
-  для активных слотов (запланированных/начатых). Исторические слоты (completed, canceled, archived) не блокируют
+  для активных слотов (запланированных/начатых). Исторические слоты (completed, canceled) не блокируют
   доступность. Это реализовано через ExclusionConstraint в PostgreSQL.
 
 ### 3. Роли и статусы участников
@@ -274,7 +300,7 @@ calendar_engine/
     - invited
     - accepted
     - declined
-    - left
+    - removed
 
 #### 3.2. Участники слота (`SlotParticipant`)
 
@@ -286,6 +312,7 @@ calendar_engine/
     - participant
     - speaker
     - moderator
+    - observer
 
 - **Статусы (status):**
     - planned
@@ -293,6 +320,7 @@ calendar_engine/
     - left_early
     - attended
     - missed
+    - cancelled
 
 ---
 
@@ -355,21 +383,22 @@ calendar_engine/
    Корень агрегата - событие календаря. Может содержать 1 или несколько временных слотов (т.е., если составное событие,
    то будет N-записей с одним ID события и разными ID слотов).
 
-| Поле               | Тип                  | Описание                |
-|--------------------|----------------------|-------------------------|
-| `id`               | UUID                 | Публичный идентификатор |
-| `creator`          | FK(AppUser)          | Организатор события     |
-| `title`            | CharField            | Название                |
-| `description`      | TextField            | Описание                |
-| `event_type`       | CharField(choices)   | Тип события             |
-| `status`           | CharField(choices)   | Статус                  |
-| `cancel_reason`    | TextField            | Причина отмены          |
-| `visibility`       | CharField(choices)   | Видимость               |
-| `capacity`         | PositiveSmallInteger | Лимит участников        |
-| `is_recurring`     | Boolean              | Повторяющееся           |
-| `previous_event_id` | FK(self)             | Связь при переносе      |
-| `source`           | CharField            | Источник                |
-| `external_id`      | CharField            | ID во внешнем календаре |
+| Поле              | Тип                  | Описание                   |
+|-------------------|----------------------|----------------------------|
+| `id`              | UUID                 | Публичный идентификатор    |
+| `creator`         | FK(AppUser)          | Организатор события        |
+| `title`           | CharField            | Название                   |
+| `description`     | TextField            | Описание                   |
+| `event_type`      | CharField(choices)   | Тип события                |
+| `status`          | CharField(choices)   | Статус                     |
+| `cancel_reason_type` | CharField(choices)   | Тип причины отмены события |
+| `cancel_reason`   | TextField            | Причина отмены             |
+| `visibility`      | CharField(choices)   | Видимость                  |
+| `capacity`        | PositiveSmallInteger | Лимит участников           |
+| `is_recurring`    | Boolean              | Повторяющееся              |
+| `previous_event`  | FK(self)             | Связь при переносе         |
+| `source`          | CharField            | Источник                   |
+| `external_id`     | CharField            | ID во внешнем календаре    |
 
 3. Модель `RecurrenceRule`:  
    Правила для повторяющегося события.
@@ -446,16 +475,18 @@ calendar_engine/
     Правила доступности специалиста (рабочее расписание).
     Например: Пн-Пт, с набором рабочих окон внутри дня (AvailabilityRuleTimeWindow).
 
-| Поле                     | Тип                       | Описание                        |
-|--------------------------|---------------------------|---------------------------------|
-| `creator`                | FK(AppUser)               | Пользователь                    |
-| `timezone`               | TimeZoneField             | Часовой пояс                    |
-| `rule_start`             | Date                      | Начало                          |
-| `rule_end`               | Date                      | Конец                           |
-| `weekdays`               | Array(choices)            | Дни недели                      |
-| `slot_duration`          | PositiveSmallIntegerField | Длительность сессии (минуты)    |
-| `break_between_sessions` | PositiveSmallIntegerField | Перерыв между сессиями (минуты) |
-| `is_active`              | Boolean                   | Признак действия правила        |
+| Поле                          | Тип                       | Описание                                                              |
+|-------------------------------|---------------------------|-----------------------------------------------------------------------|
+| `creator`                     | FK(AppUser)               | Пользователь                                                          |
+| `timezone`                    | TimeZoneField             | Часовой пояс                                                          |
+| `rule_start`                  | Date                      | Начало                                                                |
+| `rule_end`                    | Date                      | Конец                                                                 |
+| `weekdays`                    | Array(choices)            | Дни недели                                                            |
+| `session_duration_individual` | PositiveSmallIntegerField | Длительность 1 индивидуальной сессии (минуты)                         |
+| `session_duration_couple`     | PositiveSmallIntegerField | Длительность 1 парной сессии (минуты)                                 |
+| `break_between_sessions`      | PositiveSmallIntegerField | Перерыв между сессиями (минуты)                                       |
+| `minimum_booking_notice_hours` | PositiveSmallIntegerField | Минимальное количество часов до ближайшего доступного слота для записи |
+| `is_active`                   | Boolean                   | Признак действия правила                                              |
 
 8. Модель `AvailabilityRuleTimeWindow`:  
    Временное окно доступности внутри рабочего дня из AvailabilityRule:
@@ -471,17 +502,19 @@ calendar_engine/
 9. Модель `AvailabilityException`:  
    Исключения из правил доступности специалиста (отпуск, болезнь, выходной)
 
-| Поле                              | Тип                 | Описание                                                |
-|-----------------------------------|---------------------|---------------------------------------------------------|
-| `creator`                         | FK(AppUser)         | Пользователь                                            |
-| `rule`                            | FK(AvailabilityRule) | Правило для которого устанавливается исключение         |
-| `exception_start`                 | Date                | Дата старта действия исключения                         |
-| `exception_end`                   | Date                | Дата окончания действия исключения                      |
-| `reason`                          | CharField(choices)  | Выбор причины                                           |
-| `exception_type`                  | CharField(choices)  | Тип исключения: unavailable / override                  |
-| `override_slot_duration`          | Time                | Продолжительность 1 сессии согласно исключения (минуты) |
-| `override_break_between_sessions` | Time                | Перерыв между сессиями согласно исключения (минуты)     |
-| `is_active`                       | Boolean             | Признак действия исключения                             |
+| Поле                                   | Тип                       | Описание                                                                     |
+|----------------------------------------|---------------------------|------------------------------------------------------------------------------|
+| `creator`                              | FK(AppUser)               | Пользователь                                                                 |
+| `rule`                                 | FK(AvailabilityRule)      | Правило для которого устанавливается исключение                              |
+| `exception_start`                      | Date                      | Дата старта действия исключения                                              |
+| `exception_end`                        | Date                      | Дата окончания действия исключения                                           |
+| `reason`                               | CharField(choices)        | Выбор причины                                                                |
+| `exception_type`                       | CharField(choices)        | Тип исключения: unavailable / override                                       |
+| `override_session_duration_individual` | PositiveSmallIntegerField | Продолжительность 1 индивидуальной сессии согласно исключения (минуты)       |
+| `override_session_duration_couple`     | PositiveSmallIntegerField | Продолжительность 1 парной сессии согласно исключения (минуты)               |
+| `override_break_between_sessions`      | PositiveSmallIntegerField | Перерыв между сессиями согласно исключения (минуты)                          |
+| `override_minimum_booking_notice_hours` | PositiveSmallIntegerField | Новое минимальное количество часов до ближайшего доступного слота для записи |
+| `is_active`                            | Boolean                   | Признак действия исключения                                                  |
 
 10. Модель `AvailabilityExceptionTimeWindow`:  
    Переопределенное временное окно доступности внутри рабочего дня из AvailabilityException (например, "с 09:00 до 18:00").
@@ -910,11 +943,11 @@ calendar_engine/application/use_cases/
 
 ---
 
-### `specialist_schedule.py` - получение актуального расписания специалиста
+### `specialist_schedule.py` - получение актуального расписания специалиста (с учетом AvailabilityRule + AvailabilityException + BOOKING)
 
-| Класс                               | Описание                                                                 |
-|-------------------------------------|--------------------------------------------------------------------------|
-| `GenerateSpecialistScheduleUseCase` | Use-case получения актуального расписания специалиста (в TZ СПЕЦИАЛИСТА) |
+| Класс                               | Описание                                                                                                                                                                                                                                                     |
+|-------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `GenerateSpecialistScheduleUseCase` | Use-case получения актуального расписания специалиста (в TZ СПЕЦИАЛИСТА) <br/> Ответственность: <br/>- сгенерировать доменные слоты; <br/>- отфильтровать их по AvailabilityRule / AvailabilityException / Booking; <br/>- вернуть список доступных SlotDTO. |
 
 ---
 
@@ -1032,13 +1065,156 @@ calendar_engine/application/factories/
 
 ### `generate_specialist_schedule_factory.py` - выполнение сборки use-case генерации расписания специалиста
 
-| Класс                                                             | Описание                                                                                     |
-|-------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
-| `build_generate_specialist_schedule_use_case(specialist_profile)` | Собирает use-case генерации расписания специалиста. <br/> На входе: **PsychologistProfile**. |
+| Класс                                                                                | Описание                                                                                                                                                                                                                                                                                                            |
+|--------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `_iter_days(date_from: date, date_to: date)`                                         | Вспомогательный генератор календарных дней (включительно). <br/> Нужен для сценария, когда одно исключение действует не один день, а диапазон дат. Тогда мы можем развернуть диапазон в словарь по каждому календарному дню и позже быстро понять, нужно ли в конкретный день переопределять minimum booking notice. |
+| `_build_override_break_between_sessions_by_day(exceptions)`                            | Собирает словарь override_break_between_sessions из AvailabilityException по календарным дням.                                                                                                                                                                                                                      |
+| `_build_all_override_maps(rule, exceptions, consultation_type)`                        | Собирает словари override-параметров из AvailabilityException по календарным дням и base-параметры из AvailabilityRule.                                                                                                                                                                                             |
+| `_build_specialist_busy_intervals(specialist_profile, specialist_tz, rule, exceptions)` | Строит список уже занятых интервалов специалиста. Т.е., функция нужна для одной конкретной задачи: "Определить какие уже существующие встречи специалиста должны сделать часть доменных стартов (слотов) недоступными в его расписании".                                                                            |
+| `build_specialist_schedule_runtime_context(specialist_profile, consultation_type)`     | Собирает единый runtime-context для availability и booking логики специалиста.                                                                                                                                                                                                                                                                                                                    |
+| `build_generate_specialist_schedule_use_case(specialist_profile, consultation_type)` | Factory финальной сборки use-case генерации расписания специалиста.                                                                                                                                                                                                                     |
 
 ---
 
-## <a id="title10"> 🌐 Инфраструктурные процессы </a>
+## <a id="title10"> 📇 Booking-процессы </a>
+
+## 1️⃣ booking/use_cases - функционал бронирования/создания встречи и работы с ними
+
+### 🎯 Цель слоя:
+
+- Задать функционал для бронирования/создания встреч:
+  - терапевтические сессии;
+  - групповые встречи;
+  - встречи между специалистами (супервизии / интервизии);
+  - повторяющиеся встречи;
+  - семинары / вебинары.
+- Задать функционал для работы со встречами:
+  - создание;
+  - перенос;
+  - редактирование;
+  - отмена;
+  - проведение.
+- Задать функционал системы уведомлений.
+
+```bash
+calendar_engine/booking/use_cases/
+├── therapy_session_create.py        # Прикладной сценарий для клиента по созданию встречи (терапевтическая сессия) со специалистом
+└── ...                              # 
+```
+
+---
+
+### `therapy_session_create.py` - терапевтическая сессия
+
+| Класс                         | Описание                                                                                                                                                                                                                                                                                                         |
+|-------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `CreateTherapySessionUseCase` | Текущий use-case: <br/> - клиент выбирает специалиста; - клиент выбирает доступный доменный слот в расписании специалиста; - backend повторно проверяет, что этот старт (слот или слоты, если время сессии > 1 часа) еще реально доступен; - создаются CalendarEvent / TimeSlot / EventParticipant / SlotParticipant. |
+
+---
+
+### calendar_engine/booking/exceptions.py:
+
+- `CreateTherapySessionValidationError(BookingError)` - Ошибка валидации сценария CreateTherapySession. Используется, когда:
+    - клиент передал некорректные входные данные;
+    - выбранный слот уже недоступен;
+    - у специалиста нет рабочего правила;
+    - создание встречи противоречит текущим бизнес-инвариантам.
+
+- `ParseSlotValidationError(BookingError)` - Ошибка валидации преобразования ISO-строки в слотах в aware datetime.
+
+---
+
+### calendar_engine/booking/services.py:
+
+- `get_specialist_profile_for_booking_therapy_session(specialist_profile_id)` - Возвращает профиль специалиста для сценария бронирования терапевтической сессии.
+    - клиент записывается не просто к пользователю, а к конкретному профилю специалиста;
+    - поэтому для booking-flow источником истины выступает именно PsychologistProfile
+
+- `normalize_user_timezone(timezone_value)` - Нормализует timezone пользователя к объекту tzinfo.
+
+- `build_booking_therapy_session_title(specialist_full_name, consultation_type)` - Формирует понятное пользователю название терапевтической сессии.
+
+---
+
+### calendar_engine/booking/validators.py:
+
+- `validate_client_can_create_therapy_session(client_user)` - Проверяет, что операцию создания встречи (терапевтическая сессия) запускает именно клиент.
+
+- `validate_consultation_type_in_therapy_session(consultation_type)` - Проверяет, что формат консультации относится к текущему поддерживаемому scope в рамках therapy_session.
+
+- `parse_requested_slot_start(slot_start_iso)` - Преобразует ISO-строку старта слота в aware datetime.
+
+- `validate_client_has_no_overlapping_therapy_sessions(client_user, slot_start_datetime, slot_end_datetime)` - Проверяет, что у клиента нет другой активной терапевтической сессии с пересечением по времени.
+
+---
+
+## <a id="title11"> ⚙️ API-функционал </a>
+
+### 1. СЕРИАЛИЗАТОРЫ МОДЕЛЕЙ
+
+Для **API-эндпоинтов** созданы следующие сериализаторы:
+
+### calendar_engine/_api/serializers/:
+
+- Рабочее расписание специалиста (правило рабочего времени / исключения):
+  - `AvailabilityRuleTimeWindowSerializer` - временное окно доступности специалиста внутри рабочего дня в AvailabilityRule (например, "с 09:00 до 18:00")
+  - `AvailabilityRuleSerializer` - рабочее расписание специалиста (правило доступности, например: Пн-Пт, с набором рабочих окон внутри дня)
+  - `AvailabilityExceptionTimeWindowSerializer` - переопределенное временное окно доступности внутри рабочего дня из AvailabilityException
+  - `AvailabilityExceptionSerializer` - исключение из рабочего расписания психолога
+
+- Терапевтические сессии:
+  - `CreateTherapySessionSerializer` - создание встречи между клиентом и специалистом (терапевтическая сессия).
+
+### 2. КОНТРОЛЛЕРЫ 
+
+### calendar_engine/_api/views/:
+
+#### 1) API 
+
+| № | Название контроллера                     | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                                                                                                                   | Используемые модели                                      | Используемые сериализаторы       |
+|---|------------------------------------------|------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------|----------------------------------|
+| 1 | **AvailabilityRuleListCreateView**       | `ListCreateAPIView`    | 1) Создание нового рабочего расписания; 2) Получение рабочего расписания: по умолчанию активное расписание; с параметром include_archived=true все включая архивные правила        | `AvailabilityRule`, `AppUser`, `PsychologistProfile`     | `AvailabilityRuleSerializer`     |
+| 2 | **AvailabilityRuleDeactivateView**       | `APIView`              | Явное "закрытие" рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                                 | `AvailabilityRule`, `AppUser`, `PsychologistProfile`     | -                                |
+| 3 | **AvailabilityExceptionListCreateView**  | `ListCreateAPIView`    | 1) Создание нового исключения из рабочего расписания; 2) Получение исключений: по умолчанию активные исключения; с параметром include_archived=true все включая архивные исключения | `AvailabilityException`, `AppUser`, `PsychologistProfile` | `AvailabilityExceptionSerializer` |
+| 4 | **AvailabilityExceptionDeactivateView**  | `APIView`              | Явное "закрытие" исключения из рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                   | `AvailabilityException`, `AppUser`, `PsychologistProfile` | -                                |
+| 5 | **CalendarTherapySessionListCreateView**  | `GenericAPIView`       | Выполнение клиентом сценария создания встречи со специалистом (терапевтическая сессия) - CreateTherapySession                                                                      | `AppUser`                                                | `CreateTherapySessionSerializer` |
+
+#### 2) AJAX-запрос (fetch) на специальный API-endpoint
+
+| № | Название контроллера              | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                                                                                                                                 | Используемые модели          |
+|---|-----------------------------------|------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
+| 1 | **GetDomainSlotsAjaxView**        | `View`                 | Возвращает клиенту на UI все возможные доменные временные слоты (общее правило домена). <br/> Read-only эндпоинт только для показа возможных слотов на странице пользователя, без сохранения в БД | Без использования БД         |
+| 2 | **GetSpecialistScheduleAjaxView** | `View`                 | Возвращает клиенту на UI в карточке конкретного специалиста актуальное расписание данного специалиста: <br/> 1) ближайший доступный слот; <br/> 2) все доступные слоты в блоке "Расписание"      | Без использования БД         |
+
+
+### 3. МАРШРУТЫ (РОУТЫ)
+
+### calendar_engine/_api/urls.py:
+
+#### 1) API 
+
+| № | Эндпоинт                                                  | HTTP-методы  | Описание функционала                                                                                                             |
+|---|-----------------------------------------------------------|--------------|----------------------------------------------------------------------------------------------------------------------------------|
+| 1 | `/calendar/api/my-availability-rules/`                    | `GET`, `POST` | Создать рабочее расписание / Получить список расписаний (текущее + архивные, если указать в адресе `?include_archived=true`)     |
+| 2 | `/calendar/api/my-availability-rules/close/`              | `PATCH`      | Явное "закрытие" рабочего расписания специалиста                                                                                 |
+| 3 | `/calendar/api/my-availability-exceptions/`               | `GET`, `POST` | Создать исключение в расписании / Получить список исключений (текущее + архивные, если указать в адресе `?include_archived=true`) |
+| 4 | `/calendar/api/my-availability-exceptions/<int:pk>/close/` | `PATCH`      | Явное "закрытие" исключения                                                                                                      |
+| 5 | `/calendar/api/therapy-sessions/`                         | `POST`       | Cоздание встречи между клиентом и специалистом (терапевтическая сессия)                                                          |
+
+#### 2) AJAX-запросы (fetch) на моментальное сохранение указанных клиентом на html-страницах данных в БД
+
+| № | Эндпоинт                                              | HTTP-методы | Описание функционала                                                                       |
+|---|-------------------------------------------------------|------------|--------------------------------------------------------------------------------------------|
+| 1 | `/calendar/api/get-domain-slots/`                        | `GET`      | Показать все возможные доменные временные слоты на ближайшие N-дней                        |
+| 2 | `/calendar/api/psychologists/<int:profile_id>/schedule/` | `GET`      | Показать расписание специалиста (доступное время для записи)                               |
+
+---
+
+---
+
+БЭКЛОГ
+
+## <a id="title123"> 🌐 Инфраструктурные процессы </a>
 
     ├── infrastructure/
     │    ├── persistence/
@@ -1064,25 +1240,6 @@ calendar_engine/application/factories/
 - Кэширование
 - Напоминания/Уведомления
 - Интеграции с внешними сервисами
-- ...
-
----
-
-## <a id="title11"> 🖥️ API и WEB интерфейс </a>
-
-    ├── api/                          # ⭐ DRF
-    │    ├── serializers.py
-    │    ├── permissions.py
-    │    ├── views.py
-    │    └── urls.py
-    │
-    ├── web/                          # ⭐️ SSR (рендеринг) + стилизация
-    │    ├── views.py
-    │    ├── urls.py
-    │    └── templates/  
-
-### 🎯 Цель слоя:
-
 - ...
 
 ---
