@@ -73,9 +73,12 @@ export function renderPsychologistCard(ps, options = {}) {
     const topicsTitle = typeof options.topicsTitle === "string"
         ? options.topicsTitle
         : "Работает с темами вашей анкеты";
-    // Управляем завершающим CTA без изменения поведения matching-flow:
-    // ??? - submit: переход к следующему шагу (выбор психолога после анкеты);
-    // ??? - button: заглушка без перехода (детальная карточка из каталога).
+    // Главная кнопка записи должна быть именно обычной button-кнопкой, а не submit.
+    // Это важно, потому что переход на payment-card выполняется только после явного выбора слота
+    // и формируется вручную через JS из:
+    // - выбранного специалиста;
+    // - выбранного времени;
+    // - формата сессии.
     const chooseSessionButtonType = "button";
     // В каталоге нижняя кнопка "Назад" дублирует верхний "Назад в каталог", поэтому прячем её опционально.
     const showBottomBackButton = options.showBottomBackButton !== false;
@@ -251,7 +254,8 @@ export function renderPsychologistCard(ps, options = {}) {
 
     // 7) Подгружаем РАСПИСАНИЕ и БЛИЖАЙШЕЕ ВРЕМЯ для выбранного специалиста
     const currentPsId = ps.id;
-    // ???
+    // Базовый URL следующего шага "Запись и оплата", который backend заранее пробросил в HTML-шаблон.
+    // Дальше JS добавляет к нему уже конкретные выбранные параметры: специалиста, слот и формат сессии.
     const paymentCardUrl = container.dataset.paymentCardUrl;
     // Сохраняем id в DOM, чтобы отсекать "гонки" при быстром переключении карточек.
     container.dataset.psId = String(currentPsId);
@@ -566,12 +570,16 @@ export function renderPsychologistCard(ps, options = {}) {
         </div>
     `;
 
-    // ???
+    // Отдельно навешиваем обработчик на главную кнопку записи внизу карточки.
+    // Она нужна, чтобы после выбора слота перевести клиента именно на шаг payment-card,
+    // а не пытаться выполнять какой-то другой сценарий.
     const chooseSessionButton = container.querySelector("[data-choose-session-btn]");
     if (chooseSessionButton) {
         chooseSessionButton.addEventListener("click", event => {
             // Даже при type="button" явно запрещаем default-поведение,
-            // чтобы этот CTA никогда не начал случайно сабмитить outer-form при будущих правках шаблона.
+            // чтобы этот CTA никогда не начал случайно сабмитить outer-form
+            // (то есть не начал неожиданно отправлять внешнюю HTML-форму всей страницы)
+            // при будущих правках шаблона.
             event.preventDefault();
 
             const rawSlot = sessionStorage.getItem("selectedAppointmentSlot");

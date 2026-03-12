@@ -71,7 +71,9 @@ function updatePaymentStepLink(isEnabled, targetHref = null) {
     link.setAttribute("aria-disabled", "true");
 }
 
-// ???
+// Синхронно обновляем ссылку шага "Запись и оплата".
+// Если слот выбран, шаг становится активным и ведет на конкретный URL payment-card.
+// Если слот не выбран, шаг снова блокируется, чтобы клиент не мог перейти дальше раньше времени.
 export function updatePaymentStepTarget(targetHref) {
     updatePaymentStepLink(Boolean(targetHref), targetHref);
 }

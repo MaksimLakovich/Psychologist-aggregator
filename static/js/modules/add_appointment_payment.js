@@ -30,7 +30,12 @@ const API_URL = "/aggregator/api/match-psychologists/";
 const STORAGE_KEY = "selectedPsychologistId";
 const SELECTED_APPOINTMENT_SLOT_KEY = "selectedAppointmentSlot";
 
-// ???
+// Получаем скрытые поля формы на странице payment-card.
+// Это те значения, которые клиент уже выбрал на предыдущем шаге:
+// - специалист;
+// - время слота;
+// - формат сессии.
+// Они не отображаются как обычные поля ввода, но backend использует их при финальном подтверждении записи.
 function getHiddenBookingInputs() {
     return {
         specialistField: document.getElementById("id_specialist_profile_id"),
@@ -39,7 +44,9 @@ function getHiddenBookingInputs() {
     };
 }
 
-// ???
+// Считываем начальный набор данных для бронирования прямо из скрытых полей формы.
+// Это нужно, чтобы страница payment-card могла корректно восстановить уже сделанный выбор клиента
+// даже без повторного обращения к предыдущему шагу.
 function getInitialBookingPayload() {
     const { specialistField, slotField, consultationTypeField } = getHiddenBookingInputs();
 
