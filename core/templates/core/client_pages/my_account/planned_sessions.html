@@ -4,6 +4,11 @@
 
 {% block title %} {{ title_client_account_view|default:"ОПОРА" }} {% endblock %}
 
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js" defer></script>
+{% endblock %}
+
 {% block extra_style %}
 <style>
     /* Плавный фон */
@@ -32,6 +37,52 @@
     .animate-fade-in-left {
         opacity: 0;
         animation: fadeInLeft 0.9s ease-out forwards;
+    }
+
+    .planned-session-calendar .fc {
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    .planned-session-calendar .fc-toolbar-title {
+        color: #312e81;
+        font-size: 1.1rem;
+        font-weight: 800;
+        letter-spacing: 0.01em;
+    }
+
+    .planned-session-calendar .fc-button {
+        background: #eef2ff;
+        border: none;
+        color: #4338ca;
+        box-shadow: none;
+    }
+
+    .planned-session-calendar .fc-button:hover,
+    .planned-session-calendar .fc-button:focus {
+        background: #c7d2fe;
+        color: #312e81;
+        box-shadow: none;
+    }
+
+    .planned-session-calendar .fc-daygrid-day-number {
+        color: #27272a;
+        font-weight: 700;
+    }
+
+    .planned-session-calendar .planned-session-count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.5rem;
+        height: 1.5rem;
+        margin-top: 0.35rem;
+        border-radius: 9999px;
+        background: #4f46e5;
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 800;
+        line-height: 1;
+        box-shadow: 0 6px 18px rgba(79, 70, 229, 0.2);
     }
 </style>
 {% endblock %}
@@ -76,49 +127,99 @@
 
         <!-- ===== Отображение списка запланированных встреч ===== -->
         {% if planned_events %}
-            <div class="animate-fade-in-up grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div class="animate-fade-in-up grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
 
-                {% for item in planned_events %}
-                    <article class="rounded-3xl border border-indigo-100 bg-white/75 p-6 shadow-sm backdrop-blur-md">
-                        {% if item.is_recently_created %}
-                            <div class="mb-4 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700">
-                                Только что создано
+                <div class="xl:col-span-8 space-y-5">
+                    {% for item in planned_events %}
+                        <article class="rounded-3xl border border-indigo-100 bg-white/80 p-6 shadow-sm backdrop-blur-md">
+                            <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                                <div class="flex items-start gap-4 min-w-0">
+                                    <img
+                                        src="{{ item.specialist_photo_url }}"
+                                        alt="Фото специалиста"
+                                        class="h-16 w-16 rounded-2xl object-cover shadow-sm flex-shrink-0"
+                                    >
+
+                                    <div class="min-w-0">
+                                        {% if item.is_recently_created %}
+                                            <div class="mb-3 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700">
+                                                Только что создано
+                                            </div>
+                                        {% endif %}
+
+                                        <h2 class="text-2xl font-bold text-indigo-900 break-words">
+                                            {{ item.event.title }}
+                                        </h2>
+
+                                        <p class="mt-2 text-lg font-semibold text-zinc-800">
+                                            {{ item.counterpart_full_name|default:"Специалист будет указан позже" }}
+                                        </p>
+
+                                        <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
+                                            <span class="inline-flex rounded-full bg-indigo-100 px-3 py-1 font-semibold text-indigo-700">
+                                                {{ item.event.get_status_display }}
+                                            </span>
+                                            <span class="inline-flex rounded-full bg-sky-100 px-3 py-1 font-semibold text-sky-700">
+                                                {{ item.specialist_profile.get_therapy_format_display|default:"Онлайн" }}
+                                            </span>
+                                            <span class="inline-flex rounded-full bg-sky-100 px-3 py-1 font-semibold text-sky-700">
+                                                {{ item.event.visibility|default:"Приватная" }}
+                                            </span>
+                                            <span class="inline-flex rounded-full bg-sky-100 px-3 py-1 font-semibold text-sky-700">
+                                                {{ item.event.event_type|default:"Индивидуальная сессия" }}
+                                            </span>
+                                            <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 font-semibold text-emerald-700">
+                                                {{ item.frequency|default:"Разовая встреча" }}
+                                            </span>
+                                            <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 font-semibold text-emerald-700">
+                                                {{ item.specialist_profile.get_work_status_display|default:"Работает" }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="w-full lg:max-w-sm rounded-2xl bg-zinc-50/80 p-4 text-zinc-700 shadow-inner">
+                                    <div class="space-y-3 text-base">
+                                        <p>
+                                            <span class="font-semibold text-zinc-900">Дата:</span>
+                                            {{ item.display_date }}
+                                        </p>
+                                        <p>
+                                            <span class="font-semibold text-zinc-900">Время:</span>
+                                            {{ item.display_time_range }}
+                                        </p>
+                                        <p>
+                                            <span class="font-semibold text-zinc-900">Часовой пояс:</span>
+                                            {{ item.display_client_timezone }}
+                                        </p>
+                                    </div>
+
+                                    <a href="{% url 'core:client-therapy-session-detail' item.event.id %}{{ layout_query }}"
+                                        class="inline-flex items-center justify-center w-full xl:w-auto mt-5 px-6 py-3 gap-2
+                                        border border-transparent text-sm md:text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
+                                        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                                        transition-all duration-200 shadow-md hover:shadow-lg whitespace-normal text-center">
+                                        Посмотреть детали сессии
+                                    </a>
+                                </div>
                             </div>
-                        {% endif %}
+                        </article>
+                    {% endfor %}
+                </div>
 
-                        <h2 class="text-2xl font-bold text-indigo-900">
-                            {{ item.event.title }}
-                        </h2>
-
-                        <div class="mt-5 space-y-3 text-zinc-700">
-                            <p class="text-base">
-                                <span class="font-semibold text-zinc-900">Статус:</span>
-                                {{ item.event.get_status_display }}
+                <aside class="xl:col-span-4 planned-session-calendar">
+                    <div class="rounded-3xl border border-indigo-100 bg-white/85 p-5 shadow-sm backdrop-blur-md">
+                        <div class="mb-4">
+                            <h2 class="text-2xl font-bold text-indigo-900">Календарь встреч</h2>
+                            <p class="mt-2 text-sm text-zinc-600">
+                                Виджет показывает, в какие дни у вас назначены сессии и сколько встреч запланировано на каждый день.
                             </p>
-
-                            {% if item.primary_slot %}
-                                <p class="text-base">
-                                    <span class="font-semibold text-zinc-900">Дата и время:</span>
-                                    {{ item.primary_slot.start_datetime|date:"d.m.Y H:i" }} - {{ item.primary_slot.end_datetime|date:"H:i" }}
-                                </p>
-                                <p class="text-base">
-                                    <span class="font-semibold text-zinc-900">Часовой пояс:</span>
-                                    {{ item.primary_slot.timezone|default:"не указан" }}
-                                </p>
-                            {% endif %}
-
-                            <p class="text-base">
-                                <span class="font-semibold text-zinc-900">Специалист:</span>
-                                {% if item.counterpart_user %}
-                                    {{ item.counterpart_user.get_full_name|default:item.counterpart_user.first_name }}
-                                {% else %}
-                                    Участник будет указан позже
-                                {% endif %}
-                            </p>
-
                         </div>
-                    </article>
-                {% endfor %}
+
+                        {{ calendar_month_widget_events|json_script:"planned-sessions-calendar-data" }}
+                        <div id="planned-sessions-calendar-widget" data-initial-date="{{ calendar_widget_initial_date }}"></div>
+                    </div>
+                </aside>
             </div>
 
         {% else %}
@@ -143,5 +244,7 @@
     </div>
 
 </section>
+
+<script type="module" src="{% static 'js/calendar_widgets/planned_sessions_month_calendar.js' %}"></script>
 
 {% endblock %}
