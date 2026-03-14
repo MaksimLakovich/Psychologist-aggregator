@@ -52,21 +52,25 @@
     }
 
     /* ========================================================= */
-    /* Мягкая пульсация блока времени для сегодняшней сессии */
+    /* Мягкая пульсация текста времени для сегодняшней сессии */
     /* ========================================================= */
-    @keyframes sessionTodayBadgePulse {
+    @keyframes sessionTodayTimePulse {
         0%, 100% {
             transform: scale(1);
+            opacity: 0.92;
+            text-shadow: 0 0 0 rgba(144, 97, 249, 0);
         }
         50% {
-            transform: scale(1.15);
+            transform: scale(1.06);
+            opacity: 1;
+            text-shadow: 0 0 14px rgba(144, 97, 249, 0.22);
         }
     }
 
-    .session-today-badge-pulse {
-        position: relative;
-        animation: sessionTodayBadgePulse 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        will-change: transform, box-shadow, border-color, background-color;
+    .session-today-time-pulse {
+        display: inline-block;
+        animation: sessionTodayTimePulse 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        will-change: transform, opacity, text-shadow;
     }
 
     /* ========================================================= */
@@ -213,8 +217,8 @@
                                     <div class="h-10 w-px bg-zinc-200 block md:hidden"></div>
 
                                     <div class="md:mt-4 text-center">
-                                        <div class="inline-flex flex-col items-center px-3 py-2{% if item.is_today %}session-today-badge-pulse{% endif %}">
-                                            <span class="text-base font-black text-indigo-900 tracking-wide">{{ item.display_start_time }}</span>
+                                        <div class="inline-flex flex-col items-center px-3 py-2">
+                                            <span class="{% if item.is_today %}text-base session-today-time-pulse{% else %}text-sm{% endif %} font-black text-indigo-900 tracking-wide">{{ item.display_start_time }}</span>
                                         </div>
                                     </div>
 
