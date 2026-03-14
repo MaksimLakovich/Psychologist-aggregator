@@ -160,6 +160,9 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
             planned_events.append(
                 {
                     "event": event,
+                    # Даем шаблону понятный alias "slot", потому что карточка на странице показывает
+                    # именно основной временной интервал встречи, а не все внутренние связи модели.
+                    "slot": primary_slot,
                     "primary_slot": primary_slot,
                     "counterpart_user": counterpart_user,
                     "counterpart_full_name": counterpart_full_name or "Имя не указано",
@@ -167,12 +170,22 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
                     "specialist_photo_url": counterpart_user.avatar_url,
                     "visibility_display": event.get_visibility_display() or "Приватная",
                     "event_type_display": event.get_event_type_display() or "Индивидуальная сессия",
+                    "status_display": event.get_status_display() or "Запланировано",
+                    "duration_minutes": (
+                        int((primary_slot.end_datetime - primary_slot.start_datetime).total_seconds() // 60)
+                        if primary_slot
+                        else None
+                    ),
                     "display_date": slot_display_data.get("display_date"),
                     "display_day_key": slot_display_data.get("display_day_key"),
                     "display_time_range": slot_display_data.get("display_time_range"),
+                    "display_month_short": slot_display_data.get("display_month_short"),
+                    "display_day_number": slot_display_data.get("display_day_number"),
+                    "display_weekday": slot_display_data.get("display_weekday"),
                     "display_client_timezone": slot_display_data.get("display_client_timezone"),
                     "display_start_iso": slot_display_data.get("display_start_iso"),
                     "display_end_iso": slot_display_data.get("display_end_iso"),
+                    "is_today": slot_display_data.get("is_today", False),
                     "frequency_display": (
                         recurrence_rule.get_frequency_display()
                         if recurrence_rule and recurrence_rule.frequency
