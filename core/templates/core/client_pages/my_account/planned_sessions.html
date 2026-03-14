@@ -55,43 +55,54 @@
     /* Стили для ВИДЖЕТА month-calendar от FULLCALENDAR */
     /* ========================================================= */
 
+    /* Общий шрифт всего month-widget календаря, чтобы визуально он не выбивался из остальной страницы */
     .planned-session-calendar .fc {
-        /* Общий шрифт всего month-widget календаря, чтобы визуально он не выбивался из остальной страницы */
-        font-family: 'Open Sans', sans-serif;
+        font-family: inherit;
+        color: #6C2BD9; /* indigo-700 */
     }
 
+    /* Заголовок календаря с названием текущего месяца и года, например "март 2026" */
     .planned-session-calendar .fc-toolbar-title {
-        /* Заголовок календаря с названием текущего месяца и года, например "март 2026" */
         color: #312e81;
         font-size: 1.1rem;
         font-weight: 800;
         letter-spacing: 0.01em;
     }
 
+    /* Кнопки переключения месяцев "назад / вперед" в шапке виджета календаря */
     .planned-session-calendar .fc-button {
-        /* Кнопки переключения месяцев "назад / вперед" в шапке виджета календаря */
-        background: #eef2ff;
-        border: none;
-        color: #4338ca;
-        box-shadow: none;
+        background-color: #6C2BD9; /* indigo-700 */
+        border: 1px solid #e5e7eb !important;
+        color: #374151 !important;
+        border-radius: 0.75rem !important;
+        text-transform: capitalize;
+        font-weight: 500 !important;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+        transition: all 0.2s ease !important;
+        padding: 0.4rem 0.75rem !important;
     }
 
+    /* Состояние hover/focus для кнопок переключения месяцев, чтобы клиент видел отклик интерфейса */
     .planned-session-calendar .fc-button:hover,
     .planned-session-calendar .fc-button:focus {
-        /* Состояние hover/focus для кнопок переключения месяцев, чтобы клиент видел отклик интерфейса */
         background: #c7d2fe;
         color: #312e81;
         box-shadow: none;
     }
 
+    /* Цифра дня внутри ячейки месяца, например "14", "15", "16". */
     .planned-session-calendar .fc-daygrid-day-number {
-        /* Цифра дня внутри ячейки месяца, например "14", "15", "16". */
-        color: #27272a;
+        color: #6C2BD9; /* indigo-700 */
         font-weight: 700;
     }
 
+    /* Сегодняшний день */
+    .planned-session-calendar .fc-day-today {
+        background-color: #6C2BD9 !important; /* indigo-700 */
+    }
+
+    /* Круглый badge с количеством встреч в конкретный день месяца */
     .planned-session-calendar .planned-session-count-badge {
-        /* Круглый badge с количеством встреч в конкретный день месяца */
         display: inline-flex;
         align-items: center;
         justify-content: center;
