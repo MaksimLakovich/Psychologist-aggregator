@@ -10,7 +10,7 @@ LANGUAGE_CHOICES = [
 ]
 
 THERAPY_FORMAT_CHOICES = [
-    ("online", "Онлайн"),
+    ("online", "Онлайн встреча"),
     ("offline", "Личная встреча"),
     ("any", "Любая"),
 ]

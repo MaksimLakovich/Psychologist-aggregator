@@ -2859,6 +2859,10 @@ input:checked + .toggle-bg {
   gap: 2rem;
 }
 
+.gap-0\.5 {
+  gap: 0.125rem;
+}
+
 .gap-x-20 {
   -moz-column-gap: 5rem;
        column-gap: 5rem;
@@ -3273,6 +3277,11 @@ input:checked + .toggle-bg {
   border-color: rgb(250 250 250 / var(--tw-border-opacity, 1));
 }
 
+.border-indigo-700 {
+  --tw-border-opacity: 1;
+  border-color: rgb(81 69 205 / var(--tw-border-opacity, 1));
+}
+
 .\!bg-gray-50 {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1)) !important;
@@ -3671,6 +3680,49 @@ input:checked + .toggle-bg {
   background-color: rgb(205 219 254 / 0.5);
 }
 
+.bg-zinc-200\/40 {
+  background-color: rgb(228 228 231 / 0.4);
+}
+
+.bg-purple-700\/50 {
+  background-color: rgb(108 43 217 / 0.5);
+}
+
+.bg-indigo-200\/25 {
+  background-color: rgb(205 219 254 / 0.25);
+}
+
+.bg-zinc-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(113 113 122 / var(--tw-bg-opacity, 1));
+}
+
+.bg-zinc-200\/30 {
+  background-color: rgb(228 228 231 / 0.3);
+}
+
+.bg-white\/15 {
+  background-color: rgb(255 255 255 / 0.15);
+}
+
+.bg-indigo-300\/15 {
+  background-color: rgb(180 198 252 / 0.15);
+}
+
+.bg-zinc-50\/15 {
+  background-color: rgb(250 250 250 / 0.15);
+}
+
+.bg-violet-300 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(196 181 253 / var(--tw-bg-opacity, 1));
+}
+
+.bg-violet-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(139 92 246 / var(--tw-bg-opacity, 1));
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
@@ -4043,6 +4095,14 @@ input:checked + .toggle-bg {
 
 .pt-8 {
   padding-top: 2rem;
+}
+
+.pr-10 {
+  padding-right: 2.5rem;
+}
+
+.pr-4 {
+  padding-right: 1rem;
 }
 
 .text-left {
@@ -4480,6 +4540,27 @@ input:checked + .toggle-bg {
 
 .text-indigo-900\/30 {
   color: rgb(54 47 120 / 0.3);
+}
+
+.text-zinc-700\/60 {
+  color: rgb(63 63 70 / 0.6);
+}
+
+.text-purple-700 {
+  --tw-text-opacity: 1;
+  color: rgb(108 43 217 / var(--tw-text-opacity, 1));
+}
+
+.text-indigo-800\/80 {
+  color: rgb(66 56 157 / 0.8);
+}
+
+.text-indigo-700\/40 {
+  color: rgb(81 69 205 / 0.4);
+}
+
+.text-zinc-900\/40 {
+  color: rgb(24 24 27 / 0.4);
 }
 
 .line-through {
@@ -4997,6 +5078,16 @@ input:checked + .toggle-bg {
 .hover\:bg-zinc-50:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(250 250 250 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-violet-600:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(124 58 237 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-indigo-800:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(66 56 157 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:text-blue-600:hover {

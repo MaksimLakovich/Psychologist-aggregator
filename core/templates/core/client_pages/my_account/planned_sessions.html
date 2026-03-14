@@ -61,7 +61,7 @@
             text-shadow: 0 0 0 rgba(144, 97, 249, 0);
         }
         50% {
-            transform: scale(1.06);
+            transform: scale(1.11);
             opacity: 1;
             text-shadow: 0 0 14px rgba(144, 97, 249, 0.22);
         }
@@ -192,7 +192,7 @@
         {% if planned_events %}
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
 
-                <div class="xl:col-span-8 space-y-5 animate-fade-in-up">
+                <div class="xl:col-span-8 space-y-5 pr-4 animate-fade-in-up">
                     {% for item in planned_events %}
                         <article
                                 class="relative bg-zinc-50 rounded-[1.5rem] border border-zinc-50 hover:border-zinc-100
@@ -225,31 +225,35 @@
                                 </div>
 
                                 <!-- ЦЕНТРАЛЬНАЯ часть карточки встречи -->
-                                <div class="flex-1 p-6 flex flex-col justify-center min-w-0">
+                                <div class="flex-1 p-5 flex flex-col justify-center min-w-0">
 
-                                    <div class="flex flex-wrap items-center gap-2 mb-3">
-                                        <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-[10px] font-bold uppercase tracking-widest rounded">
+                                    <h2 class="text-xl font-bold text-indigo-800/80 tracking-wide mb-2.5">
+                                        {{ item.event.title }}
+                                    </h2>
+
+                                    <div class="flex flex-wrap items-center gap-2 mb-5">
+                                        <span class="px-2 py-1 bg-zinc-200/40 text-zinc-800 text-sm font-bold tracking-wider rounded">
                                             {{ item.event_type_display }}
                                         </span>
-                                        <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-[10px] font-bold uppercase tracking-widest rounded">
+                                        <span class="px-2 py-1 bg-zinc-200/40 text-zinc-800 text-sm font-bold tracking-wider rounded">
                                             <span class="opacity-50">Длительность:</span> {{ item.duration_minutes }} мин
                                         </span>
                                     </div>
 
-                                    <h2 class="text-xl font-bold text-zinc-900 truncate mb-4">
-                                        {{ item.event.title }}
-                                    </h2>
-
                                     <div class="flex items-center gap-3">
                                         <div class="relative">
-                                            <img src="{{ item.specialist_photo_url }}" alt="Специалист" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm">
-                                            <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" title="Онлайн"></div>
+                                            <img src="{{ item.specialist_photo_url }}" alt="Специалист"
+                                                 class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
+                                            <span class="absolute bottom-1 right-1 w-4 h-4 rounded-full">
+                                                <span class="absolute inline-flex w-3 h-3 animate-ping rounded-full bg-emerald-300 opacity-75"></span>
+                                                <span class="absolute inline-flex w-3 h-3 rounded-full bg-emerald-300"></span>
+                                            </span>
                                         </div>
                                         <div>
-                                            <p class="text-sm font-semibold text-zinc-900 leading-tight">
+                                            <p class="text-lg font-semibold text-zinc-800 leading-tight">
                                                 {{ item.counterpart_full_name }}
                                             </p>
-                                            <p class="text-xs font-medium text-zinc-500">
+                                            <p class="text-sm font-medium text-zinc-400">
                                                 Психолог • {{ item.specialist_profile.get_therapy_format_display|default:"Онлайн" }}
                                             </p>
                                         </div>
@@ -257,12 +261,13 @@
                                 </div>
 
                                 <!-- ПРАВАЯ часть карточки встречи -->
-                                <div class="md:w-56 bg-purple-100/50 p-6 border-t md:border-t-0 md:border-l border-zinc-100 flex flex-col justify-center gap-3 shrink-0">
+                                <div class="md:w-56 bg-zinc-200/30 p-6 border-t md:border-t-0 md:border-l border-zinc-100
+                                flex flex-col justify-center gap-3 shrink-0">
 
                                     <div class="flex justify-between items-center mb-1">
                                         <span class="text-xs font-semibold text-zinc-500">Статус</span>
-                                        <span class="inline-flex items-center gap-1 text-xs font-bold text-indigo-700">
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                                        <span class="inline-flex items-center gap-0.5 text-xs font-bold text-indigo-700">
+                                            <img src="{% static 'images/psychologist_profile/seal-check.svg' %}" alt="edit" class="w-3.5 h-3.5">
                                             {{ item.status_display }}
                                         </span>
                                     </div>
@@ -271,27 +276,24 @@
                                     {% if item.slot.meeting_url %}
                                         <a href="{{ item.slot.meeting_url }}"
                                             target="_blank"
-                                            class="inline-flex items-center justify-center w-full sm:w-auto mt-6 px-6 py-2 gap-3
-                                            border border-transparent text-base font-medium rounded-xl text-white bg-violet-600 hover:bg-indigo-700
-                                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                                            transition-all duration-200 shadow-md hover:shadow-lg">
+                                            class="inline-flex items-center justify-center w-full sm:w-auto mt-1 px-6 py-2 gap-3
+                                            border border-transparent text-base font-medium rounded-xl text-white bg-violet-500 hover:bg-violet-600
+                                            transition-all duration-200">
                                             <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-6 h-6">
-                                            Видеозвонок
+                                            Видеочат
                                         </a>
                                         <a href="{% url 'core:client-therapy-session-detail' item.event.id %}{{ layout_query }}"
-                                            class="inline-flex items-center justify-center w-full sm:w-auto mt-6 px-6 py-2 gap-3
-                                            border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
-                                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                                            transition-all duration-200 shadow-md hover:shadow-lg">
-                                            Посмотреть детали сессии
+                                            class="inline-flex items-center justify-center w-full sm:w-auto mt-1 px-6 py-2 gap-3
+                                            border border-transparent text-base font-medium rounded-xl text-white bg-indigo-700 hover:bg-indigo-800
+                                            transition-all duration-200">
+                                            Посмотреть
                                         </a>
                                     {% else %}
                                         <a href="{% url 'core:client-therapy-session-detail' item.event.id %}{{ layout_query }}"
-                                            class="inline-flex items-center justify-center w-full sm:w-auto mt-6 px-6 py-2 gap-3
-                                            border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
-                                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                                            transition-all duration-200 shadow-md hover:shadow-lg">
-                                            Посмотреть детали сессии
+                                            class="inline-flex items-center justify-center w-full sm:w-auto mt-1 px-6 py-2 gap-3
+                                            border border-transparent text-base font-medium rounded-xl text-white bg-indigo-700 hover:bg-indigo-800
+                                            transition-all duration-200">
+                                            Посмотреть
                                         </a>
                                     {% endif %}
 
@@ -303,18 +305,18 @@
 
                 <!-- ===== ВИДЖЕТ КАЛЕНДАРЯ ===== -->
                 <aside class="xl:col-span-4 animate-fade-in-right planned-session-calendar">
-                    <div class="rounded-3xl border border-indigo-100 bg-white/85 p-5 shadow-sm backdrop-blur-md">
+                    <div class="rounded-3xl border border-zinc-100 bg-white/25 p-5 shadow-lg backdrop-blur-md">
                         <div class="mb-4">
-                            <h2 class="text-2xl font-bold text-indigo-900">Календарь встреч</h2>
-                            <p class="text-xs font-medium text-zinc-500 mt-1">
-                            Часовой пояс: {{ calendar_widget_timezone_display }}
+                            <h2 class="text-xl text-center font-bold text-zinc-700 tracking-wider">Календарь</h2>
+                            <p class="text-sm text-center font-medium text-zinc-900/40 mt-1">
+                                часовой пояс: <strong>{{ calendar_widget_timezone_display }}</strong>
                             </p>
                         </div>
 
                         {{ calendar_month_widget_events|json_script:"planned-sessions-calendar-data" }}
                         <div id="planned-sessions-calendar-widget" data-initial-date="{{ calendar_widget_initial_date }}"></div>
 
-                        <p class="mt-2 text-sm text-zinc-600">
+                        <p class="mt-2 text-xs text-center text-zinc-400">
                             Виджет показывает, в какие дни у вас назначены сессии и сколько встреч запланировано на каждый день
                         </p>
                     </div>
