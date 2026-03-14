@@ -156,7 +156,7 @@
 
         <!-- Шапка страницы -->
         <div class="animate-fade-in-left mb-12 md:mb-16 max-w-5xl">
-            <header class="w-full">
+            <header>
                 <h1 class="text-4xl md:text-5xl font-black text-indigo-900 tracking-tight leading-tight break-words">
                     Запланированные <span class="text-indigo-600">сессии</span>
                 </h1>
@@ -173,9 +173,8 @@
                 <div class="xl:col-span-8 space-y-5 animate-fade-in-up">
                     {% for item in planned_events %}
                         <article
-                                class="group relative bg-slate-300 rounded-[1.5rem] border border-zinc-200 hover:border-indigo-200
-                                shadow-sm hover:shadow-xl hover:shadow-indigo-900/5 transition-all duration-300 overflow-hidden animate-list-item"
-                                style="animation-delay: calc(0.1s * {{ forloop.counter }});">
+                                class="relative bg-slate-300 rounded-[1.5rem] border border-zinc-200 hover:border-indigo-200
+                                shadow-sm hover:shadow-xl hover:shadow-indigo-900/5 transition-all duration-300 overflow-hidden">
 
                             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-indigo-500 to-indigo-600"></div>
 
@@ -200,7 +199,7 @@
                                     </div>
                                 </div>
 
-                                <div class="flex-1 p-6 flex flex-col justify-center min-w-0 relative">
+                                <div class="flex-1 p-6 flex flex-col justify-center min-w-0">
 
                                     <div class="flex flex-wrap items-center gap-2 mb-3">
                                         <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-[10px] font-bold uppercase tracking-widest rounded">
@@ -222,7 +221,7 @@
                                         </div>
                                         <div>
                                             <p class="text-sm font-semibold text-zinc-900 leading-tight">
-                                                {{ item.counterpart_full_name|default:"Ожидание назначения" }}
+                                                {{ item.counterpart_full_name }}
                                             </p>
                                             <p class="text-xs font-medium text-zinc-500">
                                                 Психолог • {{ item.specialist_profile.get_therapy_format_display|default:"Онлайн" }}
@@ -242,19 +241,28 @@
                                     </div>
 
                                     {% if item.slot.meeting_url %}
-                                        <a href="{{ item.slot.meeting_url }}" target="_blank" class="w-full inline-flex justify-center items-center gap-2 px-4 py-2.5 bg-zinc-900 hover:bg-indigo-600 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                        <a href="{{ item.slot.meeting_url }}"
+                                            target="_blank"
+                                            class="inline-flex items-center justify-center w-full sm:w-auto mt-6 px-6 py-2 gap-3
+                                            border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
+                                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                                            transition-all duration-200 shadow-md hover:shadow-lg">
+                                            <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-6 h-6">
                                             Видеозвонок
                                         </a>
-                                        <a href="{% url 'core:client-therapy-session-detail' item.event.id %}{{ layout_query }}" class="w-full inline-flex justify-center items-center px-4 py-2.5 bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-sm font-bold rounded-xl transition-colors shadow-sm">
-                                            Детали
+                                        <a href="{% url 'core:client-therapy-session-detail' item.event.id %}{{ layout_query }}"
+                                            class="inline-flex items-center justify-center w-full sm:w-auto mt-6 px-6 py-2 gap-3
+                                            border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
+                                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                                            transition-all duration-200 shadow-md hover:shadow-lg">
+                                            Посмотреть детали сессии
                                         </a>
                                     {% else %}
                                         <a href="{% url 'core:client-therapy-session-detail' item.event.id %}{{ layout_query }}"
-                                            class="inline-flex items-center justify-center w-full xl:w-auto mt-5 px-6 py-3 gap-2
-                                            border border-transparent text-sm md:text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
+                                            class="inline-flex items-center justify-center w-full sm:w-auto mt-6 px-6 py-2 gap-3
+                                            border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
                                             focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                                            transition-all duration-200 shadow-md hover:shadow-lg whitespace-normal text-center">
+                                            transition-all duration-200 shadow-md hover:shadow-lg">
                                             Посмотреть детали сессии
                                         </a>
                                     {% endif %}
@@ -288,7 +296,7 @@
             <div class="animate-fade-in-up p-12 text-center flex flex-col items-center justify-center">
 
                 <div class="w-20 h-20 bg-indigo-500/10 rounded-full flex items-center justify-center mb-6">
-                    <img src="{% static 'images/booking/calendar.svg' %}" alt="look-for" class="w-8 h-8">
+                    <img src="{% static 'images/booking/calendar.svg' %}" alt="calendar" class="w-8 h-8">
                 </div>
                 <h3 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">Нет предстоящих встреч</h3>
                 <p class="text-base text-zinc-300 font-medium leading-relaxed mt-3 mb-8">
