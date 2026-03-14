@@ -60,6 +60,9 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
                 #   - сразу отсортировать их по start_datetime;
                 #   - потом безопасно взять "основной" слот как самый ранний.
                 Prefetch("slots", queryset=TimeSlot.objects.order_by("start_datetime")),
+                # Правила повторения подгружаем заранее, чтобы потом без дополнительных запросов
+                # показать тип повторяемости события
+                Prefetch("recurrences"),
                 Prefetch(
                     "participants",
                     # select_related(...) работает для ForeignKey / OneToOne и делает SQL JOIN.
@@ -151,6 +154,7 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
                 if primary_slot
                 else {}
             )
+            recurrence_rule = next(iter(event.recurrences.all()), None)
 
             # Формируем готовую структуру для HTML-шаблона
             planned_events.append(
@@ -161,12 +165,19 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
                     "counterpart_full_name": counterpart_full_name or "Имя не указано",
                     "specialist_profile": specialist_profile,
                     "specialist_photo_url": counterpart_user.avatar_url,
+                    "visibility_display": event.get_visibility_display() or "Приватная",
+                    "event_type_display": event.get_event_type_display() or "Индивидуальная сессия",
                     "display_date": slot_display_data.get("display_date"),
                     "display_day_key": slot_display_data.get("display_day_key"),
                     "display_time_range": slot_display_data.get("display_time_range"),
                     "display_client_timezone": slot_display_data.get("display_client_timezone"),
                     "display_start_iso": slot_display_data.get("display_start_iso"),
                     "display_end_iso": slot_display_data.get("display_end_iso"),
+                    "frequency_display": (
+                        recurrence_rule.get_frequency_display()
+                        if recurrence_rule and recurrence_rule.frequency
+                        else "Разовая встреча"
+                    ),
                     "is_recently_created": str(event.id) == last_created_booking_id,
                 }
             )

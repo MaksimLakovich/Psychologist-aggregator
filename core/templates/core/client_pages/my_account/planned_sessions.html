@@ -185,13 +185,13 @@
                                                 {{ item.specialist_profile.get_therapy_format_display|default:"Онлайн" }}
                                             </span>
                                             <span class="inline-flex rounded-full bg-sky-100 px-3 py-1 font-semibold text-sky-700">
-                                                {{ item.event.visibility|default:"Приватная" }}
+                                                {{ item.visibility_display|default:"Приватная" }}
                                             </span>
                                             <span class="inline-flex rounded-full bg-sky-100 px-3 py-1 font-semibold text-sky-700">
-                                                {{ item.event.event_type|default:"Индивидуальная сессия" }}
+                                                {{ item.event_type_display|default:"Индивидуальная сессия" }}
                                             </span>
                                             <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 font-semibold text-emerald-700">
-                                                {{ item.frequency|default:"Разовая встреча" }}
+                                                {{ item.frequency_display|default:"Разовая встреча" }}
                                             </span>
                                             <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 font-semibold text-emerald-700">
                                                 {{ item.specialist_profile.get_work_status_display|default:"Работает" }}
