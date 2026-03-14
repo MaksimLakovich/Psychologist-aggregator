@@ -11,7 +11,9 @@
 
 {% block extra_style %}
 <style>
+    /* ========================================================= */
     /* Плавный фон */
+    /* ========================================================= */
     body {
         background-image: url('{% static "images/background/background-start.jpg" %}');
         background-size: cover;
@@ -20,13 +22,19 @@
         background-attachment: fixed; /* красиво фиксирует фон */
     }
 
+    /* ========================================================= */
     /* Анимации входа блоков (как на странице редактирования профиля) */
+    /* ========================================================= */
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
     }
     @keyframes fadeInLeft {
         from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeInRight {
+        from { opacity: 0; transform: translateX(20px); }
         to { opacity: 1; transform: translateX(0); }
     }
 
@@ -38,12 +46,22 @@
         opacity: 0;
         animation: fadeInLeft 0.9s ease-out forwards;
     }
+    .animate-fade-in-right {
+        opacity: 0;
+        animation: fadeInRight 0.9s ease-out forwards;
+    }
+
+    /* ========================================================= */
+    /* Стили для ВИДЖЕТА month-calendar от FULLCALENDAR */
+    /* ========================================================= */
 
     .planned-session-calendar .fc {
+        /* Общий шрифт всего month-widget календаря, чтобы визуально он не выбивался из остальной страницы */
         font-family: 'Open Sans', sans-serif;
     }
 
     .planned-session-calendar .fc-toolbar-title {
+        /* Заголовок календаря с названием текущего месяца и года, например "март 2026" */
         color: #312e81;
         font-size: 1.1rem;
         font-weight: 800;
@@ -51,6 +69,7 @@
     }
 
     .planned-session-calendar .fc-button {
+        /* Кнопки переключения месяцев "назад / вперед" в шапке виджета календаря */
         background: #eef2ff;
         border: none;
         color: #4338ca;
@@ -59,17 +78,20 @@
 
     .planned-session-calendar .fc-button:hover,
     .planned-session-calendar .fc-button:focus {
+        /* Состояние hover/focus для кнопок переключения месяцев, чтобы клиент видел отклик интерфейса */
         background: #c7d2fe;
         color: #312e81;
         box-shadow: none;
     }
 
     .planned-session-calendar .fc-daygrid-day-number {
+        /* Цифра дня внутри ячейки месяца, например "14", "15", "16". */
         color: #27272a;
         font-weight: 700;
     }
 
     .planned-session-calendar .planned-session-count-badge {
+        /* Круглый badge с количеством встреч в конкретный день месяца */
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -127,9 +149,9 @@
 
         <!-- ===== Отображение списка запланированных встреч ===== -->
         {% if planned_events %}
-            <div class="animate-fade-in-up grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
 
-                <div class="xl:col-span-8 space-y-5">
+                <div class="xl:col-span-8 space-y-5 animate-fade-in-up">
                     {% for item in planned_events %}
                         <article class="rounded-3xl border border-indigo-100 bg-white/80 p-6 shadow-sm backdrop-blur-md">
                             <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -207,7 +229,7 @@
                     {% endfor %}
                 </div>
 
-                <aside class="xl:col-span-4 planned-session-calendar">
+                <aside class="xl:col-span-4 animate-fade-in-right planned-session-calendar">
                     <div class="rounded-3xl border border-indigo-100 bg-white/85 p-5 shadow-sm backdrop-blur-md">
                         <div class="mb-4">
                             <h2 class="text-2xl font-bold text-indigo-900">Календарь встреч</h2>
