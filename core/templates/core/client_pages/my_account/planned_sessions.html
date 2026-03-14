@@ -216,10 +216,11 @@
                                     </div>
                                     <div class="h-10 w-px bg-zinc-200 block md:hidden"></div>
                                     <div class="md:mt-4 text-center">
-                                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-zinc-200
+                                        <div class="inline-flex flex-col items-center px-3 py-2 bg-white border border-zinc-200
                                         rounded-lg shadow-sm {% if item.is_today %}session-today-badge-pulse{% endif %}">
-                                            <div class="{% if item.is_today %}{% else %}{% endif %}"></div>
-                                            <span class="text-xs font-bold text-zinc-700">{{ item.display_time_range }}</span>
+                                            <span class="text-xs font-bold text-zinc-700 leading-none">{{ item.display_start_time }}</span>
+                                            <span class="text-[10px] font-black text-indigo-400 leading-none my-1">-</span>
+                                            <span class="text-xs font-bold text-zinc-700 leading-none">{{ item.display_end_time }}</span>
                                         </div>
                                     </div>
                                 </div>

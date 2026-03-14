@@ -193,6 +193,8 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
                     ),
                     "display_date": slot_display_data.get("display_date"),
                     "display_day_key": slot_display_data.get("display_day_key"),
+                    "display_start_time": slot_display_data.get("display_start_time"),
+                    "display_end_time": slot_display_data.get("display_end_time"),
                     "display_time_range": slot_display_data.get("display_time_range"),
                     "display_month_short": slot_display_data.get("display_month_short"),
                     "display_day_number": slot_display_data.get("display_day_number"),

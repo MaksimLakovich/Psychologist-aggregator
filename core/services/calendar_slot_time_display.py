@@ -14,6 +14,8 @@ def build_calendar_slot_time_display(*, slot, client_timezone) -> dict:
     Возвращает только финальные display-поля:
         - display_date: дата встречи в формате для UI;
         - display_day_key: ключ дня для month-widget календаря;
+        - display_start_time / display_end_time: отдельные значения начала и конца для карточек,
+          где время нужно показывать по строкам;
         - display_time_range: строка времени начала и конца встречи;
         - display_month_short / display_day_number / display_weekday: части даты для карточек и badge-блоков;
         - display_client_timezone: timezone клиента для подписи в интерфейсе;
@@ -31,6 +33,8 @@ def build_calendar_slot_time_display(*, slot, client_timezone) -> dict:
     return {
         "display_date": start_client_tz.strftime("%d.%m.%Y"),
         "display_day_key": start_client_tz.strftime("%Y-%m-%d"),
+        "display_start_time": start_client_tz.strftime("%H:%M"),
+        "display_end_time": end_client_tz.strftime("%H:%M"),
         "display_time_range": f"{start_client_tz.strftime('%H:%M')} - {end_client_tz.strftime('%H:%M')}",
         "display_month_short": date_format(start_client_tz, "E"),
         "display_day_number": date_format(start_client_tz, "d"),

@@ -2046,6 +2046,11 @@ input:checked + .toggle-bg {
   margin-bottom: 1rem;
 }
 
+.my-1 {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
 .-mt-10 {
   margin-top: -2.5rem;
 }
