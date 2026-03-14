@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Min, Prefetch
+from django.db.models import Min, Prefetch, Q
 from django.utils import timezone
 from django.views.generic import TemplateView
 
@@ -51,7 +51,15 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
             # Зачем это нужно:
             #   - у события может быть несколько слотов;
             #   - для списка "Запланированные" нам нужно уметь стабильно сортировать событие по самому раннему слоту
-            .annotate(first_slot_start=Min("slots__start_datetime"))
+            .annotate(
+                # Сортируем список не по "самому первому слоту события в истории",
+                # а по ближайшему еще актуальному слоту, который реально должен быть показан клиенту
+                # на экране "Запланированные".
+                first_slot_start=Min(
+                    "slots__start_datetime",
+                    filter=Q(slots__status__in=["planned", "started"]),
+                )
+            )
             # prefetch_related(...) заранее подгружает связанные данные отдельными SQL-запросами,
             # чтобы потом в цикле по событиям не делать N дополнительных запросов к БД (исключаем проблему N+1)
             .prefetch_related(
@@ -117,7 +125,13 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
             # TODO: Для будущих multi-slot событий нужно изменить эту строку и логику страницы в целом,
             #  так как сейчас "эта страница = список событий", а если нам нужно показывать multi-slot события,
             #  то, наверное, логично показывать каждый будущий урок (slot) отдельно, а не общее event для всех уроков
-            primary_slot = next(iter(active_slots), None)
+            slot = next(iter(active_slots), None)
+
+            # Если по данным события не найдено ни одного актуального слота,
+            # то карточку лучше вообще не выводить на экран "Запланированные":
+            # иначе шаблон начнет маскировать проблему дефолтами вместо реальных данных.
+            if slot is None:
+                continue
 
             # Находим второго участника встречи, чтобы показать клиенту с кем именно у него назначена сессия.
             # Здесь self.request.user - это сам клиент, поэтому ищем участника с другим user_id.
@@ -148,10 +162,10 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
             #   - подпись timezone клиента
             slot_display_data = (
                 build_calendar_slot_time_display(
-                    slot=primary_slot,
+                    slot=slot,
                     client_timezone=client_timezone,
                 )
-                if primary_slot
+                if slot
                 else {}
             )
             recurrence_rule = next(iter(event.recurrences.all()), None)
@@ -160,20 +174,21 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
             planned_events.append(
                 {
                     "event": event,
-                    # Даем шаблону понятный alias "slot", потому что карточка на странице показывает
-                    # именно основной временной интервал встречи, а не все внутренние связи модели.
-                    "slot": primary_slot,
-                    "primary_slot": primary_slot,
+                    "slot": slot,
                     "counterpart_user": counterpart_user,
                     "counterpart_full_name": counterpart_full_name or "Имя не указано",
                     "specialist_profile": specialist_profile,
-                    "specialist_photo_url": counterpart_user.avatar_url,
+                    "specialist_photo_url": (
+                        counterpart_user.avatar_url
+                        if counterpart_user
+                        else "/static/images/menu/user-circle.svg"
+                    ),
                     "visibility_display": event.get_visibility_display() or "Приватная",
                     "event_type_display": event.get_event_type_display() or "Индивидуальная сессия",
                     "status_display": event.get_status_display() or "Запланировано",
                     "duration_minutes": (
-                        int((primary_slot.end_datetime - primary_slot.start_datetime).total_seconds() // 60)
-                        if primary_slot
+                        int((slot.end_datetime - slot.start_datetime).total_seconds() // 60)
+                        if slot
                         else None
                     ),
                     "display_date": slot_display_data.get("display_date"),
@@ -208,8 +223,8 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
         calendar_events = []
 
         for item in planned_events:
-            primary_slot = item.get("primary_slot")
-            if primary_slot is None:
+            slot = item.get("slot")
+            if slot is None:
                 continue
 
             # Формируем минимальный набор данных, который нужен именно JS-календарю.
@@ -254,7 +269,12 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
         # чтобы календарь открывался не "по серверу", а по фактическому текущему времени клиента
         context["calendar_widget_initial_date"] = timezone.localtime(
             timezone.now(),
-            getattr(self.request.user, "timezone", None),
+            getattr(self.request.user, "timezone", None) or timezone.get_default_timezone(),
         ).strftime("%Y-%m-%d")
+
+        # Подписываем календарный виджет тем же effective timezone, по которому уже показаны сами карточки встреч.
+        context["calendar_widget_timezone_display"] = str(
+            getattr(self.request.user, "timezone", None) or timezone.get_default_timezone()
+        )
 
         return context

@@ -185,17 +185,17 @@
                                 items-center justify-center gap-4 md:gap-1">
                                     <div class="text-center">
                                         <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">
-                                            {{ item.display_month_short|default:"МЕСЯЦ" }} </p>
+                                            {{ item.display_month_short }} </p>
                                         <p class="text-4xl font-black text-zinc-900 leading-none tracking-tighter">
-                                            {{ item.display_day_number|default:"00" }} </p>
+                                            {{ item.display_day_number }} </p>
                                         <p class="text-xs font-semibold text-zinc-400 uppercase tracking-wide mt-1.5">
-                                            {{ item.display_weekday|default:"ДЕНЬ" }} </p>
+                                            {{ item.display_weekday }} </p>
                                     </div>
                                     <div class="h-10 w-px bg-zinc-200 block md:hidden"></div>
                                     <div class="md:mt-4 text-center">
                                         <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-zinc-200 rounded-lg shadow-sm">
                                             <div class="w-1.5 h-1.5 rounded-full {% if item.is_today %}bg-emerald-500 animate-pulse{% else %}bg-indigo-500{% endif %}"></div>
-                                            <span class="text-xs font-bold text-zinc-700">{{ item.display_time_range|default:"00:00" }}</span>
+                                            <span class="text-xs font-bold text-zinc-700">{{ item.display_time_range }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -204,10 +204,10 @@
 
                                     <div class="flex flex-wrap items-center gap-2 mb-3">
                                         <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-[10px] font-bold uppercase tracking-widest rounded">
-                                            {{ item.event_type_display|default:"Сессия" }}
+                                            {{ item.event_type_display }}
                                         </span>
                                         <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-[10px] font-bold uppercase tracking-widest rounded">
-                                            <span class="opacity-50">Длительность:</span> {{ item.duration_minutes|default:"50" }} мин
+                                            <span class="opacity-50">Длительность:</span> {{ item.duration_minutes }} мин
                                         </span>
                                     </div>
 
@@ -270,7 +270,7 @@
                         <div class="mb-4">
                             <h2 class="text-2xl font-bold text-indigo-900">Календарь встреч</h2>
                             <p class="text-xs font-medium text-zinc-500 mt-1">
-                            Часовой пояс: {{ user.timezone|default:"UTC" }}
+                            Часовой пояс: {{ calendar_widget_timezone_display }}
                             </p>
                         </div>
 
