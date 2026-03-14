@@ -3587,6 +3587,32 @@ input:checked + .toggle-bg {
   background-color: rgb(24 24 27 / var(--tw-bg-opacity, 1));
 }
 
+.bg-indigo-300 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(180 198 252 / var(--tw-bg-opacity, 1));
+}
+
+.bg-slate-300 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(203 213 225 / var(--tw-bg-opacity, 1));
+}
+
+.bg-indigo-600\/25 {
+  background-color: rgb(88 80 236 / 0.25);
+}
+
+.bg-indigo-600\/15 {
+  background-color: rgb(88 80 236 / 0.15);
+}
+
+.bg-indigo-600\/10 {
+  background-color: rgb(88 80 236 / 0.1);
+}
+
+.bg-indigo-500\/10 {
+  background-color: rgb(104 117 245 / 0.1);
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
@@ -3614,6 +3640,12 @@ input:checked + .toggle-bg {
 .from-transparent {
   --tw-gradient-from: transparent var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(0 0 0 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.from-indigo-100 {
+  --tw-gradient-from: #E5EDFF var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(229 237 255 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
@@ -4330,6 +4362,11 @@ input:checked + .toggle-bg {
 .text-red-500 {
   --tw-text-opacity: 1;
   color: rgb(240 82 82 / var(--tw-text-opacity, 1));
+}
+
+.text-zinc-300 {
+  --tw-text-opacity: 1;
+  color: rgb(212 212 216 / var(--tw-text-opacity, 1));
 }
 
 .line-through {
