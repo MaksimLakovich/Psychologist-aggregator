@@ -35,11 +35,11 @@ def normalize_user_timezone(*, timezone_value):
     return ZoneInfo(str(timezone_value))
 
 
-def build_booking_therapy_session_title(*, specialist_full_name: str, consultation_type: str) -> str:
-    """Формирует понятное пользователю название терапевтической сессии."""
-    normalized_specialist_name = specialist_full_name.strip() or "специалистом"
-
-    if consultation_type == "couple":
-        return f"Парная сессия с {normalized_specialist_name}"
-
-    return f"Индивидуальная сессия с {normalized_specialist_name}"
+# def build_booking_therapy_session_title(*, specialist_full_name: str, consultation_type: str) -> str:
+#     """Формирует понятное пользователю название терапевтической сессии."""
+#     normalized_specialist_name = specialist_full_name.strip() or "специалистом"
+#
+#     if consultation_type == "couple":
+#         return f"Парная сессия с {normalized_specialist_name}"
+#
+#     return f"Индивидуальная сессия с {normalized_specialist_name}"

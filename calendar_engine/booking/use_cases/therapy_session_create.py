@@ -11,7 +11,6 @@ from calendar_engine.application.use_cases.specialist_schedule import \
 from calendar_engine.booking.exceptions import \
     CreateTherapySessionValidationError
 from calendar_engine.booking.services import (
-    build_booking_therapy_session_title,
     get_specialist_profile_for_booking_therapy_session,
     normalize_user_timezone)
 from calendar_engine.booking.validators import (
@@ -167,22 +166,22 @@ class CreateTherapySessionUseCase:
             slot_end_datetime=slot_end_datetime,
         )
 
-        # 10) Формируем понятный заголовок события для календаря клиента.
-        # Название должно сразу объяснять пользователю, что это за встреча и с каким специалистом она связана.
-        specialist_full_name = (
-            f"{specialist_user.first_name} {specialist_user.last_name}".strip()
-            or specialist_user.email
-        )
-        event_title = build_booking_therapy_session_title(
-            specialist_full_name=specialist_full_name,
-            consultation_type=consultation_type,
-        )
+        # # 10) Формируем понятный заголовок события для календаря клиента.
+        # # Название должно сразу объяснять пользователю, что это за встреча и с каким специалистом она связана.
+        # specialist_full_name = (
+        #     f"{specialist_user.first_name} {specialist_user.last_name}".strip()
+        #     or specialist_user.email
+        # )
+        # event_title = build_booking_therapy_session_title(
+        #     specialist_full_name=specialist_full_name,
+        #     consultation_type=consultation_type,
+        # )
 
         # 11) Создаем корневую сущность встречи - CalendarEvent.
         # Это "карточка" самой терапевтической сессии, внутри которой потом уже живут слот и участники.
         event = CalendarEvent(
             creator=client_user,
-            title=event_title,
+            title="Терапевтическая сессия с психологом",  # title=event_title
             description="",
             event_type="session_couple" if consultation_type == "couple" else "session_individual",
             status="planned",

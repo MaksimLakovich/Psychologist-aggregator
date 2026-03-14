@@ -52,6 +52,34 @@
     }
 
     /* ========================================================= */
+    /* Мягкая пульсация блока времени для сегодняшней сессии */
+    /* ========================================================= */
+    @keyframes sessionTodayBadgePulse {
+        0%, 100% {
+            transform: scale(1);
+            border-color: rgba(16, 185, 129, 0.20);
+            background-color: rgba(255, 255, 255, 0.96);
+            box-shadow:
+                0 1px 2px rgba(0, 0, 0, 0.06),
+                0 0 0 0 rgba(16, 185, 129, 0.00);
+        }
+        50% {
+            transform: scale(1.015);
+            border-color: rgba(16, 185, 129, 0.32);
+            background-color: rgba(236, 253, 245, 0.98);
+            box-shadow:
+                0 6px 18px rgba(16, 185, 129, 0.12),
+                0 0 0 4px rgba(16, 185, 129, 0.06);
+        }
+    }
+
+    .session-today-badge-pulse {
+        position: relative;
+        animation: sessionTodayBadgePulse 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        will-change: transform, box-shadow, border-color, background-color;
+    }
+
+    /* ========================================================= */
     /* Стили для ВИДЖЕТА month-calendar от FULLCALENDAR */
     /* ========================================================= */
 
@@ -192,8 +220,9 @@
                                     </div>
                                     <div class="h-10 w-px bg-zinc-200 block md:hidden"></div>
                                     <div class="md:mt-4 text-center">
-                                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-zinc-200 rounded-lg shadow-sm">
-                                            <div class="w-1.5 h-1.5 rounded-full {% if item.is_today %}bg-emerald-500 animate-pulse{% else %}bg-indigo-500{% endif %}"></div>
+                                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-zinc-200
+                                        rounded-lg shadow-sm {% if item.is_today %}session-today-badge-pulse{% endif %}">
+                                            <div class="{% if item.is_today %}{% else %}{% endif %}"></div>
                                             <span class="text-xs font-bold text-zinc-700">{{ item.display_time_range }}</span>
                                         </div>
                                     </div>
