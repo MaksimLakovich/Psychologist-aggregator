@@ -198,6 +198,17 @@
                                 class="relative bg-zinc-50 rounded-[1.5rem] border border-zinc-50 hover:border-zinc-100
                                 shadow-sm hover:scale-[1.04] transition-all duration-300 overflow-hidden">
 
+                            <!-- На новой встрече добавляем временный бейдж - НОВАЯ ЗАПИСЬ -->
+                            {% if item.is_recently_created %}
+                                <div class="absolute -top-3 left-8 inline-flex items-center gap-1.5 rounded-full bg-gray-900 px-3 py-1 shadow-sm">
+                                    <span class="relative flex h-2 w-2">
+                                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                    </span>
+                                    <span class="text-[10px] font-bold text-white uppercase tracking-widest">Новая запись</span>
+                                </div>
+                            {% endif %}
+
                             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-indigo-600 to-indigo-500"></div>
 
                             <div class="flex flex-col md:flex-row">
