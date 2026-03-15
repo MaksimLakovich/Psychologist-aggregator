@@ -62,6 +62,6 @@ class EditClientProfilePageView(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         """Сохраняем данные профиля и выводим сообщение."""
         form.save()
-        messages.success(self.request, "Данные профиля обновлены.")
+        messages.success(self.request, "Данные профиля обновлены!")
 
         return super().form_valid(form)

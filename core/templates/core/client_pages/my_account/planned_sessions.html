@@ -226,7 +226,7 @@
 
                 <div class="xl:col-span-8 space-y-5 pr-4 animate-fade-in-up">
                     {% for item in planned_events %}
-                        <article class="relative">
+                        <article class="relative" {% if item.is_recently_created %}data-recently-created-session{% endif %}>
 
                             <!-- На новой встрече добавляем временный бейдж - НОВАЯ ЗАПИСЬ -->
                             {% if item.is_recently_created %}
@@ -401,5 +401,6 @@
 
 <script type="module" src="{% static 'js/calendar_widgets/planned_sessions_month_calendar.js' %}"></script>
 <script type="module" src="{% static 'js/modules/auto_hide_message.js' %}"></script>
+<script type="module" src="{% static 'js/calendar_widgets/planned_sessions_ui.js' %}"></script>
 
 {% endblock %}
