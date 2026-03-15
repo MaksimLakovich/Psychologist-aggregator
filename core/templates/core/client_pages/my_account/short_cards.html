@@ -47,7 +47,7 @@
 
     <!-- 3) Плашки: диплом + опыт -->
     <div class="mt-5 flex flex-wrap items-center justify-center gap-2">
-        <div class="inline-flex items-center gap-2 rounded-2xl group-hover:bg-indigo-100/75 px-3 py-1.5 bg-slate-200/40 border border-transparent group-hover:border-indigo-100 transition-all">
+        <div class="inline-flex items-center gap-2 rounded-2xl px-3 py-1.5 bg-slate-200/40 border border-transparent transition-all">
             <img src="{% static 'images/menu/education-icon.svg' %}"
                  alt="education_icon"
                  class="h-5.5 w-5.5 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
@@ -56,7 +56,7 @@
                 {% if profile.is_all_education_verified %}Диплом проверен{% else %}Документы в работе{% endif %}
             </span>
         </div>
-        <div class="inline-flex items-center gap-2 rounded-2xl group-hover:bg-indigo-100/75 px-3 py-1.5 bg-slate-200/40 border border-transparent group-hover:border-indigo-100 transition-all">
+        <div class="inline-flex items-center gap-2 rounded-2xl px-3 py-1.5 bg-slate-200/40 border border-transparent transition-all">
             <img src="{% static 'images/psychologist_profile/seal-check.svg' %}"
                  alt="check_icon"
                  class="h-5.5 w-5.5 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
@@ -68,7 +68,7 @@
     </div>
 
     <!-- 4) Стоимость -->
-    <div class="mt-5 rounded-2xl p-4 border border-slate-100 group-hover:bg-indigo-100/75 group-hover:border-indigo-100 transition-all">
+    <div class="mt-5 rounded-2xl p-4 group-hover:bg-slate-200/50 transition-all">
         {% if catalog_selected_consultation_type == "couple" %}
             <div class="flex justify-between items-center">
                 <span class="text-sm font-semibold text-slate-500 tracking-wide">Парная сессия · 1.5 часа</span>
@@ -125,7 +125,7 @@
                     <div class="flex flex-wrap ml-3 gap-1.5">
                         {% for method in methods|slice:":3" %}
                             <span
-                                    class="px-3 py-1.5 bg-slate-200/40 border border-transparent text-slate-600 text-base font-medium rounded-2xl transition-all group-hover:bg-indigo-100/75 group-hover:border-indigo-100">
+                                    class="px-3 py-1.5 bg-slate-200/40 border border-transparent text-slate-600 text-base font-medium rounded-2xl transition-all">
                                 {{ method.name }}
                             </span>
                         {% endfor %}
@@ -151,7 +151,7 @@
                     <div class="flex flex-wrap ml-3 gap-1.5">
                         {% for topic in topics|slice:":4" %}
                             <span
-                                    class="px-3 py-1.5 bg-slate-200/40 border border-transparent text-slate-600 text-base font-medium rounded-2xl transition-all group-hover:bg-indigo-100/75 group-hover:border-indigo-100">
+                                    class="px-3 py-1.5 bg-slate-200/40 border border-transparent text-slate-600 text-base font-medium rounded-2xl transition-all">
                                 {{ topic.name }}
                             </span>
                         {% endfor %}
@@ -197,8 +197,8 @@
             data-catalog-detail-link
             data-profile-slug="{{ profile.slug }}"
             class="inline-flex w-full items-center justify-center rounded-[1.5rem] bg-slate-400 px-6 py-4
-            text-sm font-black tracking-widest text-white uppercase transition-all duration-300
-            group-hover:bg-indigo-600 hover:shadow-xl hover:shadow-indigo-200 active:scale-[0.98]"
+            text-sm font-black tracking-widest text-white uppercase transition-all duration-300 hover:scale-[1.02]
+            group-hover:bg-indigo-600 active:scale-[0.98]"
         >
             Подробнее о психологе
         </a>
