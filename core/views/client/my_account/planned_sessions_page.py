@@ -3,6 +3,7 @@ from django.db.models import Min, Prefetch, Q
 from django.utils import timezone
 from django.views.generic import TemplateView
 
+from calendar_engine.booking.services import build_specialist_live_indicator
 from calendar_engine.models import CalendarEvent, EventParticipant, TimeSlot
 from core.services.calendar_slot_time_display import build_calendar_slot_time_display
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
@@ -92,6 +93,15 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
         )
 
         planned_events = []
+
+        # Это локальный in-memory cache на время выполнения одного request.
+        # Например:
+        #   - у клиента 3 встречи;
+        #   - 2 из них с психологом Анной;
+        #   - 1 с психологом Олегом.
+        # Чтоб не считать для Анны индикатор 2 раза использую specialist_indicator_cache = {}
+        specialist_indicator_cache = {}
+
         # Берем id только что созданной встречи из session и сразу удаляем его оттуда.
         # Это нужно для одноразовой подсветки:
         #   - после redirect клиент видит список своих сессий;
@@ -150,6 +160,13 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
                 if counterpart_user
                 else None
             )
+            specialist_profile_id = getattr(specialist_profile, "pk", None)
+            if specialist_profile_id not in specialist_indicator_cache:
+                # Для списка встреч считаем specialist_indicator по каждому специалисту только один раз,
+                # даже если у клиента с ним несколько событий в выборке.
+                specialist_indicator_cache[specialist_profile_id] = build_specialist_live_indicator(
+                    specialist_profile=specialist_profile,
+                )
             counterpart_full_name = (
                 f"{counterpart_user.first_name} {counterpart_user.last_name}".strip()
                 if counterpart_user
@@ -178,6 +195,7 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
                     "counterpart_user": counterpart_user,
                     "counterpart_full_name": counterpart_full_name or "Имя не указано",
                     "specialist_profile": specialist_profile,
+                    "specialist_live_indicator": specialist_indicator_cache[specialist_profile_id],
                     "specialist_photo_url": (
                         counterpart_user.avatar_url
                         if counterpart_user

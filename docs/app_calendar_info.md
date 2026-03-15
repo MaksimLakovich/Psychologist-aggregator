@@ -237,7 +237,7 @@ calendar_engine/
     │    │    ├── therapy_session_create.py           # Прикладной сценарий для клиента по созданию встречи (терапевтическая сессия) со специалистом
     │    │    └── ...
     │    ├── exceptions.py               # Кастомные исключения для booking-модуля
-    │    ├── services.py                 # Вспомогательные функции
+    │    ├── services.py                 # Вспомогательные функции (build_booking_therapy_session_title, get_specialist_profile_for_booking_therapy_session, build_specialist_live_indicator и прочее)
     │    ├── validators.py               # Кастомные валидаторы для booking-flow
     │    ├── throttles.py
     │    └── ...
@@ -1133,6 +1133,13 @@ calendar_engine/booking/use_cases/
 - `normalize_user_timezone(timezone_value)` - Нормализует timezone пользователя к объекту tzinfo.
 
 - `build_booking_therapy_session_title(specialist_full_name, consultation_type)` - Формирует понятное пользователю название терапевтической сессии.
+
+- `_get_effective_time_windows_for_day(rule, exceptions, day)` - Возвращает итоговые рабочие окна специалиста на конкретный календарный день для build_specialist_live_indicator().
+
+- `build_specialist_live_indicator(specialist_profile)` - Возвращает готовый display-контракт индикатора статуса специалиста для UI:
+  - **красный без ping**: специалист сейчас вне рабочего дня/времени;
+  - **зеленый с ping**: специалист сейчас в рабочем окне и свободен;
+  - **желтый с ping**: специалист сейчас в рабочем окне, но у него уже идет встреча.
 
 ---
 
