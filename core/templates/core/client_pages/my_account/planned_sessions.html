@@ -52,6 +52,38 @@
     }
 
     /* ========================================================= */
+    /* Через несколько секунд автоматически скрываем системное уведомление об успешной операции */
+    /* ========================================================= */
+    .auto-dismiss-message {
+        overflow: hidden;
+        max-height: 12rem;
+        transition:
+            opacity 0.55s ease,
+            transform 0.55s ease,
+            filter 0.55s ease;
+    }
+
+    .auto-dismiss-message.is-fading {
+        opacity: 0;
+        transform: translateY(-6px);
+        filter: blur(2px);
+    }
+
+    .auto-dismiss-message.is-collapsing {
+        max-height: 0;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        border-width: 0;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        transition:
+            max-height 0.65s ease,
+            padding 0.65s ease,
+            margin 0.65s ease,
+            border-width 0.65s ease;
+    }
+
+    /* ========================================================= */
     /* Мягкая пульсация текста времени для сегодняшней сессии */
     /* ========================================================= */
     @keyframes sessionTodayTimePulse {
@@ -153,7 +185,7 @@
 {% block content %}
 
 
-<section class="relative overflow-hidden min-h-screen bg-white/80 backdrop-blur-[2px] w-full">
+<section class="relative min-h-screen bg-white/80 backdrop-blur-[2px] w-full">
 
     <!-- Фоновое ЛОГО в нижний правый угол -->
     <div class="hidden lg:block absolute bottom-10 right-10 p-8 pointer-events-none z-0 select-none opacity-10 blur-[2px]">
@@ -169,7 +201,7 @@
         {% if messages %}
             <div class="mb-8 space-y-3 max-w-3xl">
                 {% for message in messages %}
-                    <div class="rounded-2xl bg-emerald-50 p-6 text-emerald-700 border border-emerald-100 shadow-sm animate-fade-in-up">
+                    <div data-auto-dismiss-message class="auto-dismiss-message rounded-2xl bg-emerald-50 p-6 text-emerald-700 border border-emerald-100 shadow-sm animate-fade-in-up">
                         <p class="text-base font-semibold tracking-wide">{{ message }}</p>
                     </div>
                 {% endfor %}
@@ -194,24 +226,20 @@
 
                 <div class="xl:col-span-8 space-y-5 pr-4 animate-fade-in-up">
                     {% for item in planned_events %}
-                        <article
-                                class="relative bg-zinc-50 rounded-[1.5rem] border border-zinc-50 hover:border-zinc-100
-                                shadow-sm hover:scale-[1.04] transition-all duration-300 overflow-hidden">
+                        <article class="relative">
 
                             <!-- На новой встрече добавляем временный бейдж - НОВАЯ ЗАПИСЬ -->
                             {% if item.is_recently_created %}
-                                <div class="absolute -top-3 left-8 inline-flex items-center gap-1.5 rounded-full bg-gray-900 px-3 py-1 shadow-sm">
-                                    <span class="relative flex h-2 w-2">
-                                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                    </span>
+                                <div class="absolute -top-3 left-8 z-20 inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1 shadow-sm">
                                     <span class="text-[10px] font-bold text-white uppercase tracking-widest">Новая запись</span>
                                 </div>
                             {% endif %}
 
-                            <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-indigo-600 to-indigo-500"></div>
+                            <div class="relative bg-zinc-50 rounded-[1.5rem] border border-zinc-50 hover:border-zinc-100
+                                shadow-sm hover:scale-[1.02] transition-all duration-300 overflow-hidden">
+                                <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-indigo-600 to-indigo-500"></div>
 
-                            <div class="flex flex-col md:flex-row">
+                                <div class="flex flex-col md:flex-row">
 
                                 <!-- ЛЕВАЯ часть карточки встречи -->
                                 <div class="md:w-36 bg-indigo-200/50 border-b md:border-b-0 md:border-r p-6 flex flex-row md:flex-col items-center md:items-center justify-start gap-4 md:gap-1">
@@ -324,7 +352,7 @@
                 </div>
 
                 <!-- ===== ВИДЖЕТ КАЛЕНДАРЯ ===== -->
-                <aside class="xl:col-span-4 animate-fade-in-right planned-session-calendar">
+                <aside class="xl:col-span-4 lg:sticky lg:top-14 self-start h-fit animate-fade-in-right planned-session-calendar">
                     <div class="rounded-3xl border border-zinc-100 bg-white/25 p-5 shadow-lg backdrop-blur-md">
                         <div class="mb-4">
                             <h2 class="text-xl text-center font-bold text-zinc-700 tracking-wider">Календарь</h2>
@@ -372,5 +400,6 @@
 </section>
 
 <script type="module" src="{% static 'js/calendar_widgets/planned_sessions_month_calendar.js' %}"></script>
+<script type="module" src="{% static 'js/modules/auto_hide_message.js' %}"></script>
 
 {% endblock %}

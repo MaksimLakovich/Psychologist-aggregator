@@ -2012,6 +2012,10 @@ input:checked + .toggle-bg {
   bottom: 100%;
 }
 
+.top-4 {
+  top: 1rem;
+}
+
 .z-0 {
   z-index: 0;
 }
@@ -2373,6 +2377,11 @@ input:checked + .toggle-bg {
 
 .h-2\.5 {
   height: 0.625rem;
+}
+
+.h-fit {
+  height: -moz-fit-content;
+  height: fit-content;
 }
 
 .max-h-0 {
@@ -3019,6 +3028,10 @@ input:checked + .toggle-bg {
 
 .overflow-y-auto {
   overflow-y: auto;
+}
+
+.overflow-x-hidden {
+  overflow-x: hidden;
 }
 
 .overflow-x-scroll {
@@ -6071,6 +6084,14 @@ input:checked + .toggle-bg {
     top: 2rem;
   }
 
+  .lg\:top-24 {
+    top: 6rem;
+  }
+
+  .lg\:top-14 {
+    top: 3.5rem;
+  }
+
   .lg\:order-2 {
     order: 2;
   }
@@ -6252,6 +6273,14 @@ input:checked + .toggle-bg {
 }
 
 @media (min-width: 1280px) {
+  .xl\:sticky {
+    position: sticky;
+  }
+
+  .xl\:top-24 {
+    top: 6rem;
+  }
+
   .xl\:col-span-3 {
     grid-column: span 3 / span 3;
   }
@@ -6270,6 +6299,11 @@ input:checked + .toggle-bg {
 
   .xl\:col-span-8 {
     grid-column: span 8 / span 8;
+  }
+
+  .xl\:h-fit {
+    height: -moz-fit-content;
+    height: fit-content;
   }
 
   .xl\:w-16 {
