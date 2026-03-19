@@ -124,7 +124,9 @@ class TimeSlotAdmin(CreatorAndReadonlyFields):
             - это особенно важно, если в будущем у разных слотов одного события
               состав участников может отличаться.
         """
-        participants = [build_participant_display(participant=participant) for participant in obj.slot_participants.all()]
+        participants = [
+            build_participant_display(participant=participant) for participant in obj.slot_participants.all()
+        ]
         return ", ".join(participants) if participants else "Нет участников"
 
 

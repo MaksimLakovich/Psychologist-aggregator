@@ -5,7 +5,8 @@ from django.views.generic import TemplateView
 
 from calendar_engine.booking.services import build_specialist_live_indicator
 from calendar_engine.models import CalendarEvent, EventParticipant, TimeSlot
-from core.services.calendar_slot_time_display import build_calendar_slot_time_display
+from core.services.calendar_slot_time_display import \
+    build_calendar_slot_time_display
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 
 

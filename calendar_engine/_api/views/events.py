@@ -2,10 +2,14 @@ from django.db.models import Min, Prefetch, Q
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from calendar_engine._api.serializers.events import CreateTherapySessionSerializer, EventListSerializer
-from calendar_engine.booking.exceptions import CreateTherapySessionValidationError
+
+from calendar_engine._api.serializers.events import (
+    CreateTherapySessionSerializer, EventListSerializer)
+from calendar_engine.booking.exceptions import \
+    CreateTherapySessionValidationError
 from calendar_engine.booking.throttles import CreateTherapySessionThrottle
-from calendar_engine.models import CalendarEvent, EventParticipant, RecurrenceRule, TimeSlot
+from calendar_engine.models import (CalendarEvent, EventParticipant,
+                                    RecurrenceRule, TimeSlot)
 
 
 class CalendarSessionListCreateView(generics.ListCreateAPIView):

@@ -2,9 +2,11 @@ from zoneinfo import ZoneInfo
 
 from django.utils import timezone
 
-from calendar_engine.models import AvailabilityException, AvailabilityRule, TimeSlot
+from calendar_engine.booking.exceptions import \
+    CreateTherapySessionValidationError
+from calendar_engine.models import (AvailabilityException, AvailabilityRule,
+                                    TimeSlot)
 from calendar_engine.services import normalize_range
-from calendar_engine.booking.exceptions import CreateTherapySessionValidationError
 from users.models import PsychologistProfile
 
 
