@@ -111,11 +111,11 @@
 
     .planned-session-calendar .fc {
         font-family: inherit;
-        /* Делаем сетку очень мягкой и полупрозрачной */
-        --fc-border-color: rgba(161, 161, 170, 0.2);
+        /* Убираем дефолтную заливку сегодня из переменных, чтобы она не красила td целиком (иначе будут острые углы) */
+        --fc-today-bg-color: transparent;
+        --fc-border-color: rgba(161, 161, 170, 0.25);
         --fc-page-bg-color: transparent;
         --fc-neutral-bg-color: transparent;
-        --fc-today-bg-color: #CDDBFE; /* indigo-200 для "сегодня" */
     }
 
     /* Заголовок календаря с названием текущего месяца и года, например "март 2026" */
@@ -126,8 +126,10 @@
         letter-spacing: -0.02em;
     }
 
-    /* Убираем внешние границы у таблицы для чистоты дизайна */
-    .planned-session-calendar .fc-scrollgrid {
+    /* УБИРАЕМ ВСЕ СТАНДАРТНЫЕ ГРАНИЦЫ У ТАБЛИЦЫ И ЯЧЕЕК */
+    .planned-session-calendar .fc-scrollgrid,
+    .planned-session-calendar .fc-theme-standard td,
+    .planned-session-calendar .fc-theme-standard th {
         border: none !important;
     }
 
@@ -168,26 +170,48 @@
         color: #ffffff !important;
     }
 
-    /* Дни недели (Пн, Вт, Ср...) - делаем их аккуратными и современными */
+    /* Дни недели (Пн, Вт, Ср...) - делаем их аккуратными и современными, без границ, аккуратные */
     .planned-session-calendar .fc-col-header-cell-cushion {
         color: oklch(27.9% 0.041 260.031); /* slate-800 */
         font-size: 0.65rem;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        padding: 0.75rem 0 !important;
+        padding: 0.75rem 0 1rem 0 !important;
     }
 
-    /* Ячейки дней: добавляем плавный hover эффект */
-    .planned-session-calendar .fc-daygrid-day {
-        transition: background-color 0.2s ease;
+    /* СТИЛИЗАЦИЯ САМОЙ ЯЧЕЙКИ (Frame) */
+    /* Вместо td мы стилизуем внутренний контейнер. Это дает возможность сделать gap (margin) и rounded-sm */
+    .planned-session-calendar .fc-daygrid-day-frame {
+        border: 0.25px solid var(--fc-border-color);
+        border-radius: 1rem; /* rounded-sm */
+        margin: 4px; /* Создает эффект плавающих карточек, вместо слипшейся таблицы */
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        min-height: 4.5rem !important; /* Даем чуть больше воздуха по высоте */
+        background-color: transparent;
     }
-    .planned-session-calendar .fc-daygrid-day:hover {
+
+    /* Hover эффект только для активных дней месяца */
+    .planned-session-calendar .fc-daygrid-day:not(.fc-day-other) .fc-daygrid-day-frame:hover {
         background-color: oklch(92.9% 0.013 255.508);
+        border-color: rgba(161, 161, 170, 0.4);
+        transform: translateY(-2px); /* Легкое поднятие карточки */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
     }
 
-    /* Верхняя зона ячейки дня: размещаем номер даты и badge вертикально друг под другом,
-       чтобы счетчик встреч занимал пустое пространство ниже даты, а не вставал с ней в одну строку. */
+    /* Стили для Сегодняшнего дня */
+    .planned-session-calendar .fc-day-today .fc-daygrid-day-frame {
+        background-color: #CDDBFE !important; /* Ваш цвет */
+        border-color: #a5b4fc !important; /* Чуть более яркая граница */
+    }
+
+    /* Приглушаем дни не из текущего месяца (следующий/предыдущий) */
+    .planned-session-calendar .fc-day-other .fc-daygrid-day-frame {
+        border-color: transparent; /* Убираем рамки у чужих дней */
+        opacity: 0.35; /* Делаем их полупрозрачными */
+        background: transparent !important;
+    }
+
     .planned-session-calendar .fc-daygrid-day-top {
         display: flex;
         flex-direction: column;
@@ -195,7 +219,6 @@
         justify-content: flex-start;
         gap: 0.1rem;
         padding-top: 0.25rem;
-        min-height: 3rem;
     }
 
     /* Цифра дня */
@@ -205,6 +228,7 @@
         font-size: 0.875rem;
         padding: 0.2rem 0.5rem 0;
         transition: color 0.2s;
+        text-decoration: none !important; /* Убираем подчеркивание у ссылок */
     }
 
     /* Акцент на сегодняшней дате */
@@ -222,7 +246,7 @@
         min-height: 0 !important;
     }
 
-    /* Круглый badge с градиентом и красивой тенью */
+    /* Круглый badge */
     .planned-session-calendar .planned-session-count-badge {
         display: inline-flex;
         align-items: center;

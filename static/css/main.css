@@ -3116,6 +3116,10 @@ input:checked + .toggle-bg {
   border-radius: 3rem;
 }
 
+.rounded-sm {
+  border-radius: 0.125rem;
+}
+
 .rounded-e-lg {
   border-start-end-radius: 0.5rem;
   border-end-end-radius: 0.5rem;
