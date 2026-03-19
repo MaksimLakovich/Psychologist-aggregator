@@ -1,23 +1,23 @@
 # Справочники для моделей в users/models.py
 GENDER_CHOICES = [
-    ("male", "мужской"),
-    ("female", "женский"),
+    ("male", "Мужской"),
+    ("female", "Женский"),
 ]
 
 LANGUAGE_CHOICES = [
-    ("english", "английский"),
-    ("russian", "русский"),
+    ("english", "Английский"),
+    ("russian", "Русский"),
 ]
 
 THERAPY_FORMAT_CHOICES = [
-    ("online", "удаленно"),
-    ("offline", "встреча"),
-    ("any", "любая"),
+    ("online", "Онлайн встреча"),
+    ("offline", "Личная встреча"),
+    ("any", "Любая"),
 ]
 
 WORK_STATUS_CHOICES = [
-    ("working", "работает"),
-    ("not_working", "не работает"),
+    ("working", "Работает"),
+    ("not_working", "Не работает"),
 ]
 
 AGE_BUCKET_CHOICES = [

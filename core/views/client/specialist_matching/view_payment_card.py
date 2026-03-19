@@ -78,7 +78,7 @@ class ClientAddPaymentCardPageView(SpecialistMatchingLayoutMixin, LoginRequiredM
         #   - по этому id экран понимает, какую из них отметить как "Только что создано".
         self.request.session["last_created_booking_id"] = str(booking_result["event"].id)
 
-        messages.success(self.request, "Сессия успешно записана.")
+        messages.success(self.request, "Сессия успешно записана!")
 
         return super().form_valid(form)
 

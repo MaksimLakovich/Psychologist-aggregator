@@ -37,10 +37,10 @@ EVENT_VISIBILITY_CHOICES = [
 ]
 
 EVENT_SOURCE_CHOICES = [
-    ("internal", "Internal"),
-    ("google", "Google Calendar"),
-    ("apple", "Apple Calendar"),
-    ("outlook", "Outlook"),
+    ("internal", "Сервис ОПОРА"),
+    ("google", "Google календарь"),
+    ("apple", "Apple календарь"),
+    ("outlook", "Outlook календарь"),
 ]
 
 FREQUENCY_RECURRENCE_CHOICES = [
