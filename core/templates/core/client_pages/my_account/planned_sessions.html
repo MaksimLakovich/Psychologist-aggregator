@@ -217,7 +217,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
-        gap: 0.1rem;
+        gap: 0.35rem;
         padding-top: 0.25rem;
     }
 
@@ -272,12 +272,7 @@
 
 <section class="relative min-h-screen bg-white/80 backdrop-blur-[2px] w-full">
 
-    <!-- Фоновое ЛОГО в нижний правый угол -->
-    <div class="hidden lg:block absolute bottom-10 right-10 p-8 pointer-events-none z-0 select-none opacity-10 blur-[2px]">
-        <img src="{% static 'images/menu/opora-base.png' %}"
-             alt=""
-             class="w-80 h-auto">
-    </div>
+
 
     <div class="relative z-10 w-full px-6 sm:px-8 py-10
         {% if show_sidebar %} lg:px-24 {% else %} lg:px-40 xl:px-80 {% endif %}">

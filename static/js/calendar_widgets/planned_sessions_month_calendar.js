@@ -66,6 +66,8 @@ function initPlannedSessionsCalendarWidget() {
 
     const calendar = new FullCalendar.Calendar(calendarContainer, {
         locale: "ru",
+        // Для клиента неделя в кабинетном календаре должна начинаться с понедельника, а не с воскресенья.
+        firstDay: 1,
         initialView: "dayGridMonth",
         initialDate,
         height: "auto",
