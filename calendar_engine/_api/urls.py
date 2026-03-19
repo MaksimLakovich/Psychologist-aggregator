@@ -4,8 +4,7 @@ from calendar_engine._api.views.availability import (
     AvailabilityExceptionDeactivateView, AvailabilityExceptionListCreateView,
     AvailabilityRuleDeactivateView, AvailabilityRuleListCreateView,
     GetDomainSlotsAjaxView, GetSpecialistScheduleAjaxView)
-from calendar_engine._api.views.events import \
-    CalendarTherapySessionListCreateView
+from calendar_engine._api.views.events import CalendarSessionListCreateView
 from calendar_engine.apps import AppCalendarConfig
 
 app_name = AppCalendarConfig.name
@@ -31,9 +30,7 @@ urlpatterns = [
     ),
 
     # Работа с событиями / слотами
-    path(
-        "therapy-sessions/", CalendarTherapySessionListCreateView.as_view(), name="therapy-sessions-list-create"
-    ),
+    path("sessions/", CalendarSessionListCreateView.as_view(), name="sessions-list-create"),
 
     # AJAX-запрос (fetch) на создание и отображение временных слотов и расписания на html-страницах
     path("get-domain-slots/", GetDomainSlotsAjaxView.as_view(), name="get-domain-slots"),

@@ -237,7 +237,7 @@ calendar_engine/
     │    │    ├── therapy_session_create.py           # Прикладной сценарий для клиента по созданию встречи (терапевтическая сессия) со специалистом
     │    │    └── ...
     │    ├── exceptions.py               # Кастомные исключения для booking-модуля
-    │    ├── services.py                 # Вспомогательные функции
+    │    ├── services.py                 # Вспомогательные функции (build_booking_therapy_session_title, get_specialist_profile_for_booking_therapy_session, build_specialist_live_indicator и прочее)
     │    ├── validators.py               # Кастомные валидаторы для booking-flow
     │    ├── throttles.py
     │    └── ...
@@ -383,22 +383,22 @@ calendar_engine/
    Корень агрегата - событие календаря. Может содержать 1 или несколько временных слотов (т.е., если составное событие,
    то будет N-записей с одним ID события и разными ID слотов).
 
-| Поле              | Тип                  | Описание                   |
-|-------------------|----------------------|----------------------------|
-| `id`              | UUID                 | Публичный идентификатор    |
-| `creator`         | FK(AppUser)          | Организатор события        |
-| `title`           | CharField            | Название                   |
-| `description`     | TextField            | Описание                   |
-| `event_type`      | CharField(choices)   | Тип события                |
-| `status`          | CharField(choices)   | Статус                     |
+| Поле                 | Тип                  | Описание                   |
+|----------------------|----------------------|----------------------------|
+| `id`                 | UUID                 | Публичный идентификатор    |
+| `creator`            | FK(AppUser)          | Организатор события        |
+| `title`              | CharField            | Название                   |
+| `description`        | TextField            | Описание                   |
+| `event_type`         | CharField(choices)   | Тип события                |
+| `status`             | CharField(choices)   | Статус                     |
 | `cancel_reason_type` | CharField(choices)   | Тип причины отмены события |
-| `cancel_reason`   | TextField            | Причина отмены             |
-| `visibility`      | CharField(choices)   | Видимость                  |
-| `capacity`        | PositiveSmallInteger | Лимит участников           |
-| `is_recurring`    | Boolean              | Повторяющееся              |
-| `previous_event`  | FK(self)             | Связь при переносе         |
-| `source`          | CharField            | Источник                   |
-| `external_id`     | CharField            | ID во внешнем календаре    |
+| `cancel_reason`      | TextField            | Причина отмены             |
+| `visibility`         | CharField(choices)   | Видимость                  |
+| `capacity`           | PositiveSmallInteger | Лимит участников           |
+| `is_recurring`       | Boolean              | Повторяющееся              |
+| `previous_event`     | FK(self)             | Связь при переносе         |
+| `source`             | CharField            | Источник                   |
+| `external_id`        | CharField            | ID во внешнем календаре    |
 
 3. Модель `RecurrenceRule`:  
    Правила для повторяющегося события.
@@ -1134,6 +1134,13 @@ calendar_engine/booking/use_cases/
 
 - `build_booking_therapy_session_title(specialist_full_name, consultation_type)` - Формирует понятное пользователю название терапевтической сессии.
 
+- `_get_effective_time_windows_for_day(rule, exceptions, day)` - Возвращает итоговые рабочие окна специалиста на конкретный календарный день для build_specialist_live_indicator().
+
+- `build_specialist_live_indicator(specialist_profile)` - Возвращает готовый display-контракт индикатора статуса специалиста для UI:
+  - **красный без ping**: специалист сейчас вне рабочего дня/времени;
+  - **зеленый с ping**: специалист сейчас в рабочем окне и свободен;
+  - **желтый с ping**: специалист сейчас в рабочем окне, но у него уже идет встреча.
+
 ---
 
 ### calendar_engine/booking/validators.py:
@@ -1157,13 +1164,16 @@ calendar_engine/booking/use_cases/
 ### calendar_engine/_api/serializers/:
 
 - Рабочее расписание специалиста (правило рабочего времени / исключения):
-  - `AvailabilityRuleTimeWindowSerializer` - временное окно доступности специалиста внутри рабочего дня в AvailabilityRule (например, "с 09:00 до 18:00")
-  - `AvailabilityRuleSerializer` - рабочее расписание специалиста (правило доступности, например: Пн-Пт, с набором рабочих окон внутри дня)
-  - `AvailabilityExceptionTimeWindowSerializer` - переопределенное временное окно доступности внутри рабочего дня из AvailabilityException
-  - `AvailabilityExceptionSerializer` - исключение из рабочего расписания психолога
+  - **availability.py/**`AvailabilityRuleTimeWindowSerializer` - временное окно доступности специалиста внутри рабочего дня в AvailabilityRule (например, "с 09:00 до 18:00")
+  - **availability.py/**`AvailabilityRuleSerializer` - рабочее расписание специалиста (правило доступности, например: Пн-Пт, с набором рабочих окон внутри дня)
+  - **availability.py/**`AvailabilityExceptionTimeWindowSerializer` - переопределенное временное окно доступности внутри рабочего дня из AvailabilityException
+  - **availability.py/**`AvailabilityExceptionSerializer` - исключение из рабочего расписания психолога
 
 - Терапевтические сессии:
-  - `CreateTherapySessionSerializer` - создание встречи между клиентом и специалистом (терапевтическая сессия).
+  - **events.py/**`CreateTherapySessionSerializer` - создание встречи между клиентом и специалистом (терапевтическая сессия). На текущем этапе это тонкая HTTP-обертка над CreateTherapySessionUseCase, чтобы web-flow и API использовали одну и ту же бизнес-логику.
+  - **events.py/**`EventSlotSerializer` - получение slot внутри события (нужен для GET-ответа, чтобы клиент API видел все временные интервалы события).
+  - **events.py/**`EventParticipantSerializer` - получение participant внутри события (нужен для GET-ответа, чтобы клиент API видел состав участников, их роли и текущие статусы внутри события).
+  - **events.py/**`EventListSerializer` - получение списка всех событий пользователя.
 
 ### 2. КОНТРОЛЛЕРЫ 
 
@@ -1171,13 +1181,13 @@ calendar_engine/booking/use_cases/
 
 #### 1) API 
 
-| № | Название контроллера                     | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                                                                                                                   | Используемые модели                                      | Используемые сериализаторы       |
-|---|------------------------------------------|------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------|----------------------------------|
-| 1 | **AvailabilityRuleListCreateView**       | `ListCreateAPIView`    | 1) Создание нового рабочего расписания; 2) Получение рабочего расписания: по умолчанию активное расписание; с параметром include_archived=true все включая архивные правила        | `AvailabilityRule`, `AppUser`, `PsychologistProfile`     | `AvailabilityRuleSerializer`     |
-| 2 | **AvailabilityRuleDeactivateView**       | `APIView`              | Явное "закрытие" рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                                 | `AvailabilityRule`, `AppUser`, `PsychologistProfile`     | -                                |
-| 3 | **AvailabilityExceptionListCreateView**  | `ListCreateAPIView`    | 1) Создание нового исключения из рабочего расписания; 2) Получение исключений: по умолчанию активные исключения; с параметром include_archived=true все включая архивные исключения | `AvailabilityException`, `AppUser`, `PsychologistProfile` | `AvailabilityExceptionSerializer` |
-| 4 | **AvailabilityExceptionDeactivateView**  | `APIView`              | Явное "закрытие" исключения из рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                   | `AvailabilityException`, `AppUser`, `PsychologistProfile` | -                                |
-| 5 | **CalendarTherapySessionListCreateView**  | `GenericAPIView`       | Выполнение клиентом сценария создания встречи со специалистом (терапевтическая сессия) - CreateTherapySession                                                                      | `AppUser`                                                | `CreateTherapySessionSerializer` |
+| № | Название контроллера               | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                                                                                                                           | Используемые модели                                      | Используемые сериализаторы                              |
+|---|------------------------------------|------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------|---------------------------------------------------------|
+| 1 | **AvailabilityRuleListCreateView** | `ListCreateAPIView`    | 1) Создание нового рабочего расписания; 2) Получение рабочего расписания: по умолчанию активное расписание; с параметром include_archived=true все включая архивные правила                | `AvailabilityRule`, `AppUser`, `PsychologistProfile`     | `AvailabilityRuleSerializer`                            |
+| 2 | **AvailabilityRuleDeactivateView** | `APIView`              | Явное "закрытие" рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                                         | `AvailabilityRule`, `AppUser`, `PsychologistProfile`     | -                                                       |
+| 3 | **AvailabilityExceptionListCreateView** | `ListCreateAPIView`    | 1) Создание нового исключения из рабочего расписания; 2) Получение исключений: по умолчанию активные исключения; с параметром include_archived=true все включая архивные исключения        | `AvailabilityException`, `AppUser`, `PsychologistProfile` | `AvailabilityExceptionSerializer`                       |
+| 4 | **AvailabilityExceptionDeactivateView** | `APIView`              | Явное "закрытие" исключения из рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                           | `AvailabilityException`, `AppUser`, `PsychologistProfile` | -                                                       |
+| 5 | **CalendarSessionListCreateView**  | `ListCreateAPIView`       | 1) Создание новой терапевтической сессии - CreateTherapySessionSerializer; 2) Получение списка всех видов сессий - EventListSerializer (include_archived=true все включая архивные записи) | `AppUser`                                                | `CreateTherapySessionSerializer`, `EventListSerializer` |
 
 #### 2) AJAX-запрос (fetch) на специальный API-endpoint
 
@@ -1193,13 +1203,13 @@ calendar_engine/booking/use_cases/
 
 #### 1) API 
 
-| № | Эндпоинт                                                  | HTTP-методы  | Описание функционала                                                                                                             |
-|---|-----------------------------------------------------------|--------------|----------------------------------------------------------------------------------------------------------------------------------|
-| 1 | `/calendar/api/my-availability-rules/`                    | `GET`, `POST` | Создать рабочее расписание / Получить список расписаний (текущее + архивные, если указать в адресе `?include_archived=true`)     |
-| 2 | `/calendar/api/my-availability-rules/close/`              | `PATCH`      | Явное "закрытие" рабочего расписания специалиста                                                                                 |
-| 3 | `/calendar/api/my-availability-exceptions/`               | `GET`, `POST` | Создать исключение в расписании / Получить список исключений (текущее + архивные, если указать в адресе `?include_archived=true`) |
-| 4 | `/calendar/api/my-availability-exceptions/<int:pk>/close/` | `PATCH`      | Явное "закрытие" исключения                                                                                                      |
-| 5 | `/calendar/api/therapy-sessions/`                         | `POST`       | Cоздание встречи между клиентом и специалистом (терапевтическая сессия)                                                          |
+| № | Эндпоинт                                                  | HTTP-методы   | Описание функционала                                                                                                                                             |
+|---|-----------------------------------------------------------|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | `/calendar/api/my-availability-rules/`                    | `GET`, `POST` | Создать рабочее расписание / Получить список расписаний (текущее + архивные, если указать в адресе `?include_archived=true`)                                     |
+| 2 | `/calendar/api/my-availability-rules/close/`              | `PATCH`       | Явное "закрытие" рабочего расписания специалиста                                                                                                                 |
+| 3 | `/calendar/api/my-availability-exceptions/`               | `GET`, `POST` | Создать исключение в расписании / Получить список исключений (текущее + архивные, если указать в адресе `?include_archived=true`)                                |
+| 4 | `/calendar/api/my-availability-exceptions/<int:pk>/close/` | `PATCH`       | Явное "закрытие" исключения                                                                                                                                      |
+| 5 | `/calendar/api/sessions/`                                 | `GET`, `POST` | Cоздать терапевтическую сессию между клиентом и специалистом / Получить список всех событий (текущее + архивные, если указать в адресе `?include_archived=true`) |
 
 #### 2) AJAX-запросы (fetch) на моментальное сохранение указанных клиентом на html-страницах данных в БД
 
