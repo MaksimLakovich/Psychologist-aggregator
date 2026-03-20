@@ -5,6 +5,7 @@ from django.views.generic import TemplateView
 
 from calendar_engine.booking.services import build_specialist_live_indicator
 from calendar_engine.models import CalendarEvent, EventParticipant, TimeSlot
+from core.services.calendar_event_slot_selector import get_event_active_slot
 from core.services.calendar_slot_time_display import \
     build_calendar_slot_time_display
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
@@ -23,6 +24,42 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
     """
 
     template_name = "core/client_pages/my_account/planned_sessions.html"
+
+    def get_context_data(self, **kwargs):
+        """Формирует контекст страницы запланированных сессий клиента."""
+        context = super().get_context_data(**kwargs)
+
+        context["title_client_account_view"] = "Запланированные сессии на ОПОРА"
+
+        # Применяем тот же layout-режим, который сопровождал клиента на шагах подбора и записи:
+        # либо верхнее меню, либо сайдбар
+        self._apply_layout_context(context)
+
+        context["current_sidebar_key"] = "session-planned"
+
+        # Сначала собираем все карточки встреч для основной левой колонки страницы (СПИСОК)
+        planned_events = self._build_planned_events()
+        context["planned_events"] = planned_events
+
+        # Затем из уже подготовленных карточек встреч собираем отдельный компактный набор данных
+        # для month-widget календаря в правой колонке (КАЛЕНДАРЬ)
+        context["calendar_month_widget_events"] = self._build_calendar_month_widget_events(
+            planned_events=planned_events,
+        )
+
+        # Начальный месяц виджета тоже выставляем по timezone клиента,
+        # чтобы календарь открывался не "по серверу", а по фактическому текущему времени клиента
+        context["calendar_widget_initial_date"] = timezone.localtime(
+            timezone.now(),
+            getattr(self.request.user, "timezone", None) or timezone.get_default_timezone(),
+        ).strftime("%Y-%m-%d")
+
+        # Подписываем календарный виджет тем же effective timezone, по которому уже показаны сами карточки встреч.
+        context["calendar_widget_timezone_display"] = str(
+            getattr(self.request.user, "timezone", None) or timezone.get_default_timezone()
+        )
+
+        return context
 
     def _build_planned_events(self):
         """Собирает удобную для шаблона проекцию запланированных и уже начавшихся терапевтические сессии."""
@@ -112,31 +149,9 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
         last_created_booking_id = self.request.session.pop("last_created_booking_id", None)
 
         for event in events:
-            # Для карточки списка берем не "самый первый слот вообще", а первый АКТУАЛЬНЫЙ слот:
-            #   - либо еще запланированный;
-            #   - либо уже начавшийся.
-            # Это важно для будущих multi-slot событий.
-            #
-            # Пример:
-            #   - у события "Курс" три урока;
-            #   - первый урок уже completed;
-            #   - второй урок planned;
-            #   - третий урок planned.
-            # В таком случае на странице "Запланированные" нужно показывать не первый завершенный урок,
-            # а ближайший еще актуальный урок курса.
-            #
-            # Важно: фильтруем уже загруженный через prefetch набор слотов,
-            # чтобы не делать дополнительный SQL-запрос на каждое событие.
-            active_slots = [
-                slot
-                for slot in event.slots.all()
-                if slot.status in ["planned", "started"]
-            ]
-
-            # TODO: Для будущих multi-slot событий нужно изменить эту строку и логику страницы в целом,
-            #  так как сейчас "эта страница = список событий", а если нам нужно показывать multi-slot события,
-            #  то, наверное, логично показывать каждый будущий урок (slot) отдельно, а не общее event для всех уроков
-            slot = next(iter(active_slots), None)
+            # Переиспользуем единое правило выбора актуального слота события,
+            # чтобы список "Запланированные" и страница detail-инфо выбранной одной сессии работали одинаково.
+            slot = get_event_active_slot(event)
 
             # Если по данным события не найдено ни одного актуального слота,
             # то карточку лучше вообще не выводить на экран "Запланированные":
@@ -263,39 +278,3 @@ class ClientPlannedSessionsView(SpecialistMatchingLayoutMixin, LoginRequiredMixi
             )
 
         return calendar_events
-
-    def get_context_data(self, **kwargs):
-        """Формирует контекст страницы запланированных сессий клиента."""
-        context = super().get_context_data(**kwargs)
-
-        context["title_client_account_view"] = "Запланированные сессии на ОПОРА"
-
-        # Применяем тот же layout-режим, который сопровождал клиента на шагах подбора и записи:
-        # либо верхнее меню, либо сайдбар
-        self._apply_layout_context(context)
-
-        context["current_sidebar_key"] = "session-planned"
-
-        # Сначала собираем все карточки встреч для основной левой колонки страницы (СПИСОК)
-        planned_events = self._build_planned_events()
-        context["planned_events"] = planned_events
-
-        # Затем из уже подготовленных карточек встреч собираем отдельный компактный набор данных
-        # для month-widget календаря в правой колонке (КАЛЕНДАРЬ)
-        context["calendar_month_widget_events"] = self._build_calendar_month_widget_events(
-            planned_events=planned_events,
-        )
-
-        # Начальный месяц виджета тоже выставляем по timezone клиента,
-        # чтобы календарь открывался не "по серверу", а по фактическому текущему времени клиента
-        context["calendar_widget_initial_date"] = timezone.localtime(
-            timezone.now(),
-            getattr(self.request.user, "timezone", None) or timezone.get_default_timezone(),
-        ).strftime("%Y-%m-%d")
-
-        # Подписываем календарный виджет тем же effective timezone, по которому уже показаны сами карточки встреч.
-        context["calendar_widget_timezone_display"] = str(
-            getattr(self.request.user, "timezone", None) or timezone.get_default_timezone()
-        )
-
-        return context
