@@ -1,0 +1,214 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %} {{ title_client_account_view|default:"ОПОРА" }} {% endblock %}
+
+{% block extra_style %}
+<style>
+    body {
+        background-image: url('{% static "images/background/background-start.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+
+    /* Карточка системного уведомления сначала мягко затухает, а затем аккуратно освобождает место,
+       чтобы подтверждение сохранения не висело на экране дольше нужного. */
+    .auto-dismiss-message {
+        overflow: hidden;
+        transition:
+            opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+            transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+            filter 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+            max-height 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+            margin 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+            padding 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+            border-width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        transform-origin: top center;
+        will-change: opacity, transform, filter, max-height, margin, padding;
+        max-height: 220px;
+    }
+
+    .auto-dismiss-message.is-fading {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.985);
+        filter: blur(1px);
+    }
+
+    .auto-dismiss-message.is-collapsing {
+        max-height: 0;
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        border-top-width: 0;
+        border-bottom-width: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="relative overflow-hidden min-h-screen bg-white/80 backdrop-blur-[2px] w-full">
+    <div class="relative z-10 w-full px-6 sm:px-8 py-10 {% if show_sidebar %}lg:px-24{% else %}lg:px-40 xl:px-80{% endif %}">
+
+        {% if messages %}
+            <div class="mb-8 space-y-3 max-w-3xl">
+                {% for message in messages %}
+                    <div data-auto-dismiss-message class="auto-dismiss-message rounded-2xl bg-emerald-50 p-6 text-emerald-700 border border-emerald-100 shadow-sm animate-fade-in-up">
+                        <p class="text-base font-semibold tracking-wide">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="mb-10">
+            <a href="{% url 'core:client-planned-sessions' %}{{ layout_query }}"
+               class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition">
+                <span>←</span>
+                <span>Назад к запланированным сессиям</span>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-10 gap-6 items-start">
+            <div class="xl:col-span-7 space-y-6">
+                <article class="rounded-3xl border border-indigo-100 bg-white/85 p-6 shadow-sm backdrop-blur-md">
+                    <div class="flex flex-col gap-5 md:flex-row md:items-start">
+                        <img
+                            src="{{ specialist_photo_url }}"
+                            alt="Фото специалиста"
+                            class="h-24 w-24 rounded-3xl object-cover shadow-sm"
+                        >
+
+                        <div class="min-w-0">
+                            <h1 class="text-3xl md:text-4xl font-black text-indigo-900 tracking-tight">
+                                {{ event.title }}
+                            </h1>
+                            <p class="mt-3 text-xl font-semibold text-zinc-800">
+                                {{ counterpart_full_name }}
+                            </p>
+
+                            <div class="mt-4 flex flex-wrap gap-2 text-sm">
+                                <span class="inline-flex rounded-full bg-indigo-100 px-3 py-1 font-semibold text-indigo-700">
+                                    {{ event.get_status_display }}
+                                </span>
+                                <span class="inline-flex rounded-full bg-sky-100 px-3 py-1 font-semibold text-sky-700">
+                                    {{ specialist_profile.get_therapy_format_display|default:"Онлайн" }}
+                                </span>
+                                <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 font-semibold text-emerald-700">
+                                    {{ specialist_profile.get_work_status_display|default:"Работает" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="rounded-3xl border border-indigo-100 bg-white/85 p-6 shadow-sm backdrop-blur-md">
+                    <h2 class="text-2xl font-bold text-indigo-900">Информация о сессии</h2>
+
+                    <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-zinc-700">
+                        <div class="rounded-2xl bg-zinc-50/80 p-4">
+                            <p class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Дата</p>
+                            <p class="mt-2 text-lg font-semibold text-zinc-900">{{ display_date }}</p>
+                        </div>
+                        <div class="rounded-2xl bg-zinc-50/80 p-4">
+                            <p class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Время</p>
+                            <p class="mt-2 text-lg font-semibold text-zinc-900">{{ display_time_range }}</p>
+                        </div>
+                        <div class="rounded-2xl bg-zinc-50/80 p-4">
+                            <p class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Часовой пояс клиента</p>
+                            <p class="mt-2 text-lg font-semibold text-zinc-900">{{ display_client_timezone }}</p>
+                        </div>
+                        <div class="rounded-2xl bg-zinc-50/80 p-4">
+                            <p class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Источник события</p>
+                            <p class="mt-2 text-lg font-semibold text-zinc-900">{{ event.get_source_display }}</p>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="rounded-3xl border border-indigo-100 bg-white/85 p-6 shadow-sm backdrop-blur-md">
+                    <h2 class="text-2xl font-bold text-indigo-900">Детали и подключение</h2>
+
+                    <form method="post" class="mt-5 space-y-5">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="rounded-2xl bg-rose-50 px-5 py-4 text-rose-600">
+                                {% for error in form.non_field_errors %}
+                                    <p class="text-sm font-medium">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div>
+                            <label for="{{ form.meeting_url.id_for_label }}" class="mb-2 block text-base font-semibold text-zinc-900">
+                                {{ form.meeting_url.label }}
+                            </label>
+                            {{ form.meeting_url }}
+                            {% if form.meeting_url.errors %}
+                                <p class="mt-2 text-sm font-medium text-rose-600">{{ form.meeting_url.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.comment.id_for_label }}" class="mb-2 block text-base font-semibold text-zinc-900">
+                                {{ form.comment.label }}
+                            </label>
+                            {{ form.comment }}
+                            {% if form.comment.errors %}
+                                <p class="mt-2 text-sm font-medium text-rose-600">{{ form.comment.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit"
+                                class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold transition hover:bg-indigo-700 shadow-md hover:shadow-lg">
+                            Сохранить изменения
+                        </button>
+                    </form>
+                </article>
+            </div>
+
+            <aside class="xl:col-span-3 space-y-6">
+                <article class="rounded-3xl border border-indigo-100 bg-white/85 p-6 shadow-sm backdrop-blur-md">
+                    <h2 class="text-2xl font-bold text-indigo-900">Участники</h2>
+                    <div class="mt-5 space-y-4 text-zinc-700">
+                        {% for participant in event.participants.all %}
+                            <div class="rounded-2xl bg-zinc-50/80 p-4">
+                                <p class="text-base font-semibold text-zinc-900">
+                                    {{ participant.user.first_name }} {{ participant.user.last_name }}
+                                </p>
+                                <p class="mt-2 text-sm text-zinc-600">
+                                    Роль: {{ participant.get_role_display }}
+                                </p>
+                                <p class="mt-1 text-sm text-zinc-600">
+                                    Статус: {{ participant.get_status_display }}
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </article>
+
+                <article class="rounded-3xl border border-indigo-100 bg-white/85 p-6 shadow-sm backdrop-blur-md">
+                    <h2 class="text-2xl font-bold text-indigo-900">Работает с темами вашей анкеты</h2>
+
+                    {% if matched_topics %}
+                        <div class="mt-5 flex flex-wrap gap-2">
+                            {% for topic in matched_topics %}
+                                <span class="inline-flex rounded-full bg-indigo-100 px-3 py-1 text-sm font-semibold text-indigo-700">
+                                    {{ topic.name }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="mt-4 text-base text-zinc-600">
+                            Для этой сессии пока не найдено совпавших тем между вашим запросом и профилем специалиста.
+                        </p>
+                    {% endif %}
+                </article>
+            </aside>
+        </div>
+    </div>
+</section>
+<script type="module" src="{% static 'js/modules/auto_hide_message.js' %}"></script>
+{% endblock %}

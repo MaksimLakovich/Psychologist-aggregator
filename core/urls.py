@@ -9,6 +9,8 @@ from core.views.client.my_account.ps_catalog import (
     PsychologistCatalogPageView)
 from core.views.client.my_account.questions_answers import \
     CommonQuestionPageView
+from core.views.client.my_account.therapy_session_detail_page import \
+    ClientTherapySessionDetailView
 from core.views.client.specialist_matching.view_choice_psychologist import \
     ClientChoicePsychologistPageView
 from core.views.client.specialist_matching.view_general_questions import \
@@ -46,6 +48,11 @@ urlpatterns = [
     path("client-account/", ClientAccountView.as_view(), name="client-account"),
     path(
         "client-account/sessions/planned/", ClientPlannedSessionsView.as_view(), name="client-planned-sessions"
+    ),
+    path(
+        "client-account/sessions/<uuid:event_id>/",
+        ClientTherapySessionDetailView.as_view(),
+        name="client-therapy-session-detail",
     ),
 
     # Детальная карточка психолога в КАТАЛОГЕ должна быть последней, потому что это catch-all slug route.
