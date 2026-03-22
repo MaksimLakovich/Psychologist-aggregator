@@ -7,12 +7,16 @@ from rest_framework.permissions import IsAuthenticated
 
 from aggregator._api.filters import PsychologistFilter
 from aggregator._api.serializers import PublicPsychologistListSerializer
-from aggregator._web.services.final_aggregator import PsychologistAggregatorService
-from aggregator._web.services.topic_type_mapping import CLIENT_TO_TOPIC_TYPE_MAP
+from aggregator._web.services.final_aggregator import \
+    PsychologistAggregatorService
+from aggregator._web.services.topic_type_mapping import \
+    CLIENT_TO_TOPIC_TYPE_MAP
 from aggregator.paginators import PsychologistCatalogPagination
-from calendar_engine.application.mappers.match_result_mapper import map_match_result_to_dict
+from calendar_engine.application.mappers.match_result_mapper import \
+    map_match_result_to_dict
 from core.services.experience_label import build_experience_label
-from core.services.get_client_profile_for_request import get_client_profile_for_request
+from core.services.get_client_profile_for_request import \
+    get_client_profile_for_request
 from users.models import Education, PsychologistProfile
 
 

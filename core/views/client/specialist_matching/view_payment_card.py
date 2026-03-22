@@ -3,12 +3,17 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import FormView
 
-from calendar_engine.booking.exceptions import CreateTherapySessionValidationError
-from calendar_engine.booking.use_cases.therapy_session_create import CreateTherapySessionUseCase
-from core.forms.client.specialist_matching.form_payment_card import ClientAddPaymentCardForm
-from core.services.get_client_timezone_value import get_client_timezone_value_for_request
+from calendar_engine.booking.exceptions import \
+    CreateTherapySessionValidationError
+from calendar_engine.booking.use_cases.therapy_session_create import \
+    CreateTherapySessionUseCase
+from core.forms.client.specialist_matching.form_payment_card import \
+    ClientAddPaymentCardForm
+from core.services.anonymous_client_flow_for_search_and_booking import (
+    get_guest_pending_booking, set_guest_pending_booking)
+from core.services.get_client_timezone_value import \
+    get_client_timezone_value_for_request
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
-from core.services.anonymous_client_flow_for_search_and_booking import get_guest_pending_booking, set_guest_pending_booking
 
 
 class ClientAddPaymentCardPageView(SpecialistMatchingLayoutMixin, FormView):

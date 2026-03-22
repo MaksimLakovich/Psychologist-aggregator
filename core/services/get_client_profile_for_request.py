@@ -1,4 +1,5 @@
-from core.services.anonymous_client_flow_for_search_and_booking import build_guest_profile
+from core.services.anonymous_client_flow_for_search_and_booking import \
+    build_guest_profile
 
 
 def get_client_profile_for_request(request):

@@ -1,9 +1,11 @@
 from django.urls import reverse
 from django.views.generic import FormView
 
-from core.forms.client.specialist_matching.form_general_questions import ClientGeneralQuestionsForm
+from core.forms.client.specialist_matching.form_general_questions import \
+    ClientGeneralQuestionsForm
+from core.services.anonymous_client_flow_for_search_and_booking import (
+    get_guest_matching_state, update_guest_general_state)
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
-from core.services.anonymous_client_flow_for_search_and_booking import get_guest_matching_state, update_guest_general_state
 
 
 class ClientGeneralQuestionsPageView(SpecialistMatchingLayoutMixin, FormView):

@@ -13,11 +13,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from calendar_engine._api.serializers.availability import AvailabilityExceptionSerializer, AvailabilityRuleSerializer
-from calendar_engine.application.factories.generate_specialist_schedule_factory import build_generate_specialist_schedule_use_case
-from calendar_engine.application.use_cases.get_domain_slots_use_case import GetDomainSlotsUseCase
+from calendar_engine._api.serializers.availability import (
+    AvailabilityExceptionSerializer, AvailabilityRuleSerializer)
+from calendar_engine.application.factories.generate_specialist_schedule_factory import \
+    build_generate_specialist_schedule_use_case
+from calendar_engine.application.use_cases.get_domain_slots_use_case import \
+    GetDomainSlotsUseCase
 from calendar_engine.models import AvailabilityException, AvailabilityRule
-from core.services.get_client_profile_for_request import get_client_profile_for_request
+from core.services.get_client_profile_for_request import \
+    get_client_profile_for_request
 from users.models import PsychologistProfile
 from users.permissions import IsPsychologistOrAdmin
 

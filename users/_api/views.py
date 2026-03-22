@@ -10,10 +10,12 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+from rest_framework_simplejwt.token_blacklist.models import (BlacklistedToken,
+                                                             OutstandingToken)
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from core.services.anonymous_client_flow_for_search_and_booking import update_guest_personal_state
+from core.services.anonymous_client_flow_for_search_and_booking import \
+    update_guest_personal_state
 from users._api.serializers import (AppUserSerializer,
                                     ChangePasswordSerializer,
                                     ClientProfileReadSerializer,
@@ -28,9 +30,12 @@ from users._api.serializers import (AppUserSerializer,
                                     PublicPsychologistProfileSerializer,
                                     RegisterSerializer,
                                     SpecialisationSerializer, TopicSerializer)
-from users.constants import AGE_BUCKET_CHOICES, ALLOWED_REGISTER_ROLES, GENDER_CHOICES, PREFERRED_TOPIC_TYPE_CHOICES
-from users.models import AppUser, ClientProfile, Education, Method, PsychologistProfile, Specialisation, Topic, UserRole
-from users.permissions import IsOwnerOrAdmin, IsProfileOwnerOrAdmin, IsSelfOrAdmin
+from users.constants import (AGE_BUCKET_CHOICES, ALLOWED_REGISTER_ROLES,
+                             GENDER_CHOICES, PREFERRED_TOPIC_TYPE_CHOICES)
+from users.models import (AppUser, ClientProfile, Education, Method,
+                          PsychologistProfile, Specialisation, Topic, UserRole)
+from users.permissions import (IsOwnerOrAdmin, IsProfileOwnerOrAdmin,
+                               IsSelfOrAdmin)
 from users.services.send_password_reset_email import send_password_reset_email
 from users.services.send_verification_email import send_verification_email
 from users.services.throttles import (ChangePasswordThrottle, LoginThrottle,

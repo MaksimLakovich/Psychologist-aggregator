@@ -60,6 +60,7 @@ def _build_default_guest_state() -> dict[str, Any]:
         "pending_booking": None,  # Ожидающая подтверждения и завершения бронирования сессия/встреча
     }
 
+
 def get_guest_matching_state(session) -> dict[str, Any]:
     """Достает из session текущее временное состояние нового неавторизованного клиента (guest-anonymous-состояние)
     и приводит его к нормальному полному виду.

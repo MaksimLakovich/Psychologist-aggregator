@@ -1,8 +1,10 @@
 from django.urls import reverse
 from django.views.generic import FormView
 
-from core.forms.client.specialist_matching.form_choice_psychologist import ClientChoicePsychologistForm
-from core.services.get_client_timezone_value import get_client_timezone_value_for_request
+from core.forms.client.specialist_matching.form_choice_psychologist import \
+    ClientChoicePsychologistForm
+from core.services.get_client_timezone_value import \
+    get_client_timezone_value_for_request
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 
 

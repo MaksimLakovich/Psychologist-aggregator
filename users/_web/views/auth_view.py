@@ -14,15 +14,18 @@ from django.views import View
 from django.views.generic.edit import FormView
 from django_ratelimit.decorators import ratelimit
 
-from calendar_engine.booking.exceptions import CreateTherapySessionValidationError
-from calendar_engine.booking.use_cases.therapy_session_create import CreateTherapySessionUseCase
+from calendar_engine.booking.exceptions import \
+    CreateTherapySessionValidationError
+from calendar_engine.booking.use_cases.therapy_session_create import \
+    CreateTherapySessionUseCase
 from core.services.anonymous_client_flow_for_search_and_booking import (
     apply_guest_state_to_user, build_choice_psychologist_url,
     build_signed_booking_token, clear_guest_matching_state,
-    get_guest_data_for_login, get_guest_matching_state,
-    get_guest_pending_booking, get_guest_data_for_registration,
+    get_guest_data_for_login, get_guest_data_for_registration,
+    get_guest_matching_state, get_guest_pending_booking,
     load_signed_booking_token, update_guest_general_state)
-from users._web.forms.auth_form import AppUserLoginForm, AppUserRegistrationForm
+from users._web.forms.auth_form import (AppUserLoginForm,
+                                        AppUserRegistrationForm)
 from users.mixins.anonymous_only_mixin import AnonymousOnlyMixin
 from users.models import AppUser, ClientProfile, PsychologistProfile, UserRole
 from users.services.send_verification_email import send_verification_email

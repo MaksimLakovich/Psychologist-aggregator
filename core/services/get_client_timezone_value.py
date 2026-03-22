@@ -1,4 +1,5 @@
-from core.services.anonymous_client_flow_for_search_and_booking import get_guest_matching_state
+from core.services.anonymous_client_flow_for_search_and_booking import \
+    get_guest_matching_state
 
 
 def get_client_timezone_value_for_request(request) -> str:
