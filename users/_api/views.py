@@ -1,4 +1,3 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
 from django.http import JsonResponse
 from django.utils.dateparse import parse_datetime
@@ -11,10 +10,10 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.token_blacklist.models import (BlacklistedToken,
-                                                             OutstandingToken)
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from core.services.anonymous_client_flow_for_search_and_booking import update_guest_personal_state
 from users._api.serializers import (AppUserSerializer,
                                     ChangePasswordSerializer,
                                     ClientProfileReadSerializer,
@@ -29,12 +28,9 @@ from users._api.serializers import (AppUserSerializer,
                                     PublicPsychologistProfileSerializer,
                                     RegisterSerializer,
                                     SpecialisationSerializer, TopicSerializer)
-from users.constants import (AGE_BUCKET_CHOICES, ALLOWED_REGISTER_ROLES,
-                             GENDER_CHOICES, PREFERRED_TOPIC_TYPE_CHOICES)
-from users.models import (AppUser, ClientProfile, Education, Method,
-                          PsychologistProfile, Specialisation, Topic, UserRole)
-from users.permissions import (IsOwnerOrAdmin, IsProfileOwnerOrAdmin,
-                               IsProfileOwnerOrAdminMixin, IsSelfOrAdmin)
+from users.constants import AGE_BUCKET_CHOICES, ALLOWED_REGISTER_ROLES, GENDER_CHOICES, PREFERRED_TOPIC_TYPE_CHOICES
+from users.models import AppUser, ClientProfile, Education, Method, PsychologistProfile, Specialisation, Topic, UserRole
+from users.permissions import IsOwnerOrAdmin, IsProfileOwnerOrAdmin, IsSelfOrAdmin
 from users.services.send_password_reset_email import send_password_reset_email
 from users.services.send_verification_email import send_verification_email
 from users.services.throttles import (ChangePasswordThrottle, LoginThrottle,
@@ -502,7 +498,58 @@ class EducationRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 # AJAX-ЗАПРОСЫ (fetch)
 # =====
 
-class SavePreferredTopicTypeAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
+def _save_personal_preferences(request, **payload):
+    """Сохраняет ответы клиента со второго шага подбора ("Личные вопросы").
+
+    Работает с двумя сценариями:
+        - сценарий 1: работает зарегистрированный авторизованный пользователь - сохранение в БД;
+        - сценарий 2: работает guest-anonymous - временное хранение в session.
+
+    Что именно может сохранять:
+        - preferred_topic_type;
+        - requested_topic_ids;
+        - has_preferences;
+        - preferred_ps_gender;
+        - preferred_ps_age;
+        - preferred_method_ids;
+        - has_time_preferences;
+        - preferred_slots.
+
+    Важно:
+        - requested_topic_ids и preferred_method_ids сохраняются как связи many-to-many;
+        - остальные поля записываются как обычные поля профиля клиента или как значения session-state гостя.
+    """
+    # Сценарий 1
+    if request.user.is_authenticated:
+        profile = request.user.client_profile
+
+        for field_name, value in payload.items():
+            if field_name == "requested_topic_ids":
+                profile.requested_topics.set(value)
+            elif field_name == "preferred_method_ids":
+                profile.preferred_methods.set(value)
+            else:
+                # Все остальные поля из payload - это обычные атрибуты ClientProfile,
+                # например preferred_topic_type, has_preferences, preferred_ps_gender и preferred_slots
+                setattr(profile, field_name, value)
+
+        update_fields = [
+            field_name
+            for field_name in payload.keys()
+            if field_name not in {"requested_topic_ids", "preferred_method_ids"}
+        ]
+        if update_fields:
+            profile.save(update_fields=update_fields)
+        else:
+            profile.save()
+        return
+
+    # Сценарий 2.
+    # update_guest_personal_state() - обновляет в session ответы гостя со второго шага подбора (с "Перс.вопросы")
+    update_guest_personal_state(request.session, payload=payload)
+
+
+class SavePreferredTopicTypeAjaxView(View):
     """Класс-контроллер на основе View для автосохранения без кнопки "Сохранить", как это делают
     профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint.
     Моментальное сохранение выбранного клиентом значения в preferred_topic_type на html-страницах."""
@@ -516,16 +563,14 @@ class SavePreferredTopicTypeAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMi
                 data={"status": "error", "error": "invalid_value"}, status=400
             )
 
-        profile = request.user.client_profile
-        profile.preferred_topic_type = value
-        profile.save(update_fields=["preferred_topic_type"])
+        _save_personal_preferences(request, preferred_topic_type=value)  # запуск сохранения для 2-х сценариев
 
         return JsonResponse(
             data={"status": "ok", "saved": value}, status=200
         )
 
 
-class SaveRequestedTopicsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
+class SaveRequestedTopicsAjaxView(View):
     """Класс-контроллер на основе View для автосохранения чекбоксов без кнопки "Сохранить", как это делают
     профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint.
 
@@ -536,18 +581,16 @@ class SaveRequestedTopicsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin
 
     def post(self, request, *args, **kwargs):
         """Сохранение выбранных методов в requested_topics."""
-        profile = request.user.client_profile
         ids = request.POST.getlist("topics[]")  # получаем список ID
 
-        profile.requested_topics.set(ids)
-        profile.save()
+        _save_personal_preferences(request, requested_topic_ids=ids)  # запуск сохранения для 2-х сценариев
 
         return JsonResponse(
             data={"status": "ok", "saved": ids}, status=200
         )
 
 
-class SaveHasPreferencesAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
+class SaveHasPreferencesAjaxView(View):
     """Класс-контроллер на основе View для автосохранения без кнопки "Сохранить", как это делают
     профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint.
     Моментальное сохранение выбранного клиентом значения в has_preferences на html-страницах."""
@@ -564,16 +607,14 @@ class SaveHasPreferencesAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
         # Это профессиональный Python-паттерн: "= (value == "1")" возвращает значение True или False:
         has_pref = (value == "1")
 
-        profile = request.user.client_profile
-        profile.has_preferences = has_pref
-        profile.save(update_fields=["has_preferences"])
+        _save_personal_preferences(request, has_preferences=has_pref)  # запуск сохранения для 2-х сценариев
 
         return JsonResponse(
             data={"status": "ok", "saved": has_pref}, status=200
         )
 
 
-class SavePreferredGenderAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
+class SavePreferredGenderAjaxView(View):
     """Класс-контроллер на основе View для автосохранения без кнопки "Сохранить", как это делают
     профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint.
     Моментальное сохранение выбранного клиентом значения в preferred_ps_gender на html-страницах."""
@@ -590,16 +631,14 @@ class SavePreferredGenderAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin
                 data={"status": "error", "error": "invalid_value"}, status=400
             )
 
-        profile = request.user.client_profile
-        profile.preferred_ps_gender = values
-        profile.save(update_fields=["preferred_ps_gender"])
+        _save_personal_preferences(request, preferred_ps_gender=values)  # запуск сохранения для 2-х сценариев
 
         return JsonResponse(
             data={"status": "ok", "saved": values}, status=200
         )
 
 
-class SavePreferredAgeAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
+class SavePreferredAgeAjaxView(View):
     """Класс-контроллер на основе View для автосохранения без кнопки "Сохранить", как это делают
     профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint.
     Моментальное сохранение выбранного клиентом значения в preferred_ps_age на html-страницах."""
@@ -616,16 +655,14 @@ class SavePreferredAgeAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, V
                 data={"status": "error", "error": "invalid_value"}, status=400
             )
 
-        profile = request.user.client_profile
-        profile.preferred_ps_age = values
-        profile.save(update_fields=["preferred_ps_age"])
+        _save_personal_preferences(request, preferred_ps_age=values)  # запуск сохранения для 2-х сценариев
 
         return JsonResponse(
             data={"status": "ok", "saved": values}, status=200
         )
 
 
-class SavePreferredMethodsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
+class SavePreferredMethodsAjaxView(View):
     """Класс-контроллер на основе View для автосохранения чекбоксов без кнопки "Сохранить", как это делают
     профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint.
 
@@ -636,18 +673,16 @@ class SavePreferredMethodsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixi
 
     def post(self, request, *args, **kwargs):
         """Сохранение выбранных методов в preferred_methods."""
-        profile = request.user.client_profile
         ids = request.POST.getlist("methods[]")  # получаем список ID
 
-        profile.preferred_methods.set(ids)
-        profile.save()
+        _save_personal_preferences(request, preferred_method_ids=ids)  # запуск сохранения для 2-х сценариев
 
         return JsonResponse(
             data={"status": "ok", "saved": ids}, status=200
         )
 
 
-class SaveHasTimePreferencesAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
+class SaveHasTimePreferencesAjaxView(View):
     """Класс-контроллер на основе View для автосохранения без кнопки "Сохранить", как это делают
     профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint.
     Моментальное сохранение выбранного клиентом значения в has_time_preferences на html-страницах."""
@@ -664,16 +699,14 @@ class SaveHasTimePreferencesAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMi
         # Это профессиональный Python-паттерн: "= (value == "1")" возвращает значение True или False:
         has_pref = (value == "1")
 
-        profile = request.user.client_profile
-        profile.has_time_preferences = has_pref
-        profile.save(update_fields=["has_time_preferences"])
+        _save_personal_preferences(request, has_time_preferences=has_pref)  # запуск сохранения для 2-х сценариев
 
         return JsonResponse(
             data={"status": "ok", "saved": has_pref}, status=200
         )
 
 
-class SavePreferredSlotsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
+class SavePreferredSlotsAjaxView(View):
     """Класс-контроллер на основе View для автосохранения без кнопки "Сохранить", как это делают
     профессиональные SaaS-сервисы. Решение: AJAX-запрос (fetch) на специальный API-endpoint.
     Моментальное сохранение выбранных клиентом значений в preferred_slots на html-страницах."""
@@ -684,9 +717,7 @@ class SavePreferredSlotsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
 
         # допустимо: пользователь снял все слоты
         if not slot_values:
-            profile = request.user.client_profile
-            profile.preferred_slots = []
-            profile.save(update_fields=["preferred_slots"])
+            _save_personal_preferences(request, preferred_slots=[])  # запуск сохранения для 2-х сценариев
             return JsonResponse(
                 data={"status": "ok", "slots_count": 0}, status=200,
             )
@@ -718,9 +749,19 @@ class SavePreferredSlotsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin,
 
             slots.append(slot_dt)
 
-        profile = request.user.client_profile
-        profile.preferred_slots = slots
-        profile.save(update_fields=["preferred_slots"])
+        # preferred_slots хранятся по-разному:
+        # 1) у авторизованного клиента - как реальные datetime в ClientProfile;
+        # 2) у гостя - как ISO-строки в session, потому что session должна хранить JSON-подобные данные
+        preferred_slots_payload = slots
+
+        if not request.user.is_authenticated:
+            preferred_slots_payload = [slot.isoformat() for slot in slots]
+
+        # Запуск сохранения для 2-х сценариев
+        _save_personal_preferences(
+            request,
+            preferred_slots=preferred_slots_payload,
+        )
 
         return JsonResponse(
             data={"status": "ok", "slots_count": len(slots)}, status=200,

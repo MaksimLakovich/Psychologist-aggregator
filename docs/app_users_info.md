@@ -315,16 +315,16 @@
 
 #### 2) AJAX-запрос (fetch) на специальный API-endpoint
 
-| №  | Название контроллера              | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                                                                                                                                 | Используемые модели          |
-|----|-----------------------------------|------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
-| 1  | **SaveHasPreferencesAjaxView**    | `View`                 | Моментальное сохранение значения has_preferences выбранного клиентом на html-странице                                                                                                            | `ClientProfile` + справочники |
-| 2  | **SavePreferredMethodsAjaxView**  | `View`                 | Моментальное сохранение выбранных клиентом методов в preferred_methods на html-странице                                                                                                          | `ClientProfile` + справочники |
-| 3  | **SavePreferredTopicTypeAjaxView** | `View`                 | Моментальное сохранение значения preferred_topic_type выбранного клиентом на html-странице                                                                                                       | `ClientProfile` + справочники |
-| 4  | **SaveRequestedTopicsAjaxView**   | `View`                 | Моментальное сохранение выбранных клиентом тем в requested_topics на html-странице                                                                                                               | `ClientProfile` + справочники |
-| 5  | **SavePreferredGenderAjaxView**   | `View`                 | Моментальное сохранение выбранных клиентом значений в preferred_ps_gender на html-страницах                                                                                                      | `ClientProfile` + справочники |
-| 6  | **SavePreferredAgeAjaxView**      | `View`                 | Моментальное сохранение выбранных клиентом значений в preferred_ps_age на html-страницах                                                                                                         | `ClientProfile` + справочники |
-| 7  | **SaveHasTimePreferencesAjaxView** | `View`                 | Моментальное сохранение значения has_time_preferences выбранного клиентом на html-странице                                                                                                       | `ClientProfile` + справочники |
-| 8  | **SavePreferredSlotsAjaxView**    | `View`                 | Моментальное сохранение выбранных клиентом значений в preferred_slots на html-странице                                                                                                           | `ClientProfile` + справочники |
+| №  | Название контроллера              | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                                                     | Используемые модели          |
+|----|-----------------------------------|------------------------|----------------------------------------------------------------------------------------------------------------------|------------------------------|
+| 1  | **SaveHasPreferencesAjaxView**    | `View`                 | Моментальное сохранение значения has_preferences выбранного клиентом в БД или гостем в session на html-странице      | `ClientProfile` + справочники |
+| 2  | **SavePreferredMethodsAjaxView**  | `View`                 | Моментальное сохранение выбранных клиентом в БД или гостем в session методов в preferred_methods на html-странице    | `ClientProfile` + справочники |
+| 3  | **SavePreferredTopicTypeAjaxView** | `View`                 | Моментальное сохранение значения preferred_topic_type выбранного клиентом в БД или гостем в session на html-странице | `ClientProfile` + справочники |
+| 4  | **SaveRequestedTopicsAjaxView**   | `View`                 | Моментальное сохранение выбранных клиентом в БД или гостем в session тем в requested_topics на html-странице         | `ClientProfile` + справочники |
+| 5  | **SavePreferredGenderAjaxView**   | `View`                 | Моментальное сохранение выбранных клиентом в БД или гостем в session значений в preferred_ps_gender на html-страницах | `ClientProfile` + справочники |
+| 6  | **SavePreferredAgeAjaxView**      | `View`                 | Моментальное сохранение выбранных клиентом в БД или гостем в session значений в preferred_ps_age на html-страницах   | `ClientProfile` + справочники |
+| 7  | **SaveHasTimePreferencesAjaxView** | `View`                 | Моментальное сохранение значения has_time_preferences выбранного клиентом в БД или гостем в session на html-странице | `ClientProfile` + справочники |
+| 8  | **SavePreferredSlotsAjaxView**    | `View`                 | Моментальное сохранение выбранных клиентом в БД или гостем в session значений в preferred_slots на html-странице     | `ClientProfile` + справочники |
 
 
 ### 3. МАРШРУТЫ (РОУТЫ)
