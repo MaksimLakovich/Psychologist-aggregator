@@ -21,7 +21,7 @@
                 <span class="text-5xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
             </a>
             <a href="{% url 'core:start-page' %}"
-               class="md:hidden flex items-center gap-1 text-indigo-700 hover:bg-gray-50 focus:ring-4 focus:ring-gray-300
+               class="md:hidden flex items-center gap-1 text-indigo-700 hover:bg-gray-50 focus:ring-1 focus:ring-gray-300
                font-medium rounded-lg text-base px-4 py-2 focus:outline-none">
                 <img src="{% static 'images/menu/back-icon.svg' %}" class="hover:text-gray-900" alt="Back_icon"/>
                 <span>Назад</span>
@@ -39,6 +39,12 @@
                 </p>
 
                 <!-- УВЕДОМЛЕНИЯ -->
+                {% if resume_booking_mode %}
+                <div class="mb-4 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-700">
+                    Мы сохранили выбранного специалиста и время сессии. Вы сможете продолжить запись после входа или регистрации
+                </div>
+                {% endif %}
+
                 {% if messages %}
                 <div class="space-y-2">
                     {% for message in messages %}
@@ -183,7 +189,7 @@
         <div class="w-full hidden md:flex pb-1">
             <div class="w-full max-w-md mx-auto flex justify-end">
                 <a href="{% url 'core:start-page' %}"
-                   class="flex items-center gap-1 text-white hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300
+                   class="flex items-center gap-1 text-white hover:bg-indigo-600 focus:ring-1 focus:ring-indigo-300
                    font-medium rounded-lg text-base px-4 md:px-5 py-2 md:py-3
                    focus:outline-none">
                     <img src="{% static 'images/menu/back-icon-white.svg' %}" class="hover:text-white" alt="Back_icon"/>
