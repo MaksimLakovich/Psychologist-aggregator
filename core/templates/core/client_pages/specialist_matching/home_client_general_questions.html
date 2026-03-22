@@ -149,6 +149,11 @@
                             <label class="block mb-2 mt-1 text-sm font-medium text-gray-400">
                                 Имя или псевдоним будет доступен психологу
                             </label>
+                            {% if form.first_name.errors %}
+                            <p class="mt-1 text-sm text-red-600">
+                                {{ form.first_name.errors.0 }}
+                            </p>
+                            {% endif %}
                         </div>
 
                         <!-- Email -->
@@ -157,6 +162,11 @@
                             <label class="block mb-2 mt-1 text-sm font-medium text-gray-400">
                                 Для важных уведомлений от психолога и сервиса
                             </label>
+                            {% if form.email.errors %}
+                            <p class="mt-1 text-sm text-red-600">
+                                {{ form.email.errors.0 }}
+                            </p>
+                            {% endif %}
                         </div>
 
                         <!-- Возраст -->
@@ -210,6 +220,11 @@
                         <label class="block mb-2 mt-1 text-sm font-medium text-gray-400">
                             Для корректного отображения расписания сессий
                         </label>
+                        {% if form.timezone.errors %}
+                        <p class="mt-1 text-sm text-red-600">
+                            {{ form.timezone.errors.0 }}
+                        </p>
+                        {% endif %}
                     </div>
                 </div>
 

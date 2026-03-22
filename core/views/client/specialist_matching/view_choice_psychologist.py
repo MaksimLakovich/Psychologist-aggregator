@@ -1,14 +1,18 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.views.generic import FormView
 
-from core.forms.client.specialist_matching.form_choice_psychologist import \
-    ClientChoicePsychologistForm
+from core.forms.client.specialist_matching.form_choice_psychologist import ClientChoicePsychologistForm
+from core.services.get_client_timezone_value import get_client_timezone_value_for_request
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 
 
-class ClientChoicePsychologistPageView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, FormView):
-    """Контроллер на основе FormView для отображения страницы *Выбор психолога*."""
+class ClientChoicePsychologistPageView(SpecialistMatchingLayoutMixin, FormView):
+    """Контроллер на основе FormView для отображения страницы *Выбор психолога*.
+
+    Вью работает в двух сценариях:
+        - сценарий 1: работает зарегистрированный авторизованный пользователь;
+        - сценарий 2: работает guest-anonymous.
+    """
 
     template_name = "core/client_pages/specialist_matching/home_client_choice_psychologist.html"
     form_class = ClientChoicePsychologistForm
@@ -40,6 +44,11 @@ class ClientChoicePsychologistPageView(SpecialistMatchingLayoutMixin, LoginRequi
         )
 
         context["title_home_page_view"] = "Психологи онлайн на Опора — поиск и подбор психолога"
+
+        # get_client_timezone_value_for_request() - возвращает TZ текущего участника flow в строковом виде:
+        # - для авторизованного клиента timezone берется из аккаунта;
+        # - для гостя из временного guest-anonymous-состояния в session, собранного на первом шаге подбора
+        context["client_timezone_value"] = get_client_timezone_value_for_request(self.request)
 
         # Логика управление отображением сайдбара:
         # 1) если пришли из сайдбара, показываем его;

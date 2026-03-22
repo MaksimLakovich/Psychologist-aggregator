@@ -57,16 +57,37 @@ class ClientGeneralQuestionsForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        """Добавляем дефолтное значение в справочник 'TIMEZONE' и выводим сразу его на web-странице пользователя."""
+        """Подготавливает форму под оба возможные сценарии шага "Общие вопросы":
+            - сценарий 1: работает зарегистрированный авторизованный пользователь;
+            - сценарий 2: работает guest-anonymous.
+
+        init:
+            1) добавляет в список timezone пустой первый пункт "Выберите часовой пояс", чтобы пользователь
+              не получал случайно выбранный timezone по умолчанию и не переходил к подбору слота с некорректным TZ;
+            2) переключает поле email между двумя сценариями:
+               - сценарий 1: для авторизованного клиента email остается read-only;
+               - сценарий 2: для гостя email становится обычным редактируемым полем, потому что он вводит его впервые.
+        """
+        email_readonly = kwargs.pop("email_readonly", True)
         super().__init__(*args, **kwargs)
 
-        # Добавляем пустой вариант в начало списка часовых поясов
+        # 1) Добавляем пустой вариант в начало списка часовых поясов
         timezone_choices = list(self.fields["timezone"].choices)
         if not timezone_choices or timezone_choices[0][0] != "":
             self.fields["timezone"].choices = [
                 ("", "Выберите часовой пояс"),
                 *timezone_choices,
             ]
+
+        # 2) Для гостя email нельзя блокировать read-only: это его первый ввод email в шаге подбора
+        if not email_readonly:
+            email_widget = self.fields["email"].widget
+            email_widget.attrs.pop("readonly", None)
+            email_widget.attrs["class"] = (
+                "block w-full max-w-sm rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-lg "
+                "text-gray-900 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+            )
+            email_widget.attrs["placeholder"] = "Ваш email"
 
     def save(self, user):
         """Сохранение данных формы в модели AppUser и ClientProfile.

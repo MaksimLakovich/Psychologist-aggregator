@@ -57,6 +57,16 @@
                 <!-- ========== ВАЖНО для открытия либо САЙДБАРА либо МЕНЮ ========== -->
                 <input type="hidden" name="layout" value="{{ layout_mode }}">
 
+                {% if messages %}
+                <div class="space-y-2">
+                    {% for message in messages %}
+                    <div class="rounded-2xl border {% if 'error' in message.tags %}border-rose-200 bg-rose-50 text-rose-700{% else %}border-emerald-200 bg-emerald-50 text-emerald-700{% endif %} px-5 py-4">
+                        {{ message|linebreaksbr }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 <!-- ========== STICKY HEADER (ШАГИ + АВАТАРЫ) ========== -->
                 <div
                         id="choice-sticky-header"
@@ -159,7 +169,7 @@
                         data-static-url="{% static '' %}"
                         data-back-url="{% url 'core:personal-questions' %}{{ layout_query }}"
                         data-payment-card-url="{% url 'core:payment-card' %}{{ layout_query }}"
-                        data-client-timezone="{{ request.user.timezone|default_if_none:'' }}"
+                        data-client-timezone="{{ client_timezone_value }}"
                         data-reset-choice="{% if reset_choice_psychologist %}1{% else %}0{% endif %}"
                     >
                         <!-- Skeleton-заглушка: показываем структуру карточки до прихода данных из JS/API -->
