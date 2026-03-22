@@ -32,6 +32,32 @@ from users.models import AppUser, ClientProfile, PsychologistProfile, UserRole
 from users.services.send_verification_email import send_verification_email
 
 
+def _has_planned_or_started_sessions(user) -> bool:
+    """Проверяет, есть ли у пользователя клиентские события в статусе planned или started.
+
+    Это нужно, чтобы после входа или подтверждения email направить пользователя в наиболее логичную точку:
+        - если встречи уже есть, открываем страницу "Мой кабинет";
+        - если встреч еще нет, открываем первый шаг "Подбор психолога".
+    """
+    return CalendarEvent.objects.filter(
+        participants__user=user,
+        status__in=["planned", "started"],
+    ).exists()
+
+
+def _build_post_login_redirect_url(user) -> str:
+    """Возвращает стартовый URL для уже авторизованного клиента.
+
+    Используется в двух местах:
+        - после обычного входа по email и паролю;
+        - после подтверждения email, когда система автоматически логинит пользователя.
+    """
+    if _has_planned_or_started_sessions(user):
+        return reverse_lazy("core:client-account")
+
+    return str(reverse_lazy("core:general-questions"))
+
+
 @method_decorator(ratelimit(key="ip", rate="5/m", block=True), name="post")
 class RegisterPageView(AnonymousOnlyMixin, FormView):
     """Класс-контроллер для регистрации нового пользователя в системе.
@@ -189,7 +215,11 @@ class VerifyEmailView(AnonymousOnlyMixin, View):
     """
 
     def get(self, request, *args, **kwargs):
-        """Подтверждает email и, при необходимости, возобновляет paused-booking."""
+        """Подтверждает email и, при необходимости, возобновляет paused-booking.
+
+        После успешного подтверждения система автоматически логинит пользователя,
+        чтобы ему не приходилось повторно вводить email и пароль.
+        """
         uidb64 = request.GET.get("uid")
         token = request.GET.get("token")
         resume_booking_token = request.GET.get("resume_booking")
@@ -209,12 +239,13 @@ class VerifyEmailView(AnonymousOnlyMixin, View):
             messages.error(self.request, "Ссылка подтверждения недействительна или устарела.")
             return redirect("users:web:login-page")
 
-        # Если пользователь уже активирован, guest-state больше не нужен:
-        # сервис clear_guest_matching_state() удаляет временный черновик гостя из session
+        # Если пользователь уже активирован и ссылка валидна, повторно подтверждать ничего не нужно.
+        # Но для удобства все равно автоматически логиним пользователя и ведем его дальше как в обычном post-login.
         if user.is_active:
             clear_guest_matching_state(self.request.session)
-            messages.info(self.request, "Email уже подтвержден. Теперь вы можете войти.")
-            return redirect("users:web:login-page")
+            login(self.request, user)
+            messages.info(self.request, "Email уже был подтвержден. Вы уже вошли в систему")
+            return redirect(_build_post_login_redirect_url(user))
 
         # Активируем пользователя после успешной проверки uid/token
         user.is_active = True
@@ -254,9 +285,10 @@ class VerifyEmailView(AnonymousOnlyMixin, View):
             return redirect(f"{reverse_lazy('core:client-planned-sessions')}?layout={layout_mode}")
 
         # 2) Сценарий 2: обычное подтверждение email без возобновления paused-booking
+        login(self.request, user)
         clear_guest_matching_state(self.request.session)
-        messages.success(self.request, "Email успешно подтвержден. Теперь вы можете войти.")
-        return redirect("users:web:login-page")
+        messages.success(self.request, "Email успешно подтвержден. Вы уже вошли в систему")
+        return redirect(_build_post_login_redirect_url(user))
 
 
 @method_decorator(ratelimit(key="ip", rate="5/m", block=True), name="post")
@@ -321,18 +353,6 @@ class LoginPageView(AnonymousOnlyMixin, LoginView):
 
         return context
 
-    def _has_planned_or_started_sessions(self, user) -> bool:
-        """Проверяет, есть ли у пользователя клиентские события в статусе planned или started.
-
-        Это нужно, чтобы после входа направить пользователя в наиболее логичную точку:
-            - если встречи уже есть, открываем страницу "Мой кабинет";
-            - если встреч еще нет, открываем первый шаг "Подбор психолога".
-        """
-        return CalendarEvent.objects.filter(
-            participants__user=user,
-            status__in=["planned", "started"],
-        ).exists()
-
     def get_success_url(self):
         """Определяет страницу, которую пользователь увидит сразу после успешного входа.
 
@@ -340,10 +360,7 @@ class LoginPageView(AnonymousOnlyMixin, LoginView):
             - если у клиента уже есть события в статусе planned или started, то открываем страницу "Мой кабинет";
             - если таких событий нет, открываем первый шаг "Подбор психолога".
         """
-        if self._has_planned_or_started_sessions(self.request.user):
-            return reverse_lazy("core:client-account")
-
-        return reverse_lazy("core:general-questions")
+        return _build_post_login_redirect_url(self.request.user)
 
     def form_valid(self, form):
         """Выполняет вход пользователя после успешной аутентификации.
