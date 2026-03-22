@@ -18,6 +18,7 @@ from calendar_engine.booking.exceptions import \
     CreateTherapySessionValidationError
 from calendar_engine.booking.use_cases.therapy_session_create import \
     CreateTherapySessionUseCase
+from calendar_engine.models import CalendarEvent
 from core.services.anonymous_client_flow_for_search_and_booking import (
     apply_guest_state_to_user, build_choice_psychologist_url,
     build_signed_booking_token, clear_guest_matching_state,
@@ -320,13 +321,36 @@ class LoginPageView(AnonymousOnlyMixin, LoginView):
 
         return context
 
+    def _has_planned_or_started_sessions(self, user) -> bool:
+        """Проверяет, есть ли у пользователя клиентские события в статусе planned или started.
+
+        Это нужно, чтобы после входа направить пользователя в наиболее логичную точку:
+            - если встречи уже есть, открываем страницу "Мой кабинет";
+            - если встреч еще нет, открываем первый шаг "Подбор психолога".
+        """
+        return CalendarEvent.objects.filter(
+            participants__user=user,
+            status__in=["planned", "started"],
+        ).exists()
+
     def get_success_url(self):
-        """Явно указываю редирект переопределяя метод, так как обычный вариант в виде "success_url = reverse_lazy()"
-        не работал. Django его игнорировал и отправлял на /accounts/profile/"""
+        """Определяет страницу, которую пользователь увидит сразу после успешного входа.
+
+        Логика:
+            - если у клиента уже есть события в статусе planned или started, то открываем страницу "Мой кабинет";
+            - если таких событий нет, открываем первый шаг "Подбор психолога".
+        """
+        if self._has_planned_or_started_sessions(self.request.user):
+            return reverse_lazy("core:client-account")
+
         return reverse_lazy("core:general-questions")
 
     def form_valid(self, form):
-        """Выполняет вход пользователя после успешной аутентификации."""
+        """Выполняет вход пользователя после успешной аутентификации.
+
+        После входа Django вызывает get_success_url(), который выбирает стартовую страницу
+        в зависимости от того, есть ли у пользователя уже активные клиентские сессии.
+        """
         login(self.request, form.get_user())
 
         return super().form_valid(form)
