@@ -1,4 +1,3 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.views import View
@@ -8,16 +7,13 @@ from rest_framework.permissions import IsAuthenticated
 
 from aggregator._api.filters import PsychologistFilter
 from aggregator._api.serializers import PublicPsychologistListSerializer
-from aggregator._web.services.final_aggregator import \
-    PsychologistAggregatorService
-from aggregator._web.services.topic_type_mapping import \
-    CLIENT_TO_TOPIC_TYPE_MAP
+from aggregator._web.services.final_aggregator import PsychologistAggregatorService
+from aggregator._web.services.topic_type_mapping import CLIENT_TO_TOPIC_TYPE_MAP
 from aggregator.paginators import PsychologistCatalogPagination
-from calendar_engine.application.mappers.match_result_mapper import \
-    map_match_result_to_dict
+from calendar_engine.application.mappers.match_result_mapper import map_match_result_to_dict
 from core.services.experience_label import build_experience_label
+from core.services.get_client_profile_for_request import get_client_profile_for_request
 from users.models import Education, PsychologistProfile
-from users.permissions import IsProfileOwnerOrAdminMixin
 
 
 class PublicPsychologistListView(generics.ListAPIView):
@@ -61,19 +57,28 @@ class PublicPsychologistListView(generics.ListAPIView):
         )
 
 
-class MatchPsychologistsAjaxView(LoginRequiredMixin, IsProfileOwnerOrAdminMixin, View):
+class MatchPsychologistsAjaxView(View):
     """Класс-контроллер на основе View для автоматического запуска фильтрации психологов без кнопки "Далее"
     по указанным клиентом:
         - интересующих его базовым параметрам: темы, методы, возраст, пол;
         - интересующих его временным слотам.
-    Решение: AJAX-запрос (fetch) на специальный API-endpoint."""
+
+    Решение: AJAX-запрос (fetch) на специальный API-endpoint.
+
+    Контроллер работает по двум сценариям:
+        - сценарий 1: работает зарегистрированный авторизованный пользователь;
+        - сценарий 2: работает guest-anonymous.
+    """
 
     def get(self, request, *args, **kwargs):
-        """Метод для запуска фильтрации и возврата JSON-контракта с готовыми данными для карточки психолога."""
-        user = request.user
+        """Метод для запуска фильтрации и возврата JSON-контракта с готовыми данными для карточки психолога.
 
+        get_client_profile_for_request(request) - возвращает профиль, с которым дальше должен работать matching-flow:
+            - если клиент уже авторизован, то используется реальный ClientProfile из БД;
+            - если клиент еще гость, то используется session и временный профиль гостя.
+        """
         try:
-            client_profile = user.client_profile
+            client_profile = get_client_profile_for_request(request)
         except Exception:
             return JsonResponse({"error": "no_client_profile"}, status=400)
 

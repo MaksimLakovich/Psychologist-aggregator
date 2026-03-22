@@ -95,28 +95,28 @@ class IsPsychologistOrAdmin(BasePermission):
 # ------
 
 
-class IsProfileOwnerOrAdminMixin:
-    """Кастомный DRF permission-класс (mixin для Django CBV). Проверяет, что:
-        - пользователь это владелец ClientProfile;
-        - пользователь является действующим админом."""
-
-    def dispatch(self, request, *args, **kwargs):
-        """Метод для проверки прав или выполнения общих проверок перед выполнением GET/POST."""
-        user = request.user
-
-        if not user.is_authenticated:
-            raise PermissionDenied("Вы не авторизованы.")
-
-        profile = getattr(user, "client_profile", None)
-
-        if profile is None:
-            raise PermissionDenied("У вас нет клиентского профиля.")
-
-        # Проверка: владелец или админ
-        if profile.user != user and not (user.is_staff and user.is_active):
-            raise PermissionDenied("У вас нет прав на доступ к этому профилю.")
-
-        return super().dispatch(request, *args, **kwargs)
+# class IsProfileOwnerOrAdminMixin:
+#     """Кастомный DRF permission-класс (mixin для Django CBV). Проверяет, что:
+#         - пользователь это владелец ClientProfile;
+#         - пользователь является действующим админом."""
+#
+#     def dispatch(self, request, *args, **kwargs):
+#         """Метод для проверки прав или выполнения общих проверок перед выполнением GET/POST."""
+#         user = request.user
+#
+#         if not user.is_authenticated:
+#             raise PermissionDenied("Вы не авторизованы.")
+#
+#         profile = getattr(user, "client_profile", None)
+#
+#         if profile is None:
+#             raise PermissionDenied("У вас нет клиентского профиля.")
+#
+#         # Проверка: владелец или админ
+#         if profile.user != user and not (user.is_staff and user.is_active):
+#             raise PermissionDenied("У вас нет прав на доступ к этому профилю.")
+#
+#         return super().dispatch(request, *args, **kwargs)
 
 
 # class IsModerator(BasePermission):
