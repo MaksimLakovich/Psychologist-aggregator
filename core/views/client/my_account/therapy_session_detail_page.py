@@ -8,9 +8,9 @@ from calendar_engine.models import CalendarEvent
 from core.forms.client.my_account.form_therapy_session_details import \
     ClientTherapySessionDetailsForm
 from core.services.calendar_event_slot_selector import get_event_active_slot
-from core.services.experience_label import build_experience_label
 from core.services.calendar_slot_time_display import \
     build_calendar_slot_time_display
+from core.services.experience_label import build_experience_label
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 from users.constants import LANGUAGE_CHOICES
 
@@ -207,7 +207,8 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
             else "/static/images/menu/user-circle.svg"
         )
         context["specialist_profile_url"] = (
-            f"{reverse('core:psychologist-card-detail', kwargs={'profile_slug': specialist_profile.slug})}{self._build_layout_query()}"
+            f"{reverse('core:psychologist-card-detail', kwargs={'profile_slug': specialist_profile.slug})}"
+            f"{self._build_layout_query()}"
             if specialist_profile and specialist_profile.slug
             else None
         )
