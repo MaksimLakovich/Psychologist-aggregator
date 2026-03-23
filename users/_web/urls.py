@@ -1,7 +1,8 @@
 from django.contrib.auth.views import LogoutView
 from django.urls import path
 
-from users._web.views.auth_view import (LoginPageView, RegisterPageView,
+from users._web.views.auth_view import (CompleteBookingAuthPageView,
+                                        LoginPageView, RegisterPageView,
                                         VerifyEmailView)
 from users._web.views.change_password_view import ChangePasswordPageView
 from users._web.views.edit_client_view import EditClientProfilePageView
@@ -16,6 +17,7 @@ urlpatterns = [
     path("login/", LoginPageView.as_view(), name="login-page"),
     path("logout/", LogoutView.as_view(), name="logout"),
     path("register/", RegisterPageView.as_view(), name="register-page"),
+    path("complete-booking-auth/", CompleteBookingAuthPageView.as_view(), name="complete-booking-auth"),
     path("verify-email/", VerifyEmailView.as_view(), name="verify-email"),
 
     # Работа с аккаунтом / Работа с профилем

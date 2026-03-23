@@ -1,4 +1,6 @@
+from datetime import datetime
 import random
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth import login
@@ -7,15 +9,19 @@ from django.contrib.auth.views import LoginView
 from django.db import transaction
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_str
+from django.utils.formats import date_format
 from django.utils.http import urlsafe_base64_decode
 from django.views import View
+from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
 from django_ratelimit.decorators import ratelimit
 
 from calendar_engine.booking.exceptions import \
     CreateTherapySessionValidationError
+from calendar_engine.booking.services import normalize_user_timezone
 from calendar_engine.booking.use_cases.therapy_session_create import \
     CreateTherapySessionUseCase
 from calendar_engine.models import CalendarEvent
@@ -31,6 +37,10 @@ from users.mixins.anonymous_only_mixin import AnonymousOnlyMixin
 from users.models import AppUser, ClientProfile, PsychologistProfile, UserRole
 from users.services.send_verification_email import send_verification_email
 
+
+# ===== Вспомогательные функции для определения куда перенаправлять пользователя при авторизации:
+# - на страницу подбора, если нет запланированных событий
+# - в личный кабинет, если есть запланированные события
 
 def _has_planned_or_started_sessions(user) -> bool:
     """Проверяет, есть ли у пользователя клиентские события в статусе planned или started.
@@ -53,10 +63,168 @@ def _build_post_login_redirect_url(user) -> str:
         - после подтверждения email, когда система автоматически логинит пользователя.
     """
     if _has_planned_or_started_sessions(user):
-        return reverse_lazy("core:client-account")
+        return f"{reverse_lazy('core:client-planned-sessions')}?layout=sidebar"
 
     return str(reverse_lazy("core:general-questions"))
 
+
+# ===== Вспомогательные функции для определения отдельного экрана завершения записи для гостя и его наполнения
+
+def _build_complete_booking_auth_url(*, stage: str | None = None) -> str:
+    """Собирает URL отдельного экрана завершения записи для гостя.
+
+    Этот экран нужен только для guest paused-booking и решает бизнес-задачу:
+        - не смешивать специальный сценарий "завершение записи" с обычными страницами login/register;
+        - сначала показать пользователю, что специалист и слот уже сохранены;
+        - только потом предложить выбрать: войти в существующий аккаунт или создать новый.
+    """
+    base_url = str(reverse_lazy("users:web:complete-booking-auth"))
+
+    if not stage:
+        return base_url
+
+    return f"{base_url}?{urlencode({'stage': stage})}"
+
+
+def _build_paused_booking_summary(session) -> dict | None:
+    """Готовит предметный summary выбранного специалиста и слота для отдельного экрана завершения записи для гостя.
+
+    Summary нужен, чтобы на отдельном экране завершения записи гость видел не абстрактное сообщение,
+    а именно тот выбор, который он уже сделал на шаге payment-card:
+        - фото специалиста;
+        - имя специалиста;
+        - формат и стоимость сессии;
+        - дата и время выбранного слота.
+    """
+    # Возвращает отложенное бронирование guest-anonymous, если оно есть
+    pending_booking = get_guest_pending_booking(session)
+
+    if not pending_booking:
+        return None
+
+    specialist_profile = (
+        PsychologistProfile.objects.select_related("user")
+        .filter(pk=pending_booking["specialist_profile_id"])
+        .first()
+    )
+    if not specialist_profile:
+        return None
+
+    consultation_type = pending_booking["consultation_type"]
+    price_value = (
+        specialist_profile.price_couples
+        if consultation_type == "couple"
+        else specialist_profile.price_individual
+    )
+    price_label = format(price_value, "f").rstrip("0").rstrip(".")
+    session_label = (
+        "Парная сессия · 1,5 часа"
+        if consultation_type == "couple"
+        else "Индивидуальная сессия · 50 минут"
+    )
+    slot_start_datetime = datetime.fromisoformat(pending_booking["slot_start_iso"])
+    guest_timezone_value = get_guest_matching_state(session)["general"].get("timezone")
+    guest_timezone = (
+        normalize_user_timezone(timezone_value=guest_timezone_value)
+        if guest_timezone_value
+        else timezone.get_default_timezone()
+    )
+    slot_start_local = timezone.localtime(slot_start_datetime, guest_timezone)
+
+    return {
+        "specialist_photo_url": specialist_profile.user.avatar_url,
+        "specialist_full_name": (
+            f"{specialist_profile.user.first_name} {specialist_profile.user.last_name}".strip()
+            or specialist_profile.user.email
+        ),
+        "session_summary": f"{session_label} · {price_label} {specialist_profile.price_currency}",
+        "slot_summary": (
+            f"{date_format(slot_start_local, 'j F')} "
+            f"{slot_start_local.strftime('%H:%M')} "
+            f"({date_format(slot_start_local, 'l').lower()})"
+        ),
+    }
+
+
+# ===== Вспомогательная функция, которая потом используется для завершения paused-booking при завершении
+# регистрации или входа гостя
+
+def _resume_pending_booking_after_authentication(request, *, user, booking_payload: dict, success_message: str):
+    """Пытается сразу завершить paused-booking после успешной аутентификации.
+
+    Используется в двух местах:
+        - после входа существующего пользователя по email и паролю;
+        - после подтверждения email, когда новый пользователь автоматически логинится.
+
+    Бизнес-правило:
+        - если слот все еще доступен, запись завершается автоматически;
+        - если слот уже занят или больше недоступен, guest-черновик очищается,
+          а пользователя возвращают на шаг выбора психолога у того же специалиста.
+    """
+    try:
+        booking_result = CreateTherapySessionUseCase().execute(
+            client_user=user,
+            specialist_profile_id=booking_payload["specialist_profile_id"],
+            slot_start_iso=booking_payload["slot_start_iso"],
+            consultation_type=booking_payload["consultation_type"],
+        )
+    except CreateTherapySessionValidationError as exc:
+        # Сервис clear_guest_matching_state() очищает старый guest-черновик,
+        # потому что он уже не должен повторно использоваться после неудачной попытки resume-booking
+        clear_guest_matching_state(request.session)
+        # Используется после подтверждения email, если система попыталась автоматом завершить paused-booking,
+        # но выбранный слот уже недоступен (например, его забронировал другой клиент или слот уже в прошлом).
+        # Тогда пользователя нужно вернуть на шаг выбора психолога и времени.
+        # ВАЖНО: здесь нельзя передавать reset=1 (True), потому что reset-сценарий специально сбрасывает выбор
+        # текущего специалиста и открывает первую аву из выдачи. А в этом кейсе пользователю, наоборот,
+        # нужно сохранить ранее выбранного специалиста и предложить только выбрать другое время.
+        messages.error(request, str(exc))
+        return redirect(
+            build_choice_psychologist_url(
+                reset=False,
+                specialist_profile_id=booking_payload["specialist_profile_id"],
+            )
+        )
+
+    request.session["last_created_booking_id"] = str(booking_result["event"].id)
+
+    # После успешного завершения paused-booking временный guest-state больше не нужен
+    clear_guest_matching_state(request.session)
+    messages.success(request, success_message)
+
+    return redirect(f"{reverse_lazy('core:client-planned-sessions')}?layout=sidebar")
+
+
+# ===== ЗАВЕРШЕНИЕ БРОНИ У ГОСТЯ =====
+
+class CompleteBookingAuthPageView(AnonymousOnlyMixin, TemplateView):
+    """Отдельный экран выбора следующего шага для гостя с paused-booking.
+
+    Экран появляется только после того, как гость уже выбрал специалиста и слот, а система поставила запись
+    на паузу до аутентификации.
+    """
+
+    template_name = "users/complete_booking_auth_page.html"
+
+    def get(self, request, *args, **kwargs):
+        """Показывает экран завершения записи только если в session действительно есть paused-booking."""
+        if not get_guest_pending_booking(request.session):
+            return redirect("users:web:login-page")
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        """Формирует контекст отдельного guest-экрана завершения записи."""
+        context = super().get_context_data(**kwargs)
+        context["title_complete_booking_auth_view"] = "Завершение записи в сервисе ОПОРА"
+        context["booking_auth_stage"] = self.request.GET.get("stage", "choose-auth-method")
+        context["booking_summary"] = _build_paused_booking_summary(self.request.session)
+        context["login_url"] = reverse_lazy("users:web:login-page")
+        context["register_url"] = reverse_lazy("users:web:register-page")
+        context["guest_email"] = get_guest_matching_state(self.request.session)["general"].get("email", "")
+        return context
+
+
+# ===== РЕГИСТРАЦИЯ НОВОГО ПООЛЬЗОВАТЕЛЯ =====
 
 @method_decorator(ratelimit(key="ip", rate="5/m", block=True), name="post")
 class RegisterPageView(AnonymousOnlyMixin, FormView):
@@ -94,9 +262,6 @@ class RegisterPageView(AnonymousOnlyMixin, FormView):
         context = super().get_context_data(**kwargs)
         context["title_register_page_view"] = "Регистрация в сервисе ОПОРА"
         context["menu_variant"] = "without-any-menu"
-        # get_guest_pending_booking() возвращает отложенное бронирование guest-anonymous, если оно есть
-        context["resume_booking_mode"] = bool(get_guest_pending_booking(self.request.session))
-
         return context
 
     def form_valid(self, form):
@@ -124,6 +289,8 @@ class RegisterPageView(AnonymousOnlyMixin, FormView):
             },
         )
         existing_user = AppUser.objects.filter(email=email).first()
+        # get_guest_pending_booking() возвращает отложенное бронирование guest-anonymous, если оно есть
+        has_paused_booking = bool(get_guest_pending_booking(self.request.session))
 
         # 1) Сценарий 1: пользователь с таким email уже есть в БД.
         # Если аккаунт еще не активирован, просто отправляем повторное письмо подтверждения.
@@ -141,17 +308,26 @@ class RegisterPageView(AnonymousOnlyMixin, FormView):
                     url_name="users:web:verify-email",
                     extra_query_params={"resume_booking": resume_token} if resume_token else None,
                 )
+                # Сценарий paused-booking: после регистрации не отправляем гостя на базовую login-страницу,
+                # а показываем отдельный экран с понятным следующим шагом - подтвердить email
+                if has_paused_booking:
+                    return redirect(_build_complete_booking_auth_url(stage="verification-pending"))
+
+                messages.info(
+                    self.request,
+                    "Мы отправили инструкцию для подтверждения регистрации.\n"
+                    "Пожалуйста, проверьте вашу почту.",
+                )
+                return super().form_valid(form)
+
+            # Для гостя с paused-booking здесь нужен явный продуктовый сценарий:
+            # email уже принадлежит активному аккаунту, значит запись можно завершить только через вход
+            if has_paused_booking:
+                return redirect(_build_complete_booking_auth_url(stage="account-exists"))
 
             messages.info(
                 self.request,
-                (
-                    "Мы отправили инструкцию для подтверждения регистрации.\n"
-                    "Пожалуйста, проверьте вашу почту."
-                    if not get_guest_pending_booking(self.request.session)
-                    else
-                    "Мы отправили письмо для подтверждения регистрации.\n"
-                    "После подтверждения email бронирование встречи произойдет автоматически."
-                ),
+                "Если аккаунт с таким email существует, вы можете войти в систему или восстановить пароль.",
             )
             return super().form_valid(form)
 
@@ -189,20 +365,20 @@ class RegisterPageView(AnonymousOnlyMixin, FormView):
             url_name="users:web:verify-email",
             extra_query_params={"resume_booking": resume_token} if resume_token else None,
         )
+
+        if has_paused_booking:
+            return redirect(_build_complete_booking_auth_url(stage="verification-pending"))
+
         messages.info(
             self.request,
-            (
-                "Мы отправили инструкцию для подтверждения регистрации.\n"
-                "Пожалуйста, проверьте вашу почту."
-                if not get_guest_pending_booking(self.request.session)
-                else
-                "Мы отправили письмо для подтверждения регистрации.\n"
-                "После подтверждения email бронирование встречи произойдет автоматически."
-            ),
+            "Мы отправили инструкцию для подтверждения регистрации.\n"
+            "Пожалуйста, проверьте вашу почту.",
         )
 
         return super().form_valid(form)
 
+
+# ===== ПОДТВЕРЖДЕНИЕ И АКТИВАЦИЯ НОВОГО ПОЛЬЗОВАТЕЛЯ =====
 
 @method_decorator(ratelimit(key="ip", rate="10/m", block=True), name="get")
 class VerifyEmailView(AnonymousOnlyMixin, View):
@@ -242,8 +418,17 @@ class VerifyEmailView(AnonymousOnlyMixin, View):
         # Если пользователь уже активирован и ссылка валидна, повторно подтверждать ничего не нужно.
         # Но для удобства все равно автоматически логиним пользователя и ведем его дальше как в обычном post-login.
         if user.is_active:
-            clear_guest_matching_state(self.request.session)
             login(self.request, user)
+            resume_payload = load_signed_booking_token(resume_booking_token)
+            if resume_payload and str(resume_payload.get("user_pk")) == str(user.pk):
+                return _resume_pending_booking_after_authentication(
+                    self.request,
+                    user=user,
+                    booking_payload=resume_payload,
+                    success_message="Email уже был подтвержден, запись успешно завершена.",
+                )
+
+            clear_guest_matching_state(self.request.session)
             messages.info(self.request, "Email уже был подтвержден. Вы уже вошли в систему")
             return redirect(_build_post_login_redirect_url(user))
 
@@ -257,40 +442,13 @@ class VerifyEmailView(AnonymousOnlyMixin, View):
 
         # 1) Сценарий 1: в ссылке есть валидный resume-booking для этого пользователя
         if resume_payload and str(resume_payload.get("user_pk")) == str(user.pk):
-            layout_mode = resume_payload.get("layout_mode", "menu")
             login(self.request, user)
-
-            try:
-                booking_result = CreateTherapySessionUseCase().execute(
-                    client_user=user,
-                    specialist_profile_id=resume_payload["specialist_profile_id"],
-                    slot_start_iso=resume_payload["slot_start_iso"],
-                    consultation_type=resume_payload["consultation_type"],
-                )
-            except CreateTherapySessionValidationError as exc:
-                # Сервис clear_guest_matching_state() очищает старый guest-черновик,
-                # потому что он уже не должен повторно использоваться после неудачной попытки resume-booking
-                clear_guest_matching_state(self.request.session)
-                messages.error(self.request, str(exc))
-                # Используется после подтверждения email, если система попыталась автоматом завершить paused-booking,
-                # но выбранный слот уже недоступен (например, его забронировал другой клиент или слот уже в прошлом).
-                # Тогда пользователя нужно вернуть на шаг выбора психолога и времени.
-                # ВАЖНО: здесь нельзя передавать reset=1 (True), потому что reset-сценарий специально сбрасывает выбор
-                # текущего специалиста и открывает первую аву из выдачи. А в этом кейсе пользователю, наоборот,
-                # нужно сохранить ранее выбранного специалиста и предложить только выбрать другое время.
-                return redirect(
-                    build_choice_psychologist_url(
-                        reset=False,
-                        specialist_profile_id=resume_payload["specialist_profile_id"],
-                    )
-                )
-
-            self.request.session["last_created_booking_id"] = str(booking_result["event"].id)
-
-            # После успешного завершения paused-booking временный guest-state больше не нужен
-            clear_guest_matching_state(self.request.session)
-            messages.success(self.request, "Email подтвержден, запись успешно завершена.")
-            return redirect(f"{reverse_lazy('core:client-planned-sessions')}?layout={layout_mode}")
+            return _resume_pending_booking_after_authentication(
+                self.request,
+                user=user,
+                booking_payload=resume_payload,
+                success_message="Email подтвержден, запись успешно завершена.",
+            )
 
         # 2) Сценарий 2: обычное подтверждение email без возобновления paused-booking
         login(self.request, user)
@@ -298,6 +456,8 @@ class VerifyEmailView(AnonymousOnlyMixin, View):
         messages.success(self.request, "Email успешно подтвержден. Вы уже вошли в систему")
         return redirect(_build_post_login_redirect_url(user))
 
+
+# ===== ВХОД =====
 
 @method_decorator(ratelimit(key="ip", rate="5/m", block=True), name="post")
 class LoginPageView(AnonymousOnlyMixin, LoginView):
@@ -346,8 +506,6 @@ class LoginPageView(AnonymousOnlyMixin, LoginView):
             .exclude(photo__isnull=True)
             .order_by("?")[:10]
         )
-        # get_guest_pending_booking() возвращает отложенное бронирование guest-anonymous, если оно есть
-        context["resume_booking_mode"] = bool(get_guest_pending_booking(self.request.session))
         context["login_quote"] = random.choice(
             [
                 "«Психотерапия — это искусство возможного. В работе для нас важно сохранять "
@@ -373,9 +531,23 @@ class LoginPageView(AnonymousOnlyMixin, LoginView):
     def form_valid(self, form):
         """Выполняет вход пользователя после успешной аутентификации.
 
-        После входа Django вызывает get_success_url(), который выбирает стартовую страницу
-        в зависимости от того, есть ли у пользователя уже активные клиентские сессии.
+        Работает в двух сценариях:
+            - сценарий 1: обычный вход без paused-booking;
+            - сценарий 2: вход после guest paused-booking, где запись нужно попытаться завершить автоматически.
         """
-        login(self.request, form.get_user())
+        user = form.get_user()
+        login(self.request, user)
 
-        return super().form_valid(form)
+        # Сценарий 2: если перед входом у гостя уже была поставлена на паузу запись,
+        # пытаемся завершить ее сразу после успешной аутентификации.
+        pending_booking = get_guest_pending_booking(self.request.session)
+        if pending_booking:
+            return _resume_pending_booking_after_authentication(
+                self.request,
+                user=user,
+                booking_payload=pending_booking,
+                success_message="Вход выполнен, запись успешно завершена.",
+            )
+
+        # Сценарий 1: обычный вход в систему без paused-booking.
+        return redirect(self.get_success_url())
