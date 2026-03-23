@@ -2,56 +2,85 @@
 
 {% load static %}
 
-{% block title %} {{ title_client_account_view|default:"ОПОРА" }} {% endblock %}
+{% block title %} {{ event.title|default:"Детали сессии" }} | {{ title_client_account_view|default:"ОПОРА" }} {% endblock %}
 
 {% block extra_style %}
 <style>
+    /* ========================================================= */
+    /* Плавный фон */
+    /* ========================================================= */
     body {
         background-image: url('{% static "images/background/background-start.jpg" %}');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        background-attachment: fixed;
+        background-attachment: fixed; /* красиво фиксирует фон */
     }
 
-    /* Карточка системного уведомления сначала мягко затухает, а затем аккуратно освобождает место,
-       чтобы подтверждение сохранения не висело на экране дольше нужного. */
+    /* ========================================================= */
+    /* Анимации входа блоков */
+    /* ========================================================= */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up {
+        opacity: 0;
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+    /* Задержки для каскадного появления */
+    .delay-100 { animation-delay: 100ms; }
+    .delay-200 { animation-delay: 200ms; }
+    .delay-300 { animation-delay: 300ms; }
+
+    /* ========================================================= */
+    /* Через несколько секунд автоматически скрываем системное уведомление об успешной операции */
+    /* ========================================================= */
     .auto-dismiss-message {
         overflow: hidden;
-        transition:
-            opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-            transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-            filter 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-            max-height 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-            margin 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-            padding 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-            border-width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
         transform-origin: top center;
         will-change: opacity, transform, filter, max-height, margin, padding;
         max-height: 220px;
     }
-
     .auto-dismiss-message.is-fading {
         opacity: 0;
         transform: translateY(-6px) scale(0.985);
         filter: blur(1px);
     }
-
     .auto-dismiss-message.is-collapsing {
-        max-height: 0;
-        margin-top: 0;
-        margin-bottom: 0;
-        padding-top: 0;
-        padding-bottom: 0;
-        border-top-width: 0;
-        border-bottom-width: 0;
+        max-height: 0; margin-top: 0; margin-bottom: 0;
+        padding-top: 0; padding-bottom: 0; border-width: 0;
+    }
+
+    /* ========================================================= */
+    /* Кастомизация полей формы под Glassmorphism */
+    /* ========================================================= */
+    .glass-input input, .glass-input textarea {
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(228, 228, 231, 0.8);
+        border-radius: 1rem;
+        padding: 0.75rem 1rem;
+        color: #1e1b4b; /* indigo-950 */
+        transition: all 0.2s ease;
+        backdrop-filter: blur(4px);
+    }
+    .glass-input input:focus, .glass-input textarea:focus {
+        outline: none;
+        background-color: #ffffff;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="relative overflow-hidden min-h-screen bg-white/80 backdrop-blur-[2px] w-full">
-    <div class="relative z-10 w-full px-6 sm:px-8 py-10 {% if show_sidebar %}lg:px-24{% else %}lg:px-40 xl:px-80{% endif %}">
+
+
+<section class="relative overflow-hidden min-h-screen bg-white/40 backdrop-blur-[2px] w-full">
+
+    <div class="relative z-10 w-full px-6 sm:px-8 py-10 {% if show_sidebar %}lg:px-12 xl:px-24{% else %}max-w-7xl mx-auto{% endif %}">
 
         {% if messages %}
             <div class="mb-8 space-y-3 max-w-3xl">
@@ -63,152 +92,195 @@
             </div>
         {% endif %}
 
-        <div class="mb-10">
+        <div class="mb-10 animate-fade-in-up">
             <a href="{% url 'core:client-planned-sessions' %}{{ layout_query }}"
-               class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition">
-                <span>←</span>
-                <span>Назад к запланированным сессиям</span>
+               class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600/80 hover:text-indigo-800 transition-colors group bg-white/50 px-4 py-2 rounded-xl border border-white/60 shadow-sm backdrop-blur-md">
+                <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                <span>Ко всем сессиям</span>
             </a>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-10 gap-6 items-start">
-            <div class="xl:col-span-7 space-y-6">
-                <article class="rounded-3xl border border-indigo-100 bg-white/85 p-6 shadow-sm backdrop-blur-md">
-                    <div class="flex flex-col gap-5 md:flex-row md:items-start">
-                        <img
-                            src="{{ specialist_photo_url }}"
-                            alt="Фото специалиста"
-                            class="h-24 w-24 rounded-3xl object-cover shadow-sm"
-                        >
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
 
-                        <div class="min-w-0">
-                            <h1 class="text-3xl md:text-4xl font-black text-indigo-900 tracking-tight">
-                                {{ event.title }}
-                            </h1>
-                            <p class="mt-3 text-xl font-semibold text-zinc-800">
-                                {{ counterpart_full_name }}
-                            </p>
+            <div class="xl:col-span-8 space-y-8">
 
-                            <div class="mt-4 flex flex-wrap gap-2 text-sm">
-                                <span class="inline-flex rounded-full bg-indigo-100 px-3 py-1 font-semibold text-indigo-700">
-                                    {{ event.get_status_display }}
-                                </span>
-                                <span class="inline-flex rounded-full bg-sky-100 px-3 py-1 font-semibold text-sky-700">
-                                    {{ specialist_profile.get_therapy_format_display|default:"Онлайн" }}
-                                </span>
-                                <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 font-semibold text-emerald-700">
-                                    {{ specialist_profile.get_work_status_display|default:"Работает" }}
-                                </span>
+                <article class="relative overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 p-1 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl animate-fade-in-up delay-100">
+                    <div class="absolute left-0 top-0 bottom-0 w-2 bg-gradient-to-b from-indigo-500 to-violet-500"></div>
+
+                    <div class="p-6 sm:p-8 pl-10 sm:pl-12">
+                        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                            <span class="inline-flex items-center gap-2 rounded-full bg-indigo-100/80 px-4 py-1.5 text-sm font-bold text-indigo-800 border border-indigo-200/50">
+                                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                                {{ event.get_status_display }}
+                            </span>
+
+                            <div class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity cursor-not-allowed" title="В разработке">
+                                <button class="p-2 rounded-full hover:bg-zinc-200/50 text-zinc-500 transition-colors pointer-events-none">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <h1 class="text-3xl sm:text-4xl font-black text-indigo-950 tracking-tight mb-2">
+                            {{ event.title }}
+                        </h1>
+                        <p class="text-lg text-zinc-600 font-medium mb-8">
+                            Специалист: <span class="text-zinc-900 font-semibold">{{ counterpart_full_name }}</span>
+                        </p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-6 border-t border-zinc-200/50">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Дата</p>
+                                <p class="text-xl font-bold text-zinc-900">{{ display_date }}</p>
+                                {% if is_today %}
+                                    <p class="text-sm font-semibold text-emerald-600 mt-0.5">Сегодня</p>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Время</p>
+                                <p class="text-xl font-bold text-indigo-600">{{ display_time_range }}</p>
+                                <p class="text-xs font-medium text-zinc-500 mt-1">{{ display_client_timezone }}</p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Формат</p>
+                                <p class="text-lg font-semibold text-zinc-900">{{ event.get_event_type_display|default:"Онлайн-встреча" }}</p>
                             </div>
                         </div>
                     </div>
                 </article>
 
-                <article class="rounded-3xl border border-indigo-100 bg-white/85 p-6 shadow-sm backdrop-blur-md">
-                    <h2 class="text-2xl font-bold text-indigo-900">Информация о сессии</h2>
+                <article class="rounded-[2rem] border border-white/60 bg-white/50 p-6 sm:p-8 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
+                    <h2 class="text-2xl font-extrabold text-indigo-950 mb-6 flex items-center gap-3">
+                        <svg class="w-6 h-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                        Детали подключения
+                    </h2>
 
-                    <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-zinc-700">
-                        <div class="rounded-2xl bg-zinc-50/80 p-4">
-                            <p class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Дата</p>
-                            <p class="mt-2 text-lg font-semibold text-zinc-900">{{ display_date }}</p>
-                        </div>
-                        <div class="rounded-2xl bg-zinc-50/80 p-4">
-                            <p class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Время</p>
-                            <p class="mt-2 text-lg font-semibold text-zinc-900">{{ display_time_range }}</p>
-                        </div>
-                        <div class="rounded-2xl bg-zinc-50/80 p-4">
-                            <p class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Часовой пояс клиента</p>
-                            <p class="mt-2 text-lg font-semibold text-zinc-900">{{ display_client_timezone }}</p>
-                        </div>
-                        <div class="rounded-2xl bg-zinc-50/80 p-4">
-                            <p class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Источник события</p>
-                            <p class="mt-2 text-lg font-semibold text-zinc-900">{{ event.get_source_display }}</p>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="rounded-3xl border border-indigo-100 bg-white/85 p-6 shadow-sm backdrop-blur-md">
-                    <h2 class="text-2xl font-bold text-indigo-900">Детали и подключение</h2>
-
-                    <form method="post" class="mt-5 space-y-5">
+                    <form method="post" class="space-y-6 glass-input">
                         {% csrf_token %}
 
                         {% if form.non_field_errors %}
-                            <div class="rounded-2xl bg-rose-50 px-5 py-4 text-rose-600">
+                            <div class="rounded-xl bg-rose-50/80 px-5 py-4 text-rose-700 border border-rose-100">
                                 {% for error in form.non_field_errors %}
-                                    <p class="text-sm font-medium">{{ error }}</p>
+                                    <p class="text-sm font-semibold">{{ error }}</p>
                                 {% endfor %}
                             </div>
                         {% endif %}
 
                         <div>
-                            <label for="{{ form.meeting_url.id_for_label }}" class="mb-2 block text-base font-semibold text-zinc-900">
+                            <label for="{{ form.meeting_url.id_for_label }}" class="mb-2 block text-sm font-bold text-zinc-700 uppercase tracking-wide">
                                 {{ form.meeting_url.label }}
                             </label>
                             {{ form.meeting_url }}
                             {% if form.meeting_url.errors %}
-                                <p class="mt-2 text-sm font-medium text-rose-600">{{ form.meeting_url.errors.0 }}</p>
+                                <p class="mt-2 text-sm font-medium text-rose-500">{{ form.meeting_url.errors.0 }}</p>
                             {% endif %}
+                            <p class="mt-2 text-xs text-zinc-500">Ссылка будет доступна вам и специалисту.</p>
                         </div>
 
                         <div>
-                            <label for="{{ form.comment.id_for_label }}" class="mb-2 block text-base font-semibold text-zinc-900">
+                            <label for="{{ form.comment.id_for_label }}" class="mb-2 block text-sm font-bold text-zinc-700 uppercase tracking-wide">
                                 {{ form.comment.label }}
                             </label>
                             {{ form.comment }}
                             {% if form.comment.errors %}
-                                <p class="mt-2 text-sm font-medium text-rose-600">{{ form.comment.errors.0 }}</p>
+                                <p class="mt-2 text-sm font-medium text-rose-500">{{ form.comment.errors.0 }}</p>
                             {% endif %}
                         </div>
 
-                        <button type="submit"
-                                class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold transition hover:bg-indigo-700 shadow-md hover:shadow-lg">
-                            Сохранить изменения
-                        </button>
+                        <div class="pt-2 flex flex-col sm:flex-row gap-4 items-center">
+                            <button type="submit"
+                                    class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-indigo-600 text-white font-bold transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-0.5 focus:ring-4 focus:ring-indigo-500/30">
+                                Сохранить изменения
+                            </button>
+
+                            {% if form.instance.meeting_url %}
+                                <a href="{{ form.instance.meeting_url }}" target="_blank"
+                                   class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-violet-100 text-violet-700 font-bold transition-all duration-200 hover:bg-violet-200 border border-violet-200">
+                                    <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                    Перейти в звонок
+                                </a>
+                            {% endif %}
+                        </div>
                     </form>
                 </article>
+
             </div>
 
-            <aside class="xl:col-span-3 space-y-6">
-                <article class="rounded-3xl border border-indigo-100 bg-white/85 p-6 shadow-sm backdrop-blur-md">
-                    <h2 class="text-2xl font-bold text-indigo-900">Участники</h2>
-                    <div class="mt-5 space-y-4 text-zinc-700">
-                        {% for participant in event.participants.all %}
-                            <div class="rounded-2xl bg-zinc-50/80 p-4">
-                                <p class="text-base font-semibold text-zinc-900">
-                                    {{ participant.user.first_name }} {{ participant.user.last_name }}
-                                </p>
-                                <p class="mt-2 text-sm text-zinc-600">
-                                    Роль: {{ participant.get_role_display }}
-                                </p>
-                                <p class="mt-1 text-sm text-zinc-600">
-                                    Статус: {{ participant.get_status_display }}
-                                </p>
+            <aside class="xl:col-span-4 space-y-6">
+
+                <article class="rounded-[2rem] border border-white/60 bg-white/60 p-6 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="relative mb-4">
+                            <img src="{{ specialist_photo_url }}" alt="Фото специалиста" class="h-28 w-28 rounded-[1.5rem] object-cover shadow-md border-4 border-white/80">
+                            <div class="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-sm">
+                                <span class="block w-4 h-4 rounded-full {% if specialist_profile.work_status == 'working' %}bg-emerald-500{% else %}bg-zinc-300{% endif %}"></span>
                             </div>
-                        {% endfor %}
+                        </div>
+
+                        <h2 class="text-xl font-extrabold text-indigo-950 mb-1">{{ counterpart_full_name }}</h2>
+                        <p class="text-sm font-medium text-zinc-500 mb-5">Психолог • {{ specialist_profile.get_therapy_format_display|default:"Онлайн" }}</p>
+
+                        <div class="w-full grid grid-cols-2 gap-3 mb-5">
+                            <div class="bg-zinc-50/80 rounded-2xl p-3 border border-zinc-100">
+                                <p class="text-xs text-zinc-500 font-medium mb-1">Опыт работы</p>
+                                <p class="text-sm font-bold text-zinc-900">{{ specialist_profile.experience_years|default:"—" }} лет</p>
+                            </div>
+                            <div class="bg-zinc-50/80 rounded-2xl p-3 border border-zinc-100">
+                                <p class="text-xs text-zinc-500 font-medium mb-1">Формат</p>
+                                <p class="text-sm font-bold text-zinc-900">Индивидуально</p>
+                            </div>
+                        </div>
+
+                        <button class="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors w-full py-2 bg-indigo-50/50 rounded-xl">
+                            Посмотреть профиль
+                        </button>
                     </div>
                 </article>
 
-                <article class="rounded-3xl border border-indigo-100 bg-white/85 p-6 shadow-sm backdrop-blur-md">
-                    <h2 class="text-2xl font-bold text-indigo-900">Работает с темами вашей анкеты</h2>
+                <article class="rounded-[2rem] border border-white/60 bg-white/60 p-6 shadow-sm backdrop-blur-md animate-fade-in-up delay-300">
+                    <h3 class="text-lg font-bold text-indigo-950 mb-4 flex items-center justify-between">
+                        Запрос на сессию
+                        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs">{{ matched_topics|length|default:"0" }}</span>
+                    </h3>
 
                     {% if matched_topics %}
-                        <div class="mt-5 flex flex-wrap gap-2">
+                        <div class="flex flex-wrap gap-2">
                             {% for topic in matched_topics %}
-                                <span class="inline-flex rounded-full bg-indigo-100 px-3 py-1 text-sm font-semibold text-indigo-700">
+                                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-100/80 text-sm font-medium text-indigo-800 transition-colors hover:bg-indigo-100">
                                     {{ topic.name }}
                                 </span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        <p class="mt-4 text-base text-zinc-600">
-                            Для этой сессии пока не найдено совпавших тем между вашим запросом и профилем специалиста.
-                        </p>
+                        <div class="p-4 bg-zinc-50/80 rounded-2xl border border-zinc-100 text-center">
+                            <p class="text-sm text-zinc-500 font-medium">Конкретные темы не указаны</p>
+                        </div>
                     {% endif %}
                 </article>
+
+                <article class="rounded-[2rem] border border-white/60 bg-white/40 p-6 shadow-sm backdrop-blur-md animate-fade-in-up delay-300">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-500 mb-4">Участники встречи</h3>
+                    <div class="space-y-3">
+                        {% for participant in event.participants.all %}
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-zinc-200 flex items-center justify-center text-zinc-500 font-bold text-xs shrink-0">
+                                    {{ participant.user.first_name|first|default:"U" }}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-bold text-zinc-800 truncate">{{ participant.user.first_name }} {{ participant.user.last_name }}</p>
+                                    <p class="text-xs font-medium text-zinc-500">{{ participant.get_role_display }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </article>
+
             </aside>
         </div>
     </div>
 </section>
+
 <script type="module" src="{% static 'js/modules/auto_hide_message.js' %}"></script>
 {% endblock %}
