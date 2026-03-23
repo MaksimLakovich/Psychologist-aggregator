@@ -85,11 +85,10 @@ class ClientAddPaymentCardPageView(SpecialistMatchingLayoutMixin, FormView):
                 slot_start_iso=form.cleaned_data["slot_start_iso"],
                 consultation_type=form.cleaned_data["consultation_type"],
             )
-            messages.info(
-                self.request,
-                "Чтобы завершить запись для выбранного специалиста и слота, войдите или зарегистрируйтесь.",
-            )
-            return redirect("users:web:login-page")
+            # Для гостя используем отдельную вспомогаттельную auth-страницу, а не базовую login-страницу.
+            # Это позволяет не смешивать обычный сценарий входа/регистрации со специальным сценарием
+            # для гостя "завершить уже выбранную запись"
+            return redirect("users:web:complete-booking-auth")
 
         # Сценарий 1: Авторизованный клиент. Сохраняем данные в реальные модели данных в БД
         use_case = CreateTherapySessionUseCase()

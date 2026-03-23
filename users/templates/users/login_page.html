@@ -39,12 +39,6 @@
                 </p>
 
                 <!-- УВЕДОМЛЕНИЯ -->
-                {% if resume_booking_mode %}
-                <div class="mb-4 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-700">
-                    Мы сохранили выбранного специалиста и время сессии. Вы сможете продолжить запись после входа или регистрации
-                </div>
-                {% endif %}
-
                 {% if messages %}
                 <div class="space-y-2">
                     {% for message in messages %}
