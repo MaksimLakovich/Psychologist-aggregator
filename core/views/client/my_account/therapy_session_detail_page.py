@@ -1,15 +1,18 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 from django.views.generic import FormView
 
 from calendar_engine.models import CalendarEvent
 from core.forms.client.my_account.form_therapy_session_details import \
     ClientTherapySessionDetailsForm
 from core.services.calendar_event_slot_selector import get_event_active_slot
+from core.services.experience_label import build_experience_label
 from core.services.calendar_slot_time_display import \
     build_calendar_slot_time_display
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
+from users.constants import LANGUAGE_CHOICES
 
 
 class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, FormView):
@@ -42,6 +45,8 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
                 "slots",
                 "slots__slot_participants__user",
                 "participants__user__psychologist_profile",
+                "participants__user__psychologist_profile__methods",
+                "participants__user__psychologist_profile__specialisations",
                 "participants__user__psychologist_profile__topics",
             ),
             id=kwargs["event_id"],
@@ -157,6 +162,7 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
         """Формирует контекст detail-screen терапевтической сессии."""
         context = super().get_context_data(**kwargs)
         client_timezone = getattr(self.request.user, "timezone", None)
+        language_label_map = dict(LANGUAGE_CHOICES)
 
         _, counterpart_user, specialist_profile = self._get_counterpart_user_and_specialist_profile()
         counterpart_full_name = (
@@ -174,6 +180,19 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
             if self.slot
             else {}
         )
+        specialist_languages_display = (
+            [language_label_map.get(language_code, language_code) for language_code in specialist_profile.languages]
+            if specialist_profile and specialist_profile.languages
+            else []
+        )
+        experience_label = build_experience_label(
+            specialist_profile.work_experience_years if specialist_profile else None
+        )
+
+        if specialist_profile and self.event.event_type == "session_couple":
+            session_price_value = specialist_profile.price_couples
+        else:
+            session_price_value = specialist_profile.price_individual if specialist_profile else None
 
         context["title_client_account_view"] = "Детали сессии на ОПОРА"
         self._apply_layout_context(context)
@@ -187,9 +206,17 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
             if counterpart_user
             else "/static/images/menu/user-circle.svg"
         )
-        context["display_date"] = slot_display_data.get("display_date", "")
-        context["display_time_range"] = slot_display_data.get("display_time_range", "")
-        context["display_client_timezone"] = slot_display_data.get("display_client_timezone", str(client_timezone))
+        context["specialist_profile_url"] = (
+            f"{reverse('core:psychologist-card-detail', kwargs={'profile_slug': specialist_profile.slug})}{self._build_layout_query()}"
+            if specialist_profile and specialist_profile.slug
+            else None
+        )
+        context["specialist_experience_label"] = experience_label
+        context["specialist_languages_display"] = specialist_languages_display
+        context["session_price_value"] = session_price_value
+        context["slot_display"] = slot_display_data
+        context["slot_participants_count"] = len(self.slot.slot_participants.all()) if self.slot else 0
+        context["event_participants_count"] = len(self.event.participants.all())
         context["matched_topics"] = self._build_matched_topics()
 
         return context
