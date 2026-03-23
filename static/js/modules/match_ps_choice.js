@@ -90,15 +90,35 @@ function fetchPsychologists() {
             // Если пришли после новой/повторной фильтрации/подбора - то сбрасываем выбранного ранее психолога
             const cardContainer = document.getElementById("psychologist-card");
             const shouldReset = cardContainer?.dataset.resetChoice === "1";
+            // В сценарии неудачного resume-booking сервер возвращает specialist_profile_id в query string.
+            // Это нужно, чтобы повторно открыть именно ранее выбранного специалиста,
+            // а не заставлять клиента заново искать его по всем наборам аватаров.
+            const preferredPsychologistId = new URLSearchParams(window.location.search).get("specialist_profile_id");
 
             if (shouldReset) {
                 sessionStorage.removeItem("selectedPsychologistId");
                 cardContainer.dataset.resetChoice = "0";
             }
 
-            // В остальных случаях пытаемся восстановить последний выбранный психолог
-            const selectedId = sessionStorage.getItem("selectedPsychologistId");
-            const selected = psychologists.find(ps => String(ps.id) === selectedId) || psychologists[0];
+            let selected = null;
+
+            // 1) Сценарий 1: если URL уже содержит specialist_profile_id, приоритетно открываем именно его.
+            if (preferredPsychologistId) {
+                selected = psychologists.find(
+                    ps => String(ps.id) === String(preferredPsychologistId)
+                ) || null;
+            }
+
+            // 2) Сценарий 2: если специального id нет, пытаемся восстановить последнего выбранного психолога.
+            if (!selected) {
+                const selectedId = sessionStorage.getItem("selectedPsychologistId");
+                selected = psychologists.find(ps => String(ps.id) === selectedId) || null;
+            }
+
+            // 3) Сценарий 3: если ни один из вариантов не подошел, берем первого специалиста из текущей выдачи.
+            if (!selected) {
+                selected = psychologists[0];
+            }
 
             selectedPsychologistId = selected.id;
             // Синхронизируем выбранного психолога с sessionStorage (важно при новом подборе)

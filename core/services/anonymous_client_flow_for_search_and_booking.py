@@ -411,16 +411,24 @@ def load_signed_booking_token(
     return payload if isinstance(payload, dict) else None
 
 
-def build_choice_psychologist_url(*, reset: bool = True):
+def build_choice_psychologist_url(*, reset: bool = True, specialist_profile_id: int | None = None):
     """Собирает URL возврата на шаг выбора психолога для guest-resume-flow.
 
     Используется после подтверждения email, если система попыталась автоматически завершить paused-booking,
     но выбранный слот уже недоступен (например, его забронировал другой клиент или слот уже в прошлом).
-    Тогда пользователя нужно вернуть на шаг выбора психолога и времени в режиме нового повторного выбора.
+    Тогда пользователя нужно вернуть на шаг выбора психолога и времени.
+
+    Если известен specialist_profile_id, добавляем его в URL, чтобы страница открылась
+    сразу на карточке ранее выбранного специалиста, а не на первом специалисте из выдачи.
+    Параметр reset включаем только там, где действительно нужен полный сброс выбора специалиста
+    после новой фильтрации. Для возврата к уже выбранному специалисту reset использовать не нужно.
     """
     query = "?layout=menu"
     if reset:
         # reset=1 нужен, чтобы экран открылся как новый повторный выбор, а не пытался продолжить работать
         # на старом выбранном психологе/слоте
         query = f"{query}&reset=1"
+    # Для возврата к уже выбранному специалисту reset использовать не нужно
+    if specialist_profile_id is not None:
+        query = f"{query}&specialist_profile_id={int(specialist_profile_id)}"
     return f"{reverse('core:choice-psychologist')}{query}"

@@ -222,6 +222,15 @@
 </div>
 
 
+{% if request.GET.specialist_profile_id %}
+<script>
+    // В сценарии неудачного resume-booking возвращаем пользователя на того же специалиста,
+    // которого он уже выбрал раньше. Кладем id в sessionStorage до запуска основного JS,
+    // чтобы страница восстановила нужную аву даже если браузер еще держит старую версию frontend-кода.
+    sessionStorage.setItem("selectedPsychologistId", "{{ request.GET.specialist_profile_id|escapejs }}");
+</script>
+{% endif %}
+
 <script type="module" src="{% static 'js/pages/choice_psychologist.js' %}"></script>
 
 

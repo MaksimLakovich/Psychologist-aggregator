@@ -274,8 +274,16 @@ class VerifyEmailView(AnonymousOnlyMixin, View):
                 messages.error(self.request, str(exc))
                 # Используется после подтверждения email, если система попыталась автоматом завершить paused-booking,
                 # но выбранный слот уже недоступен (например, его забронировал другой клиент или слот уже в прошлом).
-                # Тогда пользователя нужно вернуть на шаг выбора психолога и времени в режиме нового повторного выбора
-                return redirect(build_choice_psychologist_url(reset=True))
+                # Тогда пользователя нужно вернуть на шаг выбора психолога и времени.
+                # ВАЖНО: здесь нельзя передавать reset=1 (True), потому что reset-сценарий специально сбрасывает выбор
+                # текущего специалиста и открывает первую аву из выдачи. А в этом кейсе пользователю, наоборот,
+                # нужно сохранить ранее выбранного специалиста и предложить только выбрать другое время.
+                return redirect(
+                    build_choice_psychologist_url(
+                        reset=False,
+                        specialist_profile_id=resume_payload["specialist_profile_id"],
+                    )
+                )
 
             self.request.session["last_created_booking_id"] = str(booking_result["event"].id)
 
