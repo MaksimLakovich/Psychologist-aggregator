@@ -57,7 +57,7 @@ class CreateTherapySessionUseCase:
                 return slot
 
         raise CreateTherapySessionValidationError(
-            "Выбранный слот больше недоступен. Пожалуйста, вернитесь назад и выберите другое время."
+            "Выбранный слот уже занят. Пожалуйста, выберите другое время"
         )
 
     @staticmethod
