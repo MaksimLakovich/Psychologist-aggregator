@@ -1,5 +1,5 @@
-from datetime import datetime
 import random
+from datetime import datetime
 from urllib.parse import urlencode
 
 from django.contrib import messages
@@ -37,10 +37,10 @@ from users.mixins.anonymous_only_mixin import AnonymousOnlyMixin
 from users.models import AppUser, ClientProfile, PsychologistProfile, UserRole
 from users.services.send_verification_email import send_verification_email
 
-
 # ===== Вспомогательные функции для определения куда перенаправлять пользователя при авторизации:
 # - на страницу подбора, если нет запланированных событий
 # - в личный кабинет, если есть запланированные события
+
 
 def _has_planned_or_started_sessions(user) -> bool:
     """Проверяет, есть ли у пользователя клиентские события в статусе planned или started.
