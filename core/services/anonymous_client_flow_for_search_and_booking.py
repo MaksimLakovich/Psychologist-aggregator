@@ -213,7 +213,6 @@ def clear_guest_pending_booking(session) -> None:
     save_guest_matching_state(session, state)
 
 
-# TODO: нужно подумать и, возможно, гостя отправлять сразу на новую страницу где "Уже регистрировался ранее или нет?"
 def get_guest_data_for_registration(session) -> dict[str, Any]:
     """Подготавливает initial-значения для страницы регистрации.
 
@@ -227,7 +226,6 @@ def get_guest_data_for_registration(session) -> dict[str, Any]:
     }
 
 
-# TODO: нужно подумать и, возможно, гостя отправлять сразу на новую страницу где "Уже регистрировался ранее или нет?"
 def get_guest_data_for_login(session) -> dict[str, Any]:
     """Подготавливает initial-значение для страницы входа.
 
