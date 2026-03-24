@@ -275,7 +275,7 @@
                                 Сохранить изменения
                             </button>
 
-                            {% if slot.meeting_url %}
+                            {% if can_open_meeting_url %}
                                 <a href="{{ slot.meeting_url }}" target="_blank"
                                    class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 gap-3 rounded-xl bg-violet-500
                                    text-white font-bold transition-all duration-200 hover:bg-violet-600 border border-transparent">

@@ -2,12 +2,16 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils import timezone
 from django.views.generic import FormView
 
 from calendar_engine.models import CalendarEvent
 from core.forms.client.my_account.form_therapy_session_details import \
     ClientTherapySessionDetailsForm
-from core.services.calendar_event_slot_selector import get_event_active_slot
+from core.services.calendar_event_slot_selector import (
+    get_event_active_slot,
+    get_event_completed_slot,
+)
 from core.services.calendar_slot_time_display import \
     build_calendar_slot_time_display
 from core.services.experience_label import build_experience_label
@@ -52,9 +56,18 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
             id=kwargs["event_id"],
             participants__user=request.user,
         )
-        # Страница detail-инфо выбранной одной сессии использует тот же helper выбора актуального слота,
-        # что и страница списка "Запланированные", чтобы оба вью одинаково понимали, какой слот сейчас считать рабочим
-        self.slot = get_event_active_slot(self.event)
+        # Для detail-screen сначала пробуем взять активный слот:
+        #   - это основной сценарий для будущих и текущих встреч.
+        # Если active-slot не найден, значит клиент, скорее всего, открыл уже завершенное событие из архива.
+        # Тогда переключаемся на completed-slot, чтобы страница деталей корректно работала и для прошлых встреч.
+        self.slot = get_event_active_slot(self.event) or get_event_completed_slot(self.event)
+        if self.slot is None:
+            fallback_completed_slots = [
+                event_slot
+                for event_slot in self.event.slots.all()
+                if event_slot.end_datetime < timezone.now()
+            ]
+            self.slot = next(iter(reversed(fallback_completed_slots)), None)
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -216,6 +229,14 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
         context["specialist_languages_display"] = specialist_languages_display
         context["session_price_value"] = session_price_value
         context["slot_display"] = slot_display_data
+        # Видеочат для клиента имеет смысл только пока встреча еще активна.
+        # Если слот уже завершился по статусу или по времени, кнопку перехода в звонок скрываем
+        context["can_open_meeting_url"] = bool(
+            self.slot
+            and self.slot.meeting_url
+            and self.slot.status != "completed"
+            and self.slot.end_datetime >= timezone.now()
+        )
         context["slot_participants_count"] = len(self.slot.slot_participants.all()) if self.slot else 0
         context["event_participants_count"] = len(self.event.participants.all())
         context["matched_topics"] = self._build_matched_topics()

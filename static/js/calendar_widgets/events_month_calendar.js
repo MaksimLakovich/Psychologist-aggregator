@@ -93,22 +93,24 @@ function renderDayCounter(dayCellElement, counters) {
     const badgeStack = document.createElement("div");
     badgeStack.className = "planned-session-badge-stack";
 
-    // Индиго-badge отвечает за активные встречи: клиент сразу понимает,
-    // что в этот день у него есть еще не завершенные сессии.
-    if (activeCount) {
-        const activeBadge = document.createElement("span");
-        activeBadge.className = "planned-session-count-badge";
-        activeBadge.textContent = String(activeCount);
-        badgeStack.appendChild(activeBadge);
-    }
-
     // Серый badge отвечает за уже прошедшие встречи:
     // он помогает отличить историю от будущих сессий прямо внутри календаря.
+    // Если на одной дате есть и архив, и активные встречи, серый badge должен быть слева.
     if (completedCount) {
         const completedBadge = document.createElement("span");
         completedBadge.className = "planned-session-count-badge planned-session-count-badge-completed";
         completedBadge.textContent = String(completedCount);
         badgeStack.appendChild(completedBadge);
+    }
+
+    // Индиго-badge отвечает за активные встречи: клиент сразу понимает,
+    // что в этот день у него есть еще не завершенные сессии.
+    // В паре с серым badge он должен стоять справа.
+    if (activeCount) {
+        const activeBadge = document.createElement("span");
+        activeBadge.className = "planned-session-count-badge";
+        activeBadge.textContent = String(activeCount);
+        badgeStack.appendChild(activeBadge);
     }
 
     dayTop.appendChild(badgeStack);

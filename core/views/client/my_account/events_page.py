@@ -440,6 +440,30 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
                 }
             )
 
+        # Для режима "события выбранного дня" порядок карточек должен быть смешанным:
+        #   - сначала все еще активные встречи по возрастанию времени;
+        #   - затем уже завершенные встречи по убыванию времени.
+        # Это помогает клиенту в одном списке сначала увидеть то, куда он еще может попасть сегодня,
+        # а ниже - уже прошедшие события за эту же дату.
+        if selected_calendar_day:
+            active_events = [
+                item
+                for item in client_events
+                if not item["is_archived_card"]
+            ]
+            completed_events = [
+                item
+                for item in client_events
+                if item["is_archived_card"]
+            ]
+            # В day-filter сортируем по уже подготовленному времени клиента, а не по "сырому" datetime БД.
+            # Это важно для пользователей из другого TZ:
+            # выбранный день уже посчитан в timezone клиента, значит и порядок карточек внутри дня
+            # должен соответствовать тому же самому клиентскому времени.
+            active_events.sort(key=lambda item: item["display_start_iso"] or "")
+            completed_events.sort(key=lambda item: item["display_start_iso"] or "", reverse=True)
+            client_events = active_events + completed_events
+
         return client_events
 
     def _build_calendar_month_widget_events(self) -> list[dict]:

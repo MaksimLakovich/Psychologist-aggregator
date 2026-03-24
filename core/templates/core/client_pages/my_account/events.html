@@ -449,7 +449,7 @@
                                         </div>
 
                                         <!-- КНОПКИ -->
-                                        {% if item.slot.meeting_url %}
+                                        {% if item.slot.meeting_url and not item.is_archived_card %}
                                             <a href="{{ item.slot.meeting_url }}"
                                                 target="_blank"
                                                 class="inline-flex items-center justify-center w-full sm:w-auto mt-1 px-6 py-2 gap-3
@@ -503,12 +503,12 @@
                         <div class="mt-6 pt-6 border-t border-slate-400/40 space-y-4">
                             <div class="flex items-center gap-4 text-xs font-semibold text-slate-500">
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex w-4 h-4 rounded-full bg-indigo-600"></span>
-                                    <span>Активные</span>
-                                </div>
-                                <div class="flex items-center gap-2">
                                     <span class="inline-flex w-4 h-4 rounded-full bg-gray-400"></span>
                                     <span>Прошедшие</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex w-4 h-4 rounded-full bg-indigo-600"></span>
+                                    <span>Активные</span>
                                 </div>
                             </div>
 
