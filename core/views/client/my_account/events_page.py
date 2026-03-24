@@ -58,6 +58,10 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
         # Например:
         #   - клиент нажал в month-виджете календаря на день "2026-03-25;
         #   - в шапке страницы показываем не технический YYYY-MM-DD, а "События 25 марта".
+        # date_format(..., "j E") - это логика форматирования из движка шаблонов Django и работает так:
+        #   - j = день месяца без ведущего нуля, то есть "5", а не "05";
+        #   - E = локализованное название месяца в форме, которая подходит для дат, например "марта".
+        # В результате вместо технической даты получаем понятную человеку подпись вида "25 марта".
         context["selected_calendar_day_display"] = (
             date_format(selected_calendar_day, "j E")
             if selected_calendar_day
@@ -171,7 +175,17 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
         events = (CalendarEvent.objects.filter(
             participants__user=self.request.user,
         )
-        # ???
+        # annotate(...) добавляет к каждому событию вычисляемое поле прямо на уровне SQL-запроса.
+        # Здесь latest_slot_end = самое позднее end_datetime среди всех слотов события.
+        # Зачем это нужно:
+        #   - быстро понять, событие уже целиком в прошлом или нет;
+        #   - не перебирать все слоты вручную в Python на этапе первичной фильтрации;
+        #   - иметь страховку на случай, если статус события еще не обновился, но по времени оно уже завершилось.
+        #
+        # Max("slots__end_datetime") означает:
+        #   - взять все связанные slots;
+        #   - найти у них максимальное end_datetime;
+        #   - записать это значение во временное поле latest_slot_end.
         .annotate(
             latest_slot_end=Max("slots__end_datetime"),
         ))
@@ -181,6 +195,12 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
         #   - клиент нажал день в calendar-widget;
         #   - значит ему нужно показать все события этого дня, а не только активные или только архив
         if selected_calendar_day:
+            # Q(...) в Django ORM нужен, когда условие фильтра становится составным и его нужно комбинировать
+            # через логическое ИЛИ / И.
+            # Здесь логика такая:
+            #   - либо событие имеет "нормальный" статус planned / started / completed;
+            #   - либо even если статусная модель не успела обновиться, но последнее окно latest_slot_end
+            #     уже в прошлом, такое событие все равно нужно включить
             events = events.filter(
                 Q(status__in=["planned", "started", "completed"]) | Q(latest_slot_end__lt=current_datetime)
             ).annotate(
@@ -306,7 +326,12 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
                     if show_completed
                     else get_event_active_slot(event)
                 )
-            # 3) Для показа всех ЗАПЛАНИРОВАННЫХ событий
+            # 3) Дополнительная страховка только для архива:
+            #   - если helper get_event_completed_slot(...) не нашел слот по статусу completed;
+            #   - но сама страница уже точно находится в архивном режиме (если статус еще не обновился сервисом,
+            #     но встреча по факту уже закончилась);
+            #   - и это не day-фильтр по конкретной дате;
+            # тогда берем последний слот, который просто закончился по времени
             if slot is None and show_completed and not selected_calendar_day:
                 fallback_completed_slots = [
                     event_slot
@@ -418,7 +443,8 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
         return client_events
 
     def _build_calendar_month_widget_events(self) -> list[dict]:
-        """Готовит компактный JSON-совместимый набор событий для month-виджета календаря.
+        """Этот метод нужен только для правого виджета календаря. Он делает не "еще один список карточек",
+        а компактный JSON-совместимый набор событий для month-виджета календаря.
 
         Бизнес-смысл:
             - виджет справа не должен пересчитывать доменную логику;
@@ -447,38 +473,50 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
         )
 
         for event in events:
-            # Для календарного виджета нужно различать два типа счетчиков:
+
+            # 1) Для календарного виджета нужно различать два типа счетчиков:
             #   - активные встречи;
             #   - завершенные встречи.
-            # Поэтому заранее определяем "бакет" события и выбираем слот, который будет отвечать за дату на календаре
-            is_completed_bucket = (
+            # Поэтому использую флаг is_completed_events = True/False
+            is_completed_events = (
                 event.status == "completed"
                 or (
                     getattr(event, "latest_slot_end", None) is not None
                     and event.latest_slot_end < current_datetime
                 )
             )
+
+            # 2) Далее определяем слот в зависимости от того активная или завершенная встреча
             slot = (
-                get_event_completed_slot(event)
-                if is_completed_bucket
-                else get_event_active_slot(event)
+                get_event_completed_slot(event)  # Возвращает последний завершенный слот события
+                if is_completed_events
+                else get_event_active_slot(event)  # Возвращает актуальный слот события
             )
-            if slot is None and is_completed_bucket:
+            # ЗАЩИТА:
+            # - если архивный режим включен и слот не найден, то запускаем fallback-логику (берем все слоты события;
+            # оставляем только те, которые уже закончились по факту)
+            if slot is None and is_completed_events:
                 fallback_completed_slots = [
                     event_slot
                     for event_slot in event.slots.all()
                     if event_slot.end_datetime < current_datetime
                 ]
                 slot = next(iter(reversed(fallback_completed_slots)), None)
+            # - если подходящий слот для отображения не найден, событие пропускаем
             if slot is None:
                 continue
+
+            # 3) Превращаем start/end слота в готовые display-значения:
+            #   - дату;
+            #   - время;
+            #   - ISO-строки для month-widget календаря;
+            #   - подпись timezone клиента
             slot_display_data = build_calendar_slot_time_display(
                 slot=slot,
                 client_timezone=getattr(self.request.user, "timezone", None),
             )
 
-            # Формируем минимальный набор данных, который нужен именно JS-календарю.
-            # То есть month-виджет не получает всю карточку встречи, а только то, что нужно ему
+            # 4) Формируем итоговый набор данных, который нужен именно для JS month-виджета календаря
             calendar_events.append(
                 {
                     "id": str(event.id),
@@ -487,7 +525,7 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
                     "end": slot_display_data.get("display_end_iso"),  # нужен для календарного виджета FullCalendar
                     "status": event.status,
                     "day_key": slot_display_data.get("display_day_key"),  # нужен для счетчика встреч по дням
-                    "bucket": "completed" if is_completed_bucket else "active",
+                    "bucket": "completed" if is_completed_events else "active",
                 }
             )
 
