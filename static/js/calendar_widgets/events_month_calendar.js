@@ -1,5 +1,5 @@
 /**
- * Инициализация month-widget для страницы "Запланированные сессии".
+ * Инициализация month-widget для страницы "Мой календарь".
  *
  * Бизнес-смысл:
  * - справа от списка встреч клиент видит компактный календарь текущего месяца;
@@ -29,10 +29,11 @@ function readPlannedSessionsCalendarData() {
 }
 
 function buildDayCounters(events) {
-    // Превращаем список сессий в простую карту вида:
-    // { "2026-03-19": 2, "2026-03-20": 1 }
-    // Это нужно, чтобы в каждой ячейке месяца быстро показать,
-    // сколько встреч назначено именно на этот день.
+    // Превращаем список сессий в карту по дням:
+    // { "2026-03-19": 2, "2026-03-20": 1 }, где отдельно считаем:
+    // - активные встречи;
+    // - уже завершенные встречи.
+    // Это нужно, чтобы календарный виджет мог показывать клиенту два разных типа счетчиков в одной ячейке дня.
     return (events || []).reduce((accumulator, eventItem) => {
         if (!eventItem?.day_key) {
             return accumulator;
@@ -41,21 +42,43 @@ function buildDayCounters(events) {
         // day_key - это канонический ключ дня, который сервер уже подготовил в формате YYYY-MM-DD.
         // По нему month-widget понимает, какой именно календарный день нужно пометить счетчиком встреч.
         const dayKey = String(eventItem.day_key);
-        accumulator[dayKey] = (accumulator[dayKey] || 0) + 1;
+        if (!accumulator[dayKey]) {
+            accumulator[dayKey] = {
+                activeCount: 0,
+                completedCount: 0,
+            };
+        }
+
+        if (eventItem.bucket === "completed") {
+            accumulator[dayKey].completedCount += 1;
+        } else {
+            accumulator[dayKey].activeCount += 1;
+        }
+
         return accumulator;
     }, {});
 }
 
-function renderDayCounter(dayCellElement, count) {
-    // Если в этот день у клиента нет встреч, то и badge не нужен:
+function renderDayCounter(dayCellElement, counters) {
+    // counters - это уже не одно число, а объект вида:
+    // {
+    //   activeCount: 2,
+    //   completedCount: 1
+    // }
+    // Он нужен, чтобы в одном и том же дне можно было показать
+    // и будущие/текущие встречи, и уже прошедшие.
+    const activeCount = counters?.activeCount || 0;
+    const completedCount = counters?.completedCount || 0;
+
+    // Если в этот день у клиента нет ни активных, ни завершенных встреч, то и badge не нужен:
     // ячейка должна оставаться чистой и не перегруженной лишними индикаторами.
-    if (!dayCellElement || !count) {
+    if (!dayCellElement || (!activeCount && !completedCount)) {
         return;
     }
 
     // FullCalendar может перевызывать рендер ячейки.
-    // Проверяем, не добавляли ли мы badge раньше, чтобы не дублировать его в одном и том же дне.
-    if (dayCellElement.querySelector(".planned-session-count-badge")) {
+    // Проверяем, не добавляли ли мы badge-стек раньше, чтобы не дублировать его в одном и том же дне.
+    if (dayCellElement.querySelector(".planned-session-badge-stack")) {
         return;
     }
 
@@ -67,13 +90,28 @@ function renderDayCounter(dayCellElement, count) {
         return;
     }
 
-    // Badge показывает компактный счетчик встреч за день.
-    // При наведении в title остается текстовая расшифровка, чтобы значение было понятно без догадок.
-    const badge = document.createElement("span");
-    badge.className = "planned-session-count-badge";
-    badge.textContent = String(count);
-    badge.title = `${count} ${count === 1 ? "встреча" : "встречи"} в этот день`;
-    dayTop.appendChild(badge);
+    const badgeStack = document.createElement("div");
+    badgeStack.className = "planned-session-badge-stack";
+
+    // Индиго-badge отвечает за активные встречи: клиент сразу понимает,
+    // что в этот день у него есть еще не завершенные сессии.
+    if (activeCount) {
+        const activeBadge = document.createElement("span");
+        activeBadge.className = "planned-session-count-badge";
+        activeBadge.textContent = String(activeCount);
+        badgeStack.appendChild(activeBadge);
+    }
+
+    // Серый badge отвечает за уже прошедшие встречи:
+    // он помогает отличить историю от будущих сессий прямо внутри календаря.
+    if (completedCount) {
+        const completedBadge = document.createElement("span");
+        completedBadge.className = "planned-session-count-badge planned-session-count-badge-completed";
+        completedBadge.textContent = String(completedCount);
+        badgeStack.appendChild(completedBadge);
+    }
+
+    dayTop.appendChild(badgeStack);
 }
 
 function initPlannedSessionsCalendarWidget() {
@@ -88,6 +126,14 @@ function initPlannedSessionsCalendarWidget() {
     // Берем уже подготовленные на сервере данные о сессиях и превращаем их в карту счетчиков по дням.
     const events = readPlannedSessionsCalendarData();
     const dayCounters = buildDayCounters(events);
+    // Базовая query-строка нужна, чтобы при клике по дню не потерять текущий layout страницы.
+    // Например:
+    //   - если кабинет открыт в sidebar-layout,
+    //   - клик по дню должен привести на тот же URL, но с layout=sidebar и selected_day=...
+    const dayClickQueryBase = calendarContainer.dataset.dayClickQueryBase || "";
+    // selectedDay приходит с сервера, если страница уже открыта в режиме фильтра по конкретной дате.
+    // Это нужно только для визуальной подсветки выбранной ячейки в календаре.
+    const selectedDay = calendarContainer.dataset.selectedDay || "";
 
     // Сервер передает месяц, который логично показать первым.
     // Например, если у клиента новая запись в будущем месяце, календарь может сразу открыться на нем.
@@ -112,15 +158,44 @@ function initPlannedSessionsCalendarWidget() {
         // а не рисовать внутри ячеек длинные event bars.
         events,
         eventDisplay: "none",
+        dateClick(info) {
+            // FullCalendar отдает дату объекта Date.
+            // Приводим ее к нашему каноническому формату YYYY-MM-DD,
+            // который понимает серверный фильтр selected_day.
+            // Если на день нет ни активных, ни завершенных встреч, клик не должен ничего делать:
+            // виджет фильтрует список только по тем датам, где реально есть события.
+            const dayKey = `${info.date.getFullYear()}-${String(info.date.getMonth() + 1).padStart(2, "0")}-${String(info.date.getDate()).padStart(2, "0")}`;
+            const dayCount = dayCounters[dayKey] || { activeCount: 0, completedCount: 0 };
+            if (!dayCount.activeCount && !dayCount.completedCount) {
+                return;
+            }
+
+            // Переходим на эту же страницу, но уже с selected_day.
+            // Сервер после этого сам перестроит список слева и шапку страницы.
+            const queryPrefix = dayClickQueryBase || "";
+            const separator = queryPrefix.includes("?") ? "&" : "?";
+            window.location.assign(`${window.location.pathname}${queryPrefix}${separator}selected_day=${dayKey}`);
+        },
         dayCellDidMount(info) {
             // Для каждой ячейки месяца FullCalendar отдает конкретную дату.
             // Переводим ее в тот же day_key формат, который использует сервер,
             // чтобы сопоставить календарный день со счетчиком встреч.
             const dayKey = `${info.date.getFullYear()}-${String(info.date.getMonth() + 1).padStart(2, "0")}-${String(info.date.getDate()).padStart(2, "0")}`;
-            const dayCount = dayCounters[dayKey] || 0;
+            const dayCount = dayCounters[dayKey] || { activeCount: 0, completedCount: 0 };
 
             // Если на этот день у клиента есть встречи, добавляем badge прямо в ячейку.
             renderDayCounter(info.el, dayCount);
+
+            // Дни с badge делаем интерактивными: клик по ним фильтрует список слева только на выбранную дату.
+            if (dayCount.activeCount || dayCount.completedCount) {
+                info.el.classList.add("has-session-badge");
+            }
+
+            // Если клиент уже фильтрует страницу по конкретной дате,
+            // визуально подсвечиваем выбранный день в month-widget, чтобы не терялась связь между списком и календарем.
+            if (selectedDay && selectedDay === dayKey) {
+                info.el.classList.add("fc-day-selected");
+            }
         },
     });
 

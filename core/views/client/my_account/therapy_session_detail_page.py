@@ -196,7 +196,7 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
 
         context["title_client_account_view"] = "Детали сессии на ОПОРА"
         self._apply_layout_context(context)
-        context["current_sidebar_key"] = "session-planned"
+        context["current_sidebar_key"] = "all-events"
         context["event"] = self.event
         context["slot"] = self.slot
         context["counterpart_full_name"] = counterpart_full_name or "Специалист будет указан позже"

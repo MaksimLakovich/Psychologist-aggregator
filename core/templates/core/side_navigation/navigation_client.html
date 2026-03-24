@@ -60,9 +60,9 @@
             <li>
                 <a href="{% url 'core:client-events' %}?layout=sidebar"
                    data-nav-item
-                   data-nav-key="session-planned"
-                   class="{{ nav_item_classes }} {% if current_sidebar_key == 'session-planned' %}bg-gray-300/25 !text-indigo-700{% endif %}"
-                   {% if current_sidebar_key == 'session-planned' %}data-nav-active-server="1" aria-current="page"{% endif %}>
+                   data-nav-key="all-events"
+                   class="{{ nav_item_classes }} {% if current_sidebar_key == 'all-events' %}bg-gray-300/25 !text-indigo-700{% endif %}"
+                   {% if current_sidebar_key == 'all-events' %}data-nav-active-server="1" aria-current="page"{% endif %}>
                     <img src="{% static 'images/menu/calendar.svg' %}"
                          alt="calendar"
                          class="transition-transform duration-200 group-hover:scale-110">
