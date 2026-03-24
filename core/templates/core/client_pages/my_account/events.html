@@ -315,7 +315,7 @@
         {% endif %}
 
         <!-- Шапка страницы -->
-        <div class="animate-fade-in-left mb-12 md:mb-16 max-w-5xl">
+        <div class="animate-fade-in-left mb-8 md:mb-10 max-w-5xl">
             <header>
                 <h1 class="text-4xl md:text-5xl font-black text-indigo-900 tracking-tight leading-tight break-words">
                     {% if selected_calendar_day_display %}
@@ -490,7 +490,7 @@
 
                 <!-- ===== ВИДЖЕТ КАЛЕНДАРЯ ===== -->
                 <aside class="xl:col-span-4 lg:sticky lg:top-14 self-start h-fit animate-fade-in-right planned-session-calendar">
-                    <div class="rounded-[1.5rem] bg-slate-200/50 border border-zinc-300/25 p-6 shadow-xs backdrop-blur-xl ring-1 ring-black/5">
+                    <div class="rounded-[1.5rem] bg-slate-200/50 border border-zinc-300/25 p-4 shadow-xs backdrop-blur-xl ring-1 ring-black/5">
 
                         <div class="mb-6 pb-6 flex flex-col items-center justify-center border-b border-slate-400/40">
                             <h2 class="text-xl font-extrabold text-indigo-900 tracking-tight">Календарь</h2>
@@ -509,24 +509,15 @@
                              class="min-h-[320px]"></div>
 
                         <div class="mt-6 pt-6 border-t border-slate-400/40 space-y-4">
-                            <div class="flex items-center gap-4 text-xs font-semibold text-slate-500">
-                                <div class="flex items-center gap-2">
+                            <div class="flex items-center justify-center gap-8 text-xs font-semibold text-slate-500">
+                                <div class="flex items-center gap-1">
                                     <span class="inline-flex w-4 h-4 rounded-full bg-gray-400"></span>
-                                    <span>Прошедшие</span>
+                                    <span>- прошедшие</span>
                                 </div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-1">
                                     <span class="inline-flex w-4 h-4 rounded-full bg-indigo-600"></span>
-                                    <span>Активные</span>
+                                    <span>- активные</span>
                                 </div>
-                            </div>
-
-                            <div class="flex items-start gap-3">
-                                <div class="mt-0.5 w-8 h-8 rounded-full bg-indigo-100/50 flex items-center justify-center shrink-0">
-                                    <img src="{% static 'images/booking/calendar.svg' %}" alt="info" class="w-4 h-4 opacity-70">
-                                </div>
-                                <p class="text-xs leading-relaxed text-slate-400 font-medium">
-                                    Виджет показывает, в какие дни у вас есть активные встречи и сколько сессий уже перешло в историю
-                                </p>
                             </div>
                         </div>
 
