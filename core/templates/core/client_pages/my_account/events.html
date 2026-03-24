@@ -367,7 +367,7 @@
                                 {% endif %}">
                                 <div class="absolute left-0 top-0 bottom-0 w-1.5 {% if item.is_archived_card %}bg-gradient-to-b from-slate-500 to-slate-400{% else %}bg-gradient-to-b from-indigo-600 to-indigo-500{% endif %}"></div>
                                 {% if item.is_archived_card %}
-                                    <div class="pointer-events-none absolute inset-0 bg-white/70"></div>
+                                    <div class="pointer-events-none absolute inset-0 z-10 bg-white/70"></div>
                                 {% endif %}
 
                                 <div class="flex flex-col md:flex-row">
@@ -388,7 +388,9 @@
 
                                         <div class="md:mt-4 text-center">
                                             <div class="inline-flex flex-col items-center px-3 py-2">
-                                                <span class="{% if item.is_today %}text-base session-today-time-pulse{% else %}text-sm{% endif %} font-black text-indigo-900 tracking-wide">{{ item.display_start_time }}</span>
+                                                <span class="{% if item.is_today and not item.is_archived_card %}text-base session-today-time-pulse{% else %}text-sm{% endif %} font-black text-indigo-900 tracking-wide">
+                                                    {{ item.display_start_time }}
+                                                </span>
                                             </div>
                                         </div>
 
@@ -414,19 +416,22 @@
                                             <div class="relative">
                                                 <img src="{{ item.specialist_photo_url }}" alt="Специалист"
                                                      class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
-                                                <!-- Подключаем live_indicator специалиста + лейбл с пояснением индикатора -->
-                                                <span class="group absolute -bottom-0.5 -right-0.5 z-20 flex items-center justify-center w-4 h-4 rounded-full bg-white border-2 border-white shadow-sm"
-                                                      title="{{ item.specialist_live_indicator.title }}">
-                                                    {% if item.specialist_live_indicator.should_ping %}
-                                                        <span class="absolute inset-0 m-auto inline-flex w-3 h-3 animate-ping rounded-full opacity-75"
-                                                              style="background-color: {{ item.specialist_live_indicator.ping_color }};"></span>
-                                                    {% endif %}
-                                                    <span class="absolute inset-0 m-auto inline-flex w-3 h-3 rounded-full"
-                                                          style="background-color: {{ item.specialist_live_indicator.dot_color }};"></span>
-                                                    <span class="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-zinc-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
-                                                        {{ item.specialist_live_indicator.label }}
+                                                {% if not item.is_archived_card %}
+                                                    <!-- Live-indicator оставляем только у активной встречи.
+                                                         В архивной карточке он больше не нужен и визуально конфликтует с белой "пленкой" поверх карточки. -->
+                                                    <span class="group absolute -bottom-0.5 -right-0.5 z-20 flex items-center justify-center w-4 h-4 rounded-full bg-white border-2 border-white shadow-sm"
+                                                          title="{{ item.specialist_live_indicator.title }}">
+                                                        {% if item.specialist_live_indicator.should_ping %}
+                                                            <span class="absolute inset-0 m-auto inline-flex w-3 h-3 animate-ping rounded-full opacity-75"
+                                                                  style="background-color: {{ item.specialist_live_indicator.ping_color }};"></span>
+                                                        {% endif %}
+                                                        <span class="absolute inset-0 m-auto inline-flex w-3 h-3 rounded-full"
+                                                              style="background-color: {{ item.specialist_live_indicator.dot_color }};"></span>
+                                                        <span class="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-zinc-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+                                                            {{ item.specialist_live_indicator.label }}
+                                                        </span>
                                                     </span>
-                                                </span>
+                                                {% endif %}
                                             </div>
                                             <div>
                                                 <p class="text-lg font-semibold text-zinc-800 leading-tight">
