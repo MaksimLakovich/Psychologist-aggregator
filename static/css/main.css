@@ -4086,6 +4086,18 @@ input:checked + .toggle-bg {
   background-color: rgb(156 163 175 / var(--tw-bg-opacity, 1));
 }
 
+.bg-slate-500\/25 {
+  background-color: rgb(100 116 139 / 0.25);
+}
+
+.bg-slate-100\/75 {
+  background-color: rgb(241 245 249 / 0.75);
+}
+
+.bg-slate-500\/60 {
+  background-color: rgb(100 116 139 / 0.6);
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
@@ -5609,6 +5621,22 @@ input:checked + .toggle-bg {
   border-color: rgb(203 213 225 / 0.6);
 }
 
+.hover\:border-slate-100\/90:hover {
+  border-color: rgb(241 245 249 / 0.9);
+}
+
+.hover\:border-slate-100\/30:hover {
+  border-color: rgb(241 245 249 / 0.3);
+}
+
+.hover\:border-slate-200\/90:hover {
+  border-color: rgb(226 232 240 / 0.9);
+}
+
+.hover\:border-slate-200\/70:hover {
+  border-color: rgb(226 232 240 / 0.7);
+}
+
 .hover\:\!bg-primary-800:hover {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(157 23 77 / var(--tw-bg-opacity, 1)) !important;
@@ -5766,6 +5794,10 @@ input:checked + .toggle-bg {
 
 .hover\:bg-indigo-50\/95:hover {
   background-color: rgb(240 245 255 / 0.95);
+}
+
+.hover\:bg-slate-100\/90:hover {
+  background-color: rgb(241 245 249 / 0.9);
 }
 
 .hover\:text-blue-600:hover {

@@ -335,7 +335,10 @@
              - возврат из фильтра по выбранному дню обратно к обычному списку запланированных встреч. -->
         <div class="animate-fade-in-up mb-8">
             <a href="{% url 'core:client-events' %}{{ sessions_toggle_query }}"
-               class="inline-flex items-center justify-center px-5 py-2.5 gap-2 rounded-xl border border-indigo-200 bg-white/70 text-sm font-bold text-indigo-700 shadow-sm backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-white">
+               class="inline-flex items-center justify-center px-4 py-2 gap-2
+               rounded-xl border border-indigo-200 bg-white/50 text-sm font-bold text-indigo-600/80
+               shadow-sm backdrop-blur-md transition-colors group duration-200
+               hover:border-slate-200/70 hover:bg-slate-100/90 hover:text-indigo-800">
                 {{ sessions_toggle_label }}
             </a>
         </div>
@@ -358,13 +361,13 @@
                             <!-- КРАТКАЯ КАРТОЧКА -->
                             <div class="relative rounded-[1.5rem] border overflow-hidden transition-all duration-300
                                 {% if item.is_archived_card %}
-                                    bg-slate-300/60 border-slate-400/40 shadow-sm
+                                    bg-slate-200/50 border-slate-300/40 shadow-sm
                                 {% else %}
                                     bg-slate-200/50 border-slate-300/40 shadow-sm hover:scale-[1.01] hover:border-slate-300/60
                                 {% endif %}">
                                 <div class="absolute left-0 top-0 bottom-0 w-1.5 {% if item.is_archived_card %}bg-gradient-to-b from-slate-500 to-slate-400{% else %}bg-gradient-to-b from-indigo-600 to-indigo-500{% endif %}"></div>
                                 {% if item.is_archived_card %}
-                                    <div class="pointer-events-none absolute inset-0 bg-slate-300/25"></div>
+                                    <div class="pointer-events-none absolute inset-0 bg-white/70"></div>
                                 {% endif %}
 
                                 <div class="flex flex-col md:flex-row">
