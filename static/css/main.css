@@ -4073,6 +4073,19 @@ input:checked + .toggle-bg {
   background-color: rgb(255 255 255 / 0.55);
 }
 
+.bg-slate-300\/25 {
+  background-color: rgb(203 213 225 / 0.25);
+}
+
+.bg-slate-300\/60 {
+  background-color: rgb(203 213 225 / 0.6);
+}
+
+.bg-gray-400 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(156 163 175 / var(--tw-bg-opacity, 1));
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
@@ -4127,6 +4140,12 @@ input:checked + .toggle-bg {
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
+.from-slate-500 {
+  --tw-gradient-from: #64748b var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(100 116 139 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
 .via-white\/70 {
   --tw-gradient-to: rgb(255 255 255 / 0)  var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), rgb(255 255 255 / 0.7) var(--tw-gradient-via-position), var(--tw-gradient-to);
@@ -4158,6 +4177,10 @@ input:checked + .toggle-bg {
 
 .to-violet-500 {
   --tw-gradient-to: #8b5cf6 var(--tw-gradient-to-position);
+}
+
+.to-slate-400 {
+  --tw-gradient-to: #94a3b8 var(--tw-gradient-to-position);
 }
 
 .object-contain {

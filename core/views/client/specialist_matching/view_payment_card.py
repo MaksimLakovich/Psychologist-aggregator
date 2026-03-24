@@ -29,7 +29,7 @@ class ClientAddPaymentCardPageView(SpecialistMatchingLayoutMixin, FormView):
 
     def get_success_url(self):
         """Формирует URL следующего шага с сохранением текущего layout."""
-        return f"{reverse('core:client-planned-sessions')}{self._build_layout_query()}"
+        return f"{reverse('core:client-events')}{self._build_layout_query()}"
 
     def get_initial(self):
         """Подтягивает на страницу подтверждения те данные, которые клиент уже выбрал на предыдущем шаге

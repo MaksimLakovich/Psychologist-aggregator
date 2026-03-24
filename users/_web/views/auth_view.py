@@ -63,7 +63,7 @@ def _build_post_login_redirect_url(user) -> str:
         - после подтверждения email, когда система автоматически логинит пользователя.
     """
     if _has_planned_or_started_sessions(user):
-        return f"{reverse_lazy('core:client-planned-sessions')}?layout=sidebar"
+        return f"{reverse_lazy('core:client-events')}?layout=sidebar"
 
     return str(reverse_lazy("core:general-questions"))
 
@@ -192,7 +192,7 @@ def _resume_pending_booking_after_authentication(request, *, user, booking_paylo
     clear_guest_matching_state(request.session)
     messages.success(request, success_message)
 
-    return redirect(f"{reverse_lazy('core:client-planned-sessions')}?layout=sidebar")
+    return redirect(f"{reverse_lazy('core:client-events')}?layout=sidebar")
 
 
 # ===== ЗАВЕРШЕНИЕ БРОНИ У ГОСТЯ =====
