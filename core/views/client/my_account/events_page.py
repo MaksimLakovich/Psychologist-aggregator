@@ -1,14 +1,16 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Max, Min, Prefetch, Q
+from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.formats import date_format
-from django.utils import timezone
 from django.views.generic import TemplateView
 
 from calendar_engine.booking.services import build_specialist_live_indicator
 from calendar_engine.models import CalendarEvent, EventParticipant, TimeSlot
-from core.services.calendar_event_slot_selector import get_event_active_slot, get_event_completed_slot
-from core.services.calendar_slot_time_display import build_calendar_slot_time_display
+from core.services.calendar_event_slot_selector import (
+    get_event_active_slot, get_event_completed_slot)
+from core.services.calendar_slot_time_display import \
+    build_calendar_slot_time_display
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 
 
@@ -174,19 +176,18 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
         #       participants (EventParticipant) и оставляем те события, где среди участников есть текущий пользователь
         events = (CalendarEvent.objects.filter(
             participants__user=self.request.user,
-        )
-        # annotate(...) добавляет к каждому событию вычисляемое поле прямо на уровне SQL-запроса.
-        # Здесь latest_slot_end = самое позднее end_datetime среди всех слотов события.
-        # Зачем это нужно:
-        #   - быстро понять, событие уже целиком в прошлом или нет;
-        #   - не перебирать все слоты вручную в Python на этапе первичной фильтрации;
-        #   - иметь страховку на случай, если статус события еще не обновился, но по времени оно уже завершилось.
-        #
-        # Max("slots__end_datetime") означает:
-        #   - взять все связанные slots;
-        #   - найти у них максимальное end_datetime;
-        #   - записать это значение во временное поле latest_slot_end.
-        .annotate(
+        ).annotate(
+            # annotate(...) добавляет к каждому событию вычисляемое поле прямо на уровне SQL-запроса.
+            # Здесь latest_slot_end = самое позднее end_datetime среди всех слотов события.
+            # Зачем это нужно:
+            #   - быстро понять, событие уже целиком в прошлом или нет;
+            #   - не перебирать все слоты вручную в Python на этапе первичной фильтрации;
+            #   - иметь страховку на случай, если статус события еще не обновился, но по времени оно уже завершилось.
+            #
+            # Max("slots__end_datetime") означает:
+            #   - взять все связанные slots;
+            #   - найти у них максимальное end_datetime;
+            #   - записать это значение во временное поле latest_slot_end
             latest_slot_end=Max("slots__end_datetime"),
         ))
 

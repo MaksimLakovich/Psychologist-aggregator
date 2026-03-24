@@ -1,9 +1,8 @@
 from django.urls import path
 
 from core.apps import CoreConfig
+from core.views.client.my_account.events_page import ClientEventsView
 from core.views.client.my_account.main_account_page import ClientAccountView
-from core.views.client.my_account.events_page import \
-    ClientEventsView
 from core.views.client.my_account.ps_catalog import (
     PsychologistCardDetailPageView, PsychologistCatalogFilterAjaxView,
     PsychologistCatalogPageView)
