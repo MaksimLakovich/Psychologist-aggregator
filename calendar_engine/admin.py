@@ -53,12 +53,11 @@ class CalendarEventAdmin(CreatorAndReadonlyFields):
         "event_type",
         "status",
         "event_participants_display",
-        "cancel_reason_type",
         "visibility",
         "is_recurring",
         "source",
     )
-    list_filter = ("event_type", "status", "cancel_reason_type", "visibility", "is_recurring", "source")
+    list_filter = ("event_type", "status", "visibility", "is_recurring", "source")
     search_fields = ("title", "description", "creator__email", "creator__last_name")
     ordering = ("creator__email", "-created_at")
     list_display_links = ("id", "title")  # чтобы кликать на название вместо ID
@@ -103,9 +102,11 @@ class TimeSlotAdmin(CreatorAndReadonlyFields):
         "start_datetime",
         "end_datetime",
         "status",
+        "cancel_reason_type",
+        "has_meeting_resume_display",
         "slot_index",
     )
-    list_filter = ("status",)
+    list_filter = ("status", "cancel_reason_type")
     search_fields = ("event__title", "creator__email", "creator__last_name")
     ordering = ("creator__email", "-created_at")
 
@@ -128,6 +129,17 @@ class TimeSlotAdmin(CreatorAndReadonlyFields):
             build_participant_display(participant=participant) for participant in obj.slot_participants.all()
         ]
         return ", ".join(participants) if participants else "Нет участников"
+
+    @admin.display(description="Есть итоги встречи", boolean=True)
+    def has_meeting_resume_display(self, obj):
+        """Показывает, заполнил ли кто-то итоги именно для этого слота.
+
+        Бизнес-смысл:
+            - администратору важно быстро видеть, у каких завершенных встреч уже есть протокол/резюме;
+            - это особенно полезно после переноса meeting_resume на уровень конкретного TimeSlot,
+              где одна встреча курса может быть завершена с итогами, а другая еще нет.
+        """
+        return bool(obj.meeting_resume)
 
 
 @admin.register(EventParticipant)

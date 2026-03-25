@@ -47,6 +47,10 @@ class EventSlotSerializer(serializers.ModelSerializer):
     # его не переведет JSON и получим ошибку, поэтому нужно явно описать поле timezone в сериализаторе.
     timezone = serializers.CharField(read_only=True)
     status_display = serializers.CharField(source="get_status_display", read_only=True)
+    cancel_reason_type_display = serializers.CharField(
+        source="get_cancel_reason_type_display",
+        read_only=True,
+    )
 
     class Meta:
         model = TimeSlot
@@ -59,6 +63,10 @@ class EventSlotSerializer(serializers.ModelSerializer):
             "timezone",
             "meeting_url",
             "comment",
+            "meeting_resume",
+            "cancel_reason_type",
+            "cancel_reason_type_display",
+            "cancel_reason",
             "slot_index",
             "created_at",
             "updated_at",

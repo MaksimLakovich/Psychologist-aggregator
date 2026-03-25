@@ -3094,6 +3094,10 @@ input:checked + .toggle-bg {
   white-space: nowrap;
 }
 
+.whitespace-pre-line {
+  white-space: pre-line;
+}
+
 .break-words {
   overflow-wrap: break-word;
 }
@@ -4108,6 +4112,10 @@ input:checked + .toggle-bg {
 
 .bg-slate-500\/60 {
   background-color: rgb(100 116 139 / 0.6);
+}
+
+.bg-emerald-50\/70 {
+  background-color: rgb(236 253 245 / 0.7);
 }
 
 .bg-gradient-to-br {

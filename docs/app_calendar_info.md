@@ -391,8 +391,6 @@ calendar_engine/
 | `description`        | TextField            | Описание                   |
 | `event_type`         | CharField(choices)   | Тип события                |
 | `status`             | CharField(choices)   | Статус                     |
-| `cancel_reason_type` | CharField(choices)   | Тип причины отмены события |
-| `cancel_reason`      | TextField            | Причина отмены             |
 | `visibility`         | CharField(choices)   | Видимость                  |
 | `capacity`           | PositiveSmallInteger | Лимит участников           |
 | `is_recurring`       | Boolean              | Повторяющееся              |
@@ -426,18 +424,21 @@ calendar_engine/
         - защита от double booking (защита от пересечений слотов одного creator)
     - slot_index - для составного события (курсы и серии)
 
-| Поле            | Тип                       | Описание                     |
-|-----------------|---------------------------|------------------------------|
-| `id`            | UUID                      | Идентификатор                |
-| `creator`       | FK(AppUser)               | Владелец слота               |
-| `event`         | FK(CalendarEvent)         | Событие                      |
-| `start_datetime` | DateTimeField             | Начало                       |
-| `end_datetime`  | DateTimeField             | Конец                        |
-| `status`        | CharField(choices)        | Статус                       |
-| `timezone`      | TimeZoneField             | Часовой пояс                 |
-| `meeting_url`   | URL                       | Ссылка на видео-комнату      |
-| `comment`       | TextField                 | Комментарий                  |
-| `slot_index`    | PositiveSmallIntegerField | Порядок слота внутри события |
+| Поле                | Тип                      | Описание                     |
+|---------------------|--------------------------|------------------------------|
+| `id`                | UUID                     | Идентификатор                |
+| `creator`           | FK(AppUser)              | Владелец слота               |
+| `event`             | FK(CalendarEvent)        | Событие                      |
+| `start_datetime`    | DateTimeField            | Начало                       |
+| `end_datetime`      | DateTimeField            | Конец                        |
+| `status`            | CharField(choices)       | Статус                       |
+| `timezone`          | TimeZoneField            | Часовой пояс                 |
+| `meeting_url`       | URL                      | Ссылка на видео-комнату      |
+| `comment`           | TextField                | Комментарий                  |
+| `meeting_resume`    | TextField                | Итоги встречи                |
+| `cancel_reason_type` | CharField(choices)       | Тип причины отмены           |
+| `cancel_reason`     | TextField                | Причина отмены               |
+| `slot_index`        | PositiveSmallIntegerField | Порядок слота внутри события |
 
 5. Модель `EventParticipant`:  
    Участник события с ролью и статусом.

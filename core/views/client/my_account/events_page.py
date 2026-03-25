@@ -406,7 +406,7 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
                     ),
                     "visibility_display": event.get_visibility_display() or "Приватная",
                     "event_type_display": event.get_event_type_display() or "Индивидуальная сессия",
-                    "status_display": event.get_status_display() or "Запланировано",
+                    "status_display": slot.get_status_display() or "Запланировано",
                     "duration_minutes": (
                         int((slot.end_datetime - slot.start_datetime).total_seconds() // 60)
                         if slot
