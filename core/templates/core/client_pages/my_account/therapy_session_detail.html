@@ -90,8 +90,10 @@
 
 <section class="relative overflow-hidden min-h-screen bg-white/40 backdrop-blur-[2px] w-full">
 
-    <div class="relative z-10 w-full px-6 sm:px-8 py-10 {% if show_sidebar %}lg:px-12 xl:px-24{% else %}max-w-7xl mx-auto{% endif %}">
+    <div class="relative z-10 w-full px-6 sm:px-8 py-10
+        {% if show_sidebar %} lg:px-12 xl:px-24 {% else %} max-w-7xl mx-auto {% endif %}">
 
+        <!-- Уведомления -->
         {% if messages %}
             <div class="mb-8 space-y-3 max-w-3xl">
                 {% for message in messages %}
@@ -102,9 +104,11 @@
             </div>
         {% endif %}
 
-        <div class="mb-10 animate-fade-in-up">
+        <!-- Кнопка назад -->
+        <div class="animate-fade-in-up mb-8">
             <a href="{% url 'core:client-events' %}{{ layout_query }}"
-               class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600/80 hover:text-indigo-800 transition-colors group bg-white/50 px-4 py-2 rounded-xl border border-white/60 shadow-sm backdrop-blur-md">
+               class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600/80 hover:text-indigo-800 transition-colors
+               group bg-white/50 px-4 py-2 rounded-xl border border-white/60 shadow-sm backdrop-blur-md">
                 <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
@@ -112,20 +116,24 @@
             </a>
         </div>
 
+        <!-- ===== ДЕТАЛИ ВСТРЕЧИ ===== -->
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
 
+            <!-- ===== Левая часть ===== -->
             <div class="xl:col-span-8 space-y-8">
 
+                <!-- БЛОК 1: Общие данные встречи -->
                 <article class="relative overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 p-1 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl animate-fade-in-up delay-100">
+                    <!-- Градиентная вертикальная полоска по левому краю карточки встречи -->
                     <div class="absolute left-0 top-0 bottom-0 w-2 bg-gradient-to-b from-indigo-500 to-violet-500"></div>
 
                     <div class="p-6 sm:p-8 pl-10 sm:pl-12">
+
                         <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
                             <span class="inline-flex items-center gap-2 rounded-full bg-indigo-100/80 px-4 py-1.5 text-sm font-bold text-indigo-800 border border-indigo-200/50">
                                 <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
                                 {{ event.get_status_display }}
                             </span>
-
                             <div class="flex flex-wrap items-center justify-end gap-2">
                                 <span class="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-bold tracking-wide text-zinc-700 border border-zinc-200/70">
                                     {{ event.get_event_type_display }}
@@ -142,11 +150,9 @@
                         <h1 class="text-3xl sm:text-4xl font-black text-indigo-950 tracking-tight mb-2">
                             {{ event.title }}
                         </h1>
-                        <p class="text-lg text-zinc-600 font-medium mb-8">
-                            Специалист: <span class="text-zinc-900 font-semibold">{{ counterpart_full_name }}</span>
-                        </p>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pt-6 border-t border-zinc-200/50">
+                        <!-- Горизонтальная разделяющая черта + данные встречи -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-5 pt-6 border-t border-zinc-700/70">
                             <div>
                                 <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">День недели</p>
                                 <p class="text-xl font-bold text-zinc-900">{{ slot_display.display_weekday }}</p>
@@ -154,88 +160,62 @@
                                     <p class="text-sm font-semibold text-emerald-600 mt-0.5">Сегодня</p>
                                 {% endif %}
                             </div>
-
                             <div>
                                 <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Дата</p>
                                 <p class="text-xl font-bold text-zinc-900">{{ slot_display.display_date }}</p>
                             </div>
-
                             <div>
                                 <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Время</p>
                                 <p class="text-xl font-bold text-indigo-600">{{ slot_display.display_time_range }}</p>
                                 <p class="text-xs font-medium text-zinc-500 mt-1">{{ slot_display.display_client_timezone }}</p>
                             </div>
-
                             <div>
-                                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Слот</p>
-                                <p class="text-lg font-semibold text-zinc-900">{{ slot_display.display_start_time }} - {{ slot_display.display_end_time }}</p>
-                                <p class="text-xs font-medium text-zinc-500 mt-1">{% if slot %}{{ slot.get_status_display }}{% else %}Не указано{% endif %}</p>
-                            </div>
-
-                            <div>
-                                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Стоимость этой сессии</p>
-                                {% if session_price_value %}
-                                    <p class="text-lg font-semibold text-zinc-900">{{ session_price_value|floatformat:0 }} {{ specialist_profile.price_currency }}</p>
-                                {% else %}
-                                    <p class="text-lg font-semibold text-zinc-900">Уточняется</p>
-                                {% endif %}
-                            </div>
-
-                            <div>
-                                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Участники</p>
-                                <p class="text-lg font-semibold text-zinc-900">{{ event_participants_count }}</p>
-                                <p class="text-xs font-medium text-zinc-500 mt-1">в событии</p>
+                                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Формат работы специалиста</p>
+                                <p class="text-lg font-semibold text-zinc-900">{{ specialist_profile.get_therapy_format_display }}</p>
                             </div>
                         </div>
+
+                        <!-- Горизонтальная разделяющая черта + данные встречи -->
+                        <div class="grid grid-cols-1 gap-5 pt-6 border-t border-zinc-700/70">
+                            {% if event.description %}
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Описание события</p>
+                                    <p class="text-base leading-relaxed text-zinc-700">{{ event.description }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
                     </div>
                 </article>
 
-                <article class="rounded-[2rem] border border-white/60 bg-white/55 p-6 sm:p-8 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
-                    <h2 class="text-2xl font-extrabold text-indigo-950 mb-6 flex items-center gap-3">
-                        <svg class="w-6 h-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-11 9h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v11a2 2 0 002 2z"></path>
-                        </svg>
-                        О встрече
-                    </h2>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="rounded-2xl border border-zinc-200/70 bg-white/60 p-5">
-                            <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Тип события</p>
-                            <p class="text-lg font-semibold text-zinc-900">{{ event.get_event_type_display }}</p>
-                        </div>
-
-                        <div class="rounded-2xl border border-zinc-200/70 bg-white/60 p-5">
-                            <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Источник</p>
-                            <p class="text-lg font-semibold text-zinc-900">{{ event.get_source_display }}</p>
-                        </div>
-
-                        <div class="rounded-2xl border border-zinc-200/70 bg-white/60 p-5">
-                            <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Видимость</p>
-                            <p class="text-lg font-semibold text-zinc-900">{{ event.get_visibility_display }}</p>
-                        </div>
-
-                        <div class="rounded-2xl border border-zinc-200/70 bg-white/60 p-5">
-                            <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Формат работы специалиста</p>
-                            <p class="text-lg font-semibold text-zinc-900">{{ specialist_profile.get_therapy_format_display }}</p>
-                        </div>
-                    </div>
-
-                    {% if event.description %}
-                        <div class="mt-5 rounded-2xl border border-zinc-200/70 bg-white/60 p-5">
-                            <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Описание события</p>
-                            <p class="text-base leading-relaxed text-zinc-700">{{ event.description }}</p>
-                        </div>
-                    {% endif %}
-                </article>
-
+                <!-- БЛОК 2: Ссылка на подключение -->
                 <article class="rounded-[2rem] border border-white/60 bg-white/50 p-6 sm:p-8 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
                     <h2 class="text-2xl font-extrabold text-indigo-950 mb-6 flex items-center gap-3">
                         <svg class="w-6 h-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
                         </svg>
-                        Подключение и заметки
+                        Подключение
                     </h2>
 
+                    <!-- Встречу открыл КЛИЕНТ ???? или нужно контракт вью доработать??? if request.user.role == 2 -->
+                    {% if user.role == 2 %}
+                    <div class="pt-2 flex flex-col sm:flex-row gap-4 items-center">
+                        <button type="submit"
+                                class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-indigo-600
+                                text-white font-bold transition-all duration-200 hover:bg-indigo-700">
+                            Добавить ссылку
+                        </button>
+                        {% if can_open_meeting_url %}
+                            <a href="{{ slot.meeting_url }}" target="_blank"
+                               class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 gap-3 rounded-xl bg-violet-500
+                               text-white font-bold transition-all duration-200 hover:bg-violet-600 border border-transparent">
+                                <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-6 h-6">
+                                Перейти в звонок
+                            </a>
+                        {% endif %}
+                    </div>
+                    <!-- Встречу открыл СПЕЦИАЛИСТ -->
+                    {% else %}
                     <form method="post" class="space-y-6 glass-input">
                         {% csrf_token %}
 
@@ -255,8 +235,43 @@
                             {% if form.meeting_url.errors %}
                                 <p class="mt-2 text-sm font-medium text-rose-500">{{ form.meeting_url.errors.0 }}</p>
                             {% endif %}
-                            <p class="mt-2 text-xs text-zinc-500">Ссылка будет доступна вам и специалисту.</p>
+                            <p class="mt-2 text-xs text-zinc-500">Ссылка будет доступна вам и клиенту</p>
                         </div>
+
+                        <div class="pt-2 flex flex-col sm:flex-row gap-4 items-center">
+                            {% if can_open_meeting_url %}
+                                <a href="{{ slot.meeting_url }}" target="_blank"
+                                   class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 gap-3 rounded-xl bg-violet-500
+                                   text-white font-bold transition-all duration-200 hover:bg-violet-600 border border-transparent">
+                                    <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-6 h-6">
+                                    Перейти в звонок
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                    {% endif %}
+
+                </article>
+
+                <!-- БЛОК 3: Заметки / Форум -->
+                <article class="rounded-[2rem] border border-white/60 bg-white/50 p-6 sm:p-8 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
+                    <h2 class="text-2xl font-extrabold text-indigo-950 mb-6 flex items-center gap-3">
+                        <svg class="w-6 h-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                        </svg>
+                        Комментарии
+                    </h2>
+
+                    <form method="post" class="space-y-6 glass-input">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="rounded-xl bg-rose-50/80 px-5 py-4 text-rose-700 border border-rose-100">
+                                {% for error in form.non_field_errors %}
+                                    <p class="text-sm font-semibold">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
 
                         <div>
                             <label for="{{ form.comment.id_for_label }}" class="mb-2 block text-sm font-bold text-zinc-700 uppercase tracking-wide">
@@ -272,28 +287,26 @@
                             <button type="submit"
                                     class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-indigo-600
                                     text-white font-bold transition-all duration-200 hover:bg-indigo-700">
-                                Сохранить изменения
+                                Добавить сообщение
                             </button>
-
-                            {% if can_open_meeting_url %}
-                                <a href="{{ slot.meeting_url }}" target="_blank"
-                                   class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 gap-3 rounded-xl bg-violet-500
-                                   text-white font-bold transition-all duration-200 hover:bg-violet-600 border border-transparent">
-                                    <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-6 h-6">
-                                    Перейти в звонок
-                                </a>
-                            {% endif %}
                         </div>
                     </form>
+
                 </article>
+
             </div>
 
+            <!-- ===== Правая часть ===== -->
             <aside class="xl:col-span-4 space-y-6">
+
+                <!-- БЛОК 1: Данные психолога -->
                 <article class="rounded-[2rem] border border-white/60 bg-white/60 p-6 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
                     <div class="flex flex-col items-center text-center">
+
                         <div class="relative mb-4">
                             <img src="{{ specialist_photo_url }}" alt="Фото специалиста" class="h-28 w-28 rounded-[1.5rem] object-cover shadow-md border-4 border-white/80">
                             <div class="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-sm">
+                                <!-- ????????? заменить на item.specialist_live_indicator.should_ping -->
                                 <span class="block w-4 h-4 rounded-full {% if specialist_profile.work_status == 'working' %}bg-emerald-500{% else %}bg-zinc-300{% endif %}"></span>
                             </div>
                         </div>
@@ -301,9 +314,6 @@
                         <h2 class="text-xl font-extrabold text-indigo-950 mb-1">{{ counterpart_full_name }}</h2>
                         <p class="text-sm font-medium text-zinc-500 mb-5">
                             Психолог
-                            {% if specialist_profile %}
-                                • {{ specialist_profile.get_therapy_format_display }}
-                            {% endif %}
                         </p>
 
                         <div class="flex flex-wrap items-center justify-center gap-2 mb-5">
@@ -317,11 +327,6 @@
                                     Образование проверено
                                 </span>
                             {% endif %}
-                            {% if specialist_profile %}
-                                <span class="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-bold tracking-wide text-zinc-700 border border-zinc-200/70">
-                                    {{ specialist_profile.get_work_status_display }}
-                                </span>
-                            {% endif %}
                         </div>
 
                         <div class="w-full grid grid-cols-2 gap-3 mb-5">
@@ -333,25 +338,13 @@
                                 <p class="text-xs text-zinc-500 font-medium mb-1">Рейтинг</p>
                                 <p class="text-sm font-bold text-zinc-900">{{ specialist_profile.rating|default:"—" }}</p>
                             </div>
-                            <div class="bg-zinc-50/80 rounded-2xl p-3 border border-zinc-100">
-                                <p class="text-xs text-zinc-500 font-medium mb-1">Индивидуальная</p>
-                                <p class="text-sm font-bold text-zinc-900">
-                                    {% if specialist_profile and specialist_profile.price_individual %}
-                                        {{ specialist_profile.price_individual|floatformat:0 }} {{ specialist_profile.price_currency }}
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </p>
-                            </div>
-                            <div class="bg-zinc-50/80 rounded-2xl p-3 border border-zinc-100">
-                                <p class="text-xs text-zinc-500 font-medium mb-1">Парная</p>
-                                <p class="text-sm font-bold text-zinc-900">
-                                    {% if specialist_profile and specialist_profile.price_couples %}
-                                        {{ specialist_profile.price_couples|floatformat:0 }} {{ specialist_profile.price_currency }}
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </p>
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Стоимость этой сессии</p>
+                                {% if session_price_value %}
+                                    <p class="text-lg font-semibold text-zinc-900">{{ session_price_value|floatformat:0 }} {{ specialist_profile.price_currency }}</p>
+                                {% else %}
+                                    <p class="text-lg font-semibold text-zinc-900">Уточняется</p>
+                                {% endif %}
                             </div>
                         </div>
 
@@ -370,19 +363,13 @@
 
                         {% if specialist_profile_url %}
                             <a href="{{ specialist_profile_url }}"
-                               class="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors w-full py-3 bg-indigo-50/70 rounded-xl border border-indigo-100">
+                               class="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors w-full py-3 bg-indigo-50/70
+                               rounded-xl border border-indigo-100">
                                 Посмотреть профиль специалиста
                             </a>
                         {% endif %}
                     </div>
                 </article>
-
-                {% if specialist_profile and specialist_profile.biography %}
-                    <article class="rounded-[2rem] border border-white/60 bg-white/60 p-6 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
-                        <h3 class="text-lg font-bold text-indigo-950 mb-4">О специалисте</h3>
-                        <p class="text-sm leading-7 text-zinc-700">{{ specialist_profile.biography }}</p>
-                    </article>
-                {% endif %}
 
                 {% if specialist_profile %}
                     {% with specialist_specialisations=specialist_profile.specialisations.all specialist_methods=specialist_profile.methods.all %}
@@ -442,45 +429,14 @@
                     {% endif %}
                 </article>
 
-                <article class="rounded-[2rem] border border-white/60 bg-white/40 p-6 shadow-sm backdrop-blur-md animate-fade-in-up delay-300">
-                    <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-500 mb-4">Участники события</h3>
-                    <div class="space-y-3">
-                        {% for participant in event.participants.all %}
-                            <div class="flex items-center gap-3 rounded-2xl bg-white/70 p-3 border border-white/70">
-                                <div class="w-8 h-8 rounded-full bg-zinc-200 flex items-center justify-center text-zinc-500 font-bold text-xs shrink-0">
-                                    {{ participant.user.first_name|first|default:"U" }}
-                                </div>
-                                <div class="min-w-0">
-                                    <p class="text-sm font-bold text-zinc-800 truncate">{{ participant.user.first_name }} {{ participant.user.last_name }}</p>
-                                    <p class="text-xs font-medium text-zinc-500">{{ participant.get_role_display }} • {{ participant.get_status_display }}</p>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-
-                    {% if slot_participants_count %}
-                        <div class="mt-6 pt-6 border-t border-zinc-200/60">
-                            <h4 class="text-sm font-bold uppercase tracking-widest text-zinc-500 mb-4">Участники слота</h4>
-                            <div class="space-y-3">
-                                {% for participant in slot.slot_participants.all %}
-                                    <div class="flex items-center gap-3 rounded-2xl bg-white/70 p-3 border border-white/70">
-                                        <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs shrink-0">
-                                            {{ participant.user.first_name|first|default:"U" }}
-                                        </div>
-                                        <div class="min-w-0">
-                                            <p class="text-sm font-bold text-zinc-800 truncate">{{ participant.user.first_name }} {{ participant.user.last_name }}</p>
-                                            <p class="text-xs font-medium text-zinc-500">{{ participant.get_role_display }} • {{ participant.get_status_display }}</p>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endif %}
-                </article>
             </aside>
+
         </div>
+
     </div>
+
 </section>
 
 <script type="module" src="{% static 'js/modules/auto_hide_message.js' %}"></script>
+
 {% endblock %}

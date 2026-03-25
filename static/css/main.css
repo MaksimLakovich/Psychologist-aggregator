@@ -3479,6 +3479,14 @@ input:checked + .toggle-bg {
   border-color: rgb(228 228 231 / 0.8);
 }
 
+.border-zinc-700\/50 {
+  border-color: rgb(63 63 70 / 0.5);
+}
+
+.border-zinc-700\/70 {
+  border-color: rgb(63 63 70 / 0.7);
+}
+
 .\!bg-gray-50 {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1)) !important;
@@ -6870,6 +6878,10 @@ input:checked + .toggle-bg {
 
   .lg\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .lg\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .lg\:flex-row {
