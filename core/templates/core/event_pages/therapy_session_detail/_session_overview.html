@@ -1,15 +1,18 @@
 <!-- БЛОК 1: Общие данные встречи -->
 <article class="relative overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 p-1 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl animate-fade-in-up delay-100">
     <!-- Градиентная вертикальная полоска по левому краю карточки встречи -->
-    <!-- ???? градиент в зависимости от статуса - индиго или серый-->
-    <div class="absolute left-0 top-0 bottom-0 w-2 bg-gradient-to-b from-indigo-500 to-violet-500"></div>
+    <!-- Если встреча уже архивная, переводим акцент карточки в slate-палитру, чтобы detail-screen визуально совпадал со списком событий -->
+    <div class="absolute left-0 top-0 bottom-0 w-2 {% if is_finished_slot %} bg-gradient-to-b from-slate-500 to-slate-400 {% else %} bg-gradient-to-b from-indigo-500 to-violet-500 {% endif %}"></div>
+    {% if is_finished_slot %}
+        <div class="pointer-events-none absolute inset-0 z-10 bg-white/50"></div>
+    {% endif %}
 
-    <div class="p-6 sm:p-8 pl-10 sm:pl-12">
+    <div class="relative z-20 p-6 sm:p-8 pl-10 sm:pl-12">
 
         <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <!-- ????? цвет статуса -->
-            <span class="inline-flex items-center gap-2 rounded-full bg-indigo-100/80 px-4 py-1.5 text-sm font-bold text-indigo-800 border border-indigo-200/50">
-                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+            <!-- Цвет статуса синхронизируем с архивной/активной логикой экрана: активные встречи - indigo, завершенные - slate -->
+            <span class="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-bold rounded-full {% if is_finished_slot %}bg-slate-100/90 text-slate-800 border border-slate-200/70{% else %}bg-indigo-100/80 text-indigo-800 border border-indigo-200/50{% endif %}">
+                <span class="w-2 h-2 rounded-full {% if is_finished_slot %}bg-slate-500{% else %}bg-indigo-500 animate-pulse{% endif %}"></span>
                 {{ slot.get_status_display }}
             </span>
             <div class="flex flex-wrap items-center justify-end gap-2">

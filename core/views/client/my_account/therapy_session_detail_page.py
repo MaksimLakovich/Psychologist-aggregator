@@ -4,6 +4,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import FormView
 
+from calendar_engine.booking.services import build_specialist_live_indicator
 from core.forms.client.my_account.form_therapy_session_details import \
     ClientTherapySessionDetailsForm
 from core.services.experience_label import build_experience_label
@@ -181,6 +182,7 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
         # Время и дата уже заранее подготовлены shared loader по timezone текущего пользователя
         context["slot_display"] = self.detail_data.slot_display_data
         # Отдельный флаг нужен шаблону, чтобы в архивной встрече вместо подключения показывать meeting_resume
+        # + для slate-стиля в блоке общая инфо по встрече
         context["is_finished_slot"] = self.detail_data.is_finished_slot
         # Видеочат для клиента имеет смысл только пока встреча еще активна.
         # Если слот уже завершился по статусу или по времени, кнопку перехода в звонок скрываем
@@ -188,5 +190,8 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
         context["slot_participants_count"] = self.detail_data.slot_participants_count
         context["event_participants_count"] = self.detail_data.event_participants_count
         context["matched_topics"] = self._build_matched_topics()
+        context["specialist_live_indicator"] = build_specialist_live_indicator(
+            specialist_profile=specialist_profile,
+        )
 
         return context
