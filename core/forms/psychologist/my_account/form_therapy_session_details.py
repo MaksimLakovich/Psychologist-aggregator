@@ -1,15 +1,26 @@
 from django import forms
 
 
-class ClientTherapySessionDetailsForm(forms.Form):
-    """Форма для редактирования доступных клиенту деталей уже созданной терапевтической сессии.
+class PsychologistTherapySessionDetailsForm(forms.Form):
+    """Форма редактирования деталей терапевтической сессии со стороны специалиста.
 
     Бизнес-смысл:
-        - клиент не отвечает за организационную часть встречи и поэтому НЕ может управлять meeting_url на созвон;
+        - специалист отвечает за организационную часть встречи и поэтому может управлять ссылкой на созвон;
         - comment пока остается общим простым полем заметки к сессии до появления отдельной модели
           форумного обсуждения для участников TimeSlot.
     """
 
+    meeting_url = forms.URLField(
+        required=False,
+        label="Ссылка на сессию",
+        widget=forms.URLInput(
+            attrs={
+                "class": "w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base text-zinc-800 "
+                         "focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200",
+                "placeholder": "https://...",
+            }
+        ),
+    )
     comment = forms.CharField(
         required=False,
         label="Комментарий к сессии",
