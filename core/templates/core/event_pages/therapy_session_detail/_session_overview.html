@@ -56,14 +56,14 @@
         <!-- Горизонтальная разделяющая черта + данные встречи -->
         <!-- Если у события есть описание, показываем его отдельным блоком ниже,
              чтобы клиент видел дополнительный контекст именно этой встречи -->
-        <div class="grid grid-cols-1 gap-5 pt-6 border-t border-zinc-700/70">
-            {% if event.description %}
+        {% if event.description %}
+            <div class="grid grid-cols-1 gap-5 pt-6 border-t border-zinc-700/70">
                 <div>
                     <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Описание события</p>
                     <p class="text-base leading-relaxed text-zinc-700">{{ event.description }}</p>
                 </div>
-            {% endif %}
-        </div>
+            </div>
+        {% endif %}
 
     </div>
 </article>

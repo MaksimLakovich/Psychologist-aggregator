@@ -17,9 +17,6 @@
         {% endif %}
 
         <div>
-            <label for="{{ form.comment.id_for_label }}" class="mb-2 block text-sm font-bold text-zinc-700 uppercase tracking-wide">
-                {{ form.comment.label }}
-            </label>
             {{ form.comment }}
             {% if form.comment.errors %}
                 <p class="mt-2 text-sm font-medium text-rose-500">{{ form.comment.errors.0 }}</p>
@@ -30,7 +27,7 @@
             <button type="submit"
                     class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-indigo-600
                     text-white font-bold transition-all duration-200 hover:bg-indigo-700">
-                Сохранить комментарий
+                Добавить комментарий
             </button>
         </div>
     </form>

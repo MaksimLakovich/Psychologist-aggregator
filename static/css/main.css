@@ -4398,6 +4398,11 @@ input:checked + .toggle-bg {
   padding-right: 0.625rem;
 }
 
+.py-0 {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
 .pb-0 {
   padding-bottom: 0px;
 }
@@ -4524,6 +4529,18 @@ input:checked + .toggle-bg {
 
 .pl-10 {
   padding-left: 2.5rem;
+}
+
+.pl-6 {
+  padding-left: 1.5rem;
+}
+
+.pl-8 {
+  padding-left: 2rem;
+}
+
+.pl-4 {
+  padding-left: 1rem;
 }
 
 .text-left {
@@ -5341,6 +5358,10 @@ input:checked + .toggle-bg {
 
 .delay-300 {
   transition-delay: 300ms;
+}
+
+.delay-500 {
+  transition-delay: 500ms;
 }
 
 .duration-150 {
