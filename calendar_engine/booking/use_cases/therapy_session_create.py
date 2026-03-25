@@ -203,6 +203,9 @@ class CreateTherapySessionUseCase:
             timezone=specialist_timezone,
             meeting_url=None,
             comment=None,
+            meeting_resume=None,
+            cancel_reason_type=None,
+            cancel_reason=None,
             slot_index=1,
         )
         slot.full_clean()
