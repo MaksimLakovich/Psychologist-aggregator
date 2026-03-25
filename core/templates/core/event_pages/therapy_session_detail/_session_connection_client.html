@@ -2,34 +2,52 @@
 
 <!-- БЛОК 2: Подключение клиента к встрече -->
 
-<!-- На клиентской странице meeting_url показывает только организационную готовность встречи:
-     - клиент не добавляет ссылку и не видит ее вообще - видит только кнопку, которая ведет по ссылке;
-     - ссылку готовит специалист;
-     - переход в видеочат доступен только пока встреча еще активна;
-     - в завершенной встрече, если специалист заполнил meeting_resume, то вместо блока "ПОДКЛЮЧЕНИЕ" появляется "ИТОГИ ВСТРЕЧИ" -->
+<!-- На клиентской странице один и тот же блок выполняет 2 разные бизнес-задачи:
+     - пока встреча еще не завершена, он отвечает за подключение к звонку;
+     - после завершения встречи он превращается в блок "Итоги встречи", если специалист заполнил meeting_resume.
+     Если архивная встреча завершилась без meeting_resume, блок целиком скрываем, чтобы не показывать пустую секцию -->
 
-<article class="rounded-[2rem] border border-white/60 bg-white/50 p-6 sm:p-8 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
-    <h2 class="text-2xl font-extrabold text-indigo-950 mb-6 flex items-center gap-3">
-        Подключение
-    </h2>
+{% if slot %}
 
-    {% if slot and slot.meeting_url %}
-        <div class="space-y-4">
+    {% if is_finished_slot %}
+        {% if slot.meeting_resume %}
+            <article class="rounded-[2rem] border border-white/60 bg-white/50 p-6 sm:p-8 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
+                <h2 class="text-2xl font-extrabold text-indigo-950 mb-6 flex items-center gap-3">
+                    Итоги встречи
+                </h2>
 
-            {% if can_open_meeting_url %}
-                <a href="{{ slot.meeting_url }}" target="_blank"
-                   class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 gap-3 rounded-xl bg-violet-500
-                   text-white font-bold transition-all duration-200 hover:bg-violet-600 border border-transparent">
-                    <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-6 h-6">
-                    Перейти в видеочат
-                </a>
-            {% endif %}
-        </div>
+                <div class="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5">
+                    <p class="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-2">Протокол встречи</p>
+                    <p class="whitespace-pre-line text-sm leading-relaxed text-zinc-700">{{ slot.meeting_resume }}</p>
+                </div>
+            </article>
+        {% endif %}
+
     {% else %}
-        <div>
-            <p class="mt-2 text-sm text-zinc-500">
-                Ссылка для подключения появится ближе к началу встречи, после этого вы увидите тут кнопку для перехода в видеочат
-            </p>
-        </div>
+        <article class="rounded-[2rem] border border-white/60 bg-white/50 p-6 sm:p-8 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
+            <h2 class="text-2xl font-extrabold text-indigo-950 mb-6 flex items-center gap-3">
+                Подключение
+            </h2>
+
+            <!-- Клиент не редактирует meeting_url: специалист готовит ссылку -->
+            {% if slot.meeting_url and can_open_meeting_url %}
+                <div class="space-y-4">
+                    <a href="{{ slot.meeting_url }}" target="_blank"
+                       class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 gap-3 rounded-xl bg-violet-500
+                       text-white font-bold transition-all duration-200 hover:bg-violet-600 border border-transparent">
+                        <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-6 h-6">
+                        Перейти в видеочат
+                    </a>
+                </div>
+            {% else %}
+                <div>
+                    <p class="mt-2 text-sm text-zinc-500">
+                        Ссылка для подключения появится ближе к началу встречи, после этого вы увидите тут кнопку для перехода в видеочат
+                    </p>
+                </div>
+            {% endif %}
+        </article>
+
     {% endif %}
-</article>
+
+{% endif %}

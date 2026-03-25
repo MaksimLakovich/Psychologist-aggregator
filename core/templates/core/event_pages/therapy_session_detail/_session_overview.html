@@ -8,7 +8,7 @@
         <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
             <span class="inline-flex items-center gap-2 rounded-full bg-indigo-100/80 px-4 py-1.5 text-sm font-bold text-indigo-800 border border-indigo-200/50">
                 <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                {{ event.get_status_display }}
+                {{ slot.get_status_display }}
             </span>
             <div class="flex flex-wrap items-center justify-end gap-2">
                 <span class="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-bold tracking-wide text-zinc-700 border border-zinc-200/70">

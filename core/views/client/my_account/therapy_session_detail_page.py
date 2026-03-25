@@ -178,8 +178,10 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
         context["specialist_experience_label"] = experience_label
         context["specialist_languages_display"] = specialist_languages_display
         context["session_price_value"] = session_price_value
-        # Время и дата уже заранее подготовлены shared loader по timezone текущего пользователя.
+        # Время и дата уже заранее подготовлены shared loader по timezone текущего пользователя
         context["slot_display"] = self.detail_data.slot_display_data
+        # Отдельный флаг нужен шаблону, чтобы в архивной встрече вместо подключения показывать meeting_resume
+        context["is_finished_slot"] = self.detail_data.is_finished_slot
         # Видеочат для клиента имеет смысл только пока встреча еще активна.
         # Если слот уже завершился по статусу или по времени, кнопку перехода в звонок скрываем
         context["can_open_meeting_url"] = self.detail_data.can_open_meeting_url

@@ -31,6 +31,7 @@ class TherapySessionDetailData:
     counterpart_user: object | None
     counterpart_full_name: str
     slot_display_data: dict
+    is_finished_slot: bool
     can_open_meeting_url: bool
     slot_participants_count: int
     event_participants_count: int
@@ -142,6 +143,15 @@ def load_therapy_session_detail_data(*, viewer_user, event_id, viewer_timezone):
         if slot
         else {}
     )
+    # "Встреча закрыта" для detail-экрана определяем не только по статусу, но и по фактическому времени:
+    # это позволяет корректно показывать архивную логику даже если статус completed еще не успел обновиться
+    is_finished_slot = bool(
+        slot
+        and (
+            slot.status in ["completed", "cancelled"]
+            or slot.end_datetime < timezone.now()
+        )
+    )
 
     return TherapySessionDetailData(
         event=event,
@@ -150,10 +160,11 @@ def load_therapy_session_detail_data(*, viewer_user, event_id, viewer_timezone):
         counterpart_user=counterpart_user,
         counterpart_full_name=counterpart_full_name,
         slot_display_data=slot_display_data,
+        is_finished_slot=is_finished_slot,
         can_open_meeting_url=bool(
             slot
             and slot.meeting_url
-            and slot.status != "completed"
+            and slot.status in ["planned", "started"]
             and slot.end_datetime >= timezone.now()
         ),
         slot_participants_count=len(slot.slot_participants.all()) if slot else 0,
