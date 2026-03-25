@@ -1,11 +1,13 @@
 <!-- БЛОК 1: Общие данные встречи -->
 <article class="relative overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 p-1 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl animate-fade-in-up delay-100">
     <!-- Градиентная вертикальная полоска по левому краю карточки встречи -->
+    <!-- ???? градиент в зависимости от статуса - индиго или серый-->
     <div class="absolute left-0 top-0 bottom-0 w-2 bg-gradient-to-b from-indigo-500 to-violet-500"></div>
 
     <div class="p-6 sm:p-8 pl-10 sm:pl-12">
 
         <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <!-- ????? цвет статуса -->
             <span class="inline-flex items-center gap-2 rounded-full bg-indigo-100/80 px-4 py-1.5 text-sm font-bold text-indigo-800 border border-indigo-200/50">
                 <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
                 {{ slot.get_status_display }}
@@ -48,7 +50,7 @@
                 <p class="text-xs font-medium text-zinc-500 mt-1">{{ slot_display.display_client_timezone }}</p>
             </div>
             <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Формат работы специалиста</p>
+                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Формат встречи</p>
                 <p class="text-lg font-semibold text-zinc-900">{{ specialist_profile.get_therapy_format_display }}</p>
             </div>
         </div>
@@ -59,7 +61,7 @@
         {% if event.description %}
             <div class="grid grid-cols-1 gap-5 pt-6 border-t border-zinc-700/70">
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Описание события</p>
+                    <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Описание события</p>
                     <p class="text-base leading-relaxed text-zinc-700">{{ event.description }}</p>
                 </div>
             </div>

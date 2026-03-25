@@ -139,6 +139,7 @@
 
                 <!-- БЛОК 4: Данные психолога -->
                 <article class="rounded-[2rem] border border-white/60 bg-white/60 p-6 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-3">Терапевт</h3>
                     <div class="flex flex-col items-center text-center">
 
                         <div class="relative mb-4">
@@ -154,56 +155,20 @@
                             Психолог
                         </p>
 
-                        <div class="flex flex-wrap items-center justify-center gap-2 mb-5">
-                            {% if specialist_profile and specialist_profile.is_verified %}
-                                <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold tracking-wide text-emerald-700 border border-emerald-200/70">
-                                    Профиль проверен
-                                </span>
-                            {% endif %}
-                            {% if specialist_profile and specialist_profile.is_all_education_verified %}
-                                <span class="inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-bold tracking-wide text-sky-700 border border-sky-200/70">
-                                    Образование проверено
-                                </span>
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Стоимость этой сессии</p>
+                            {% if session_price_value %}
+                                <p class="mb-5 text-lg font-semibold text-zinc-900">{{ session_price_value|floatformat:0 }} {{ specialist_profile.price_currency }}</p>
+                            {% else %}
+                                <p class="mb-5 text-lg font-semibold text-zinc-900">Уточняется</p>
                             {% endif %}
                         </div>
-
-                        <div class="w-full grid grid-cols-2 gap-3 mb-5">
-                            <div class="bg-zinc-50/80 rounded-2xl p-3 border border-zinc-100">
-                                <p class="text-xs text-zinc-500 font-medium mb-1">Опыт</p>
-                                <p class="text-sm font-bold text-zinc-900">{{ specialist_experience_label }}</p>
-                            </div>
-                            <div class="bg-zinc-50/80 rounded-2xl p-3 border border-zinc-100">
-                                <p class="text-xs text-zinc-500 font-medium mb-1">Рейтинг</p>
-                                <p class="text-sm font-bold text-zinc-900">{{ specialist_profile.rating|default:"—" }}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Стоимость этой сессии</p>
-                                {% if session_price_value %}
-                                    <p class="text-lg font-semibold text-zinc-900">{{ session_price_value|floatformat:0 }} {{ specialist_profile.price_currency }}</p>
-                                {% else %}
-                                    <p class="text-lg font-semibold text-zinc-900">Уточняется</p>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        {% if specialist_languages_display %}
-                            <div class="w-full mb-5 text-left">
-                                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Языки</p>
-                                <div class="flex flex-wrap gap-2">
-                                    {% for language in specialist_languages_display %}
-                                        <span class="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-zinc-700 border border-zinc-200/70">
-                                            {{ language }}
-                                        </span>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        {% endif %}
 
                         {% if specialist_profile_url %}
                             <a href="{{ specialist_profile_url }}"
-                               class="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors w-full py-3 bg-indigo-50/70
-                               rounded-xl border border-indigo-100">
-                                Посмотреть профиль специалиста
+                               class="rounded-xl text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors w-full py-3
+                               bg-indigo-200/60 hover:bg-indigo-200/80 border border-indigo-100">
+                                Посмотреть профиль
                             </a>
                         {% endif %}
                     </div>
@@ -212,13 +177,15 @@
                 {% if specialist_profile %}
                     {% with specialist_specialisations=specialist_profile.specialisations.all specialist_methods=specialist_profile.methods.all %}
                         {% if specialist_specialisations or specialist_methods %}
+
                             <article class="rounded-[2rem] border border-white/60 bg-white/60 p-6 shadow-sm backdrop-blur-md animate-fade-in-up delay-300">
                                 {% if specialist_specialisations %}
                                     <div>
-                                        <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-500 mb-3">Специализации</h3>
+                                        <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-3">Специализации</h3>
                                         <div class="flex flex-wrap gap-2">
                                             {% for specialisation in specialist_specialisations %}
-                                                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-white/80 border border-zinc-200/80 text-sm font-medium text-zinc-800">
+                                                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100
+                                            border border-indigo-100/80 text-sm font-medium text-indigo-800 transition-colors">
                                                     {{ specialisation.name }}
                                                 </span>
                                             {% endfor %}
@@ -227,45 +194,50 @@
                                 {% endif %}
 
                                 {% if specialist_methods %}
-                                    <div class="{% if specialist_specialisations %}mt-5 pt-5 border-t border-zinc-200/60{% endif %}">
-                                        <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-500 mb-3">Методы работы</h3>
+                                    <div class="{% if specialist_specialisations %}mt-5 pt-5 border-t border-zinc-700/70{% endif %}">
+                                        <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-3">Методы работы</h3>
                                         <div class="flex flex-wrap gap-2">
                                             {% for method in specialist_methods %}
-                                                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-100/80 text-sm font-medium text-indigo-800">
+                                                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100
+                                            border border-indigo-100/80 text-sm font-medium text-indigo-800 transition-colors">
                                                     {{ method.name }}
                                                 </span>
                                             {% endfor %}
                                         </div>
                                     </div>
                                 {% endif %}
+
+                                <div class="{% if specialist_methods %}mt-5 pt-5 border-t border-zinc-700/70{% endif %}">
+                                    <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-3 flex items-center justify-between">
+                                        Совпадения по вашей анкете
+                                        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold">
+                                            {{ matched_topics|length|default:"0" }}
+                                        </span>
+                                    </h3>
+                                </div>
+
+                                {% if matched_topics %}
+                                    <div class="flex flex-wrap gap-2">
+                                        {% for topic in matched_topics %}
+                                            <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100
+                                            border border-indigo-100/80 text-sm font-medium text-indigo-800 transition-colors">
+                                                {{ topic.name }}
+                                                {% if topic.type %}
+                                                    <span class="ml-2 text-[10px] uppercase tracking-wide opacity-60">{{ topic.type }}</span>
+                                                {% endif %}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="p-4 bg-zinc-50/80 rounded-2xl border border-zinc-100 text-center">
+                                        <p class="text-sm text-zinc-500 font-medium">Совпадающие темы между вашей анкетой и профилем специалиста не найдены</p>
+                                    </div>
+                                {% endif %}
                             </article>
+
                         {% endif %}
                     {% endwith %}
                 {% endif %}
-
-                <article class="rounded-[2rem] border border-white/60 bg-white/60 p-6 shadow-sm backdrop-blur-md animate-fade-in-up delay-300">
-                    <h3 class="text-lg font-bold text-indigo-950 mb-4 flex items-center justify-between">
-                        Совпадения по вашей анкете
-                        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold">{{ matched_topics|length|default:"0" }}</span>
-                    </h3>
-
-                    {% if matched_topics %}
-                        <div class="flex flex-wrap gap-2">
-                            {% for topic in matched_topics %}
-                                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-100/80 text-sm font-medium text-indigo-800 transition-colors hover:bg-indigo-100">
-                                    {{ topic.name }}
-                                    {% if topic.type %}
-                                        <span class="ml-2 text-[10px] uppercase tracking-wide opacity-60">{{ topic.type }}</span>
-                                    {% endif %}
-                                </span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="p-4 bg-zinc-50/80 rounded-2xl border border-zinc-100 text-center">
-                            <p class="text-sm text-zinc-500 font-medium">Совпадающие темы между вашей анкетой и профилем специалиста не найдены</p>
-                        </div>
-                    {% endif %}
-                </article>
 
             </aside>
 
