@@ -1,0 +1,35 @@
+{% load static %}
+
+<!-- БЛОК 2: Подключение клиента к встрече -->
+
+<!-- На клиентской странице meeting_url показывает только организационную готовность встречи:
+     - клиент не добавляет ссылку и не видит ее вообще - видит только кнопку, которая ведет по ссылке;
+     - ссылку готовит специалист;
+     - переход в видеочат доступен только пока встреча еще активна;
+     - в завершенной встрече, если специалист заполнил meeting_resume, то вместо блока "ПОДКЛЮЧЕНИЕ" появляется "ИТОГИ ВСТРЕЧИ" -->
+
+<article class="rounded-[2rem] border border-white/60 bg-white/50 p-6 sm:p-8 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
+    <h2 class="text-2xl font-extrabold text-indigo-950 mb-6 flex items-center gap-3">
+        Подключение
+    </h2>
+
+    {% if slot and slot.meeting_url %}
+        <div class="space-y-4">
+
+            {% if can_open_meeting_url %}
+                <a href="{{ slot.meeting_url }}" target="_blank"
+                   class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 gap-3 rounded-xl bg-violet-500
+                   text-white font-bold transition-all duration-200 hover:bg-violet-600 border border-transparent">
+                    <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-6 h-6">
+                    Перейти в видеочат
+                </a>
+            {% endif %}
+        </div>
+    {% else %}
+        <div>
+            <p class="mt-2 text-sm text-zinc-500">
+                Ссылка для подключения появится ближе к началу встречи, после этого вы увидите тут кнопку для перехода в видеочат
+            </p>
+        </div>
+    {% endif %}
+</article>

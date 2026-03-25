@@ -1,0 +1,38 @@
+<!-- БЛОК 3: Комментарии к встрече -->
+<article class="rounded-[2rem] border border-white/60 bg-white/50 p-6 sm:p-8 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
+    <h2 class="text-2xl font-extrabold text-indigo-950 mb-6 flex items-center gap-3">
+        Комментарии
+    </h2>
+
+    <!-- Пока у нас еще нет отдельной forum-модели Comment, этот блок сохраняет одно текстовое поле comment прямо в TimeSlot -->
+    <form method="post" class="space-y-6 glass-input">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="rounded-xl bg-rose-50/80 px-5 py-4 text-rose-700 border border-rose-100">
+                {% for error in form.non_field_errors %}
+                    <p class="text-sm font-semibold">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div>
+            <label for="{{ form.comment.id_for_label }}" class="mb-2 block text-sm font-bold text-zinc-700 uppercase tracking-wide">
+                {{ form.comment.label }}
+            </label>
+            {{ form.comment }}
+            {% if form.comment.errors %}
+                <p class="mt-2 text-sm font-medium text-rose-500">{{ form.comment.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="pt-2 flex flex-col sm:flex-row gap-4 items-center">
+            <button type="submit"
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-indigo-600
+                    text-white font-bold transition-all duration-200 hover:bg-indigo-700">
+                Сохранить комментарий
+            </button>
+        </div>
+    </form>
+
+</article>
