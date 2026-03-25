@@ -1,9 +1,13 @@
 from dataclasses import dataclass
+
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
 from calendar_engine.models import CalendarEvent
-from core.services.calendar_event_slot_selector import get_event_active_slot, get_event_completed_slot
-from core.services.calendar_slot_time_display import build_calendar_slot_time_display
+from core.services.calendar_event_slot_selector import (
+    get_event_active_slot, get_event_completed_slot)
+from core.services.calendar_slot_time_display import \
+    build_calendar_slot_time_display
 
 
 @dataclass

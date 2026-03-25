@@ -4,10 +4,12 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import FormView
 
-from core.forms.client.my_account.form_therapy_session_details import ClientTherapySessionDetailsForm
+from core.forms.client.my_account.form_therapy_session_details import \
+    ClientTherapySessionDetailsForm
 from core.services.experience_label import build_experience_label
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
-from core.services.therapy_session.therapy_session_detail_loader import load_therapy_session_detail_data
+from core.services.therapy_session.therapy_session_detail_loader import \
+    load_therapy_session_detail_data
 from users.constants import LANGUAGE_CHOICES
 
 
