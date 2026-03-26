@@ -29,6 +29,7 @@
 - Разнообразие событий: разовые/периодические, индивидуальные/групповые, составные события (курсы);
 - Настройка событий: лимит количества участникам, видимость события для остальных пользователей, etc.;
 - Жизненный цикл события/слота - создание, перенос, отмена, etc.;
+- Ведение переписки/обсуждения внутри события его участниками;
 - Функционал приглашения новых участников, подтверждение участия или отказ от него, etc.;
 - Отображение UI календаря для пользователей системы;
 - Синхронизация с внешними календарями;
@@ -358,17 +359,18 @@ calendar_engine/
 
 ### calendar_engine/models.py:
 
-| Компонент                        | Назначение                                                           | Где хранится |
-|----------------------------------|----------------------------------------------------------------------|-------------|
-| `TimeStampedModel`               | Абстрактная модель для временных меток создания и обновления         | PostgreSQL  |
-| `CalendarEvent`                  | Событие календаря                                                    | PostgreSQL  |
-| `RecurrenceRule`                 | Правила повторений                                                   | PostgreSQL  |
-| `TimeSlot`                       | Временной слот события                                               | PostgreSQL  |
-| `EventParticipant`               | Участник события                                                     | PostgreSQL  |
-| `SlotParticipant`                | Участник конкретного слота (если отличается от события)              | PostgreSQL  |
-| `AvailabilityRule`               | Правила доступности: рабочее расписание                              | PostgreSQL  |
-| `AvailabilityRuleTimeWindow`     | Набор рабочих окон внутри рабочего дня (расширяет AvailabilityRule)  | PostgreSQL  |
-| `AvailabilityException`          | Исключения из расписания                                             | PostgreSQL  |
+| Компонент                         | Назначение                                                           | Где хранится |
+|-----------------------------------|----------------------------------------------------------------------|-------------|
+| `TimeStampedModel`                | Абстрактная модель для временных меток создания и обновления         | PostgreSQL  |
+| `CalendarEvent`                   | Событие календаря                                                    | PostgreSQL  |
+| `RecurrenceRule`                  | Правила повторений                                                   | PostgreSQL  |
+| `TimeSlot`                        | Временной слот события                                               | PostgreSQL  |
+| `TimeSlotMessage`                 | Сообщения участников слота события                                   | PostgreSQL  |
+| `EventParticipant`                | Участник события                                                     | PostgreSQL  |
+| `SlotParticipant`                 | Участник конкретного слота (если отличается от события)              | PostgreSQL  |
+| `AvailabilityRule`                | Правила доступности: рабочее расписание                              | PostgreSQL  |
+| `AvailabilityRuleTimeWindow`      | Набор рабочих окон внутри рабочего дня (расширяет AvailabilityRule)  | PostgreSQL  |
+| `AvailabilityException`           | Исключения из расписания                                             | PostgreSQL  |
 | `AvailabilityExceptionTimeWindow` | Переопределеный набор рабочих окон (расширяет AvailabilityException) | PostgreSQL  |
 
 1. Модель `TimeStampedModel` (abstract):  
@@ -434,13 +436,25 @@ calendar_engine/
 | `status`            | CharField(choices)       | Статус                       |
 | `timezone`          | TimeZoneField            | Часовой пояс                 |
 | `meeting_url`       | URL                      | Ссылка на видео-комнату      |
-| `comment`           | TextField                | Комментарий                  |
 | `meeting_resume`    | TextField                | Итоги встречи                |
 | `cancel_reason_type` | CharField(choices)       | Тип причины отмены           |
 | `cancel_reason`     | TextField                | Причина отмены               |
 | `slot_index`        | PositiveSmallIntegerField | Порядок слота внутри события |
 
-5. Модель `EventParticipant`:  
+5. Модель `TimeSlotMessage`:  
+   Сообщение участника события.
+    - Одно событие -> много пользователей
+    - Пользователь -> много сообщений
+
+| Поле          | Тип                | Описание               |
+|---------------|--------------------|------------------------|
+| `id`          | UUID               | Идентификатор          |
+| `creator`     | FK(AppUser)        | Автор сообщения        |
+| `slot`        | FK(TimeSlot)       | Слот события           |
+| `message`     | TextField          | Текст сообщения        |
+| `is_rewrited` | BooleanField       | Признак редактирования |
+
+6. Модель `EventParticipant`:  
    Участник события с ролью и статусом.
     - Одно событие -> много пользователей
     - Пользователь -> много событий
@@ -454,7 +468,7 @@ calendar_engine/
 | `role`      | CharField(choices) | Роль          |
 | `status`    | CharField(choices) | Статус        |
 
-6. Модель `SlotParticipant`:  
+7. Модель `SlotParticipant`:  
    Связь пользователя с конкретным слотом. Используется если участники различаются по слотам.  
    Важная модель для организации составных событий с разным составом участников.
    Когда и где нужно:
@@ -472,7 +486,7 @@ calendar_engine/
 | `role`      | CharField(choices) | Роль          |
 | `status`    | CharField(choices) | Статус        |
 
-7. Модель `AvailabilityRule`:
+8. Модель `AvailabilityRule`:
     Правила доступности специалиста (рабочее расписание).
     Например: Пн-Пт, с набором рабочих окон внутри дня (AvailabilityRuleTimeWindow).
 
@@ -489,7 +503,7 @@ calendar_engine/
 | `minimum_booking_notice_hours` | PositiveSmallIntegerField | Минимальное количество часов до ближайшего доступного слота для записи |
 | `is_active`                   | Boolean                   | Признак действия правила                                              |
 
-8. Модель `AvailabilityRuleTimeWindow`:  
+9. Модель `AvailabilityRuleTimeWindow`:  
    Временное окно доступности внутри рабочего дня из AvailabilityRule:
      - одно окно с 09:00 до 18:00;
      - или несколько окон с 06:00 до 11:00 и с 16:00 до 22:00.
@@ -500,7 +514,7 @@ calendar_engine/
 | `start_time` | Time                 | Начало временного окна |
 | `end_time`   | Time                 | Конец временного окна |
 
-9. Модель `AvailabilityException`:  
+10. Модель `AvailabilityException`:  
    Исключения из правил доступности специалиста (отпуск, болезнь, выходной)
 
 | Поле                                   | Тип                       | Описание                                                                     |
@@ -517,7 +531,7 @@ calendar_engine/
 | `override_minimum_booking_notice_hours` | PositiveSmallIntegerField | Новое минимальное количество часов до ближайшего доступного слота для записи |
 | `is_active`                            | Boolean                   | Признак действия исключения                                                  |
 
-10. Модель `AvailabilityExceptionTimeWindow`:  
+11. Модель `AvailabilityExceptionTimeWindow`:  
    Переопределенное временное окно доступности внутри рабочего дня из AvailabilityException (например, "с 09:00 до 18:00").
 
 | Поле                              | Тип                       | Описание                                                          |
@@ -538,6 +552,7 @@ calendar_engine/
     - `CalendarEventAdmin`
     - `RecurrenceRuleAdmin`
     - `TimeSlotAdmin`
+    - `TimeSlotMessageAdmin`
     - `EventParticipantAdmin`
     - `SlotParticipantAdmin`
     - `AvailabilityRuleAdmin`

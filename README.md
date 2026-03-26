@@ -441,6 +441,7 @@
   - `CalendarEvent`: событие календаря
   - `RecurrenceRule`: правила повторений
   - `TimeSlot`: временной слот события
+  - `TimeSlotMessage`: сообщения участников внутри события
   - `EventParticipant`: участник события
   - `SlotParticipant`: участник конкретного слота (если отличается от события)
   - `AvailabilityRule`: правила доступности: рабочее расписание
@@ -452,6 +453,7 @@
     ```python
     AppUser 1───* CalendarEvent                              # пользователь может организовать много событий
     CalendarEvent 1───* TimeSlot                             # событие состоит из 1+ слотов
+    TimeSlot 1───* TimeSlotMessage                           # у слота/события может быть 1+ сообщений от участников слота/события
     CalendarEvent 1───* RecurrenceRule                       # у события может быть несколько правил повторения для разных событий
     
     AppUser (через EventParticipant) *───* CalendarEvent     # участие пользователей в событиях

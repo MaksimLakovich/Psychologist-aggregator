@@ -5,7 +5,7 @@ from calendar_engine.models import (AvailabilityException,
                                     AvailabilityRule,
                                     AvailabilityRuleTimeWindow, CalendarEvent,
                                     EventParticipant, RecurrenceRule,
-                                    SlotParticipant, TimeSlot)
+                                    SlotParticipant, TimeSlot, TimeSlotMessage)
 
 # =====
 # СОБЫТИЕ / СЛОТЫ
@@ -104,6 +104,7 @@ class TimeSlotAdmin(CreatorAndReadonlyFields):
         "status",
         "cancel_reason_type",
         "has_meeting_resume_display",
+        "messages_count_display",
         "slot_index",
     )
     list_filter = ("status", "cancel_reason_type")
@@ -111,9 +112,9 @@ class TimeSlotAdmin(CreatorAndReadonlyFields):
     ordering = ("creator__email", "-created_at")
 
     def get_queryset(self, request):
-        """Подгружаем участников слота заранее, чтобы колонка списка не делала N+1 запросов."""
+        """Подгружаем участников и сообщения слота заранее, чтобы список админки не делал N+1 запросов."""
         queryset = super().get_queryset(request)
-        return queryset.prefetch_related("slot_participants__user")
+        return queryset.prefetch_related("slot_participants__user", "messages")
 
     @admin.display(description="Участники")
     def slot_participants_display(self, obj):
@@ -141,6 +142,29 @@ class TimeSlotAdmin(CreatorAndReadonlyFields):
         """
         return bool(obj.meeting_resume)
 
+    @admin.display(description="Сообщений")
+    def messages_count_display(self, obj):
+        """Показывает, сколько сообщений уже оставлено внутри конкретной встречи.
+
+        Бизнес-смысл:
+            - после переноса forum-логики в отдельную модель администратору полезно сразу видеть,
+              где обсуждение уже идет активно, а где сообщений еще нет;
+            - это помогает быстрее анализировать живость общения по конкретным слотам.
+        """
+        return len(obj.messages.all())
+
+
+class TimeSlotMessageInline(admin.TabularInline):
+    """Показывает сообщения встречи прямо внутри карточки TimeSlot в админке."""
+
+    model = TimeSlotMessage
+    extra = 0
+    fields = ("creator", "message", "is_rewrited", "created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at")
+
+
+TimeSlotAdmin.inlines = (TimeSlotMessageInline,)
+
 
 @admin.register(EventParticipant)
 class EventParticipantAdmin(admin.ModelAdmin):
@@ -164,6 +188,27 @@ class SlotParticipantAdmin(admin.ModelAdmin):
     ordering = ("user__email", "-created_at")
     readonly_fields = ("created_at", "updated_at")  # чтобы в админке их случайно не изменили
     raw_id_fields = ("slot", "user",)
+
+
+@admin.register(TimeSlotMessage)
+class TimeSlotMessageAdmin(CreatorAndReadonlyFields):
+    """Настройка отображения модели TimeSlotMessage в админке."""
+
+    list_display = ("id", "creator", "slot", "short_message_display", "is_rewrited", "created_at")
+    list_filter = ("is_rewrited",)
+    search_fields = ("creator__email", "creator__last_name", "message", "slot__event__title")
+    ordering = ("-created_at",)
+    raw_id_fields = ("slot",)
+
+    @admin.display(description="Сообщение")
+    def short_message_display(self, obj):
+        """Показывает укороченную версию текста для списка админки.
+
+        Бизнес-смысл:
+            - полный текст сообщения может быть длинным;
+            - в списке админки нужен компактный preview, чтобы администратор быстрее сканировал записи.
+        """
+        return obj.message[:80] + "..." if len(obj.message) > 80 else obj.message
 
 
 # =====

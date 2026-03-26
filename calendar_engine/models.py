@@ -322,12 +322,6 @@ class TimeSlot(TimeStampedModel):
         verbose_name="Ссылка на видео-комнату",
         help_text="Укажите ссылку на видео-комнату",
     )
-    comment = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name="Комментарий",
-        help_text="Укажите комментарий",
-    )
     meeting_resume = models.TextField(
         null=True,
         blank=True,
@@ -449,6 +443,90 @@ class TimeSlot(TimeStampedModel):
         #               ...
         #           ]
         # Без этого PostgreSQL либо упадет, либо constraint просто не создастся.
+
+
+class TimeSlotMessage(TimeStampedModel):
+    """Сообщение участников внутри конкретноого события.
+
+    Бизнес-смысл:
+        - одно текстовое поле message у TimeSlot не позволяет построить нормальное обсуждение;
+        - отдельная модель дает форум/чат внутри встречи:
+            - несколько сообщений;
+            - разные авторы;
+            - редактирование своих сообщений;
+            - история по created_at / updated_at.
+    """
+
+    # Это как primary_key вместо системного автоинкремента id, чтоб было более безопасно для публичных API
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    creator = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
+        related_name="authored_slot_messages",
+        verbose_name="Автор сообщения",
+        help_text="Укажите пользователя, который оставил сообщение внутри встречи",
+    )
+    slot = models.ForeignKey(
+        to=TimeSlot,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
+        related_name="messages",
+        verbose_name="Слот встречи",
+        help_text="Укажите встречу, к которой относится сообщение",
+    )
+    message = models.TextField(
+        null=False,
+        blank=False,
+        verbose_name="Текст сообщения",
+        help_text="Укажите текст сообщения участника встречи",
+    )
+    is_rewrited = models.BooleanField(
+        default=False,
+        null=False,
+        blank=False,
+        verbose_name="Сообщение отредактировано",
+        help_text="Флаг нужен, чтобы на UI показывать, что автор уже менял текст сообщения",
+    )
+
+    def __str__(self):
+        """Краткое строковое представление сообщения для админки и shell."""
+        return f"{self.creator} -> {self.slot_id}"
+
+    def clean(self):
+        """Модельная валидация сообщения внутри встречи.
+
+        Бизнес-смысл:
+            - сообщения должны оставлять только реальные участники конкретной встречи;
+            - пустые или состоящие из пробелов тексты для форумного сценария не имеют смысла.
+        """
+        super().clean()
+
+        errors = {}
+
+        if self.message is not None and not self.message.strip():
+            errors["message"] = "Сообщение не может состоять только из пробелов"
+
+        if self.creator_id and self.slot_id:
+            is_participant = self.slot.event.participants.filter(user_id=self.creator_id).exists()
+            if not is_participant:
+                errors["creator"] = (
+                    "Оставлять сообщения внутри встречи могут только участники этого события"
+                )
+
+        if errors:
+            raise ValidationError(errors)
+
+    class Meta:
+        verbose_name = "Сообщение встречи"
+        verbose_name_plural = "Сообщения встреч"
+        ordering = ["-created_at"]
 
 
 class EventParticipant(TimeStampedModel):
