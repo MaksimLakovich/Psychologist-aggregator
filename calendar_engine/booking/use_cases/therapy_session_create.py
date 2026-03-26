@@ -202,7 +202,6 @@ class CreateTherapySessionUseCase:
             status="planned",
             timezone=specialist_timezone,
             meeting_url=None,
-            comment=None,
             meeting_resume=None,
             cancel_reason_type=None,
             cancel_reason=None,

@@ -2,7 +2,8 @@ from rest_framework import serializers
 
 from calendar_engine.booking.use_cases.therapy_session_create import \
     CreateTherapySessionUseCase
-from calendar_engine.models import CalendarEvent, EventParticipant, TimeSlot
+from calendar_engine.models import (CalendarEvent, EventParticipant, TimeSlot,
+                                    TimeSlotMessage)
 from users.constants import PREFERRED_TOPIC_TYPE_CHOICES
 
 # =====
@@ -13,7 +14,7 @@ from users.constants import PREFERRED_TOPIC_TYPE_CHOICES
 # 1) Создание обычного разового события (терапевтическая сессия)
 
 class CreateTherapySessionSerializer(serializers.Serializer):
-    """Serializer для API-сценария создания встречи между клиентом и специалистом (терапевтическая сессия).
+    """Класс-сериализатор для API-сценария создания встречи между клиентом и специалистом (терапевтическая сессия).
 
     На текущем этапе это тонкая HTTP-обертка над CreateTherapySessionUseCase, чтобы web-flow и API использовали
     одну и ту же бизнес-логику."""
@@ -39,6 +40,7 @@ class CreateTherapySessionSerializer(serializers.Serializer):
 
 class EventSlotSerializer(serializers.ModelSerializer):
     """Получение СЛОТА(-ОВ) внутри события.
+
     Класс-сериализатор с использованием класса ModelSerializer для осуществления базовой сериализации в DRF на
     основе модели TimeSlot. Нужен для GET-ответа, чтобы клиент API видел все временные интервалы события,
     если в будущем событие станет составным и будет включать несколько слотов."""
@@ -51,6 +53,8 @@ class EventSlotSerializer(serializers.ModelSerializer):
         source="get_cancel_reason_type_display",
         read_only=True,
     )
+    messages = serializers.SerializerMethodField()
+    messages_count = serializers.SerializerMethodField()
 
     class Meta:
         model = TimeSlot
@@ -62,16 +66,61 @@ class EventSlotSerializer(serializers.ModelSerializer):
             "status_display",
             "timezone",
             "meeting_url",
-            "comment",
             "meeting_resume",
             "cancel_reason_type",
             "cancel_reason_type_display",
             "cancel_reason",
+            "messages_count",
+            "messages",
             "slot_index",
             "created_at",
             "updated_at",
         ]
         read_only_fields = fields
+
+    def get_messages_count(self, obj):
+        """Возвращает количество сообщений внутри конкретной встречи."""
+        return obj.messages.count()
+
+    def get_messages(self, obj):
+        """Возвращает компактный список сообщений встречи."""
+        return TimeSlotMessageSerializer(
+            obj.messages.all(),
+            many=True,
+            context=self.context,
+        ).data
+
+
+class TimeSlotMessageSerializer(serializers.ModelSerializer):
+    """Получение сообщений внутри конкретной встречи.
+
+    Нужен для GET-ответа, чтобы API мог отдать не одно поле message, а полноценный список сообщений.
+    """
+
+    creator_full_name = serializers.SerializerMethodField()
+    creator_avatar_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TimeSlotMessage
+        fields = [
+            "id",
+            "creator_id",
+            "creator_full_name",
+            "creator_avatar_url",
+            "message",
+            "is_rewrited",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = fields
+
+    def get_creator_full_name(self, obj):
+        """Возвращает безопасное имя автора сообщения без email."""
+        return f"{obj.creator.first_name} {obj.creator.last_name}".strip()
+
+    def get_creator_avatar_url(self, obj):
+        """Возвращает фото автора сообщения или дефолтную аватарку."""
+        return obj.creator.avatar_url
 
 
 class EventParticipantSerializer(serializers.ModelSerializer):
