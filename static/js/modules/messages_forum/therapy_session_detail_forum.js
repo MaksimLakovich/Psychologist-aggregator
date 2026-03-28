@@ -1,3 +1,5 @@
+import { pluralizeRu } from "../../utils/pluralize_ru.js";
+
 // Этот модуль оживляет messages-блок на detail-странице события.
 // 1. Здесь нет бизнес-логики доступа - backend уже решил, можно ли писать и редактировать сообщения.
 // 2. JS отвечает только за UX:
@@ -6,15 +8,50 @@
 //     - открыть/закрыть inline-форму редактирования.
 
 const thread = document.querySelector("[data-comments-thread]");
+const messageCountBadge = document.querySelector("[data-message-count-badge]");
+
+function buildMessagesCountLabel(count) {
+  return `${count} ${pluralizeRu(count, "сообщение", "сообщения", "сообщений")}`;
+}
+
+if (messageCountBadge) {
+  const messageCount = Number(messageCountBadge.dataset.messageCount || 0);
+  messageCountBadge.textContent = buildMessagesCountLabel(messageCount);
+}
 
 if (thread) {
+  const commentNodes = Array.from(thread.querySelectorAll("[data-comment-item]"));
+  const visibleCommentsLimit = Number(thread.dataset.visibleCommentsLimit || 10);
   const showMoreButton = thread.querySelector("[data-show-more-comments]");
+
+  function syncCommentsVisibility(isExpanded) {
+    commentNodes.forEach((commentNode) => {
+      const commentIndex = Number(commentNode.dataset.commentIndex || 0);
+      const shouldStayVisible = isExpanded || commentIndex <= visibleCommentsLimit;
+
+      commentNode.classList.toggle("hidden", !shouldStayVisible);
+    });
+  }
+
+  function syncShowMoreButtonLabel(isExpanded) {
+    if (!showMoreButton) {
+      return;
+    }
+
+    const hiddenCommentsCount = Number(showMoreButton.dataset.showMoreCount || 0);
+    showMoreButton.textContent = isExpanded
+      ? "Скрыть"
+      : `Показать еще ${hiddenCommentsCount} ${pluralizeRu(hiddenCommentsCount, "сообщение", "сообщения", "сообщений")}`;
+  }
+
   if (showMoreButton) {
+    let isExpanded = false;
+    syncShowMoreButtonLabel(isExpanded);
+
     showMoreButton.addEventListener("click", () => {
-      thread.querySelectorAll("[data-comment-hidden]").forEach((commentNode) => {
-        commentNode.classList.remove("hidden");
-      });
-      showMoreButton.remove();
+      isExpanded = !isExpanded;
+      syncCommentsVisibility(isExpanded);
+      syncShowMoreButtonLabel(isExpanded);
     });
   }
 
@@ -35,11 +72,11 @@ if (thread) {
       if (isExpanded) {
         fullNode.classList.add("hidden");
         previewNode.classList.remove("hidden");
-        toggleButton.textContent = "Развернуть";
+        toggleButton.textContent = "Показать все";
       } else {
         previewNode.classList.add("hidden");
         fullNode.classList.remove("hidden");
-        toggleButton.textContent = "Свернуть";
+        toggleButton.textContent = "Скрыть";
       }
     });
   });

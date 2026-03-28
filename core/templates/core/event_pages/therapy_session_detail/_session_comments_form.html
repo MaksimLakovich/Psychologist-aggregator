@@ -1,21 +1,28 @@
 <!-- БЛОК 3: Сообщения внутри встречи -->
-
+{% if message_items or can_manage_slot_messages %}
 <article class="rounded-[2rem] border border-white/60 bg-white/50 p-6 sm:p-8 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
 
     <!-- Шапка блока и подсчет количества сообщений -->
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h2 class="text-2xl font-extrabold text-indigo-950">Сообщения</h2>
-        <span class="inline-flex items-center rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-zinc-500 border border-zinc-200/70">
+        <span data-message-count-badge
+              data-message-count="{{ message_items|length }}"
+              class="inline-flex items-center rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-zinc-500 border border-zinc-200/70">
             {{ message_items|length }} сообщений
         </span>
     </div>
 
     <!-- История сообщений сортируется от новых к старым -->
     {% if message_items %}
-        <div class="space-y-4" data-comments-thread>
+        <div class="space-y-4"
+             data-comments-thread
+             data-visible-comments-limit="{{ visible_messages_limit }}"
+             data-hidden-comments-count="{{ remaining_comments_count }}">
 
             {% for item in message_items %}
-                <div class="{% if item.is_own_message %}flex justify-end{% else %}flex justify-start{% endif %} {% if forloop.counter > visible_messages_limit %}hidden{% endif %}" {% if forloop.counter > visible_messages_limit %}data-comment-hidden{% endif %}>
+                <div class="{% if item.is_own_message %}flex justify-end{% else %}flex justify-start{% endif %} {% if forloop.counter > visible_messages_limit %}hidden{% endif %}"
+                     data-comment-item
+                     data-comment-index="{{ forloop.counter }}">
 
                     <div class="w-full max-w-[85%] sm:max-w-[78%]">
 
@@ -23,25 +30,35 @@
                             <div class="flex items-start justify-between gap-3">
                                 <!-- КТО + дата/время + признак наличия редактирования -->
                                 <div class="min-w-0">
-                                    <p class="text-xs font-bold {% if item.is_own_message %}text-indigo-100{% else %}text-zinc-500{% endif %}">
-                                        {% if item.is_own_message %}Вы{% else %}{{ item.creator_full_name }}{% endif %}
-                                    </p>
-                                    <p class="mt-1 text-[11px] {% if item.is_own_message %}text-indigo-100/90{% else %}text-zinc-400{% endif %}">
-                                        {{ item.created_at_display }}
+                                    <div class="flex flex-wrap items-center gap-3">
+                                        <p class="text-xs font-bold {% if item.is_own_message %}text-indigo-100{% else %}text-zinc-500{% endif %}">
+                                            {% if item.is_own_message %}Вы{% else %}{{ item.creator_full_name }}{% endif %}
+                                        </p>
+                                        <p class="text-[11px] {% if item.is_own_message %}text-indigo-100/90{% else %}text-zinc-400{% endif %}">
+                                            {{ item.created_at_display }}
+                                        </p>
                                         {% if item.comment.is_rewrited %}
-                                            <span class="ml-2 italic">(изменено)</span>
+                                            <span class="text-[11px] italic {% if item.is_own_message %}text-indigo-100/90{% else %}text-zinc-400{% endif %}">
+                                                (изменено)
+                                            </span>
                                         {% endif %}
-                                    </p>
+                                    </div>
                                 </div>
                                 <!-- Кнопка "Редактирование" внутри сообщения -->
                                 {% if item.can_edit %}
-                                    <button type="button"
-                                            data-comment-edit-toggle
-                                            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold {% if item.is_own_message %}text-indigo-100 hover:bg-white/10{% else %}text-zinc-500 hover:bg-zinc-100{% endif %} transition-colors">
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16.862 4.487a2.1 2.1 0 113.0 2.94L8.28 19.01l-4.28 1.18 1.19-4.25L16.862 4.487z"></path>
-                                        </svg>
-                                    </button>
+                                    <div class="relative group">
+                                        <button type="button"
+                                                data-comment-edit-toggle
+                                                title="Изменить сообщение"
+                                                class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold {% if item.is_own_message %}text-indigo-100 hover:bg-white/10{% else %}text-zinc-500 hover:bg-zinc-100{% endif %} transition-colors">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16.862 4.487a2.1 2.1 0 113.0 2.94L8.28 19.01l-4.28 1.18 1.19-4.25L16.862 4.487z"></path>
+                                            </svg>
+                                        </button>
+                                        <span class="pointer-events-none absolute bottom-full right-0 z-20 mb-2 whitespace-nowrap rounded-md bg-indigo-100 px-2 py-1 text-[10px] font-semibold text-indigo-500 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+                                            Изменить сообщение
+                                        </span>
+                                    </div>
                                 {% endif %}
                             </div>
 
@@ -97,8 +114,9 @@
                 <div class="pt-4 text-center">
                     <button type="button"
                             data-show-more-comments
+                            data-show-more-count="{{ remaining_comments_count }}"
                             class="inline-flex items-center justify-center rounded-xl border border-zinc-200 px-5 py-3
-                            text-sm font-semibold w-full sm:w-auto bg-indigo-600 text-white transition-all duration-200 hover:bg-indigo-700">
+                            text-sm font-semibold w-full sm:w-auto bg-indigo-900/85 text-white transition-all duration-200 hover:bg-indigo-900">
                         Показать еще {{ remaining_comments_count }}
                     </button>
                 </div>
@@ -147,3 +165,5 @@
     {% endif %}
 
 </article>
+
+{% endif %}

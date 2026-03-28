@@ -4195,6 +4195,24 @@ input:checked + .toggle-bg {
   background-color: rgb(226 232 240 / 0.9);
 }
 
+.bg-zinc-400\/85 {
+  background-color: rgb(161 161 170 / 0.85);
+}
+
+.bg-zinc-400 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(161 161 170 / var(--tw-bg-opacity, 1));
+}
+
+.bg-indigo-800 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(66 56 157 / var(--tw-bg-opacity, 1));
+}
+
+.bg-indigo-900\/85 {
+  background-color: rgb(54 47 120 / 0.85);
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
