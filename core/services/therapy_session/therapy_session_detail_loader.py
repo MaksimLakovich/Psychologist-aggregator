@@ -54,7 +54,7 @@ def _get_event_for_viewer(*, viewer_user, event_id):
             "slots__slot_participants__user",
             Prefetch(
                 "slots__messages",
-                queryset=TimeSlotMessage.objects.select_related("creator").order_by("created_at"),
+                queryset=TimeSlotMessage.objects.select_related("creator").order_by("-created_at"),
             ),
             "participants__user__psychologist_profile",
             "participants__user__psychologist_profile__methods",
