@@ -24,34 +24,85 @@ if (thread) {
   const visibleCommentsLimit = Number(thread.dataset.visibleCommentsLimit || 10);
   const showMoreButton = thread.querySelector("[data-show-more-comments]");
 
-  function syncCommentsVisibility(isExpanded) {
+  function getVisibleComments() {
+    return commentNodes.filter((commentNode) => !commentNode.classList.contains("hidden"));
+  }
+
+  function getHiddenComments() {
+    return commentNodes.filter((commentNode) => commentNode.classList.contains("hidden"));
+  }
+
+  function collapseCommentsToInitialChunk() {
     commentNodes.forEach((commentNode) => {
       const commentIndex = Number(commentNode.dataset.commentIndex || 0);
-      const shouldStayVisible = isExpanded || commentIndex <= visibleCommentsLimit;
+      const shouldStayVisible = commentIndex <= visibleCommentsLimit;
 
       commentNode.classList.toggle("hidden", !shouldStayVisible);
     });
   }
 
-  function syncShowMoreButtonLabel(isExpanded) {
+  function syncShowMoreButtonLabel() {
     if (!showMoreButton) {
       return;
     }
 
-    const hiddenCommentsCount = Number(showMoreButton.dataset.showMoreCount || 0);
-    showMoreButton.textContent = isExpanded
-      ? "Скрыть"
-      : `Показать еще ${hiddenCommentsCount} ${pluralizeRu(hiddenCommentsCount, "сообщение", "сообщения", "сообщений")}`;
+    const hiddenCommentsCount = getHiddenComments().length;
+    if (hiddenCommentsCount <= 0) {
+      showMoreButton.textContent = "Скрыть";
+      return;
+    }
+
+    const nextChunkCount = Math.min(hiddenCommentsCount, visibleCommentsLimit);
+    showMoreButton.textContent =
+      `Показать еще ${nextChunkCount} ${pluralizeRu(nextChunkCount, "сообщение", "сообщения", "сообщений")}`;
   }
 
   if (showMoreButton) {
-    let isExpanded = false;
-    syncShowMoreButtonLabel(isExpanded);
+    syncShowMoreButtonLabel();
 
     showMoreButton.addEventListener("click", () => {
-      isExpanded = !isExpanded;
-      syncCommentsVisibility(isExpanded);
-      syncShowMoreButtonLabel(isExpanded);
+      const hiddenComments = getHiddenComments();
+      if (hiddenComments.length <= 0) {
+        const buttonTopBeforeCollapse = showMoreButton.getBoundingClientRect().top;
+        collapseCommentsToInitialChunk();
+
+        requestAnimationFrame(() => {
+          const buttonTopAfterCollapse = showMoreButton.getBoundingClientRect().top;
+          window.scrollBy({
+            top: buttonTopAfterCollapse - buttonTopBeforeCollapse,
+            left: 0,
+            behavior: "auto",
+          });
+          syncShowMoreButtonLabel();
+        });
+        return;
+      }
+
+      // В качестве якоря берем последний уже прочитанный видимый комментарий.
+      // После раскрытия следующей порции возвращаем его на ту же позицию экрана,
+      // чтобы пользователь продолжал читать историю с того же места, а не оказывался внизу у кнопки.
+      const visibleComments = getVisibleComments();
+      const anchorComment = visibleComments[visibleComments.length - 1];
+      const anchorTopBeforeExpand = anchorComment
+        ? anchorComment.getBoundingClientRect().top
+        : null;
+
+      hiddenComments.slice(0, visibleCommentsLimit).forEach((commentNode) => {
+        commentNode.classList.remove("hidden");
+      });
+
+      requestAnimationFrame(() => {
+        if (anchorComment && anchorTopBeforeExpand !== null) {
+          const anchorTopAfterExpand = anchorComment.getBoundingClientRect().top;
+          window.scrollBy({
+            top: anchorTopAfterExpand - anchorTopBeforeExpand,
+            left: 0,
+            behavior: "auto",
+          });
+        }
+
+        syncShowMoreButtonLabel();
+      });
     });
   }
 
