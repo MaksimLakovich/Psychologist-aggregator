@@ -24,6 +24,8 @@ from calendar_engine.booking.exceptions import \
 from calendar_engine.booking.services import normalize_user_timezone
 from calendar_engine.booking.use_cases.therapy_session_create import \
     CreateTherapySessionUseCase
+from calendar_engine.lifecycle.event_status_lifecycle import \
+    apply_time_based_status_transitions
 from calendar_engine.models import CalendarEvent
 from core.services.anonymous_client_flow_for_search_and_booking import (
     apply_guest_state_to_user, build_choice_psychologist_url,
@@ -49,6 +51,8 @@ def _has_planned_or_started_sessions(user) -> bool:
         - если встречи уже есть, открываем страницу "Мой кабинет";
         - если встреч еще нет, открываем первый шаг "Подбор психолога".
     """
+    # Запуск автоматического обновления/определения статусов event/slot по фактическому времени
+    apply_time_based_status_transitions(participant_user=user)
     return CalendarEvent.objects.filter(
         participants__user=user,
         status__in=["planned", "started"],

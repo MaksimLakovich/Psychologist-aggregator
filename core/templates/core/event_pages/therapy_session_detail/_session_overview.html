@@ -11,8 +11,26 @@
 
         <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
             <!-- Цвет статуса синхронизируем с архивной/активной логикой экрана: активные встречи - indigo, завершенные - slate -->
-            <span class="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-bold rounded-full {% if is_finished_slot %}bg-slate-100/90 text-slate-800 border border-slate-200/70{% else %}bg-indigo-100/80 text-indigo-800 border border-indigo-200/50{% endif %}">
-                <span class="w-2 h-2 rounded-full {% if is_finished_slot %}bg-slate-500{% else %}bg-indigo-500 animate-pulse{% endif %}"></span>
+            <span
+                class="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-bold rounded-full
+                {% if is_finished_slot %}
+                    bg-slate-100/90 text-slate-800 border border-slate-200/70
+                {% elif slot.status == 'started' %}
+                    bg-emerald-100/90 text-emerald-800 border border-emerald-200/70
+                {% else %}
+                    bg-indigo-100/80 text-indigo-800 border border-indigo-200/50
+                {% endif %}"
+            >
+                <span
+                    class="w-2 h-2 rounded-full
+                    {% if is_finished_slot %}
+                        bg-slate-500
+                    {% elif slot.status == 'started' %}
+                        bg-emerald-500 animate-pulse
+                    {% else %}
+                        bg-indigo-500 animate-pulse
+                    {% endif %}"
+                ></span>
                 {{ slot.get_status_display }}
             </span>
             <div class="flex flex-wrap items-center justify-end gap-2">

@@ -8,6 +8,8 @@ from calendar_engine._api.serializers.events import (
 from calendar_engine.booking.exceptions import \
     CreateTherapySessionValidationError
 from calendar_engine.booking.throttles import CreateTherapySessionThrottle
+from calendar_engine.lifecycle.event_status_lifecycle import \
+    apply_time_based_status_transitions
 from calendar_engine.models import (CalendarEvent, EventParticipant,
                                     RecurrenceRule, TimeSlot)
 
@@ -59,6 +61,8 @@ class CalendarEventListCreateView(generics.ListCreateAPIView):
         """
         user = self.request.user
         include_archived = self.request.query_params.get("include_archived")
+        # Запуск автоматического обновления/определения статусов event/slot по фактическому времени
+        apply_time_based_status_transitions(participant_user=user)
 
         queryset = (
             CalendarEvent.objects

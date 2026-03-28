@@ -4217,6 +4217,10 @@ input:checked + .toggle-bg {
   background-color: rgb(81 69 205 / 0.95);
 }
 
+.bg-emerald-100\/90 {
+  background-color: rgb(209 250 229 / 0.9);
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
