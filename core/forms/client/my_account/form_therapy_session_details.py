@@ -1,24 +1,16 @@
-from django import forms
+from core.forms.forum_message.form_forum_message import ForumMessageForm
 
 
-class ClientTherapySessionDetailsForm(forms.Form):
+class ClientTherapySessionDetailsForm(ForumMessageForm):
     """Форма для редактирования доступных клиенту деталей уже созданной терапевтической сессии.
+    Наследуемся от ForumMessageForm - тем самым накладываем на форум функционал страницы клиента.
 
     Бизнес-смысл:
-        - клиент не отвечает за организационную часть встречи и поэтому НЕ может управлять meeting_url на созвон;
-        - comment пока остается общим простым полем заметки к сессии до появления отдельной модели
-          форумного обсуждения для участников TimeSlot.
+        - после выноса forum-сообщений в отдельный shared-модуль сам input-contract живет в ForumMessageForm;
+        - этот класс оставляем как тонкую обертку, чтобы аккуратно пережить рефакторинг
+          и не сломать возможные старые импорты client-модуля + могут появиться для клиента доступные для
+          редактирования поля (например, "Добавить заметку" и тд) и форма нужна будет.
     """
 
-    comment = forms.CharField(
-        required=False,
-        label="Комментарий к сессии",
-        widget=forms.Textarea(
-            attrs={
-                "class": "w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-base text-zinc-800 "
-                         "focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200",
-                "rows": 5,
-                "placeholder": "Например: ссылка на материалы, уточнение по подготовке или важная заметка к сессии.",
-            }
-        ),
-    )
+    # TODO: Временно pass, но изменим после того как будет реализован функционал "Добавить заметку" и т.д.
+    pass

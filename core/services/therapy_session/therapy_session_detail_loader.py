@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from calendar_engine.models import CalendarEvent
+from calendar_engine.models import CalendarEvent, TimeSlotMessage
 from core.services.calendar_event_slot_selector import (
     get_event_active_slot, get_event_completed_slot)
 from core.services.calendar_slot_time_display import \
@@ -51,6 +52,10 @@ def _get_event_for_viewer(*, viewer_user, event_id):
         CalendarEvent.objects.prefetch_related(
             "slots",
             "slots__slot_participants__user",
+            Prefetch(
+                "slots__messages",
+                queryset=TimeSlotMessage.objects.select_related("creator").order_by("created_at"),
+            ),
             "participants__user__psychologist_profile",
             "participants__user__psychologist_profile__methods",
             "participants__user__psychologist_profile__specialisations",
