@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
@@ -8,7 +10,8 @@ from django.views.generic import FormView
 
 from calendar_engine.booking.services import build_specialist_live_indicator
 from calendar_engine.models import TimeSlotMessage
-from core.constants import (MESSAGE_LENGTH_IN_THERAPY_SESSION_PAGE,
+from core.constants import (MESSAGE_EDIT_WINDOW_SECONDS_IN_THERAPY_SESSION_PAGE,
+                            MESSAGE_LENGTH_IN_THERAPY_SESSION_PAGE,
                             VISIBLE_MESSAGE_LIMITS_IN_THERAPY_SESSION_PAGE)
 from core.forms.forum_message.form_forum_message import ForumMessageForm
 from core.services.experience_label import build_experience_label
@@ -29,6 +32,8 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
     visible_messages_limit = VISIBLE_MESSAGE_LIMITS_IN_THERAPY_SESSION_PAGE
     # Количество символов в сообщении по умолчанию в детальной карточке *Терапевтическая сессия*
     message_length = MESSAGE_LENGTH_IN_THERAPY_SESSION_PAGE
+    # В течение какого времени после публикации автор еще может РЕДАКТИРОВАТЬ текст своего сообщения
+    message_edit_window_seconds = MESSAGE_EDIT_WINDOW_SECONDS_IN_THERAPY_SESSION_PAGE
 
     def dispatch(self, request, *args, **kwargs):
         """Подготавливает всю detail-страницу еще до перехода в GET/POST-логику.
@@ -93,6 +98,25 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
 
         return redirect(self.get_success_url())
 
+    def form_invalid(self, form):
+        """Разводит обработку ошибок для добавления и inline-редактирования сообщения.
+
+        Бизнес-смысл:
+            - нижняя форма страницы отвечает за добавление нового сообщения;
+            - inline-форма внутри карточки сообщения отвечает за редактирование уже существующего;
+            - если edit-message не прошел проверку, нельзя оставлять page-form в связанном состоянии
+              action=edit_message, иначе следующий submit кнопки "Добавить сообщение" повторит старую ошибку.
+        """
+        if self.request.POST.get("action") == "edit_message":
+            error_text = next(iter(form.non_field_errors()), None)
+            if error_text is None:
+                error_text = next(iter(form.errors.get("message", [])), "Не удалось обновить сообщение!")
+
+            messages.error(self.request, error_text)
+            return redirect(self.get_success_url())
+
+        return super().form_invalid(form)
+
     def get_success_url(self):
         """После сохранения остаемся на той же detail-странице и сохраняем текущий layout."""
         return f"{self.request.path}{self._build_layout_query()}"
@@ -121,6 +145,27 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
         slot_message.full_clean()
         slot_message.save()
 
+    def _can_edit_slot_message(self, slot_message):
+        """Проверяет, доступно ли автору редактирование конкретного сообщения.
+
+        Бизнес-смысл:
+            - одного условия "встреча еще активна" недостаточно:
+              иначе сообщение можно переписывать сколько угодно долго до конца встречи;
+            - поэтому вводим дополнительное окно редактирования после created_at;
+            - итоговое правило:
+                - сообщение принадлежит текущему пользователю;
+                - встреча еще допускает работу с форумом;
+                - с момента публикации прошло не больше заданного лимита секунд.
+        """
+        if slot_message.creator_id != self.request.user.pk:
+            return False
+
+        if not self._can_manage_slot_messages():
+            return False
+
+        editable_until = slot_message.created_at + timedelta(seconds=self.message_edit_window_seconds)
+        return timezone.now() <= editable_until
+
     def _edit_slot_message(self, form):
         """Редактирует сообщение текущего пользователя внутри активной встречи.
 
@@ -139,6 +184,14 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
             slot=self.slot,
             creator=self.request.user,
         )
+        if not self._can_edit_slot_message(slot_message):
+            form.add_error(
+                None,
+                f"Редактировать сообщение можно только в течение первых "
+                f"{self.message_edit_window_seconds // 60} минут после публикации.",
+            )
+            return self.form_invalid(form)
+
         new_message = form.cleaned_data["message"]
 
         if slot_message.message != new_message:
@@ -223,7 +276,7 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
                     "message_preview": Truncator(slot_message.message).chars(self.message_length, truncate="..."),
                     "is_long_message": len(slot_message.message) > self.message_length,
                     "is_own_message": is_own_message,
-                    "can_edit": is_own_message and self._can_manage_slot_messages(),
+                    "can_edit": self._can_edit_slot_message(slot_message),
                     "creator_full_name": creator_full_name or slot_message.creator.email,
                     "creator_avatar_url": slot_message.creator.avatar_url,
                     "created_at_display": local_created_at.strftime("%d.%m.%Y %H:%M"),

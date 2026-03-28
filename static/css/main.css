@@ -4213,6 +4213,10 @@ input:checked + .toggle-bg {
   background-color: rgb(54 47 120 / 0.85);
 }
 
+.bg-indigo-700\/95 {
+  background-color: rgb(81 69 205 / 0.95);
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
@@ -6000,6 +6004,10 @@ input:checked + .toggle-bg {
 
 .hover\:bg-indigo-800\/75:hover {
   background-color: rgb(66 56 157 / 0.75);
+}
+
+.hover\:bg-indigo-800\/95:hover {
+  background-color: rgb(66 56 157 / 0.95);
 }
 
 .hover\:text-blue-600:hover {
