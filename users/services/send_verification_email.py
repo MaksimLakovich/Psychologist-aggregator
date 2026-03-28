@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMultiAlternatives
@@ -6,10 +8,16 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
 
-def send_verification_email(user, url_name="users:api:verify-email"):
+def send_verification_email(user, url_name="users:api:verify-email", extra_query_params=None):
     """Метод отправки email пользователю для подтверждения регистрации:
         - по умолчанию функция отправляет ссылку на API-эндпоинт (url_name="users:api:verify-email");
-        - для WEB-потока мы передаем url_name="users:web:verify-email" во вью."""
+        - для WEB-потока мы передаем url_name="users:web:verify-email" во вью.
+
+    Поддерживает 2 сценария:
+        - сценарий 1: обычное подтверждение регистрации без доп.параметров - письмо просто активирует аккаунт;
+        - сценарий 2: подтверждение регистрации с resume-токеном paused-booking - после подтверждения email
+          система не только активирует аккаунт, но и пытается завершить ранее выбранную запись к психологу.
+    """
 
     # Генерирую зашифрованный ID пользователя
     uid = urlsafe_base64_encode(force_bytes(user.pk))
@@ -17,7 +25,21 @@ def send_verification_email(user, url_name="users:api:verify-email"):
     token = default_token_generator.make_token(user)
     # Строю ссылку для активации
     path = reverse(url_name)
-    verification_url = f"{settings.FRONT_BASE_URL}{path}?uid={uid}&token={token}"
+    # query_params - это простой словарь с параметрами URL-строки.
+    # Собираем его, чтобы потом получить ссылку вида: "?uid=...&token=...&resume_booking=..."
+    query_params = {
+        "uid": uid,
+        "token": token,
+    }
+    if extra_query_params:
+        query_params.update(extra_query_params)
+    # urlencode(query_params) превращает словарь параметров в готовую query string для URL.
+    # Пример:
+    #     {"uid": "abc", "token": "123"}
+    # превращается в:
+    #     "uid=abc&token=123"
+    # Если в значениях есть спецсимволы, urlencode сам безопасно экранирует их для ссылки
+    verification_url = f"{settings.FRONT_BASE_URL}{path}?{urlencode(query_params)}"
 
     subject = "Подтверждение регистрации"
     from_email = settings.DEFAULT_FROM_EMAIL  # Отправитель в письме

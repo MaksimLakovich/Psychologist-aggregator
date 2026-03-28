@@ -29,6 +29,7 @@
 - Разнообразие событий: разовые/периодические, индивидуальные/групповые, составные события (курсы);
 - Настройка событий: лимит количества участникам, видимость события для остальных пользователей, etc.;
 - Жизненный цикл события/слота - создание, перенос, отмена, etc.;
+- Ведение переписки/обсуждения внутри события его участниками;
 - Функционал приглашения новых участников, подтверждение участия или отказ от него, etc.;
 - Отображение UI календаря для пользователей системы;
 - Синхронизация с внешними календарями;
@@ -358,17 +359,18 @@ calendar_engine/
 
 ### calendar_engine/models.py:
 
-| Компонент                        | Назначение                                                           | Где хранится |
-|----------------------------------|----------------------------------------------------------------------|-------------|
-| `TimeStampedModel`               | Абстрактная модель для временных меток создания и обновления         | PostgreSQL  |
-| `CalendarEvent`                  | Событие календаря                                                    | PostgreSQL  |
-| `RecurrenceRule`                 | Правила повторений                                                   | PostgreSQL  |
-| `TimeSlot`                       | Временной слот события                                               | PostgreSQL  |
-| `EventParticipant`               | Участник события                                                     | PostgreSQL  |
-| `SlotParticipant`                | Участник конкретного слота (если отличается от события)              | PostgreSQL  |
-| `AvailabilityRule`               | Правила доступности: рабочее расписание                              | PostgreSQL  |
-| `AvailabilityRuleTimeWindow`     | Набор рабочих окон внутри рабочего дня (расширяет AvailabilityRule)  | PostgreSQL  |
-| `AvailabilityException`          | Исключения из расписания                                             | PostgreSQL  |
+| Компонент                         | Назначение                                                           | Где хранится |
+|-----------------------------------|----------------------------------------------------------------------|-------------|
+| `TimeStampedModel`                | Абстрактная модель для временных меток создания и обновления         | PostgreSQL  |
+| `CalendarEvent`                   | Событие календаря                                                    | PostgreSQL  |
+| `RecurrenceRule`                  | Правила повторений                                                   | PostgreSQL  |
+| `TimeSlot`                        | Временной слот события                                               | PostgreSQL  |
+| `TimeSlotMessage`                 | Сообщения участников слота события                                   | PostgreSQL  |
+| `EventParticipant`                | Участник события                                                     | PostgreSQL  |
+| `SlotParticipant`                 | Участник конкретного слота (если отличается от события)              | PostgreSQL  |
+| `AvailabilityRule`                | Правила доступности: рабочее расписание                              | PostgreSQL  |
+| `AvailabilityRuleTimeWindow`      | Набор рабочих окон внутри рабочего дня (расширяет AvailabilityRule)  | PostgreSQL  |
+| `AvailabilityException`           | Исключения из расписания                                             | PostgreSQL  |
 | `AvailabilityExceptionTimeWindow` | Переопределеный набор рабочих окон (расширяет AvailabilityException) | PostgreSQL  |
 
 1. Модель `TimeStampedModel` (abstract):  
@@ -391,8 +393,6 @@ calendar_engine/
 | `description`        | TextField            | Описание                   |
 | `event_type`         | CharField(choices)   | Тип события                |
 | `status`             | CharField(choices)   | Статус                     |
-| `cancel_reason_type` | CharField(choices)   | Тип причины отмены события |
-| `cancel_reason`      | TextField            | Причина отмены             |
 | `visibility`         | CharField(choices)   | Видимость                  |
 | `capacity`           | PositiveSmallInteger | Лимит участников           |
 | `is_recurring`       | Boolean              | Повторяющееся              |
@@ -426,20 +426,35 @@ calendar_engine/
         - защита от double booking (защита от пересечений слотов одного creator)
     - slot_index - для составного события (курсы и серии)
 
-| Поле            | Тип                       | Описание                     |
-|-----------------|---------------------------|------------------------------|
-| `id`            | UUID                      | Идентификатор                |
-| `creator`       | FK(AppUser)               | Владелец слота               |
-| `event`         | FK(CalendarEvent)         | Событие                      |
-| `start_datetime` | DateTimeField             | Начало                       |
-| `end_datetime`  | DateTimeField             | Конец                        |
-| `status`        | CharField(choices)        | Статус                       |
-| `timezone`      | TimeZoneField             | Часовой пояс                 |
-| `meeting_url`   | URL                       | Ссылка на видео-комнату      |
-| `comment`       | TextField                 | Комментарий                  |
-| `slot_index`    | PositiveSmallIntegerField | Порядок слота внутри события |
+| Поле                | Тип                      | Описание                     |
+|---------------------|--------------------------|------------------------------|
+| `id`                | UUID                     | Идентификатор                |
+| `creator`           | FK(AppUser)              | Владелец слота               |
+| `event`             | FK(CalendarEvent)        | Событие                      |
+| `start_datetime`    | DateTimeField            | Начало                       |
+| `end_datetime`      | DateTimeField            | Конец                        |
+| `status`            | CharField(choices)       | Статус                       |
+| `timezone`          | TimeZoneField            | Часовой пояс                 |
+| `meeting_url`       | URL                      | Ссылка на видео-комнату      |
+| `meeting_resume`    | TextField                | Итоги встречи                |
+| `cancel_reason_type` | CharField(choices)       | Тип причины отмены           |
+| `cancel_reason`     | TextField                | Причина отмены               |
+| `slot_index`        | PositiveSmallIntegerField | Порядок слота внутри события |
 
-5. Модель `EventParticipant`:  
+5. Модель `TimeSlotMessage`:  
+   Сообщение участника события.
+    - Одно событие -> много пользователей
+    - Пользователь -> много сообщений
+
+| Поле          | Тип                | Описание               |
+|---------------|--------------------|------------------------|
+| `id`          | UUID               | Идентификатор          |
+| `creator`     | FK(AppUser)        | Автор сообщения        |
+| `slot`        | FK(TimeSlot)       | Слот события           |
+| `message`     | TextField          | Текст сообщения        |
+| `is_rewrited` | BooleanField       | Признак редактирования |
+
+6. Модель `EventParticipant`:  
    Участник события с ролью и статусом.
     - Одно событие -> много пользователей
     - Пользователь -> много событий
@@ -453,7 +468,7 @@ calendar_engine/
 | `role`      | CharField(choices) | Роль          |
 | `status`    | CharField(choices) | Статус        |
 
-6. Модель `SlotParticipant`:  
+7. Модель `SlotParticipant`:  
    Связь пользователя с конкретным слотом. Используется если участники различаются по слотам.  
    Важная модель для организации составных событий с разным составом участников.
    Когда и где нужно:
@@ -471,7 +486,7 @@ calendar_engine/
 | `role`      | CharField(choices) | Роль          |
 | `status`    | CharField(choices) | Статус        |
 
-7. Модель `AvailabilityRule`:
+8. Модель `AvailabilityRule`:
     Правила доступности специалиста (рабочее расписание).
     Например: Пн-Пт, с набором рабочих окон внутри дня (AvailabilityRuleTimeWindow).
 
@@ -488,7 +503,7 @@ calendar_engine/
 | `minimum_booking_notice_hours` | PositiveSmallIntegerField | Минимальное количество часов до ближайшего доступного слота для записи |
 | `is_active`                   | Boolean                   | Признак действия правила                                              |
 
-8. Модель `AvailabilityRuleTimeWindow`:  
+9. Модель `AvailabilityRuleTimeWindow`:  
    Временное окно доступности внутри рабочего дня из AvailabilityRule:
      - одно окно с 09:00 до 18:00;
      - или несколько окон с 06:00 до 11:00 и с 16:00 до 22:00.
@@ -499,7 +514,7 @@ calendar_engine/
 | `start_time` | Time                 | Начало временного окна |
 | `end_time`   | Time                 | Конец временного окна |
 
-9. Модель `AvailabilityException`:  
+10. Модель `AvailabilityException`:  
    Исключения из правил доступности специалиста (отпуск, болезнь, выходной)
 
 | Поле                                   | Тип                       | Описание                                                                     |
@@ -516,7 +531,7 @@ calendar_engine/
 | `override_minimum_booking_notice_hours` | PositiveSmallIntegerField | Новое минимальное количество часов до ближайшего доступного слота для записи |
 | `is_active`                            | Boolean                   | Признак действия исключения                                                  |
 
-10. Модель `AvailabilityExceptionTimeWindow`:  
+11. Модель `AvailabilityExceptionTimeWindow`:  
    Переопределенное временное окно доступности внутри рабочего дня из AvailabilityException (например, "с 09:00 до 18:00").
 
 | Поле                              | Тип                       | Описание                                                          |
@@ -537,6 +552,7 @@ calendar_engine/
     - `CalendarEventAdmin`
     - `RecurrenceRuleAdmin`
     - `TimeSlotAdmin`
+    - `TimeSlotMessageAdmin`
     - `EventParticipantAdmin`
     - `SlotParticipantAdmin`
     - `AvailabilityRuleAdmin`
@@ -1181,20 +1197,20 @@ calendar_engine/booking/use_cases/
 
 #### 1) API 
 
-| № | Название контроллера               | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                                                                                                                           | Используемые модели                                      | Используемые сериализаторы                              |
-|---|------------------------------------|------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------|---------------------------------------------------------|
-| 1 | **AvailabilityRuleListCreateView** | `ListCreateAPIView`    | 1) Создание нового рабочего расписания; 2) Получение рабочего расписания: по умолчанию активное расписание; с параметром include_archived=true все включая архивные правила                | `AvailabilityRule`, `AppUser`, `PsychologistProfile`     | `AvailabilityRuleSerializer`                            |
-| 2 | **AvailabilityRuleDeactivateView** | `APIView`              | Явное "закрытие" рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                                         | `AvailabilityRule`, `AppUser`, `PsychologistProfile`     | -                                                       |
-| 3 | **AvailabilityExceptionListCreateView** | `ListCreateAPIView`    | 1) Создание нового исключения из рабочего расписания; 2) Получение исключений: по умолчанию активные исключения; с параметром include_archived=true все включая архивные исключения        | `AvailabilityException`, `AppUser`, `PsychologistProfile` | `AvailabilityExceptionSerializer`                       |
-| 4 | **AvailabilityExceptionDeactivateView** | `APIView`              | Явное "закрытие" исключения из рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                           | `AvailabilityException`, `AppUser`, `PsychologistProfile` | -                                                       |
-| 5 | **CalendarSessionListCreateView**  | `ListCreateAPIView`       | 1) Создание новой терапевтической сессии - CreateTherapySessionSerializer; 2) Получение списка всех видов сессий - EventListSerializer (include_archived=true все включая архивные записи) | `AppUser`                                                | `CreateTherapySessionSerializer`, `EventListSerializer` |
+| № | Название контроллера               | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                                                                                                                            | Используемые модели                                      | Используемые сериализаторы                              |
+|---|------------------------------------|------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------|---------------------------------------------------------|
+| 1 | **AvailabilityRuleListCreateView** | `ListCreateAPIView`    | 1) Создание нового рабочего расписания; 2) Получение рабочего расписания: по умолчанию активное расписание; с параметром include_archived=true все включая архивные правила                 | `AvailabilityRule`, `AppUser`, `PsychologistProfile`     | `AvailabilityRuleSerializer`                            |
+| 2 | **AvailabilityRuleDeactivateView** | `APIView`              | Явное "закрытие" рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                                          | `AvailabilityRule`, `AppUser`, `PsychologistProfile`     | -                                                       |
+| 3 | **AvailabilityExceptionListCreateView** | `ListCreateAPIView`    | 1) Создание нового исключения из рабочего расписания; 2) Получение исключений: по умолчанию активные исключения; с параметром include_archived=true все включая архивные исключения         | `AvailabilityException`, `AppUser`, `PsychologistProfile` | `AvailabilityExceptionSerializer`                       |
+| 4 | **AvailabilityExceptionDeactivateView** | `APIView`              | Явное "закрытие" исключения из рабочего расписания психолога (soft-delete: вместо DESTROY-запроса устанавливаем is_active=False)                                                            | `AvailabilityException`, `AppUser`, `PsychologistProfile` | -                                                       |
+| 5 | **CalendarEventListCreateView**  | `ListCreateAPIView`       | 1) Создание новой терапевтической сессии - CreateTherapySessionSerializer; 2) Получение списка всех видов событий - EventListSerializer (include_archived=true все включая архивные записи) | `AppUser`                                                | `CreateTherapySessionSerializer`, `EventListSerializer` |
 
 #### 2) AJAX-запрос (fetch) на специальный API-endpoint
 
-| № | Название контроллера              | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                                                                                                                                 | Используемые модели          |
-|---|-----------------------------------|------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
-| 1 | **GetDomainSlotsAjaxView**        | `View`                 | Возвращает клиенту на UI все возможные доменные временные слоты (общее правило домена). <br/> Read-only эндпоинт только для показа возможных слотов на странице пользователя, без сохранения в БД | Без использования БД         |
-| 2 | **GetSpecialistScheduleAjaxView** | `View`                 | Возвращает клиенту на UI в карточке конкретного специалиста актуальное расписание данного специалиста: <br/> 1) ближайший доступный слот; <br/> 2) все доступные слоты в блоке "Расписание"      | Без использования БД         |
+| № | Название контроллера              | Тип (ViewSet / Generic) | Описание функционала (docstring)                                                                                                                                                                                                                                                                                                                    | Используемые модели          |
+|---|-----------------------------------|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
+| 1 | **GetDomainSlotsAjaxView**        | `View`                 | Работает с двумя сценариями: - сценарий 1: работает зарегистрированный авторизованный пользователь; - сценарий 2: работает guest-anonymous. <br/> Возвращает клиенту на UI все возможные доменные временные слоты (общее правило домена). <br/> Read-only эндпоинт только для показа возможных слотов на странице пользователя, без сохранения в БД | Без использования БД         |
+| 2 | **GetSpecialistScheduleAjaxView** | `View`                 | Работает с двумя сценариями: - сценарий 1: работает зарегистрированный авторизованный пользователь; - сценарий 2: работает guest-anonymous. <br/> Возвращает клиенту на UI в карточке конкретного специалиста актуальное расписание данного специалиста: <br/> 1) ближайший доступный слот; <br/> 2) все доступные слоты в блоке "Расписание"       | Без использования БД         |
 
 
 ### 3. МАРШРУТЫ (РОУТЫ)
@@ -1209,7 +1225,7 @@ calendar_engine/booking/use_cases/
 | 2 | `/calendar/api/my-availability-rules/close/`              | `PATCH`       | Явное "закрытие" рабочего расписания специалиста                                                                                                                 |
 | 3 | `/calendar/api/my-availability-exceptions/`               | `GET`, `POST` | Создать исключение в расписании / Получить список исключений (текущее + архивные, если указать в адресе `?include_archived=true`)                                |
 | 4 | `/calendar/api/my-availability-exceptions/<int:pk>/close/` | `PATCH`       | Явное "закрытие" исключения                                                                                                                                      |
-| 5 | `/calendar/api/sessions/`                                 | `GET`, `POST` | Cоздать терапевтическую сессию между клиентом и специалистом / Получить список всех событий (текущее + архивные, если указать в адресе `?include_archived=true`) |
+| 5 | `/calendar/api/events/`                                   | `GET`, `POST` | Cоздать терапевтическую сессию между клиентом и специалистом / Получить список всех событий (текущее + архивные, если указать в адресе `?include_archived=true`) |
 
 #### 2) AJAX-запросы (fetch) на моментальное сохранение указанных клиентом на html-страницах данных в БД
 

@@ -94,20 +94,6 @@ class CalendarEvent(TimeStampedModel):
         verbose_name="Статус события",
         help_text="Укажите статус события",
     )
-    cancel_reason_type = models.CharField(
-        choices=EVENT_CANCEL_REASON_TYPE_CHOICES,
-        max_length=32,
-        null=True,
-        blank=True,
-        verbose_name="Тип причины отмены события",
-        help_text="Укажите тип причины отмены события (например: отменено пользователем, перенос, отменено админом)",
-    )
-    cancel_reason = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name="Причина отмены события",
-        help_text="Укажите текстовое пояснение причины отмены события",
-    )
     visibility = models.CharField(
         choices=EVENT_VISIBILITY_CHOICES,
         default="private",
@@ -163,14 +149,6 @@ class CalendarEvent(TimeStampedModel):
     def clean(self):
         """Модельная валидация бизнес-инвариантов события.
 
-        2 ключевых сценария:
-            1) Обычное активное или завершенное событие:
-                - НЕ должно содержать причину отмены;
-                - НЕ должно содержать тип причины отмены.
-            2) Отмененное событие:
-                - ОБЯЗАНО содержать тип причины отмены;
-                - ОБЯЗАНО содержать текстовое пояснение причины отмены.
-
         Дополнительно:
             - previous_event хранится в НОВОМ событии после переноса, а не в старом отмененном;
             - событие не может ссылаться само на себя как на previous_event.
@@ -178,27 +156,6 @@ class CalendarEvent(TimeStampedModel):
         super().clean()
 
         errors = {}
-
-        if self.status == "cancelled":
-            if not self.cancel_reason_type:
-                errors["cancel_reason_type"] = (
-                    "Для отмененного события обязательно нужно указать тип причины отмены"
-                )
-
-            if not self.cancel_reason:
-                errors["cancel_reason"] = (
-                    "Для отмененного события обязательно нужно указать текстовое пояснение причины отмены"
-                )
-        else:
-            if self.cancel_reason_type:
-                errors["cancel_reason_type"] = (
-                    "Тип причины отмены можно указывать только для события со статусом cancelled"
-                )
-
-            if self.cancel_reason:
-                errors["cancel_reason"] = (
-                    "Текстовую причину отмены можно указывать только для события со статусом cancelled"
-                )
 
         if self.previous_event_id:
             if self.pk and self.previous_event_id == self.pk:
@@ -365,11 +322,25 @@ class TimeSlot(TimeStampedModel):
         verbose_name="Ссылка на видео-комнату",
         help_text="Укажите ссылку на видео-комнату",
     )
-    comment = models.TextField(
+    meeting_resume = models.TextField(
         null=True,
         blank=True,
-        verbose_name="Комментарий",
-        help_text="Укажите комментарий",
+        verbose_name="Итоги встречи",
+        help_text="Укажите краткий протокол, выводы или результаты проведенной встречи",
+    )
+    cancel_reason_type = models.CharField(
+        choices=EVENT_CANCEL_REASON_TYPE_CHOICES,
+        max_length=32,
+        null=True,
+        blank=True,
+        verbose_name="Тип причины отмены слота",
+        help_text="Укажите тип причины отмены конкретной встречи внутри события",
+    )
+    cancel_reason = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="Причина отмены слота",
+        help_text="Укажите текстовое пояснение причины отмены конкретной встречи",
     )
     slot_index = models.PositiveSmallIntegerField(
         default=1,
@@ -382,6 +353,47 @@ class TimeSlot(TimeStampedModel):
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
         return f"{self.id} - {self.event.title}"
+
+    def clean(self):
+        """Модельная валидация бизнес-инвариантов конкретной встречи внутри события.
+
+        Бизнес-смысл:
+            - для multi-slot события отмена должна относиться к конкретному TimeSlot, а не ко всему CalendarEvent;
+            - meeting_resume можно хранить только у реально завершенной встречи;
+            - cancel_reason_type и cancel_reason должны заполняться только у отмененного слота.
+        """
+        super().clean()
+
+        errors = {}
+
+        if self.status == "cancelled":
+            if not self.cancel_reason_type:
+                errors["cancel_reason_type"] = (
+                    "Для отмененного слота обязательно нужно указать тип причины отмены"
+                )
+
+            if not self.cancel_reason:
+                errors["cancel_reason"] = (
+                    "Для отмененного слота обязательно нужно указать текстовое пояснение причины отмены"
+                )
+        else:
+            if self.cancel_reason_type:
+                errors["cancel_reason_type"] = (
+                    "Тип причины отмены можно указывать только для слота со статусом cancelled"
+                )
+
+            if self.cancel_reason:
+                errors["cancel_reason"] = (
+                    "Текстовую причину отмены можно указывать только для слота со статусом cancelled"
+                )
+
+        if self.status != "completed" and self.meeting_resume:
+            errors["meeting_resume"] = (
+                "Итоги встречи можно сохранять только для слота со статусом completed"
+            )
+
+        if errors:
+            raise ValidationError(errors)
 
     class Meta:
         verbose_name = "Слот"
@@ -431,6 +443,90 @@ class TimeSlot(TimeStampedModel):
         #               ...
         #           ]
         # Без этого PostgreSQL либо упадет, либо constraint просто не создастся.
+
+
+class TimeSlotMessage(TimeStampedModel):
+    """Сообщение участников внутри конкретноого события.
+
+    Бизнес-смысл:
+        - одно текстовое поле message у TimeSlot не позволяет построить нормальное обсуждение;
+        - отдельная модель дает форум/чат внутри встречи:
+            - несколько сообщений;
+            - разные авторы;
+            - редактирование своих сообщений;
+            - история по created_at / updated_at.
+    """
+
+    # Это как primary_key вместо системного автоинкремента id, чтоб было более безопасно для публичных API
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    creator = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
+        related_name="authored_slot_messages",
+        verbose_name="Автор сообщения",
+        help_text="Укажите пользователя, который оставил сообщение внутри встречи",
+    )
+    slot = models.ForeignKey(
+        to=TimeSlot,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
+        related_name="messages",
+        verbose_name="Слот встречи",
+        help_text="Укажите встречу, к которой относится сообщение",
+    )
+    message = models.TextField(
+        null=False,
+        blank=False,
+        verbose_name="Текст сообщения",
+        help_text="Укажите текст сообщения участника встречи",
+    )
+    is_rewrited = models.BooleanField(
+        default=False,
+        null=False,
+        blank=False,
+        verbose_name="Сообщение отредактировано",
+        help_text="Флаг нужен, чтобы на UI показывать, что автор уже менял текст сообщения",
+    )
+
+    def __str__(self):
+        """Краткое строковое представление сообщения для админки и shell."""
+        return f"{self.creator} -> {self.slot_id}"
+
+    def clean(self):
+        """Модельная валидация сообщения внутри встречи.
+
+        Бизнес-смысл:
+            - сообщения должны оставлять только реальные участники конкретной встречи;
+            - пустые или состоящие из пробелов тексты для форумного сценария не имеют смысла.
+        """
+        super().clean()
+
+        errors = {}
+
+        if self.message is not None and not self.message.strip():
+            errors["message"] = "Сообщение не может состоять только из пробелов"
+
+        if self.creator_id and self.slot_id:
+            is_participant = self.slot.event.participants.filter(user_id=self.creator_id).exists()
+            if not is_participant:
+                errors["creator"] = (
+                    "Оставлять сообщения внутри встречи могут только участники этого события"
+                )
+
+        if errors:
+            raise ValidationError(errors)
+
+    class Meta:
+        verbose_name = "Сообщение встречи"
+        verbose_name_plural = "Сообщения встреч"
+        ordering = ["-created_at"]
 
 
 class EventParticipant(TimeStampedModel):
