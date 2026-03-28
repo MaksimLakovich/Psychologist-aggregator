@@ -1,23 +1,29 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.generic.edit import FormView
 
 from core.forms.client.specialist_matching.form_personal_questions import \
     ClientPersonalQuestionsForm
+from core.services.anonymous_client_flow_for_search_and_booking import (
+    get_guest_matching_state, update_guest_personal_state)
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 from core.services.topic_groups import build_topics_grouped_by_type
 from users.models import ClientProfile, Method
 
 
-class ClientPersonalQuestionsPageView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, FormView):
-    """Контроллер на основе FormView для отображения страницы *Персональные вопросы* - предпочтения клиента."""
+class ClientPersonalQuestionsPageView(SpecialistMatchingLayoutMixin, FormView):
+    """Контроллер на основе FormView для отображения страницы *Персональные вопросы* - предпочтения клиента.
+
+    Вью работает в двух сценариях:
+        - сценарий 1: работает зарегистрированный авторизованный пользователь;
+        - сценарий 2: работает guest-anonymous.
+    """
 
     template_name = "core/client_pages/specialist_matching/home_client_personal_questions.html"
     form_class = ClientPersonalQuestionsForm
 
     def get_initial(self):
-        """Возвращает предзаполненные значения формы, полученные из ClientProfile по данным:
+        """Возвращает initial-значения формы для двух сценариев шага "Персональные вопросы":
             - preferred_topic_type;
             - requested_topics;
             - has_preferences;
@@ -28,40 +34,60 @@ class ClientPersonalQuestionsPageView(SpecialistMatchingLayoutMixin, LoginRequir
             - preferred_slots.
         Вызывается автоматически FormView при создании формы."""
         initial = super().get_initial()
-        user = self.request.user
-        profile = get_object_or_404(ClientProfile, user=user)
 
-        # 1) preferred_topic_type
-        initial["preferred_topic_type"] = profile.preferred_topic_type
+        # Сценарий 1: Авторизованный клиент. Берем данные из реальных моделей AppUser и ClientProfile
+        if self.request.user.is_authenticated:
+            user = self.request.user
+            profile = get_object_or_404(ClientProfile, user=user)
 
-        # 2) requested_topics
-        try:
-            selected = profile.requested_topics.values_list("id", flat=True)
-            initial["requested_topics"] = list(selected)
-        except Exception:
-            initial["requested_topics"] = []
+            # 1) preferred_topic_type
+            initial["preferred_topic_type"] = profile.preferred_topic_type
 
-        # 3) has_preferences
-        initial["has_preferences"] = profile.has_preferences
+            # 2) requested_topics
+            try:
+                selected = profile.requested_topics.values_list("id", flat=True)
+                initial["requested_topics"] = list(selected)
+            except Exception:
+                initial["requested_topics"] = []
 
-        # 4) preferred_ps_gender
-        initial["preferred_ps_gender"] = profile.preferred_ps_gender
+            # 3) has_preferences
+            initial["has_preferences"] = profile.has_preferences
 
-        # 5) preferred_ps_age
-        initial["preferred_ps_age"] = profile.preferred_ps_age
+            # 4) preferred_ps_gender
+            initial["preferred_ps_gender"] = profile.preferred_ps_gender
 
-        # 6) preferred_methods
-        try:
-            selected = profile.preferred_methods.values_list("id", flat=True)
-            initial["preferred_methods"] = list(selected)
-        except Exception:
-            initial["preferred_methods"] = []
+            # 5) preferred_ps_age
+            initial["preferred_ps_age"] = profile.preferred_ps_age
 
-        # 7) has_time_preferences
-        initial["has_time_preferences"] = profile.has_time_preferences
+            # 6) preferred_methods
+            try:
+                selected = profile.preferred_methods.values_list("id", flat=True)
+                initial["preferred_methods"] = list(selected)
+            except Exception:
+                initial["preferred_methods"] = []
 
-        # 8) preferred_slots
-        initial["preferred_slots"] = profile.preferred_slots
+            # 7) has_time_preferences
+            initial["has_time_preferences"] = profile.has_time_preferences
+
+            # 8) preferred_slots
+            initial["preferred_slots"] = profile.preferred_slots
+
+            return initial
+
+        # Сценарий 2: Guest-anonymous.
+        # Берем ранее сохраненный черновик из session и явно приводим его к формату initial для формы.
+        # Здесь лучше вернуть явный словарь, а не просто "return get_guest_matching_state()":
+        #   - форма получает только те поля, которые реально ожидает;
+        #   - код остается устойчивым, даже если в session позже появятся дополнительные служебные ключи
+        personal = get_guest_matching_state(self.request.session)["personal"]
+        initial["preferred_topic_type"] = personal.get("preferred_topic_type", "individual")
+        initial["requested_topics"] = list(personal.get("requested_topic_ids", []) or [])
+        initial["has_preferences"] = personal.get("has_preferences", False)
+        initial["preferred_ps_gender"] = list(personal.get("preferred_ps_gender", []) or [])
+        initial["preferred_ps_age"] = list(personal.get("preferred_ps_age", []) or [])
+        initial["preferred_methods"] = list(personal.get("preferred_method_ids", []) or [])
+        initial["has_time_preferences"] = personal.get("has_time_preferences", False)
+        initial["preferred_slots"] = list(personal.get("preferred_slots", []) or [])
 
         return initial
 
@@ -111,7 +137,7 @@ class ClientPersonalQuestionsPageView(SpecialistMatchingLayoutMixin, LoginRequir
         context["has_time_preferences"] = form.initial.get("has_time_preferences", False)
         # preferred_slots (сразу сериализоруем потому что JS не должен работать с Python datetime)
         context["preferred_slots"] = [
-            slot.isoformat()
+            slot.isoformat() if hasattr(slot, "isoformat") else str(slot)
             for slot in form.initial.get("preferred_slots", [])
         ]
         context["title_home_page_view"] = "Психологи онлайн на Опора — поиск и подбор психолога"
@@ -127,33 +153,50 @@ class ClientPersonalQuestionsPageView(SpecialistMatchingLayoutMixin, LoginRequir
         return context
 
     def form_valid(self, form):
-        """Сохраняем изменения в профиле (fallback-сохранение, если AJAX не сработал)."""
-        profile = get_object_or_404(ClientProfile, user=self.request.user)
+        """Сохраняем изменения в профиле для двух сценариев (fallback-сохранение, если AJAX не сработал)."""
+        # Сценарий 1: Авторизованный клиент. Сохраняем данные в реальные модели пользователя
+        if self.request.user.is_authenticated:
+            profile = get_object_or_404(ClientProfile, user=self.request.user)
 
-        # 1) preferred_topic_type
-        profile.preferred_topic_type = form.cleaned_data.get("preferred_topic_type")
+            # 1) preferred_topic_type
+            profile.preferred_topic_type = form.cleaned_data.get("preferred_topic_type")
 
-        # 2) requested_topics
-        selected_topics = form.cleaned_data["requested_topics"]
-        profile.requested_topics.set(selected_topics)
+            # 2) requested_topics
+            selected_topics = form.cleaned_data["requested_topics"]
+            profile.requested_topics.set(selected_topics)
 
-        # 3) has_preferences
-        profile.has_preferences = form.cleaned_data.get("has_preferences", False)
+            # 3) has_preferences
+            profile.has_preferences = form.cleaned_data.get("has_preferences", False)
 
-        # 4) preferred_ps_gender
-        profile.preferred_ps_gender = form.cleaned_data.get("preferred_ps_gender") or []
+            # 4) preferred_ps_gender
+            profile.preferred_ps_gender = form.cleaned_data.get("preferred_ps_gender") or []
 
-        # 5) preferred_ps_age
-        profile.preferred_ps_age = form.cleaned_data.get("preferred_ps_age") or []
+            # 5) preferred_ps_age
+            profile.preferred_ps_age = form.cleaned_data.get("preferred_ps_age") or []
 
-        # 6) preferred_methods
-        selected_methods = form.cleaned_data["preferred_methods"]
-        profile.preferred_methods.set(selected_methods)
+            # 6) preferred_methods
+            selected_methods = form.cleaned_data["preferred_methods"]
+            profile.preferred_methods.set(selected_methods)
 
-        # 7) has_time_preferences
-        profile.has_time_preferences = form.cleaned_data.get("has_time_preferences", False)
+            # 7) has_time_preferences
+            profile.has_time_preferences = form.cleaned_data.get("has_time_preferences", False)
 
-        profile.save()
+            profile.save()
+
+        # Сценарий 2: Guest-anonymous. Сохраняем ответы гостя во временный session-state до регистрации
+        else:
+            update_guest_personal_state(
+                self.request.session,
+                payload={
+                    "preferred_topic_type": form.cleaned_data.get("preferred_topic_type") or "individual",
+                    "requested_topic_ids": [topic.id for topic in form.cleaned_data["requested_topics"]],
+                    "has_preferences": form.cleaned_data.get("has_preferences", False),
+                    "preferred_ps_gender": form.cleaned_data.get("preferred_ps_gender") or [],
+                    "preferred_ps_age": form.cleaned_data.get("preferred_ps_age") or [],
+                    "preferred_method_ids": [method.id for method in form.cleaned_data["preferred_methods"]],
+                    "has_time_preferences": form.cleaned_data.get("has_time_preferences", False),
+                },
+            )
 
         # Маркер: что после новой фильтрации на странице выбора психолога нужно стартовать с АВЫ первого,
         # то есть нужно будет сбрасывать запоминание карточки последнего психолога, которое есть при просмотре

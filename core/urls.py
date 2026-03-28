@@ -1,9 +1,8 @@
 from django.urls import path
 
 from core.apps import CoreConfig
+from core.views.client.my_account.events_page import ClientEventsView
 from core.views.client.my_account.main_account_page import ClientAccountView
-from core.views.client.my_account.planned_sessions_page import \
-    ClientPlannedSessionsView
 from core.views.client.my_account.ps_catalog import (
     PsychologistCardDetailPageView, PsychologistCatalogFilterAjaxView,
     PsychologistCatalogPageView)
@@ -46,9 +45,7 @@ urlpatterns = [
 
     # Работа с личным КАБИНЕТОМ
     path("client-account/", ClientAccountView.as_view(), name="client-account"),
-    path(
-        "client-account/sessions/planned/", ClientPlannedSessionsView.as_view(), name="client-planned-sessions"
-    ),
+    path("client-account/events/", ClientEventsView.as_view(), name="client-events"),
     path(
         "client-account/sessions/<uuid:event_id>/",
         ClientTherapySessionDetailView.as_view(),

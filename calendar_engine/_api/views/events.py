@@ -12,14 +12,13 @@ from calendar_engine.models import (CalendarEvent, EventParticipant,
                                     RecurrenceRule, TimeSlot)
 
 
-class CalendarSessionListCreateView(generics.ListCreateAPIView):
+class CalendarEventListCreateView(generics.ListCreateAPIView):
     """Класс-контроллер на основе Generic для работы с событиями клиента.
 
     Возможности:
     1) GET (200_OK):
-        - по умолчанию возвращает только актуальные терапевтические сессии текущего пользователя
-          (status in planned/started);
-        - include_archived=true - возвращает все терапевтические сессии пользователя, включая завершенные/отмененные.
+        - по умолчанию возвращает только актуальные события текущего пользователя (статус = planned/started);
+        - include_archived=true - возвращает все события пользователя, включая завершенные/отмененные.
     2) POST (201_CREATED):
         - создает новую терапевтическую сессию через CreateTherapySessionUseCase;
         - использует тот же бизнес-сценарий, что и web-flow на странице оплаты.
@@ -50,10 +49,10 @@ class CalendarSessionListCreateView(generics.ListCreateAPIView):
         return []
 
     def get_queryset(self):
-        """Возвращает все виды сессии текущего пользователя.
+        """Возвращает все виды событий текущего пользователя.
 
         Бизнес-смысл:
-            - endpoint называется sessions/, поэтому сюда будут попадать все типы календарных событий (терапевтические
+            - endpoint называется events/, поэтому сюда будут попадать все типы календарных событий (терапевтические
               сессии, курсы, вебинары и т.д);
             - по умолчанию клиенту нужен список именно актуальных встреч, а архив подгружается отдельно
               через include_archived=true.

@@ -57,7 +57,7 @@ class CreateTherapySessionUseCase:
                 return slot
 
         raise CreateTherapySessionValidationError(
-            "Выбранный слот больше недоступен. Пожалуйста, вернитесь назад и выберите другое время."
+            "Выбранный слот уже занят. Пожалуйста, выберите другое время"
         )
 
     @staticmethod
@@ -202,7 +202,9 @@ class CreateTherapySessionUseCase:
             status="planned",
             timezone=specialist_timezone,
             meeting_url=None,
-            comment=None,
+            meeting_resume=None,
+            cancel_reason_type=None,
+            cancel_reason=None,
             slot_index=1,
         )
         slot.full_clean()

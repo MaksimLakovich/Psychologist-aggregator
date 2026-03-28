@@ -2,10 +2,13 @@
 
 {% load static %}
 
-{% block title %} {{ title_client_account_view|default:"ОПОРА" }} {% endblock %}
+{% block title %} {{ event.title|default:"Детали сессии" }} | {{ title_client_account_view|default:"ОПОРА" }} {% endblock %}
 
 {% block extra_style %}
 <style>
+    /* ========================================================= */
+    /* Плавный фон */
+    /* ========================================================= */
     body {
         background-image: url('{% static "images/background/background-start.jpg" %}');
         background-size: cover;
@@ -14,18 +17,29 @@
         background-attachment: fixed;
     }
 
-    /* Карточка системного уведомления сначала мягко затухает, а затем аккуратно освобождает место,
-       чтобы подтверждение сохранения не висело на экране дольше нужного. */
+    /* ========================================================= */
+    /* Анимации входа блоков */
+    /* ========================================================= */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in-up {
+        opacity: 0;
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    .delay-100 { animation-delay: 100ms; }
+    .delay-200 { animation-delay: 200ms; }
+    .delay-300 { animation-delay: 300ms; }
+
+    /* ========================================================= */
+    /* Автоматическое скрытие системных уведомлений */
+    /* ========================================================= */
     .auto-dismiss-message {
         overflow: hidden;
-        transition:
-            opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-            transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-            filter 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-            max-height 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-            margin 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-            padding 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-            border-width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
         transform-origin: top center;
         will-change: opacity, transform, filter, max-height, margin, padding;
         max-height: 220px;
@@ -43,16 +57,43 @@
         margin-bottom: 0;
         padding-top: 0;
         padding-bottom: 0;
-        border-top-width: 0;
-        border-bottom-width: 0;
+        border-width: 0;
+    }
+
+    /* ========================================================= */
+    /* Унифицированный стиль полей формы */
+    /* ========================================================= */
+    .glass-input input,
+    .glass-input textarea {
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(228, 228, 231, 0.8);
+        border-radius: 1rem;
+        padding: 0.75rem 1rem;
+        color: #1e1b4b;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(4px);
+    }
+
+    .glass-input input:focus,
+    .glass-input textarea:focus {
+        outline: none;
+        background-color: #ffffff;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="relative overflow-hidden min-h-screen bg-white/80 backdrop-blur-[2px] w-full">
-    <div class="relative z-10 w-full px-6 sm:px-8 py-10 {% if show_sidebar %}lg:px-24{% else %}lg:px-40 xl:px-80{% endif %}">
 
+
+<section class="relative overflow-hidden min-h-screen bg-white/40 backdrop-blur-[2px] w-full">
+
+    <div class="relative z-10 w-full px-6 sm:px-8 py-10
+        {% if show_sidebar %} lg:px-12 xl:px-24 {% else %} max-w-7xl mx-auto {% endif %}">
+
+        <!-- Уведомления -->
         {% if messages %}
             <div class="mb-8 space-y-3 max-w-3xl">
                 {% for message in messages %}
@@ -63,152 +104,159 @@
             </div>
         {% endif %}
 
-        <div class="mb-10">
-            <a href="{% url 'core:client-planned-sessions' %}{{ layout_query }}"
-               class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition">
-                <span>←</span>
-                <span>Назад к запланированным сессиям</span>
+        <!-- Кнопка назад -->
+        <div class="animate-fade-in-up mb-8">
+            <a href="{% url 'core:client-events' %}{{ layout_query }}"
+               class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600/80 hover:text-indigo-800 transition-colors
+               group bg-white/50 px-4 py-2 rounded-xl border border-white/60 shadow-sm backdrop-blur-md">
+                <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Ко всем сессиям</span>
             </a>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-10 gap-6 items-start">
-            <div class="xl:col-span-7 space-y-6">
-                <article class="rounded-3xl border border-indigo-100 bg-white/85 p-6 shadow-sm backdrop-blur-md">
-                    <div class="flex flex-col gap-5 md:flex-row md:items-start">
-                        <img
-                            src="{{ specialist_photo_url }}"
-                            alt="Фото специалиста"
-                            class="h-24 w-24 rounded-3xl object-cover shadow-sm"
-                        >
+        <!-- ===== ДЕТАЛИ ВСТРЕЧИ ===== -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
 
-                        <div class="min-w-0">
-                            <h1 class="text-3xl md:text-4xl font-black text-indigo-900 tracking-tight">
-                                {{ event.title }}
-                            </h1>
-                            <p class="mt-3 text-xl font-semibold text-zinc-800">
-                                {{ counterpart_full_name }}
-                            </p>
+            <!-- ===== ЛЕВАЯ ЧАСТЬ ===== -->
+            <div class="xl:col-span-8 space-y-8">
 
-                            <div class="mt-4 flex flex-wrap gap-2 text-sm">
-                                <span class="inline-flex rounded-full bg-indigo-100 px-3 py-1 font-semibold text-indigo-700">
-                                    {{ event.get_status_display }}
-                                </span>
-                                <span class="inline-flex rounded-full bg-sky-100 px-3 py-1 font-semibold text-sky-700">
-                                    {{ specialist_profile.get_therapy_format_display|default:"Онлайн" }}
-                                </span>
-                                <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 font-semibold text-emerald-700">
-                                    {{ specialist_profile.get_work_status_display|default:"Работает" }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </article>
+                <!-- Эти блоки уже вынесены в общий сервисный слой в event_pages/therapy_session_detail,
+                     чтобы будущая specialist-страница использовала ту же общую структуру detail-страницы что и клиентская -->
 
-                <article class="rounded-3xl border border-indigo-100 bg-white/85 p-6 shadow-sm backdrop-blur-md">
-                    <h2 class="text-2xl font-bold text-indigo-900">Информация о сессии</h2>
+                <!-- БЛОК 1: Общие данные встречи -->
+                {% include "core/event_pages/therapy_session_detail/_session_overview.html" %}
+                <!-- БЛОК 2: Подключение клиента к встрече -->
+                {% include "core/event_pages/therapy_session_detail/_session_connection_client.html" %}
+                <!-- БЛОК 3: Комментарии к встрече / форум -->
+                {% include "core/event_pages/therapy_session_detail/_session_comments_form.html" %}
 
-                    <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-zinc-700">
-                        <div class="rounded-2xl bg-zinc-50/80 p-4">
-                            <p class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Дата</p>
-                            <p class="mt-2 text-lg font-semibold text-zinc-900">{{ display_date }}</p>
-                        </div>
-                        <div class="rounded-2xl bg-zinc-50/80 p-4">
-                            <p class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Время</p>
-                            <p class="mt-2 text-lg font-semibold text-zinc-900">{{ display_time_range }}</p>
-                        </div>
-                        <div class="rounded-2xl bg-zinc-50/80 p-4">
-                            <p class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Часовой пояс клиента</p>
-                            <p class="mt-2 text-lg font-semibold text-zinc-900">{{ display_client_timezone }}</p>
-                        </div>
-                        <div class="rounded-2xl bg-zinc-50/80 p-4">
-                            <p class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Источник события</p>
-                            <p class="mt-2 text-lg font-semibold text-zinc-900">{{ event.get_source_display }}</p>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="rounded-3xl border border-indigo-100 bg-white/85 p-6 shadow-sm backdrop-blur-md">
-                    <h2 class="text-2xl font-bold text-indigo-900">Детали и подключение</h2>
-
-                    <form method="post" class="mt-5 space-y-5">
-                        {% csrf_token %}
-
-                        {% if form.non_field_errors %}
-                            <div class="rounded-2xl bg-rose-50 px-5 py-4 text-rose-600">
-                                {% for error in form.non_field_errors %}
-                                    <p class="text-sm font-medium">{{ error }}</p>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-
-                        <div>
-                            <label for="{{ form.meeting_url.id_for_label }}" class="mb-2 block text-base font-semibold text-zinc-900">
-                                {{ form.meeting_url.label }}
-                            </label>
-                            {{ form.meeting_url }}
-                            {% if form.meeting_url.errors %}
-                                <p class="mt-2 text-sm font-medium text-rose-600">{{ form.meeting_url.errors.0 }}</p>
-                            {% endif %}
-                        </div>
-
-                        <div>
-                            <label for="{{ form.comment.id_for_label }}" class="mb-2 block text-base font-semibold text-zinc-900">
-                                {{ form.comment.label }}
-                            </label>
-                            {{ form.comment }}
-                            {% if form.comment.errors %}
-                                <p class="mt-2 text-sm font-medium text-rose-600">{{ form.comment.errors.0 }}</p>
-                            {% endif %}
-                        </div>
-
-                        <button type="submit"
-                                class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold transition hover:bg-indigo-700 shadow-md hover:shadow-lg">
-                            Сохранить изменения
-                        </button>
-                    </form>
-                </article>
             </div>
 
-            <aside class="xl:col-span-3 space-y-6">
-                <article class="rounded-3xl border border-indigo-100 bg-white/85 p-6 shadow-sm backdrop-blur-md">
-                    <h2 class="text-2xl font-bold text-indigo-900">Участники</h2>
-                    <div class="mt-5 space-y-4 text-zinc-700">
-                        {% for participant in event.participants.all %}
-                            <div class="rounded-2xl bg-zinc-50/80 p-4">
-                                <p class="text-base font-semibold text-zinc-900">
-                                    {{ participant.user.first_name }} {{ participant.user.last_name }}
-                                </p>
-                                <p class="mt-2 text-sm text-zinc-600">
-                                    Роль: {{ participant.get_role_display }}
-                                </p>
-                                <p class="mt-1 text-sm text-zinc-600">
-                                    Статус: {{ participant.get_status_display }}
-                                </p>
-                            </div>
-                        {% endfor %}
+            <!-- ===== ПРАВАЯ ЧАСТЬ ===== -->
+            <aside class="xl:col-span-4 space-y-6">
+
+                <!-- БЛОК 4: Данные психолога -->
+                <article class="rounded-[2rem] border border-white/60 bg-white/60 p-6 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-3">Терапевт</h3>
+                    <div class="flex flex-col items-center text-center">
+
+                        <div class="relative mb-4">
+                            <img src="{{ specialist_photo_url }}" alt="Фото специалиста" class="h-28 w-28 rounded-[1.5rem] object-cover shadow-md border-4 border-white/80">
+                            <!-- Тот же live-indicator, что и в списке событий: клиент должен видеть одинаковое поведение статуса специалиста и в карточке списка, и на detail-странице -->
+                            <span class="group absolute -bottom-0.5 -right-0.5 z-20 flex items-center justify-center w-4 h-4 rounded-full bg-white border-2 border-white shadow-sm"
+                                  title="{{ specialist_live_indicator.title }}">
+                                {% if specialist_live_indicator.should_ping %}
+                                    <span class="absolute inset-0 m-auto inline-flex w-3 h-3 animate-ping rounded-full opacity-75"
+                                          style="background-color: {{ specialist_live_indicator.ping_color }};"></span>
+                                {% endif %}
+                                <span class="absolute inset-0 m-auto inline-flex w-3 h-3 rounded-full"
+                                      style="background-color: {{ specialist_live_indicator.dot_color }};"></span>
+                                <span class="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-zinc-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+                                    {{ specialist_live_indicator.label }}
+                                </span>
+                            </span>
+                        </div>
+
+                        <h2 class="text-xl font-extrabold text-indigo-950 mb-1">{{ counterpart_full_name }}</h2>
+                        <p class="text-sm font-medium text-zinc-500 mb-5">
+                            Психолог
+                        </p>
+
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Стоимость этой сессии</p>
+                            {% if session_price_value %}
+                                <p class="mb-5 text-lg font-semibold text-zinc-900">{{ session_price_value|floatformat:0 }} {{ specialist_profile.price_currency }}</p>
+                            {% else %}
+                                <p class="mb-5 text-lg font-semibold text-zinc-900">Уточняется</p>
+                            {% endif %}
+                        </div>
+
+                        {% if specialist_profile_url %}
+                            <a href="{{ specialist_profile_url }}"
+                               class="rounded-xl text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors w-full py-3
+                               bg-indigo-200/60 hover:bg-indigo-200/80 border border-indigo-100">
+                                Посмотреть профиль
+                            </a>
+                        {% endif %}
                     </div>
                 </article>
 
-                <article class="rounded-3xl border border-indigo-100 bg-white/85 p-6 shadow-sm backdrop-blur-md">
-                    <h2 class="text-2xl font-bold text-indigo-900">Работает с темами вашей анкеты</h2>
+                {% if specialist_profile %}
+                    {% with specialist_specialisations=specialist_profile.specialisations.all specialist_methods=specialist_profile.methods.all %}
+                        {% if specialist_specialisations or specialist_methods %}
 
-                    {% if matched_topics %}
-                        <div class="mt-5 flex flex-wrap gap-2">
-                            {% for topic in matched_topics %}
-                                <span class="inline-flex rounded-full bg-indigo-100 px-3 py-1 text-sm font-semibold text-indigo-700">
-                                    {{ topic.name }}
-                                </span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="mt-4 text-base text-zinc-600">
-                            Для этой сессии пока не найдено совпавших тем между вашим запросом и профилем специалиста.
-                        </p>
-                    {% endif %}
-                </article>
+                            <article class="rounded-[2rem] border border-white/60 bg-white/60 p-6 shadow-sm backdrop-blur-md animate-fade-in-up delay-300">
+                                {% if specialist_specialisations %}
+                                    <div>
+                                        <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-3">Специализации</h3>
+                                        <div class="flex flex-wrap gap-2">
+                                            {% for specialisation in specialist_specialisations %}
+                                                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100
+                                            border border-indigo-100/80 text-sm font-medium text-indigo-800 transition-colors">
+                                                    {{ specialisation.name }}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {% if specialist_methods %}
+                                    <div class="{% if specialist_specialisations %}mt-5 pt-5 border-t border-zinc-700/70{% endif %}">
+                                        <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-3">Методы работы</h3>
+                                        <div class="flex flex-wrap gap-2">
+                                            {% for method in specialist_methods %}
+                                                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100
+                                            border border-indigo-100/80 text-sm font-medium text-indigo-800 transition-colors">
+                                                    {{ method.name }}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <div class="{% if specialist_methods %}mt-5 pt-5 border-t border-zinc-700/70{% endif %}">
+                                    <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-3 flex items-center justify-between">
+                                        Совпадения по вашей анкете
+                                        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold">
+                                            {{ matched_topics|length|default:"0" }}
+                                        </span>
+                                    </h3>
+                                </div>
+
+                                {% if matched_topics %}
+                                    <div class="flex flex-wrap gap-2">
+                                        {% for topic in matched_topics %}
+                                            <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100
+                                            border border-indigo-100/80 text-sm font-medium text-indigo-800 transition-colors">
+                                                {{ topic.name }}
+                                                {% if topic.type %}
+                                                    <span class="ml-2 text-[10px] uppercase tracking-wide opacity-60">{{ topic.type }}</span>
+                                                {% endif %}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="p-4 bg-zinc-50/80 rounded-2xl border border-zinc-100 text-center">
+                                        <p class="text-sm text-zinc-500 font-medium">Совпадающие темы между вашей анкетой и профилем специалиста не найдены</p>
+                                    </div>
+                                {% endif %}
+                            </article>
+
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
+
             </aside>
+
         </div>
+
     </div>
+
 </section>
+
 <script type="module" src="{% static 'js/modules/auto_hide_message.js' %}"></script>
+<script type="module" src="{% static 'js/modules/messages_forum/therapy_session_detail_forum.js' %}"></script>
+
 {% endblock %}

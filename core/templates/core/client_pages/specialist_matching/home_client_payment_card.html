@@ -60,6 +60,16 @@
                 <!-- ========== ВАЖНО для открытия либо САЙДБАРА либо МЕНЮ ========== -->
                 <input type="hidden" name="layout" value="{{ layout_mode }}">
 
+                {% if messages %}
+                <div class="space-y-2">
+                    {% for message in messages %}
+                    <div class="rounded-2xl border {% if 'error' in message.tags %}border-rose-200 bg-rose-50 text-rose-700{% else %}border-emerald-200 bg-emerald-50 text-emerald-700{% endif %} px-5 py-4">
+                        {{ message|linebreaksbr }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 <!-- Общие ошибки -->
                 {% if form.non_field_errors or form.errors %}
                 <div class="rounded-2xl border border-rose-100 shadow-sm bg-rose-50 px-5 py-4 text-rose-700">
@@ -180,7 +190,7 @@
                                     <div
                                             id="payment-psychologist-summary"
                                             class="mb-1 pb-4"
-                                            data-client-timezone="{{ request.user.timezone|default_if_none:'' }}"
+                                            data-client-timezone="{{ client_timezone_value }}"
                                     >
                                         <!-- Skeleton-заглушка: пока JS загружает выбранного психолога и слот -->
                                         <div class="animate-pulse flex flex-col items-center gap-4">

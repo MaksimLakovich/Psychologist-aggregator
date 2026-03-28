@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, tzinfo
 from zoneinfo import ZoneInfo
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import JsonResponse
@@ -21,6 +20,8 @@ from calendar_engine.application.factories.generate_specialist_schedule_factory 
 from calendar_engine.application.use_cases.get_domain_slots_use_case import \
     GetDomainSlotsUseCase
 from calendar_engine.models import AvailabilityException, AvailabilityRule
+from core.services.get_client_profile_for_request import \
+    get_client_profile_for_request
 from users.models import PsychologistProfile
 from users.permissions import IsPsychologistOrAdmin
 
@@ -209,14 +210,23 @@ class AvailabilityExceptionDeactivateView(APIView):
 # ВСЕ ВОЗМОЖНЫЕ ДОМЕННЫЕ СЛОТЫ + СЛОТЫ ОТФИЛЬТРОВАННЫЕ НА ОСНОВЕ РАБОЧЕГО РАСПИСАНИЯ СПЕЦИАЛИСТА
 # =====
 
-class GetDomainSlotsAjaxView(LoginRequiredMixin, View):
+class GetDomainSlotsAjaxView(View):
     """Возвращает клиенту на UI все возможные доменные временные слоты (общее правило домена).
-    Read-only эндпоинт только для показа возможных слотов на странице пользователя, без сохранения в БД."""
+    Read-only эндпоинт только для показа возможных слотов на странице пользователя, без сохранения в БД.
+
+    Работает с двумя сценариями:
+        - сценарий 1: работает зарегистрированный авторизованный пользователь;
+        - сценарий 2: работает guest-anonymous.
+    """
 
     def get(self, request, *args, **kwargs):
         """Получить все доменные временные слоты."""
-        user = request.user
-        profile = user.client_profile
+
+        # get_client_profile_for_request(request) - возвращает профиль, с которым дальше должен работать flow:
+        #   - если клиент уже авторизован, то используется реальный ClientProfile из БД;
+        #   - если клиент еще гость, то используется session и временный профиль гостя
+        profile = get_client_profile_for_request(request)
+        user = profile.user
 
         use_case = GetDomainSlotsUseCase(
             timezone=user.timezone
@@ -239,12 +249,18 @@ class GetDomainSlotsAjaxView(LoginRequiredMixin, View):
         )
 
 
-class GetSpecialistScheduleAjaxView(LoginRequiredMixin, View):
+class GetSpecialistScheduleAjaxView(View):
     """Возвращает клиенту на UI в карточке конкретного специалиста актуальное расписание данного специалиста:
         - ближайший доступный слот;
         - все доступные слоты в блоке "Расписание".
+
     Все слоты ОТОБРАЖЕНЫ в TZ КЛИЕНТА.
-    Read-only эндпоинт только для показа доступных слотов из расписания специалиста, без сохранения в БД."""
+    Read-only эндпоинт только для показа доступных слотов из расписания специалиста, без сохранения в БД.
+
+    Работает с двумя сценариями:
+        - сценарий 1: работает зарегистрированный авторизованный пользователь;
+        - сценарий 2: работает guest-anonymous.
+    """
 
     def get(self, request, *args, **kwargs):
         """Получить расписание специалиста (доступные слоты) в TZ клиента.
@@ -262,7 +278,12 @@ class GetSpecialistScheduleAjaxView(LoginRequiredMixin, View):
             - старт 07:00 для couple уже НЕДОПУСТИМ, потому что сессия выйдет за границу рабочего окна.
         Т.е., без consultation_type система не может понять, какой именно duration проверять для этого расписания.
         """
-        user = request.user
+        # get_client_profile_for_request(request) - возвращает профиль, с которым дальше должен работать flow:
+        #   - если клиент уже авторизован, то используется реальный ClientProfile из БД;
+        #   - если клиент еще гость, то используется session и временный профиль гостя
+        profile = get_client_profile_for_request(request)
+        user = profile.user
+
         profile_id = kwargs["profile_id"]
         consultation_type = request.GET.get("consultation_type")
         # Эта вьюха берет profile_id из kwargs и далее использует specialist_profile.user, поэтому нужно
@@ -284,7 +305,7 @@ class GetSpecialistScheduleAjaxView(LoginRequiredMixin, View):
 
         if consultation_type not in ("individual", "couple"):
             try:
-                consultation_type = user.client_profile.preferred_topic_type
+                consultation_type = profile.preferred_topic_type
             except ObjectDoesNotExist:
                 consultation_type = "individual"
 

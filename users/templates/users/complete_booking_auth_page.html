@@ -1,0 +1,213 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %} {{ title_complete_booking_auth_view|default:"Завершение записи" }} {% endblock %}
+
+{% block extra_style %}
+<style>
+    /* ========================================================= */
+    /* Анимации появления блоков */
+    /* ========================================================= */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeInRight {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .animate-fade-in-up {
+        opacity: 0;
+        animation: fadeInUp 1.0s ease-out forwards;
+    }
+    .animate-fade-in-left {
+        opacity: 0;
+        animation: fadeInLeft 0.9s ease-out forwards;
+    }
+    .animate-fade-in-right {
+        opacity: 0;
+        animation: fadeInRight 0.9s ease-out forwards;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+<section class="min-h-screen bg-white py-10 md:py-12">
+    <div class="mx-auto max-w-6xl px-4">
+
+        <!-- Кнопка НАЗАД к подбору -->
+        <div class="animate-fade-in-left mb-10 md:mb-16 flex items-center justify-between">
+            <a href="{% url 'core:choice-psychologist' %}?layout=menu"
+               class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600/80 hover:text-indigo-700
+               transition-colors group px-4 py-2 rounded-xl border border-slate-100 bg-slate-50/95 hover:border-indigo-100 hover:bg-indigo-50/95
+               shadow-sm backdrop-blur-md">
+                <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                <span>Вернуться к выбору</span>
+            </a>
+        </div>
+
+        <div class="grid gap-16 lg:grid-cols-[1.05fr_0.95fr]">
+
+            <!-- ===== ЛЕВАЯ КОЛОНКА ===== -->
+            <div class="animate-fade-in-up rounded-[2rem] bg-slate-50/75 p-6 shadow-sm ring-1 ring-slate-100 md:p-8 md:pt-7">
+
+                <!-- Сценарий 1: для указанного гостем email действительно нет в БД такого email и ожидается подтверждение почты -->
+                {% if booking_auth_stage == "verification-pending" %}
+                <span class="inline-flex rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-purple-700">
+                    Почти готово
+                </span>
+                <h1 class="mt-6 text-2xl font-semibold tracking-tight text-indigo-900/95 md:text-3xl">
+                    Подтвердите email, чтобы завершить запись
+                </h1>
+                <p class="mt-4 max-w-2xl text-sm leading-7 text-slate-500">
+                    Мы уже создали аккаунт{% if guest_email %} для
+                    <span class="relative inline-block before:absolute before:-inset-0.5 before:block before:-skew-y-1 before:bg-indigo-700">
+                        <span class="relative text-white">{{ guest_email }}</span>
+                    </span>
+                    {% endif %}!
+                </p>
+                <p class="mt-4 max-w-2xl text-sm leading-7 text-slate-500">
+                Откройте письмо и подтвердите email. После этого система автоматически завершит запись на выбранную встречу без повторного ввода данных.
+                </p>
+
+                <!-- Сценарий 2: для указанного гостем email уже есть аккаунт -->
+                {% elif booking_auth_stage == "account-exists" %}
+                <span class="inline-flex rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-indigo-700">
+                    Нужен вход
+                </span>
+                <h1 class="mt-6 text-2xl font-semibold tracking-tight text-indigo-900/95 md:text-3xl">
+                    Для этого email уже есть аккаунт
+                </h1>
+                <p class="mt-4 max-w-2xl text-sm leading-7 text-slate-500">
+                    Чтобы завершить запись у выбранного специалиста, войдите в существующий аккаунт.
+                    Если хотите использовать другой email, можно вернуться к регистрации.
+                </p>
+
+                <!-- Первоначальный вариант который потом в зависимости от ситуации ведет на сценарий 1 или сценарий 2 -->
+                {% else %}
+                <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                    Запись сохранена
+                </span>
+                <h1 class="mt-6 text-2xl font-semibold tracking-tight text-indigo-900/95 md:text-3xl">
+                    Завершите запись в один шаг
+                </h1>
+                <p class="mt-4 max-w-2xl text-sm leading-7 text-slate-500">
+                    Мы уже сохранили выбранного специалиста и время сессии.
+                    Осталось только войти в существующий аккаунт или создать новый аккаунт,
+                    чтобы система автоматически <strong>завершила</strong> запись.
+                </p>
+
+                {% endif %}
+
+                <!-- Информация с деталями брони -->
+                <div class="mt-12 rounded-3xl border-2 border-slate-200 bg-white p-5">
+                    <p class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        Детали выбранной встречи
+                    </p>
+
+                    {% if booking_summary %}
+                    <div class="mt-5 flex items-start gap-4">
+                        <img
+                            src="{{ booking_summary.specialist_photo_url }}"
+                            alt="{{ booking_summary.specialist_full_name }}"
+                            class="h-20 w-20 rounded-full object-cover ring-4 ring-white shadow-sm"
+                        />
+                        <div class="min-w-0">
+                            <p class="text-xl font-semibold text-slate-700">
+                                {{ booking_summary.specialist_full_name }}
+                            </p>
+                            <p class="mt-2 text-sm leading-6 text-slate-600">
+                                {{ booking_summary.session_summary }}
+                            </p>
+                            <p class="mt-1 text-sm leading-6 text-slate-600">
+                                Дата и время: <strong class="text-indigo-900/95">{{ booking_summary.slot_summary }}</strong>
+                            </p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="mt-4 text-sm leading-6 text-slate-600">
+                        Сводка по встрече временно недоступна, но выбранный специалист и слот уже сохранены в системе.
+                    </p>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- ===== ПРАВАЯ КОЛОНКА ===== -->
+            <div class="animate-fade-in-right rounded-[2rem] bg-indigo-900/95 p-6 text-white shadow-sm ring-1 ring-slate-100 md:p-8">
+                <p class="text-sm font-semibold uppercase tracking-[0.18em] text-indigo-100">
+                    Следующий шаг
+                </p>
+
+                <!-- Сценарий 1: для указанного гостем email действительно нет в БД такого email и ожидается подтверждение почты -->
+                {% if booking_auth_stage == "verification-pending" %}
+                <h2 class="mt-6 text-2xl font-semibold tracking-tight">
+                    Откройте письмо и подтвердите регистрацию
+                </h2>
+                <div class="mt-6 space-y-4 text-sm leading-7 text-indigo-100">
+                    <p>1. Откройте письмо с подтверждением регистрации.</p>
+                    <p>2. Перейдите по ссылке из письма.</p>
+                    <p>3. После подтверждения email система автоматически завершит запись и откроет ваши запланированные встречи.</p>
+                </div>
+                <div class="mt-12 space-y-3">
+                    <a href="{{ login_url }}"
+                       class="inline-flex w-full items-center justify-center rounded-2xl bg-white px-6 py-3 text-base font-semibold text-indigo-900 transition hover:bg-indigo-50">
+                        Я уже подтвердил email
+                    </a>
+                    <a href="{{ register_url }}"
+                       class="inline-flex w-full items-center justify-center rounded-2xl border border-white/25 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/10">
+                        Указать другой email
+                    </a>
+                </div>
+
+                <!-- Сценарий 2: для указанного гостем email уже есть аккаунт -->
+                {% elif booking_auth_stage == "account-exists" %}
+                <h2 class="mt-6 text-2xl font-semibold tracking-tight">
+                    Выберите, как продолжить запись
+                </h2>
+                <div class="mt-12 space-y-3">
+                    <a href="{{ login_url }}"
+                       class="inline-flex w-full items-center justify-center rounded-2xl bg-white px-6 py-3 text-base font-semibold text-indigo-900 transition hover:bg-indigo-50">
+                        Войти в существующий аккаунт
+                    </a>
+                    <a href="{{ register_url }}"
+                       class="inline-flex w-full items-center justify-center rounded-2xl border border-white/25 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/10">
+                        Использовать другой email
+                    </a>
+                </div>
+
+                <!-- Первоначальный вариант который потом в зависимости от ситуации ведет на сценарий 1 или сценарий 2 -->
+                {% else %}
+                <h2 class="mt-6 text-2xl font-semibold tracking-tight">
+                    У вас уже есть аккаунт или вы здесь впервые?
+                </h2>
+                <div class="mt-12 space-y-3">
+                    <a href="{{ login_url }}"
+                       class="inline-flex w-full items-center justify-center rounded-2xl bg-white px-6 py-3 text-base font-semibold text-indigo-900 transition hover:bg-indigo-50">
+                        Я уже регистрировался
+                    </a>
+                    <a href="{{ register_url }}"
+                       class="inline-flex w-full items-center justify-center rounded-2xl border border-white/25 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/10">
+                        Я здесь впервые
+                    </a>
+                </div>
+                {% endif %}
+
+
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+{% endblock %}
