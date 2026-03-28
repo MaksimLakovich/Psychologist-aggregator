@@ -8,7 +8,8 @@ from django.views.generic import FormView
 
 from calendar_engine.booking.services import build_specialist_live_indicator
 from calendar_engine.models import TimeSlotMessage
-from core.constants import VISIBLE_MESSAGE_LIMITS_IN_THERAPY_SESSION_PAGE, MESSAGE_LENGTH_IN_THERAPY_SESSION_PAGE
+from core.constants import (MESSAGE_LENGTH_IN_THERAPY_SESSION_PAGE,
+                            VISIBLE_MESSAGE_LIMITS_IN_THERAPY_SESSION_PAGE)
 from core.forms.forum_message.form_forum_message import ForumMessageForm
 from core.services.experience_label import build_experience_label
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
