@@ -19,7 +19,7 @@
 
                     <div class="w-full max-w-[85%] sm:max-w-[78%]">
 
-                        <div class="{% if item.is_own_message %}bg-indigo-600 text-white ml-auto{% else %}bg-white/90 text-zinc-800{% endif %} rounded-[1.5rem] border {% if item.is_own_message %}border-indigo-500/40{% else %}border-zinc-200/80{% endif %} px-4 py-3 shadow-sm">
+                        <div class="{% if item.is_own_message %}bg-indigo-600/90 text-white ml-auto{% else %}bg-slate-200/75 text-zinc-800{% endif %} rounded-[1.5rem] border {% if item.is_own_message %}border-indigo-500/40{% else %}border-zinc-200/80{% endif %} px-4 py-3 shadow-sm">
                             <div class="flex items-start justify-between gap-3">
                                 <!-- КТО + дата/время + признак наличия редактирования -->
                                 <div class="min-w-0">
@@ -94,11 +94,11 @@
 
             <!-- Кнопка "Показать еще" -->
             {% if remaining_comments_count > 0 %}
-                <div class="pt-2 text-center">
+                <div class="pt-4 text-center">
                     <button type="button"
                             data-show-more-comments
                             class="inline-flex items-center justify-center rounded-xl border border-zinc-200 px-5 py-3
-                            text-sm font-semibold text-zinc-700 hover:text-indigo-800 transition-colors bg-white hover:bg-indigo-300/75">
+                            text-sm font-semibold w-full sm:w-auto bg-indigo-600 text-white transition-all duration-200 hover:bg-indigo-700">
                         Показать еще {{ remaining_comments_count }}
                     </button>
                 </div>
