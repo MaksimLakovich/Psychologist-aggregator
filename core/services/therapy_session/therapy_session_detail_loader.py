@@ -4,7 +4,7 @@ from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from calendar_engine.lifecycle.event_status_lifecycle import \
+from calendar_engine.lifecycle.use_cases.apply_time_based_status_transitions import \
     apply_time_based_status_transitions_for_event
 from calendar_engine.models import CalendarEvent, TimeSlotMessage
 from core.services.calendar_event_slot_selector import (

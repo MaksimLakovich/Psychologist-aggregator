@@ -24,7 +24,7 @@ from calendar_engine.booking.exceptions import \
 from calendar_engine.booking.services import normalize_user_timezone
 from calendar_engine.booking.use_cases.therapy_session_create import \
     CreateTherapySessionUseCase
-from calendar_engine.lifecycle.event_status_lifecycle import \
+from calendar_engine.lifecycle.use_cases.apply_time_based_status_transitions import \
     apply_time_based_status_transitions_for_user
 from calendar_engine.models import CalendarEvent
 from core.services.anonymous_client_flow_for_search_and_booking import (

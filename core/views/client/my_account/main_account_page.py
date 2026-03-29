@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.views.generic import TemplateView
 
 from calendar_engine.booking.services import build_specialist_live_indicator
-from calendar_engine.lifecycle.event_status_lifecycle import \
+from calendar_engine.lifecycle.use_cases.apply_time_based_status_transitions import \
     apply_time_based_status_transitions_for_user
 from calendar_engine.models import CalendarEvent, EventParticipant, TimeSlot
 

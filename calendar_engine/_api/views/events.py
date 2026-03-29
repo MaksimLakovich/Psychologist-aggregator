@@ -8,7 +8,7 @@ from calendar_engine._api.serializers.events import (
 from calendar_engine.booking.exceptions import \
     CreateTherapySessionValidationError
 from calendar_engine.booking.throttles import CreateTherapySessionThrottle
-from calendar_engine.lifecycle.event_status_lifecycle import \
+from calendar_engine.lifecycle.use_cases.apply_time_based_status_transitions import \
     apply_time_based_status_transitions_for_user
 from calendar_engine.models import (CalendarEvent, EventParticipant,
                                     RecurrenceRule, TimeSlot)
