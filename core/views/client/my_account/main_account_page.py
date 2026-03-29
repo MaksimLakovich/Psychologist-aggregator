@@ -5,7 +5,7 @@ from django.views.generic import TemplateView
 
 from calendar_engine.booking.services import build_specialist_live_indicator
 from calendar_engine.lifecycle.event_status_lifecycle import \
-    apply_time_based_status_transitions
+    apply_time_based_status_transitions_for_user
 from calendar_engine.models import CalendarEvent, EventParticipant, TimeSlot
 
 
@@ -28,7 +28,7 @@ class ClientAccountView(LoginRequiredMixin, TemplateView):
             - если запланированных встреч пока нет, блок отрисовывается заглушкой, но без ошибки.
         """
         # Запуск автоматического обновления/определения статусов event/slot по фактическому времени
-        apply_time_based_status_transitions(participant_user=self.request.user)
+        apply_time_based_status_transitions_for_user(participant_user=self.request.user)
         events = (
             CalendarEvent.objects.filter(
                 participants__user=self.request.user,

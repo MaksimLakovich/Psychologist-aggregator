@@ -7,7 +7,7 @@ from django.views.generic import TemplateView
 
 from calendar_engine.booking.services import build_specialist_live_indicator
 from calendar_engine.lifecycle.event_status_lifecycle import \
-    apply_time_based_status_transitions
+    apply_time_based_status_transitions_for_user
 from calendar_engine.models import CalendarEvent, EventParticipant, TimeSlot
 from core.services.calendar_event_slot_selector import (
     get_event_active_slot, get_event_completed_slot)
@@ -47,7 +47,7 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
         """
         context = super().get_context_data(**kwargs)
         # Запуск автоматического обновления/определения статусов event/slot по фактическому времени
-        apply_time_based_status_transitions(participant_user=self.request.user)
+        apply_time_based_status_transitions_for_user(participant_user=self.request.user)
 
         # Вспомогательная функция, которая определяет, хочет ли клиент видеть архив вместо активных событий
         show_completed = self._should_show_completed_events()
