@@ -59,16 +59,25 @@ def validate_client_has_no_overlapping_bookings(
     client_user,
     slot_start_datetime,
     slot_end_datetime,
-    ignore_event_ids=None,
+    previous_event_id=None,
 ) -> None:
-    """Проверяет, что у клиента нет другого активного бронирования с пересечением по времени.
+    """Проверяет, что нет другого активного бронирования с пересечением по времени (защита от двойного бронирования).
 
     Бизнес-смысл:
         - клиент не может быть одновременно записан сразу на две встречи в один и тот же период;
         - даже если слот свободен у специалиста, backend не должен создавать новое бронирование,
           если у клиента уже существует пересекающаяся встреча;
         - это минимальная защита клиента от двойного бронирования до появления более общей busy-модели.
+
+    :param client_user: Кого проверяем.
+    :param slot_start_datetime: Начало новой встречи.
+    :param slot_end_datetime: Конец новой встречи.
+    :param previous_event_id:
+        - для СОЗДАНИЯ новой встречи previous_event_id=None;
+        - для ПЕРЕНОСА события необходимо учитывать ID переносимого (старого) события, которое нужно временно
+        исключить из проверки при переносе встречи.
     """
+    # 1) Ищем все активные слоты клиента, которые пересекаются по времени с новой встречей
     overlapping_slots = TimeSlot.objects.filter(
         status__in=["planned", "started"],
         start_datetime__lt=slot_end_datetime,
@@ -76,12 +85,17 @@ def validate_client_has_no_overlapping_bookings(
         slot_participants__user=client_user,
     )
 
-    if ignore_event_ids:
-        overlapping_slots = overlapping_slots.exclude(event_id__in=ignore_event_ids)
+    # 2) При переносе старая встреча еще существует в БД в момент проверки, поэтому нужно убрать из
+    # найденных конфликтов старое событие, которое мы сейчас переносим, чтоб он не мешало само себе
+    if previous_event_id:
+        overlapping_slots = overlapping_slots.exclude(event_id=previous_event_id)
 
+    # distinct().exists() отвечает на простой вопрос:
+    # "Осталась ли после всех фильтров хотя бы одна другая встреча клиента, которая реально конфликтует по времени?"
+    # Если да - новое бронирование создавать нельзя
     overlapping_slot_exists = overlapping_slots.distinct().exists()
 
     if overlapping_slot_exists:
         raise CreateBookingValidationError(
-            "Невозможно создать встречу: у клиента уже есть другая сессия в выбранное время."
+            "Невозможно создать встречу: у клиента уже есть другая сессия в выбранное время"
         )

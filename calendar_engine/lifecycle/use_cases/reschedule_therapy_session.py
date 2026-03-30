@@ -23,8 +23,8 @@ def reschedule_therapy_session_slot(
 
     Что происходит:
         - сначала создается новое событие на выбранный слот;
-        - в новом событии сохраняется ссылка на старое через `previous_event`;
-        - старый слот помечается как `cancelled` с причиной `rescheduled`;
+        - в новом событии сохраняется ссылка на старое через previous_event;
+        - старый слот помечается как cancelled с причиной rescheduled;
         - затем пересчитывается статус старого события.
     """
     slot = validate_slot_can_be_changed(slot=slot, action_name="Перенести")  # Проверяет, что слот еще можно менять
@@ -41,7 +41,7 @@ def reschedule_therapy_session_slot(
         slot_start_iso=slot_start_iso,
         consultation_type=consultation_type,
         previous_event=slot.event,
-        ignore_event_ids=[slot.event_id],
+        previous_event_id=slot.event_id,
     )
 
     # 2) Отменяется текущая встреча (слот)

@@ -1181,7 +1181,7 @@ calendar_engine/booking/
 
 - `parse_requested_slot_start(slot_start_iso)` - Преобразует ISO-строку старта слота в aware datetime.
 
-- `validate_client_has_no_overlapping_bookings(client_user, slot_start_datetime, slot_end_datetime, ignore_event_ids)` - Проверяет, что у клиента нет другого активного бронирования с пересечением по времени.
+- `validate_client_has_no_overlapping_bookings(client_user, slot_start_datetime, slot_end_datetime, previous_event_id)` - Проверяет, что у клиента нет другого активного бронирования с пересечением по времени.
 
 ---
 
