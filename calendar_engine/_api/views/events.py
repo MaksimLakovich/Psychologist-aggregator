@@ -5,8 +5,7 @@ from rest_framework.response import Response
 
 from calendar_engine._api.serializers.events import (
     CreateTherapySessionSerializer, EventListSerializer)
-from calendar_engine.booking.exceptions import \
-    CreateTherapySessionValidationError
+from calendar_engine.booking.exceptions import CreateBookingValidationError
 from calendar_engine.booking.throttles import CreateTherapySessionThrottle
 from calendar_engine.lifecycle.use_cases.apply_time_based_status_transitions import \
     apply_time_based_status_transitions_for_user
@@ -107,7 +106,7 @@ class CalendarEventListCreateView(generics.ListCreateAPIView):
 
         try:
             booking_result = serializer.save()
-        except CreateTherapySessionValidationError as exc:
+        except CreateBookingValidationError as exc:
             return Response(
                 {"detail": str(exc)},
                 status=status.HTTP_400_BAD_REQUEST,

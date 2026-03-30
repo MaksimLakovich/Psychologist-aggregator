@@ -19,8 +19,7 @@ from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
 from django_ratelimit.decorators import ratelimit
 
-from calendar_engine.booking.exceptions import \
-    CreateTherapySessionValidationError
+from calendar_engine.booking.exceptions import CreateBookingValidationError
 from calendar_engine.booking.services import normalize_user_timezone
 from calendar_engine.booking.use_cases.therapy_session_create import \
     CreateTherapySessionUseCase
@@ -172,7 +171,7 @@ def _resume_pending_booking_after_authentication(request, *, user, booking_paylo
             slot_start_iso=booking_payload["slot_start_iso"],
             consultation_type=booking_payload["consultation_type"],
         )
-    except CreateTherapySessionValidationError as exc:
+    except CreateBookingValidationError as exc:
         # Сервис clear_guest_matching_state() очищает старый guest-черновик,
         # потому что он уже не должен повторно использоваться после неудачной попытки resume-booking
         clear_guest_matching_state(request.session)

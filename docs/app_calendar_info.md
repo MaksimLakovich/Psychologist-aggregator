@@ -1144,7 +1144,7 @@ calendar_engine/booking/
 
 ## 2️⃣ booking/exceptions.py:
 
-- `CreateTherapySessionValidationError(BookingError)` - Ошибка валидации сценария CreateTherapySession. Используется, когда:
+- `CreateBookingValidationError(BookingError)` - Ошибка валидации сценария создания бронирования. Используется, когда:
     - клиент передал некорректные входные данные;
     - выбранный слот уже недоступен;
     - у специалиста нет рабочего правила;
@@ -1175,13 +1175,13 @@ calendar_engine/booking/
 
 ## 4️⃣ booking/validators.py:
 
-- `validate_client_can_create_therapy_session(client_user)` - Проверяет, что операцию создания встречи (терапевтическая сессия) запускает именно клиент.
+- `validate_client_can_create_booking(client_user)` - Проверяет, что клиентское бронирование запускает именно пользователь с client_profile.
 
 - `validate_consultation_type_in_therapy_session(consultation_type)` - Проверяет, что формат консультации относится к текущему поддерживаемому scope в рамках therapy_session.
 
 - `parse_requested_slot_start(slot_start_iso)` - Преобразует ISO-строку старта слота в aware datetime.
 
-- `validate_client_has_no_overlapping_therapy_sessions(client_user, slot_start_datetime, slot_end_datetime)` - Проверяет, что у клиента нет другой активной терапевтической сессии с пересечением по времени.
+- `validate_client_has_no_overlapping_bookings(client_user, slot_start_datetime, slot_end_datetime, ignore_event_ids)` - Проверяет, что у клиента нет другого активного бронирования с пересечением по времени.
 
 ---
 

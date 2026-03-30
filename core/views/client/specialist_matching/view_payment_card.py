@@ -3,8 +3,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import FormView
 
-from calendar_engine.booking.exceptions import \
-    CreateTherapySessionValidationError
+from calendar_engine.booking.exceptions import CreateBookingValidationError
 from calendar_engine.booking.use_cases.therapy_session_create import \
     CreateTherapySessionUseCase
 from core.forms.client.specialist_matching.form_payment_card import \
@@ -100,7 +99,7 @@ class ClientAddPaymentCardPageView(SpecialistMatchingLayoutMixin, FormView):
                 slot_start_iso=form.cleaned_data["slot_start_iso"],
                 consultation_type=form.cleaned_data["consultation_type"],
             )
-        except CreateTherapySessionValidationError as exc:
+        except CreateBookingValidationError as exc:
             # Если backend не смог создать встречу, возвращаем клиента на эту же страницу
             # и показываем понятное сообщение прямо над формой.
             # Пример:
