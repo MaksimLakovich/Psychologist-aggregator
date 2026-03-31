@@ -207,7 +207,7 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
             #   - либо even если статусная модель не успела обновиться, но последнее окно latest_slot_end
             #     уже в прошлом, такое событие все равно нужно включить
             events = events.filter(
-                Q(status__in=["planned", "started", "completed"]) | Q(latest_slot_end__lt=current_datetime)
+                Q(status__in=["planned", "started", "completed", "cancelled"]) | Q(latest_slot_end__lt=current_datetime)
             ).annotate(
                 # annotate(...) добавляет к каждому событию вычисляемое поле прямо на уровне SQL-запроса.
                 # Здесь first_slot_start = минимальное slots__start_datetime.
@@ -219,14 +219,17 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
         # 2) Для фильтра и показа всех АРХИВНЫХ событий
         elif show_completed:
             events = events.filter(
-                Q(status="completed") | Q(latest_slot_end__lt=current_datetime)
+                Q(status__in=["completed", "cancelled"]) | Q(latest_slot_end__lt=current_datetime)
             ).annotate(
                 # annotate(...) добавляет к каждому событию вычисляемое поле прямо на уровне SQL-запроса.
                 # Для архива нужен не самый ранний, а самый свежий завершенный слот, чтобы сверху были последние
                 # прошедшие встречи клиента
                 first_slot_start=Max(
                     "slots__start_datetime",
-                    filter=Q(slots__status="completed") | Q(slots__end_datetime__lt=current_datetime),
+                    filter=(
+                        Q(slots__status__in=["completed", "cancelled"]) |
+                        Q(slots__end_datetime__lt=current_datetime)
+                    ),
                 )
             )
         # 3) Для фильтра и показа всех ЗАПЛАНИРОВАННЫХ событий
@@ -440,6 +443,7 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
                     "is_archived_card": (
                         show_completed
                         or slot.status == "completed"
+                        or slot.status == "cancelled"
                         or slot.end_datetime < current_datetime
                     ),
                 }
@@ -492,7 +496,7 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
                 latest_slot_end=Max("slots__end_datetime"),
             )
             .filter(
-                Q(status__in=["planned", "started", "completed"])
+                Q(status__in=["planned", "started", "completed", "cancelled"])
                 | Q(latest_slot_end__lt=current_datetime)
             )
             .prefetch_related(
@@ -508,7 +512,7 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
             #   - завершенные встречи.
             # Поэтому использую флаг is_completed_events = True/False
             is_completed_events = (
-                event.status == "completed"
+                event.status in ["completed", "cancelled"]
                 or (
                     getattr(event, "latest_slot_end", None) is not None
                     and event.latest_slot_end < current_datetime
