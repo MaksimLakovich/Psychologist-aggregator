@@ -206,8 +206,12 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
             #   - либо событие имеет "нормальный" статус planned / started / completed;
             #   - либо even если статусная модель не успела обновиться, но последнее окно latest_slot_end
             #     уже в прошлом, такое событие все равно нужно включить
+            selected_day_filter = (
+                Q(status__in=["planned", "started", "completed", "cancelled"])
+                | Q(latest_slot_end__lt=current_datetime)
+            )
             events = events.filter(
-                Q(status__in=["planned", "started", "completed", "cancelled"]) | Q(latest_slot_end__lt=current_datetime)
+                selected_day_filter
             ).annotate(
                 # annotate(...) добавляет к каждому событию вычисляемое поле прямо на уровне SQL-запроса.
                 # Здесь first_slot_start = минимальное slots__start_datetime.
@@ -218,6 +222,10 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
             )
         # 2) Для фильтра и показа всех АРХИВНЫХ событий
         elif show_completed:
+            archived_slot_filter = (
+                Q(slots__status__in=["completed", "cancelled"])
+                | Q(slots__end_datetime__lt=current_datetime)
+            )
             events = events.filter(
                 Q(status__in=["completed", "cancelled"]) | Q(latest_slot_end__lt=current_datetime)
             ).annotate(
@@ -226,10 +234,7 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
                 # прошедшие встречи клиента
                 first_slot_start=Max(
                     "slots__start_datetime",
-                    filter=(
-                        Q(slots__status__in=["completed", "cancelled"]) |
-                        Q(slots__end_datetime__lt=current_datetime)
-                    ),
+                    filter=archived_slot_filter,
                 )
             )
         # 3) Для фильтра и показа всех ЗАПЛАНИРОВАННЫХ событий
