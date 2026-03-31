@@ -7640,6 +7640,11 @@ input:checked + .toggle-bg {
     padding-left: 4rem;
     padding-right: 4rem;
   }
+
+  .xl\:px-28 {
+    padding-left: 7rem;
+    padding-right: 7rem;
+  }
 }
 
 @media (min-width: 1536px) {

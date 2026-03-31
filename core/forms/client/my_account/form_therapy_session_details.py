@@ -67,7 +67,8 @@ class RescheduleTherapySessionForm(forms.Form):
             attrs={
                 "id": "id_reschedule_cancel_reason",
                 "rows": 4,
-                "placeholder": "Кратко опишите, почему хотите перенести встречу",
+                "placeholder": "Кратко опишите, почему хотите перенести встречу и укажите новое "
+                               "предпочитаемое время в расписании специалиста",
             }
         ),
     )
