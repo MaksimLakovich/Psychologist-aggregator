@@ -2432,6 +2432,10 @@ input:checked + .toggle-bg {
   height: 12rem;
 }
 
+.h-\[90vh\] {
+  height: 90vh;
+}
+
 .max-h-0 {
   max-height: 0px;
 }
@@ -2494,6 +2498,10 @@ input:checked + .toggle-bg {
 
 .min-h-\[22rem\] {
   min-height: 22rem;
+}
+
+.min-h-1 {
+  min-height: 0.25rem;
 }
 
 .w-1\/2 {

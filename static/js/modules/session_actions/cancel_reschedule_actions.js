@@ -1,5 +1,5 @@
 import {
-    formatNearestSlot,
+    formatSlotParts,
     renderScheduleList,
 } from "../detail_card/detail_card_schedule.js";
 
@@ -101,27 +101,29 @@ function initCancelSessionModal() {
 function initRescheduleSessionModal() {
     const modal = document.getElementById("reschedule-session-modal");
     const scheduleList = document.getElementById("reschedule-schedule-list");
-    const nearestSlot = document.getElementById("reschedule-nearest-slot");
-    const selectedSlot = document.getElementById("reschedule-selected-slot");
     const slotStartIsoField = document.getElementById("id_slot_start_iso");
     const previousEventField = document.getElementById("id_previous_event_id");
     const submitButton = document.getElementById("reschedule-session-submit");
 
-    if (!modal || !scheduleList || !nearestSlot || !selectedSlot || !slotStartIsoField || !previousEventField || !submitButton) {
+    if (!modal || !scheduleList || !slotStartIsoField || !previousEventField || !submitButton) {
         return;
     }
 
     const scheduleUrl = modal.dataset.scheduleUrl;
     const consultationType = modal.dataset.consultationType || "individual";
     const clientTimeZone = modal.dataset.clientTimezone || undefined;
-    const staticUrl = modal.dataset.staticUrl || "/static/";
     const currentSlotStartIso = modal.dataset.currentSlotStartIso || "";
+    const defaultSubmitButtonText = "Перенести встречу";
+    let selectedSlotLabel = "";
 
     // Кнопка "Перенести встречу" становится активной только когда:
     // - backend уже знает, какое старое событие переносим;
     // - пользователь выбрал новый слот
     const syncButtonState = () => {
         submitButton.disabled = !(previousEventField.value && slotStartIsoField.value);
+        submitButton.textContent = selectedSlotLabel
+            ? `Перенести встречу на ${selectedSlotLabel}`
+            : defaultSubmitButtonText;
     };
 
     // Сбрасывает выбранный новый слот, если:
@@ -130,13 +132,24 @@ function initRescheduleSessionModal() {
     // - список слотов был пересчитан
     const resetSelectedSlot = () => {
         slotStartIsoField.value = "";
-        selectedSlot.textContent = "Новый слот пока не выбран";
+        selectedSlotLabel = "";
         syncButtonState();
     };
 
     // Отрисовывает список доступных слотов в правой части модального окна
     const renderSchedule = schedule => {
-        scheduleList.innerHTML = renderScheduleList(schedule, slotStartIsoField.value || null, null, staticUrl);
+        scheduleList.innerHTML = renderScheduleList(schedule, slotStartIsoField.value || null);
+    };
+
+    // Формирует короткую человекочитаемую подпись выбранного слота для текста кнопки:
+    // "1 апреля 19:00" вместо технического "2026-04-01 19:00".
+    const buildSelectedSlotButtonLabel = slotStartIso => {
+        const parts = formatSlotParts({ start_iso: slotStartIso }, clientTimeZone);
+        if (!parts) {
+            return "новое время";
+        }
+
+        return `${parts.datePart} ${parts.timePart}`;
     };
 
     // Загружает с backend актуальное расписание специалиста именно для сценария переноса.
@@ -153,7 +166,6 @@ function initRescheduleSessionModal() {
                     Не удалось определить расписание специалиста для переноса
                 </div>
             `;
-            nearestSlot.textContent = "Расписание недоступно";
             resetSelectedSlot();
             return;
         }
@@ -163,7 +175,6 @@ function initRescheduleSessionModal() {
                 Подгружаем доступные слоты...
             </div>
         `;
-        nearestSlot.textContent = "Подгружаем расписание...";
         resetSelectedSlot();
 
         try {
@@ -199,11 +210,6 @@ function initRescheduleSessionModal() {
             // чтобы в модалке остались только реально новые варианты времени
             const schedule = (payload.schedule || []).filter(slot => slot.start_iso !== currentSlotStartIso);
 
-            // В левой панели показываем ближайший найденный слот как быстрый ориентир для клиента.
-            nearestSlot.textContent = schedule.length
-                ? formatNearestSlot(schedule[0], clientTimeZone) || "Ближайший слот недоступен"
-                : "Нет доступных слотов для переноса";
-
             renderSchedule(schedule);
         } catch (error) {
             scheduleList.innerHTML = `
@@ -211,7 +217,6 @@ function initRescheduleSessionModal() {
                     Не удалось загрузить доступные слоты. Попробуйте открыть модальное окно еще раз
                 </div>
             `;
-            nearestSlot.textContent = "Ошибка загрузки расписания";
             resetSelectedSlot();
         }
     };
@@ -229,8 +234,6 @@ function initRescheduleSessionModal() {
 
         const slotKey = button.dataset.slotKey || "";
         const slotStartIso = button.dataset.startIso || slotKey;
-        const slotDisplayDay = button.dataset.day || "";
-        const slotDisplayTime = button.dataset.startTime || "";
 
         scheduleList.querySelectorAll("button[data-slot-key]").forEach(slotButton => {
             slotButton.classList.remove("bg-indigo-500", "text-white", "border-transparent", "hover:bg-indigo-500");
@@ -241,9 +244,7 @@ function initRescheduleSessionModal() {
         button.classList.add("bg-indigo-500", "text-white", "border-transparent", "hover:bg-indigo-500");
 
         slotStartIsoField.value = slotStartIso;
-        selectedSlot.textContent = slotDisplayDay && slotDisplayTime
-            ? `${slotDisplayDay} в ${slotDisplayTime}`
-            : "Новый слот выбран";
+        selectedSlotLabel = buildSelectedSlotButtonLabel(slotStartIso);
         syncButtonState();
     });
 
