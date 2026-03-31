@@ -1,4 +1,5 @@
 from django.db import transaction
+
 from calendar_engine.booking.use_cases.therapy_session_create import \
     CreateTherapySessionUseCase
 from calendar_engine.booking.validators import parse_requested_slot_start

@@ -2,8 +2,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import is_naive, make_aware
 
-from calendar_engine.booking.exceptions import (
-    CreateBookingValidationError, ParseSlotValidationError)
+from calendar_engine.booking.exceptions import (CreateBookingValidationError,
+                                                ParseSlotValidationError)
 from calendar_engine.models import TimeSlot
 
 

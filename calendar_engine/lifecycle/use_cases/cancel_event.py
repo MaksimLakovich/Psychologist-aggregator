@@ -1,9 +1,10 @@
 from django.db import transaction
+
 from calendar_engine.lifecycle.exceptions import LifecycleActionValidationError
-from calendar_engine.lifecycle.services.slot_action_validator import \
-    validate_slot_can_be_changed
 from calendar_engine.lifecycle.services.event_status_resolver import \
     recalculate_calendar_event_status
+from calendar_engine.lifecycle.services.slot_action_validator import \
+    validate_slot_can_be_changed
 from calendar_engine.models import TimeSlot
 
 

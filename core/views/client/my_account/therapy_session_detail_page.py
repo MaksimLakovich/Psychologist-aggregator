@@ -8,8 +8,8 @@ from django.utils import timezone
 from django.utils.text import Truncator
 from django.views.generic import FormView
 
-from calendar_engine.booking.services import build_specialist_live_indicator
 from calendar_engine.booking.exceptions import CreateBookingValidationError
+from calendar_engine.booking.services import build_specialist_live_indicator
 from calendar_engine.lifecycle.exceptions import LifecycleActionValidationError
 from calendar_engine.lifecycle.use_cases.cancel_event import cancel_event_slot
 from calendar_engine.lifecycle.use_cases.reschedule_therapy_session import \
@@ -171,7 +171,10 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
             else None
         )
         context["client_timezone_value"] = getattr(self.request.user, "timezone", "") or ""
-        context["current_slot_start_iso"] = self.detail_data.slot_display_data.get("display_start_iso") if self.slot else ""
+        context["current_slot_start_iso"] = (
+            self.detail_data.slot_display_data.get("display_start_iso")
+            if self.slot else ""
+        )
         context["visible_messages_limit"] = self.visible_messages_limit
         context["remaining_comments_count"] = max(len(message_items) - self.visible_messages_limit, 0)
         context["specialist_live_indicator"] = build_specialist_live_indicator(
