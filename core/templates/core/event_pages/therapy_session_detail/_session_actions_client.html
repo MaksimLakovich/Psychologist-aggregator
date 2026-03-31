@@ -1,0 +1,37 @@
+{% load static %}
+
+{% if can_manage_session_actions %}
+
+    <article class="rounded-[2rem] border border-white/60 bg-white/50 p-6 sm:p-8 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
+        <div class="flex flex-col gap-6">
+            <div>
+                <h2 class="text-2xl font-extrabold text-indigo-950 mb-2">
+                    Управление встречей
+                </h2>
+            </div>
+
+            <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+                <button
+                    type="button"
+                    data-open-reschedule-modal
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3 gap-3 rounded-xl bg-sky-600/85
+                    text-white font-semibold transition-all duration-200 hover:bg-sky-600 border border-transparent"
+                >
+                    <img src="{% static 'images/booking/reschedule-event-white.svg' %}" alt="reschedule" class="w-6 h-6">
+                    Перенести встречу
+                </button>
+
+                <button
+                    type="button"
+                    data-open-cancel-modal
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3 gap-3 rounded-xl bg-slate-600/85
+                    text-white font-semibold transition-all duration-200 hover:bg-slate-600 border border-transparent"
+                >
+                    <img src="{% static 'images/booking/cancel-event-white.svg' %}" alt="cancel" class="w-6 h-6">
+                    Отменить встречу
+                </button>
+            </div>
+        </div>
+    </article>
+
+{% endif %}

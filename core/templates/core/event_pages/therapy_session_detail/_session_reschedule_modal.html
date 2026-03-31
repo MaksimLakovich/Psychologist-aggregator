@@ -1,0 +1,86 @@
+{% load static %}
+
+<div
+    id="reschedule-session-modal"
+    tabindex="-1"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4"
+    data-schedule-url="{{ specialist_schedule_url|default:'' }}"
+    data-consultation-type="{{ session_consultation_type }}"
+    data-client-timezone="{{ client_timezone_value }}"
+    data-static-url="{% static '' %}"
+    data-current-slot-start-iso="{{ current_slot_start_iso }}"
+>
+    <div class="relative w-full max-w-4xl max-h-[90vh] rounded-2xl bg-white p-6 shadow-lg flex flex-col">
+        <div class="flex items-center justify-between pb-6">
+            <div>
+                <h3 class="text-xl font-semibold text-amber-500">Перенос встречи</h3>
+                <p class="mt-2 text-sm text-zinc-500">
+                    Выберите новый доступный слот специалиста. Перенос создаст новое событие и свяжет его с текущим.
+                </p>
+            </div>
+            <button
+                type="button"
+                class="text-gray-400 hover:text-gray-900"
+                data-close-reschedule-modal
+            >
+                ✕
+            </button>
+        </div>
+
+        <form method="post" action="" class="border-t border-default pt-5 flex flex-col gap-5 min-h-0">
+            {% csrf_token %}
+            {{ reschedule_session_form.action }}
+            {{ reschedule_session_form.previous_event_id }}
+            {{ reschedule_session_form.slot_start_iso }}
+
+            <div class="rounded-2xl border border-amber-100 bg-amber-50/80 px-4 py-3">
+                <p class="text-xs font-bold uppercase tracking-widest text-amber-500 mb-1">Источник переноса</p>
+                <p class="text-sm font-semibold text-amber-700">
+                    Новое событие будет связано с текущей встречей через previous_event
+                </p>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)] min-h-0">
+                <div class="rounded-2xl border border-zinc-100 bg-zinc-50/60 p-4">
+                    <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Ближайший слот</p>
+                    <p id="reschedule-nearest-slot" class="text-sm font-semibold text-zinc-700">
+                        Подгружаем расписание...
+                    </p>
+
+                    <div class="mt-5 pt-5 border-t border-zinc-200/80">
+                        <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Выбранный слот</p>
+                        <p id="reschedule-selected-slot" class="text-sm font-semibold text-zinc-700">
+                            Новый слот пока не выбран
+                        </p>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-zinc-100 bg-white p-4 min-h-[22rem] overflow-y-auto">
+                    <div id="reschedule-schedule-list" class="space-y-4">
+                        <div class="flex h-48 items-center justify-center text-sm font-medium text-zinc-400">
+                            Откройте модальное окно, чтобы загрузить доступные слоты
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col-reverse gap-3 border-t border-default pt-6 sm:flex-row sm:justify-end">
+                <button
+                    type="button"
+                    class="rounded-xl border border-zinc-200 px-6 py-3 text-sm font-bold text-zinc-600 transition hover:bg-zinc-50"
+                    data-close-reschedule-modal
+                >
+                    Отмена
+                </button>
+                <button
+                    type="submit"
+                    id="reschedule-session-submit"
+                    class="rounded-xl bg-amber-400 px-6 py-3 text-sm font-bold text-white transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:bg-zinc-300"
+                    disabled
+                >
+                    Перенести встречу
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
