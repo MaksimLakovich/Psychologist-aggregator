@@ -286,6 +286,12 @@ class GetSpecialistScheduleAjaxView(View):
 
         profile_id = kwargs["profile_id"]
         consultation_type = request.GET.get("consultation_type")
+        # Когда клиент открывает модалку “Перенести встречу”, фронт запрашивает у backend доступные слоты специалиста.
+        # Но есть нюанс:
+        # - старая встреча еще существует в БД и она уже занимает время у специалиста;
+        # - если просто построить расписание "как есть", backend посчитает, что это время занято и старая встреча
+        # начнет блокировать перенос сама на себя
+        exclude_event_id = request.GET.get("exclude_event_id")
         # Эта вьюха берет profile_id из kwargs и далее использует specialist_profile.user, поэтому нужно
         # использовать get_object_or_404() и передавать именно объект дальше
         specialist_profile = get_object_or_404(PsychologistProfile, pk=profile_id)
@@ -312,6 +318,7 @@ class GetSpecialistScheduleAjaxView(View):
         use_case = build_generate_specialist_schedule_use_case(
             specialist_profile=specialist_profile,
             consultation_type=consultation_type,
+            exclude_event_ids=[exclude_event_id] if exclude_event_id else None,
         )
 
         if use_case is None:
