@@ -13,10 +13,9 @@
     <div class="relative w-full max-w-4xl max-h-[90vh] rounded-2xl bg-white p-6 shadow-lg flex flex-col">
         <div class="flex items-center justify-between pb-6">
             <div>
-                <h3 class="text-xl font-semibold text-amber-500">Перенос встречи</h3>
-                <p class="mt-2 text-sm text-zinc-500">
-                    Выберите новый доступный слот специалиста. Перенос создаст новое событие и свяжет его с текущим.
-                </p>
+                <h3 class="text-2xl font-extrabold text-indigo-950">
+                    Перенос встречи
+                </h3>
             </div>
             <button
                 type="button"
@@ -34,9 +33,8 @@
             {{ reschedule_session_form.slot_start_iso }}
 
             <div class="rounded-2xl border border-amber-100 bg-amber-50/80 px-4 py-3">
-                <p class="text-xs font-bold uppercase tracking-widest text-amber-500 mb-1">Источник переноса</p>
-                <p class="text-sm font-semibold text-amber-700">
-                    Новое событие будет связано с текущей встречей через previous_event
+                <p class="text-sm font-semibold text-amber-700 text-center">
+                    Выберите новое предпочитаемое время в доступном рабочем расписании специалиста
                 </p>
             </div>
 
@@ -75,7 +73,8 @@
                 <button
                     type="submit"
                     id="reschedule-session-submit"
-                    class="rounded-xl bg-amber-400 px-6 py-3 text-sm font-bold text-white transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:bg-zinc-300"
+                    class="rounded-xl bg-indigo-700 hover:bg-indigo-800 px-6 py-3 text-sm font-bold text-white transition
+                    disabled:cursor-not-allowed disabled:bg-zinc-300"
                     disabled
                 >
                     Перенести встречу

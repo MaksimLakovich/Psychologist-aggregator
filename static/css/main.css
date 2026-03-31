@@ -2072,6 +2072,10 @@ input:checked + .toggle-bg {
   margin: 1.5rem;
 }
 
+.m-3 {
+  margin: 0.75rem;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -2898,6 +2902,10 @@ input:checked + .toggle-bg {
 
 .items-center {
   align-items: center;
+}
+
+.items-baseline {
+  align-items: baseline;
 }
 
 .justify-start {
@@ -4376,6 +4384,14 @@ input:checked + .toggle-bg {
   background-color: rgb(71 85 105 / 0.85);
 }
 
+.bg-slate-300\/85 {
+  background-color: rgb(203 213 225 / 0.85);
+}
+
+.bg-slate-400\/85 {
+  background-color: rgb(148 163 184 / 0.85);
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
@@ -4898,6 +4914,10 @@ input:checked + .toggle-bg {
   text-transform: uppercase;
 }
 
+.lowercase {
+  text-transform: lowercase;
+}
+
 .capitalize {
   text-transform: capitalize;
 }
@@ -5407,6 +5427,20 @@ input:checked + .toggle-bg {
 
 .text-lime-500\/90 {
   color: rgb(132 204 22 / 0.9);
+}
+
+.text-pink-400 {
+  --tw-text-opacity: 1;
+  color: rgb(241 126 184 / var(--tw-text-opacity, 1));
+}
+
+.text-pink-300 {
+  --tw-text-opacity: 1;
+  color: rgb(248 180 217 / var(--tw-text-opacity, 1));
+}
+
+.text-indigo-950\/75 {
+  color: rgb(30 27 75 / 0.75);
 }
 
 .line-through {
@@ -6255,6 +6289,11 @@ input:checked + .toggle-bg {
 .hover\:bg-slate-600:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(71 85 105 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-slate-500:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(100 116 139 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:text-blue-600:hover {
