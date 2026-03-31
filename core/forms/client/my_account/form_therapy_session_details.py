@@ -55,6 +55,22 @@ class RescheduleTherapySessionForm(forms.Form):
         choices=[("reschedule_session", "Перенести встречу")],
         widget=forms.HiddenInput(),
     )
+    cancel_reason_type = forms.ChoiceField(
+        choices=[("rescheduled", "Перенесено")],
+        initial="rescheduled",
+        widget=forms.HiddenInput(),
+    )
+    cancel_reason = forms.CharField(
+        required=True,
+        label="Причина переноса",
+        widget=forms.Textarea(
+            attrs={
+                "id": "id_reschedule_cancel_reason",
+                "rows": 4,
+                "placeholder": "Кратко опишите, почему хотите перенести встречу",
+            }
+        ),
+    )
     previous_event_id = forms.UUIDField(
         required=True,
         widget=forms.HiddenInput(),
@@ -63,6 +79,12 @@ class RescheduleTherapySessionForm(forms.Form):
         required=True,
         widget=forms.HiddenInput(),
     )
+
+    def clean_cancel_reason(self):
+        cancel_reason = (self.cleaned_data.get("cancel_reason") or "").strip()
+        if not cancel_reason:
+            raise forms.ValidationError("Для переноса встречи нужно указать причину")
+        return cancel_reason
 
     def clean_slot_start_iso(self):
         slot_start_iso = (self.cleaned_data.get("slot_start_iso") or "").strip()

@@ -1243,9 +1243,9 @@ calendar_engine/lifecycle/
 
 ### `reschedule_therapy_session.py` - функционал "Перенести встречу".
 
-| Класс                                                                                                          | Описание                        |
-|----------------------------------------------------------------------------------------------------------------|---------------------------------|
-| `reschedule_therapy_session_slot(slot, client_user, specialist_profile_id, slot_start_iso, consultation_type)` | Переносит встречу на новый слот |
+| Класс                                                                                                                         | Описание                        |
+|-------------------------------------------------------------------------------------------------------------------------------|---------------------------------|
+| `reschedule_therapy_session_slot(slot, client_user, specialist_profile_id, slot_start_iso, consultation_type, cancel_reason)` | Переносит встречу на новый слот |
 
 ---
 

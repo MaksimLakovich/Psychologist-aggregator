@@ -7410,6 +7410,10 @@ input:checked + .toggle-bg {
     grid-template-columns: 18rem minmax(0,1fr);
   }
 
+  .lg\:grid-cols-\[minmax\(0\2c 0\.9fr\)_minmax\(0\2c 1\.6fr\)\] {
+    grid-template-columns: minmax(0,0.9fr) minmax(0,1.6fr);
+  }
+
   .lg\:flex-row {
     flex-direction: row;
   }

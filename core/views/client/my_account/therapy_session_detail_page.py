@@ -358,6 +358,7 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
                 specialist_profile_id=specialist_profile.pk,
                 slot_start_iso=form.cleaned_data["slot_start_iso"],
                 consultation_type=consultation_type,
+                cancel_reason=form.cleaned_data["cancel_reason"],
             )
         # Это уже проверка бизнес-логики и текущего состояния встречи внутри use case. Т.е., форма может быть
         # заполнена идеально, но действие все равно нельзя выполнить:

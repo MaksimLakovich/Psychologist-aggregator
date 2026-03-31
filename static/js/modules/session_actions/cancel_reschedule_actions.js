@@ -72,7 +72,7 @@ function bindModalVisibility({ modal, openButtonsSelector, closeButtonsSelector,
 // - как только клиент вводит текст причины, кнопку разблокируем
 function initCancelSessionModal() {
     const modal = document.getElementById("cancel-session-modal");
-    const cancelReasonField = document.getElementById("id_cancel_reason");
+    const cancelReasonField = modal?.querySelector("[name='cancel_reason']");
     const submitButton = document.getElementById("cancel-session-submit");
 
     if (!modal || !cancelReasonField || !submitButton) return;
@@ -101,11 +101,12 @@ function initCancelSessionModal() {
 function initRescheduleSessionModal() {
     const modal = document.getElementById("reschedule-session-modal");
     const scheduleList = document.getElementById("reschedule-schedule-list");
+    const cancelReasonField = document.getElementById("id_reschedule_cancel_reason");
     const slotStartIsoField = document.getElementById("id_slot_start_iso");
     const previousEventField = document.getElementById("id_previous_event_id");
     const submitButton = document.getElementById("reschedule-session-submit");
 
-    if (!modal || !scheduleList || !slotStartIsoField || !previousEventField || !submitButton) {
+    if (!modal || !scheduleList || !cancelReasonField || !slotStartIsoField || !previousEventField || !submitButton) {
         return;
     }
 
@@ -118,9 +119,14 @@ function initRescheduleSessionModal() {
 
     // Кнопка "Перенести встречу" становится активной только когда:
     // - backend уже знает, какое старое событие переносим;
-    // - пользователь выбрал новый слот
+    // - пользователь выбрал новый слот;
+    // - пользователь указал причину переноса
     const syncButtonState = () => {
-        submitButton.disabled = !(previousEventField.value && slotStartIsoField.value);
+        submitButton.disabled = !(
+            previousEventField.value
+            && slotStartIsoField.value
+            && cancelReasonField.value.trim()
+        );
         submitButton.textContent = selectedSlotLabel
             ? `Перенести встречу на ${selectedSlotLabel}`
             : defaultSubmitButtonText;
@@ -247,6 +253,8 @@ function initRescheduleSessionModal() {
         selectedSlotLabel = buildSelectedSlotButtonLabel(slotStartIso);
         syncButtonState();
     });
+
+    cancelReasonField.addEventListener("input", syncButtonState);
 
     // При первой инициализации синхронизируем состояние кнопки до открытия модалки
     syncButtonState();

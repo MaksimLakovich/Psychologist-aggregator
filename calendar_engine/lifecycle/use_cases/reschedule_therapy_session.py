@@ -19,6 +19,7 @@ def reschedule_therapy_session_slot(
     specialist_profile_id: int,
     slot_start_iso: str,
     consultation_type: str,
+    cancel_reason: str,
 ) -> dict:
     """Переносит встречу на новый слот.
 
@@ -30,9 +31,13 @@ def reschedule_therapy_session_slot(
     """
     slot = validate_slot_can_be_changed(slot=slot, action_name="Перенести")  # Проверяет, что слот еще можно менять
     requested_slot_start_datetime = parse_requested_slot_start(slot_start_iso=slot_start_iso)  # Преобразует ISO-строку
+    cancel_reason = (cancel_reason or "").strip()
 
     if requested_slot_start_datetime == slot.start_datetime:
         raise LifecycleActionValidationError("Новый слот должен отличаться от текущего времени встречи")
+
+    if not cancel_reason:
+        raise LifecycleActionValidationError("Для переноса встречи нужно указать причину")
 
     # 1) Создаем новую встречу (слот)
     create_use_case = CreateTherapySessionUseCase()
@@ -48,7 +53,7 @@ def reschedule_therapy_session_slot(
     # 2) Отменяется текущая встреча (слот)
     slot.status = "cancelled"
     slot.cancel_reason_type = "rescheduled"
-    slot.cancel_reason = "Встреча перенесена на другой временной слот"
+    slot.cancel_reason = cancel_reason
     slot.full_clean()
     slot.save(update_fields=["status", "cancel_reason_type", "cancel_reason", "updated_at"])
 
