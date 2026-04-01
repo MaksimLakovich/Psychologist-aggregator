@@ -1,12 +1,11 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Min, Prefetch
-from django.utils import timezone
+from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
 
-from calendar_engine.booking.services import build_specialist_live_indicator
-from calendar_engine.lifecycle.use_cases.apply_time_based_status_transitions import \
-    apply_time_based_status_transitions_for_user
-from calendar_engine.models import CalendarEvent, EventParticipant, TimeSlot
+from core.services.topic_groups import build_topics_grouped_by_type
+from core.views.client.my_account.events_page import \
+    load_client_next_planned_event_data
+from users.models import ClientProfile, Method
 
 
 class ClientAccountView(LoginRequiredMixin, TemplateView):
@@ -19,7 +18,7 @@ class ClientAccountView(LoginRequiredMixin, TemplateView):
 
     template_name = "core/client_pages/my_account/main_account.html"
 
-    def _get_my_therapist_data(self) -> dict:
+    def _get_my_therapist_data(self, upcoming_event_data) -> dict:
         """Возвращает данные для блока "Мой терапевт" на главной странице кабинета клиента.
 
         Бизнес-смысл:
@@ -27,73 +26,33 @@ class ClientAccountView(LoginRequiredMixin, TemplateView):
             - поэтому источником истины сейчас является ближайшая запланированная терапевтическая встреча;
             - если запланированных встреч пока нет, блок отрисовывается заглушкой, но без ошибки.
         """
-        # Запуск автоматического обновления/определения статусов event/slot по фактическому времени
-        apply_time_based_status_transitions_for_user(participant_user=self.request.user)
-        events = (
-            CalendarEvent.objects.filter(
-                participants__user=self.request.user,
-                status__in=["planned", "started"],
-                slots__end_datetime__gte=timezone.now(),
-            )
-            .annotate(first_slot_start=Min("slots__start_datetime"))
-            .prefetch_related(
-                Prefetch(
-                    "participants",
-                    queryset=EventParticipant.objects.select_related(
-                        "user",
-                        "user__psychologist_profile",
-                    ).order_by("pk"),
-                ),
-                Prefetch("slots", queryset=TimeSlot.objects.order_by("start_datetime")),
-            )
-            .distinct()
-            .order_by("first_slot_start", "created_at")
-            .first()
-        )
-
-        if events is None:
+        if upcoming_event_data is None:
             return {
                 "therapist_full_name": "Терапевт не назначен",
                 "therapist_photo_url": "/static/images/menu/user-circle.svg",
                 "therapist_subtitle": "Специалист появится после записи на встречу",
-                "therapist_live_indicator": build_specialist_live_indicator(specialist_profile=None),
+                "therapist_live_indicator": {
+                    "title": "Специалист пока не назначен",
+                    "label": "Терапевт появится после записи",
+                    "dot_color": "#d4d4d8",
+                    "ping_color": "#d4d4d8",
+                    "should_ping": False,
+                },
+                "specialist_profile_url": None,
             }
 
-        counterpart_participant = next(
-            (
-                participant
-                for participant in events.participants.all()
-                if participant.user_id != self.request.user.pk
-            ),
-            None,
-        )
-        counterpart_user = counterpart_participant.user if counterpart_participant else None
-        specialist_profile = (
-            getattr(counterpart_user, "psychologist_profile", None)
-            if counterpart_user
-            else None
-        )
-        therapist_full_name = (
-            f"{counterpart_user.first_name} {counterpart_user.last_name}".strip()
-            if counterpart_user
-            else ""
-        )
+        specialist_profile = upcoming_event_data["specialist_profile"]
 
         return {
-            "therapist_full_name": therapist_full_name or "Имя не указано",
-            "therapist_photo_url": (
-                counterpart_user.avatar_url
-                if counterpart_user
-                else "/static/images/menu/user-circle.svg"
-            ),
+            "therapist_full_name": upcoming_event_data["counterpart_full_name"] or "Имя не указано",
+            "therapist_photo_url": upcoming_event_data["specialist_photo_url"],
             "therapist_subtitle": (
                 f"Психолог • {specialist_profile.get_therapy_format_display()}"
                 if specialist_profile
                 else "Психолог"
             ),
-            "therapist_live_indicator": build_specialist_live_indicator(
-                specialist_profile=specialist_profile,
-            ),
+            "therapist_live_indicator": upcoming_event_data["specialist_live_indicator"],
+            "specialist_profile_url": upcoming_event_data["specialist_profile_url"],
         }
 
     def get_context_data(self, **kwargs):
@@ -115,7 +74,37 @@ class ClientAccountView(LoginRequiredMixin, TemplateView):
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
         context["current_sidebar_key"] = "client-account"
 
+        client_profile = get_object_or_404(
+            ClientProfile.objects.prefetch_related("requested_topics", "preferred_methods"),
+            user=self.request.user,
+        )
+        upcoming_event_data = load_client_next_planned_event_data(
+            user=self.request.user,
+            viewer_timezone=getattr(self.request.user, "timezone", None),
+            detail_layout="sidebar",
+        )
+
+        context["upcoming_event"] = upcoming_event_data
+        context["topics_by_type"] = build_topics_grouped_by_type()
+        context["selected_topics"] = [
+            str(topic_id)
+            for topic_id in client_profile.requested_topics.values_list("id", flat=True)
+        ]
+        context["selected_methods"] = [
+            str(method_id)
+            for method_id in client_profile.preferred_methods.values_list("id", flat=True)
+        ]
+        context["client_requested_topics"] = client_profile.requested_topics.all().order_by(
+            "type",
+            "group_name",
+            "name",
+        )
+        context["client_preferred_methods"] = Method.objects.filter(
+            id__in=client_profile.preferred_methods.values_list("id", flat=True)
+        ).order_by("name")
+        context["all_methods"] = Method.objects.all().order_by("name")
+
         # Блок "Мой терапевт" / Или заглушка, если нет встреч запланированных ни с кем
-        context.update(self._get_my_therapist_data())
+        context.update(self._get_my_therapist_data(upcoming_event_data))
 
         return context
