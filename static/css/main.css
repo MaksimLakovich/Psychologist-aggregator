@@ -2472,6 +2472,10 @@ input:checked + .toggle-bg {
   max-height: calc(90vh - 164px);
 }
 
+.max-h-\[88vh\] {
+  max-height: 88vh;
+}
+
 .min-h-\[150px\] {
   min-height: 150px;
 }
@@ -3604,6 +3608,10 @@ input:checked + .toggle-bg {
   border-color: rgb(255 255 255 / 0.2);
 }
 
+.border-emerald-100\/80 {
+  border-color: rgb(209 250 229 / 0.8);
+}
+
 .\!bg-gray-50 {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1)) !important;
@@ -4468,6 +4476,10 @@ input:checked + .toggle-bg {
   background-image: linear-gradient(to bottom, var(--tw-gradient-stops));
 }
 
+.bg-\[linear-gradient\(180deg\2c rgba\(255\2c 255\2c 255\2c 0\.98\)\2c rgba\(248\2c 250\2c 255\2c 0\.95\)\)\] {
+  background-image: linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,255,0.95));
+}
+
 .from-indigo-500 {
   --tw-gradient-from: #6875F5 var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(104 117 245 / 0) var(--tw-gradient-to-position);
@@ -4531,6 +4543,12 @@ input:checked + .toggle-bg {
 .from-slate-100 {
   --tw-gradient-from: #f1f5f9 var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(241 245 249 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.from-white {
+  --tw-gradient-from: #ffffff var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
@@ -4605,6 +4623,14 @@ input:checked + .toggle-bg {
 
 .to-indigo-100 {
   --tw-gradient-to: #E5EDFF var(--tw-gradient-to-position);
+}
+
+.to-emerald-50\/40 {
+  --tw-gradient-to: rgb(236 253 245 / 0.4) var(--tw-gradient-to-position);
+}
+
+.to-indigo-50\/40 {
+  --tw-gradient-to: rgb(240 245 255 / 0.4) var(--tw-gradient-to-position);
 }
 
 .object-contain {
@@ -5715,6 +5741,18 @@ input:checked + .toggle-bg {
 .shadow-\[0_24px_50px_rgba\(30\2c 41\2c 59\2c 0\.32\)\] {
   --tw-shadow: 0 24px 50px rgba(30,41,59,0.32);
   --tw-shadow-colored: 0 24px 50px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.shadow-\[0_30px_80px_rgba\(15\2c 23\2c 42\2c 0\.22\)\] {
+  --tw-shadow: 0 30px 80px rgba(15,23,42,0.22);
+  --tw-shadow-colored: 0 30px 80px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.shadow-\[inset_0_1px_0_rgba\(255\2c 255\2c 255\2c 0\.6\)\] {
+  --tw-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+  --tw-shadow-colored: inset 0 1px 0 var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
@@ -7108,6 +7146,11 @@ input:checked + .toggle-bg {
   .sm\:py-4 {
     padding-top: 1rem;
     padding-bottom: 1rem;
+  }
+
+  .sm\:py-6 {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
   }
 
   .sm\:pt-2 {

@@ -1,10 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<div id="methods-modal"
+     data-modal
+     class="fixed inset-0 z-[90] hidden bg-indigo-950/45 px-4 py-6 backdrop-blur-sm sm:px-6">
+    <div class="mx-auto flex min-h-full max-w-4xl items-center justify-center">
+        <div class="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-[2rem] border border-emerald-100/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,255,0.95))] shadow-[0_30px_80px_rgba(15,23,42,0.22)]">
+            <div class="shrink-0 border-b border-emerald-100 px-6 py-5 sm:px-8">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700/80">Редактирование</p>
+                        <h2 class="mt-2 text-3xl font-black tracking-tight text-indigo-950">Подходы</h2>
+                        <p class="mt-2 text-sm text-zinc-500">Настройте предпочитаемую методологию в формате более точной персонализации.</p>
+                    </div>
+                    <button type="button"
+                            data-modal-close
+                            class="rounded-full p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700">
+                        <span class="sr-only">Закрыть</span>
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M4.22 4.22a.75.75 0 011.06 0L10 8.94l4.72-4.72a.75.75 0 111.06 1.06L11.06 10l4.72 4.72a.75.75 0 11-1.06 1.06L10 11.06l-4.72 4.72a.75.75 0 11-1.06-1.06L8.94 10 4.22 5.28a.75.75 0 010-1.06z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
 
-</body>
-</html>
+            <div class="min-h-0 flex-1 overflow-y-auto px-6 py-6 sm:px-8">
+                <div id="methods-modal-error" class="mb-5 hidden rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700"></div>
+
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {% for method in all_methods %}
+                        <label class="flex items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/50 px-4 py-3 text-sm font-medium text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] transition hover:border-emerald-200 hover:bg-emerald-50">
+                            <input
+                                    id="account-method-{{ method.pk }}"
+                                    type="checkbox"
+                                    name="preferred_methods"
+                                    value="{{ method.pk }}"
+                                    data-label="{{ method.name }}"
+                                    class="method-checkbox h-4 w-4 rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
+                                    {% if method.pk|stringformat:"s" in selected_methods %}checked{% endif %}
+                            >
+                            <span>{{ method.name }}</span>
+                        </label>
+                    {% empty %}
+                        <p class="text-sm text-zinc-500">Методы не найдены.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="shrink-0 border-t border-emerald-100 px-6 py-5 sm:px-8">
+                <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                    <button type="button"
+                            data-modal-close
+                            class="inline-flex items-center justify-center rounded-2xl border border-zinc-200 px-5 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50">
+                        Отмена
+                    </button>
+                    <button type="button"
+                            id="save-methods-button"
+                            data-save-url="{% url 'users:api:save-methods' %}"
+                            data-csrf-token="{{ csrf_token }}"
+                            class="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700">
+                        Сохранить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,6 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Max, Min, Prefetch, Q
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.formats import date_format
@@ -15,109 +14,6 @@ from core.services.calendar_event_slot_selector import (
 from core.services.calendar_slot_time_display import \
     build_calendar_slot_time_display
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
-
-
-def load_client_next_planned_event_data(*, user, viewer_timezone=None, detail_layout="sidebar"):
-    """Возвращает данные ближайшей активной встречи клиента в том же формате, что использует календарь."""
-    apply_time_based_status_transitions_for_user(participant_user=user)
-    current_datetime = timezone.now()
-    client_timezone = viewer_timezone or getattr(user, "timezone", None)
-
-    event = (
-        CalendarEvent.objects.filter(
-            participants__user=user,
-            status__in=["planned", "started"],
-            slots__end_datetime__gte=current_datetime,
-        )
-        .annotate(
-            first_slot_start=Min(
-                "slots__start_datetime",
-                filter=Q(slots__status__in=["planned", "started"]),
-            )
-        )
-        .prefetch_related(
-            Prefetch("slots", queryset=TimeSlot.objects.order_by("start_datetime")),
-            Prefetch("recurrences"),
-            Prefetch(
-                "participants",
-                queryset=EventParticipant.objects.select_related(
-                    "user",
-                    "user__psychologist_profile",
-                ).order_by("pk"),
-            ),
-        )
-        .distinct()
-        .order_by("first_slot_start", "created_at")
-        .first()
-    )
-
-    if event is None:
-        return None
-
-    slot = get_event_active_slot(event)
-    if slot is None:
-        return None
-
-    counterpart_participant = next(
-        (
-            participant
-            for participant in event.participants.all()
-            if participant.user_id != user.pk
-        ),
-        None,
-    )
-    counterpart_user = counterpart_participant.user if counterpart_participant else None
-    specialist_profile = (
-        getattr(counterpart_user, "psychologist_profile", None)
-        if counterpart_user
-        else None
-    )
-    slot_display_data = build_calendar_slot_time_display(
-        slot=slot,
-        client_timezone=client_timezone,
-    )
-    recurrence_rule = next(iter(event.recurrences.all()), None)
-    detail_url = reverse("core:client-therapy-session-detail", kwargs={"event_id": event.id})
-    if detail_layout:
-        detail_url = f"{detail_url}?layout={detail_layout}"
-
-    return {
-        "event": event,
-        "slot": slot,
-        "counterpart_user": counterpart_user,
-        "counterpart_full_name": (
-            f"{counterpart_user.first_name} {counterpart_user.last_name}".strip()
-            if counterpart_user
-            else "Специалист будет указан позже"
-        ),
-        "specialist_profile": specialist_profile,
-        "specialist_photo_url": (
-            counterpart_user.avatar_url
-            if counterpart_user
-            else "/static/images/menu/user-circle.svg"
-        ),
-        "specialist_live_indicator": build_specialist_live_indicator(
-            specialist_profile=specialist_profile,
-        ),
-        "event_type_display": event.get_event_type_display() or "Индивидуальная сессия",
-        "frequency_display": (
-            recurrence_rule.get_frequency_display()
-            if recurrence_rule and recurrence_rule.frequency
-            else "Разовая встреча"
-        ),
-        "status_display": slot.get_status_display() or "Запланировано",
-        "duration_minutes": int((slot.end_datetime - slot.start_datetime).total_seconds() // 60),
-        "detail_url": detail_url,
-        "specialist_profile_url": (
-            reverse(
-                "core:psychologist-card-detail",
-                kwargs={"profile_slug": specialist_profile.slug},
-            )
-            if specialist_profile and specialist_profile.slug
-            else None
-        ),
-        **slot_display_data,
-    }
 
 
 class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, TemplateView):
