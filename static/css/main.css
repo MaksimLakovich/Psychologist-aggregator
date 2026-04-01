@@ -5619,6 +5619,18 @@ input:checked + .toggle-bg {
   color: rgb(81 69 205 / 0.8);
 }
 
+.text-indigo-950\/80 {
+  color: rgb(30 27 75 / 0.8);
+}
+
+.text-indigo-950\/50 {
+  color: rgb(30 27 75 / 0.5);
+}
+
+.text-indigo-900\/75 {
+  color: rgb(54 47 120 / 0.75);
+}
+
 .line-through {
   text-decoration-line: line-through;
 }
@@ -6520,6 +6532,10 @@ input:checked + .toggle-bg {
   background-color: rgb(240 245 255 / 0.6);
 }
 
+.hover\:bg-emerald-50\/60:hover {
+  background-color: rgb(236 253 245 / 0.6);
+}
+
 .hover\:text-blue-600:hover {
   --tw-text-opacity: 1;
   color: rgb(28 100 242 / var(--tw-text-opacity, 1));
@@ -7116,6 +7132,10 @@ input:checked + .toggle-bg {
 
   .sm\:p-5 {
     padding: 1.25rem;
+  }
+
+  .sm\:p-4 {
+    padding: 1rem;
   }
 
   .sm\:px-10 {
