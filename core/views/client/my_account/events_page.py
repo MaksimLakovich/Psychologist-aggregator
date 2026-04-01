@@ -37,6 +37,7 @@ def load_client_next_planned_event_data(*, user, viewer_timezone=None, detail_la
         )
         .prefetch_related(
             Prefetch("slots", queryset=TimeSlot.objects.order_by("start_datetime")),
+            Prefetch("recurrences"),
             Prefetch(
                 "participants",
                 queryset=EventParticipant.objects.select_related(
@@ -75,6 +76,7 @@ def load_client_next_planned_event_data(*, user, viewer_timezone=None, detail_la
         slot=slot,
         client_timezone=client_timezone,
     )
+    recurrence_rule = next(iter(event.recurrences.all()), None)
     detail_url = reverse("core:client-therapy-session-detail", kwargs={"event_id": event.id})
     if detail_layout:
         detail_url = f"{detail_url}?layout={detail_layout}"
@@ -98,6 +100,11 @@ def load_client_next_planned_event_data(*, user, viewer_timezone=None, detail_la
             specialist_profile=specialist_profile,
         ),
         "event_type_display": event.get_event_type_display() or "Индивидуальная сессия",
+        "frequency_display": (
+            recurrence_rule.get_frequency_display()
+            if recurrence_rule and recurrence_rule.frequency
+            else "Разовая встреча"
+        ),
         "status_display": slot.get_status_display() or "Запланировано",
         "duration_minutes": int((slot.end_datetime - slot.start_datetime).total_seconds() // 60),
         "detail_url": detail_url,

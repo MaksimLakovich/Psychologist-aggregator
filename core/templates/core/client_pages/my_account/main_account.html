@@ -181,10 +181,18 @@
 
                     <div class="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.9fr)]">
                         <div class="rounded-[1.7rem] border border-white/70 bg-white/72 p-5 md:p-6 shadow-[0_18px_40px_rgba(99,102,241,0.10)] backdrop-blur-xl">
-                            <div class="flex flex-wrap items-start justify-between gap-4">
-                                <div class="flex min-w-0 items-start gap-4">
+                            {% if upcoming_event %}
+                                <div class="flex flex-col gap-6">
+                                    <div class="flex flex-col gap-4 xl:flex-row xl:items-start">
+                                        <div class="flex flex-wrap gap-2.5">
+                                            <span class="meeting-stat-chip">{{ upcoming_event.specialist_profile.get_therapy_format_display|default:"Онлайн" }}</span>
+                                            <span class="meeting-stat-chip">{{ upcoming_event.event_type_display }}</span>
+                                            <span class="meeting-stat-chip">{{ upcoming_event.frequency_display }}</span>
+                                            <span class="meeting-stat-chip">{{ upcoming_event.status_display }}</span>
+                                        </div>
+                                    </div>
 
-                                    {% if upcoming_event %}
+                                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
                                         <div class="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-[1.6rem]
                                         border border-indigo-200/70 bg-gradient-to-br from-indigo-500 via-indigo-500 to-sky-400
                                         text-white shadow-[0_18px_40px_rgba(79,70,229,0.24)]">
@@ -195,48 +203,37 @@
                                                 {{ upcoming_event.display_day_number }}
                                             </span>
                                         </div>
-                                    {% endif %}
 
-                                    <div class="min-w-0">
-                                        {% if upcoming_event %}
-                                            <div class="flex flex-wrap gap-2">
-                                                <span class="meeting-stat-chip">{{ upcoming_event.event_type_display }}</span>
-                                                <span class="meeting-stat-chip">{{ upcoming_event.status_display }}</span>
-                                            </div>
-                                            <h2 class="mt-4 text-2xl md:text-[1.7rem] font-black tracking-tight text-indigo-950">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-500">
                                                 {{ upcoming_event.display_weekday }}
-                                            </h2>
-                                            <p class="mt-2 text-base md:text-lg font-semibold text-indigo-700">
+                                            </p>
+                                            <h2 class="mt-2 text-2xl md:text-[1.7rem] font-black tracking-tight text-indigo-950">
                                                 {{ upcoming_event.display_time_range }}
-                                            </p>
-                                        {% else %}
-                                            <h2 class="mt-1 text-2xl md:text-[1.7rem] font-black tracking-tight text-indigo-950">
-                                                Пространство для следующей встречи уже готово
                                             </h2>
-                                            <p class="mt-3 max-w-2xl text-sm md:text-base leading-relaxed text-slate-500">
-                                                Как только запись будет создана, здесь появятся дата, время, специалист и быстрый переход в детали ближайшей встречи
-                                            </p>
+                                            <span>{{ upcoming_event.display_client_timezone }}</span>
+                                        </div>
+
+                                        {% if upcoming_event.slot.meeting_url %}
+                                            <a href="{{ upcoming_event.slot.meeting_url }}"
+                                               target="_blank"
+                                               class="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 gap-3
+                                               border border-transparent text-base font-medium rounded-xl text-white bg-violet-500 hover:bg-violet-600
+                                               transition-all duration-200 shadow-md hover:shadow-lg">
+                                                <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-6 h-6">
+                                                Видеочат
+                                            </a>
                                         {% endif %}
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="mt-6 flex flex-wrap gap-3">
-                                {% if upcoming_event %}
-                                    <div class="meeting-stat-chip">
-                                        <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-                                        {{ upcoming_event.display_client_timezone }}
-                                    </div>
-                                    <div class="meeting-stat-chip">
-                                        <span class="h-2 w-2 rounded-full bg-indigo-400"></span>
-                                        Видеовстреча
-                                    </div>
-                                    <div class="meeting-stat-chip">
-                                        <span class="h-2 w-2 rounded-full bg-sky-400"></span>
-                                        Детали и чат внутри встречи
-                                    </div>
-                                {% endif %}
-                            </div>
+                            {% else %}
+                                <h2 class="mt-1 text-2xl md:text-[1.7rem] font-black tracking-tight text-indigo-950">
+                                    Пространство для следующей встречи уже готово
+                                </h2>
+                                <p class="mt-3 max-w-2xl text-sm md:text-base leading-relaxed text-slate-500">
+                                    Как только запись будет создана, здесь появятся дата, время, специалист и быстрый переход в детали ближайшей встречи
+                                </p>
+                            {% endif %}
                         </div>
 
                         <div class="rounded-[1.7rem] border border-indigo-200/70 bg-gradient-to-br from-slate-950 via-indigo-950 to-indigo-900 p-5 md:p-6 text-white shadow-[0_24px_50px_rgba(30,41,59,0.32)]">
