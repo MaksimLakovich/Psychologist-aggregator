@@ -78,22 +78,6 @@
         z-index: 1;
     }
 
-    /* Компактные плашки с параметрами встречи */
-    .meeting-stat-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.45rem;
-        border-radius: 9999px;
-        border: 1px solid rgba(165, 180, 252, 0.28);
-        background: rgba(255, 255, 255, 0.7);
-        padding: 0.5rem 0.85rem;
-        color: rgb(67 56 202);
-        font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: 0.02em;
-        backdrop-filter: blur(8px);
-    }
-
     /* Карточки с выбранными темами и подходами */
     .selection-card {
         position: relative;
@@ -173,15 +157,45 @@
                             {% if upcoming_event %}
                                 <div class="relative z-10">
                                     <div class="flex flex-wrap gap-2 mb-8">
-                                        <span class="meeting-stat-chip bg-indigo-50/50 border-indigo-100/50">{{ upcoming_event.specialist_profile.get_therapy_format_display|default:"Онлайн" }}</span>
-                                        <span class="meeting-stat-chip bg-white/60">{{ upcoming_event.event_type_display }}</span>
-                                        <span class="meeting-stat-chip bg-white/60">{{ upcoming_event.frequency_display }}</span>
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-wider border border-emerald-100">
-                                            {{ upcoming_event.status_display }}
+                                        <span class="inline-flex rounded-full bg-indigo-100/80 px-3 py-1
+                                        text-sm font-bold tracking-wide text-indigo-900/75 border border-indigo-200/70">
+                                            {{ upcoming_event.specialist_profile.get_therapy_format_display|default:"Онлайн" }}
+                                        </span>
+                                        <span class="inline-flex rounded-full bg-indigo-100/80 px-3 py-1
+                                        text-sm font-bold tracking-wide text-indigo-900/75 border border-indigo-200/70">
+                                            {{ upcoming_event.event_type_display }}
+                                        </span>
+                                        <span class="inline-flex rounded-full bg-indigo-100/80 px-3 py-1
+                                        text-sm font-bold tracking-wide text-indigo-900/75 border border-indigo-200/70">
+                                            {{ upcoming_event.frequency_display }}
+                                        </span>
+                                        <!-- Цвет статуса синхронизируем с архивной/активной логикой экрана: активные встречи - indigo, завершенные - slate -->
+                                        <span
+                                            class="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-bold rounded-full
+                                            {% if is_finished_slot %}
+                                                bg-slate-100/90 text-slate-800 border border-slate-200/70
+                                            {% elif slot.status == 'started' %}
+                                                bg-emerald-100/90 text-emerald-800 border border-emerald-200/70
+                                            {% else %}
+                                                bg-indigo-100/80 text-indigo-800 border border-indigo-200/50
+                                            {% endif %}"
+                                        >
+                                            <span
+                                                class="w-2 h-2 rounded-full
+                                                {% if is_finished_slot %}
+                                                    bg-slate-500
+                                                {% elif slot.status == 'started' %}
+                                                    bg-emerald-500 animate-pulse
+                                                {% else %}
+                                                    bg-indigo-500 animate-pulse
+                                                {% endif %}"
+                                            ></span>
+                                            {{ slot.get_status_display }}
                                         </span>
                                     </div>
 
                                     <div class="flex flex-col lg:flex-row lg:items-center gap-6 md:gap-8">
+
                                         <div class="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-[1.6rem]
                                         border border-indigo-200/70 bg-gradient-to-br from-indigo-500 via-indigo-500 to-sky-400
                                         text-white shadow-[0_18px_40px_rgba(79,70,229,0.24)]">
@@ -196,16 +210,14 @@
 
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center gap-2 mb-1">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
-                                                <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">
+                                                <p class="text-base font-bold uppercase tracking-[0.15em] text-indigo-500">
                                                     {{ upcoming_event.display_weekday }}
                                                 </p>
                                             </div>
-                                            <h2 class="text-3xl md:text-4xl font-black tracking-tight text-indigo-950 flex items-baseline gap-2">
+                                            <h2 class="text-2xl md:text-3xl font-black tracking-tight text-indigo-900/75 flex items-baseline gap-2">
                                                 {{ upcoming_event.display_time_range }}
                                             </h2>
-                                            <p class="mt-1 text-sm font-medium text-slate-400 flex items-center gap-1.5">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <p class="mt-1 text-xs font-medium tracking-widest text-indigo-500 flex items-center gap-1.5">
                                                 {{ upcoming_event.display_client_timezone }}
                                             </p>
                                         </div>
@@ -214,7 +226,7 @@
                                         <div class="lg:ml-auto">
                                             <a href="{{ upcoming_event.slot.meeting_url }}"
                                                target="_blank"
-                                               class="group relative inline-flex items-center justify-center px-8 py-4 gap-3
+                                               class="group relative inline-flex items-center justify-center px-7 py-3 gap-3
                                                       overflow-hidden rounded-2xl bg-indigo-600 text-white font-bold
                                                       transition-all duration-300 hover:bg-indigo-700 hover:shadow-[0_10px_30px_rgba(79,70,229,0.3)]
                                                       active:scale-95 w-full sm:w-auto">
@@ -225,6 +237,17 @@
                                         </div>
                                         {% endif %}
                                     </div>
+                                    <!-- Горизонтальная разделяющая черта + данные встречи -->
+                                    <!-- Если у события есть описание, показываем его отдельным блоком ниже,
+                                         чтобы клиент видел дополнительный контекст именно этой встречи -->
+                                    {% if upcoming_event.description %}
+                                        <div class="grid grid-cols-1 gap-5 pt-6 border-t border-zinc-700/70">
+                                            <div>
+                                                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Описание события</p>
+                                                <p class="text-base leading-relaxed text-zinc-700">{{ upcoming_event.description }}</p>
+                                            </div>
+                                        </div>
+                                    {% endif %}
                                 </div>
                             {% else %}
                                 <h2 class="mt-1 text-2xl md:text-[1.7rem] font-black tracking-tight text-indigo-950">
