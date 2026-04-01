@@ -7463,6 +7463,22 @@ input:checked + .toggle-bg {
     font-size: 2rem;
   }
 
+  .md\:text-\[1\.5rem\] {
+    font-size: 1.5rem;
+  }
+
+  .md\:text-\[2\.5rem\] {
+    font-size: 2.5rem;
+  }
+
+  .md\:text-\[1\.8rem\] {
+    font-size: 1.8rem;
+  }
+
+  .md\:text-\[1\.7rem\] {
+    font-size: 1.7rem;
+  }
+
   .md\:backdrop-blur-sm {
     --tw-backdrop-blur: blur(4px);
     backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
@@ -7500,6 +7516,10 @@ input:checked + .toggle-bg {
 
   .lg\:col-span-8 {
     grid-column: span 8 / span 8;
+  }
+
+  .lg\:col-span-12 {
+    grid-column: span 12 / span 12;
   }
 
   .lg\:mt-0 {
