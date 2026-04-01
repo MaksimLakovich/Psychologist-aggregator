@@ -169,60 +169,78 @@
                     </span>
 
                     <div class="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.9fr)]">
-                        <div class="rounded-[1.7rem] border border-white/70 bg-white/72 p-5 md:p-6 shadow-[0_18px_40px_rgba(99,102,241,0.10)] backdrop-blur-xl">
+                        <div class="relative overflow-hidden rounded-[1.7rem] border border-white/80 bg-white/40 p-6 md:p-8 shadow-[0_20px_50px_rgba(99,102,241,0.08)] backdrop-blur-2xl flex flex-col justify-between transition-all duration-300 hover:shadow-[0_25px_60px_rgba(99,102,241,0.12)]">
                             {% if upcoming_event %}
-                                <div class="flex flex-col gap-6">
-                                    <div class="flex flex-col gap-4 xl:flex-row xl:items-start">
-                                        <div class="flex flex-wrap gap-2.5">
-                                            <span class="meeting-stat-chip">{{ upcoming_event.specialist_profile.get_therapy_format_display|default:"Онлайн" }}</span>
-                                            <span class="meeting-stat-chip">{{ upcoming_event.event_type_display }}</span>
-                                            <span class="meeting-stat-chip">{{ upcoming_event.frequency_display }}</span>
-                                            <span class="meeting-stat-chip">{{ upcoming_event.status_display }}</span>
-                                        </div>
+                                <div class="relative z-10">
+                                    <div class="flex flex-wrap gap-2 mb-8">
+                                        <span class="meeting-stat-chip bg-indigo-50/50 border-indigo-100/50">{{ upcoming_event.specialist_profile.get_therapy_format_display|default:"Онлайн" }}</span>
+                                        <span class="meeting-stat-chip bg-white/60">{{ upcoming_event.event_type_display }}</span>
+                                        <span class="meeting-stat-chip bg-white/60">{{ upcoming_event.frequency_display }}</span>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-wider border border-emerald-100">
+                                            {{ upcoming_event.status_display }}
+                                        </span>
                                     </div>
 
-                                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+                                    <div class="flex flex-col lg:flex-row lg:items-center gap-6 md:gap-8">
                                         <div class="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-[1.6rem]
                                         border border-indigo-200/70 bg-gradient-to-br from-indigo-500 via-indigo-500 to-sky-400
                                         text-white shadow-[0_18px_40px_rgba(79,70,229,0.24)]">
-                                            <span class="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-indigo-100">
+                                            <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                            <span class="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-indigo-100/90 relative z-10">
                                                 {{ upcoming_event.display_month_short|upper }}
                                             </span>
-                                            <span class="mt-1 text-3xl font-black leading-none">
+                                            <span class="text-3xl font-black leading-none mt-1 relative z-10">
                                                 {{ upcoming_event.display_day_number }}
                                             </span>
                                         </div>
 
-                                        <div class="min-w-0 flex-1">
-                                            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                                                {{ upcoming_event.display_weekday }}
-                                            </p>
-                                            <h2 class="mt-2 text-2xl md:text-[1.7rem] font-black tracking-tight text-indigo-950">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                                <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">
+                                                    {{ upcoming_event.display_weekday }}
+                                                </p>
+                                            </div>
+                                            <h2 class="text-3xl md:text-4xl font-black tracking-tight text-indigo-950 flex items-baseline gap-2">
                                                 {{ upcoming_event.display_time_range }}
                                             </h2>
-                                            <span>{{ upcoming_event.display_client_timezone }}</span>
+                                            <p class="mt-1 text-sm font-medium text-slate-400 flex items-center gap-1.5">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                {{ upcoming_event.display_client_timezone }}
+                                            </p>
                                         </div>
 
                                         {% if upcoming_event.slot.meeting_url %}
+                                        <div class="lg:ml-auto">
                                             <a href="{{ upcoming_event.slot.meeting_url }}"
                                                target="_blank"
-                                               class="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 gap-3
-                                               border border-transparent text-base font-medium rounded-xl text-white bg-violet-500 hover:bg-violet-600
-                                               transition-all duration-200 shadow-md hover:shadow-lg">
-                                                <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-6 h-6">
-                                                Видеочат
+                                               class="group relative inline-flex items-center justify-center px-8 py-4 gap-3
+                                                      overflow-hidden rounded-2xl bg-indigo-600 text-white font-bold
+                                                      transition-all duration-300 hover:bg-indigo-700 hover:shadow-[0_10px_30px_rgba(79,70,229,0.3)]
+                                                      active:scale-95 w-full sm:w-auto">
+                                                <div class="absolute inset-0 w-3 bg-white/20 skew-x-[-30deg] -translate-x-12 group-hover:translate-x-[150px] transition-transform duration-700 ease-in-out"></div>
+                                                <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-5 h-5 transition-transform group-hover:rotate-12">
+                                                <span>Войти в видеочат</span>
                                             </a>
+                                        </div>
                                         {% endif %}
                                     </div>
                                 </div>
                             {% else %}
-                                <h2 class="mt-1 text-2xl md:text-[1.7rem] font-black tracking-tight text-indigo-950">
-                                    Пространство для следующей встречи уже готово
-                                </h2>
-                                <p class="mt-3 max-w-2xl text-sm md:text-base leading-relaxed text-slate-500">
-                                    Как только запись будет создана, здесь появятся дата, время, специалист и быстрый переход в детали ближайшей встречи
-                                </p>
+                                <div class="flex flex-col justify-center h-full py-4">
+                                    <div class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-500 mb-6">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    </div>
+                                    <h2 class="text-2xl md:text-3xl font-black tracking-tight text-indigo-950">
+                                        Ваше время для заботы о себе
+                                    </h2>
+                                    <p class="mt-3 max-w-lg text-base leading-relaxed text-slate-500 font-medium">
+                                        Как только вы запишетесь на сессию, здесь появятся все детали: время, ссылка на видеочат и информация о специалисте.
+                                    </p>
+                                </div>
                             {% endif %}
+
+                            <div class="absolute -right-16 -bottom-16 h-64 w-64 rounded-full bg-indigo-50/30 blur-3xl pointer-events-none"></div>
                         </div>
 
                         <div class="rounded-[1.7rem] border border-indigo-200/70 bg-gradient-to-br from-slate-950 via-indigo-950 to-indigo-900 p-5 md:p-6 text-white shadow-[0_24px_50px_rgba(30,41,59,0.32)]">
@@ -232,7 +250,6 @@
                                         <img src="{{ upcoming_event.specialist_photo_url }}"
                                              alt="{{ upcoming_event.counterpart_full_name }}"
                                              class="h-14 w-14 rounded-2xl border border-white/20 object-cover shadow-lg">
-                                        <!-- Подключаем live_indicator специалиста + лейбл с пояснением индикатора -->
                                         <span class="group absolute -bottom-0.5 -right-0.5 z-20 flex items-center justify-center w-4 h-4 rounded-full shadow-sm"
                                               title="{{ upcoming_event.specialist_live_indicator.title }}">
                                             {% if upcoming_event.specialist_live_indicator.should_ping %}
