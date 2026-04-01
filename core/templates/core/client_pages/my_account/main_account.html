@@ -220,7 +220,7 @@
                                                 Пространство для следующей встречи уже готово
                                             </h2>
                                             <p class="mt-3 max-w-2xl text-sm md:text-base leading-relaxed text-slate-500">
-                                                Как только запись будет создана, здесь появятся дата, время, специалист и быстрый переход в детали встречи
+                                                Как только запись будет создана, здесь появятся дата, время, специалист и быстрый переход в детали ближайшей встречи
                                             </p>
                                         {% endif %}
                                     </div>
@@ -269,9 +269,9 @@
                                 </a>
                             {% else %}
                                 <p class="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-200/80">Следующий шаг</p>
-                                <h3 class="mt-3 text-2xl font-black tracking-tight">Запишите первую встречу</h3>
+                                <h3 class="mt-3 text-2xl font-black tracking-tight">Запишитесь на встречу</h3>
                                 <p class="mt-3 text-sm leading-relaxed text-indigo-100/80">
-                                    После записи этот блок превратится во встречу с датой, временем и переходом в детали
+                                    После записи этот блок превратится во встречу с датой, временем и переходом в ее детали
                                 </p>
                                 <a href="{% url 'core:general-questions' %}?layout=sidebar"
                                    class="mt-6 inline-flex w-full items-center justify-center rounded-[1.2rem] bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-indigo-50">
@@ -285,7 +285,7 @@
 
             <!-- ===== Мой терапевт ===== -->
             {% if upcoming_event %}
-                <div class="md:col-span-1 lg:col-span-4 bg-white/60 backdrop-blur-md rounded-3xl p-6
+                <div class="premium-surface md:col-span-1 lg:col-span-4 bg-white/60 backdrop-blur-md rounded-3xl p-6
                 border border-indigo-100/80 shadow-sm flex flex-col justify-center items-center text-center min-w-0">
                     <span class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 mb-4 block self-start w-full text-left">
                         Мой терапевт
@@ -402,26 +402,23 @@
 
                 <button type="button"
                         data-modal-open="topics-modal"
-                        class="absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
+                        class="absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center
+                        rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
                     <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
                 </button>
 
                 <div class="relative z-[1]">
                     <div class="flex items-start gap-3 mb-5">
-                    <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100/90 text-indigo-600 shadow-sm flex-shrink-0">
+                    <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100/80 text-indigo-600 shadow-sm flex-shrink-0">
                         <img src="{% static 'images/menu/topic-icon.svg' %}" alt="topic" class="w-7 h-7">
                     </span>
                         <div class="min-w-0 pr-12">
-                            <p class="text-xs font-bold uppercase tracking-[0.2em] text-indigo-700/80">Темы для работы</p>
-                            <h3 class="mt-2 text-2xl font-black tracking-tight text-slate-900">Ваш фокус в терапии</h3>
+                            <p class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 mb-4 block">Темы для работы</p>
+                            <h3 class="mt-2 text-xl font-black tracking-tight text-indigo-950/75">Ваш фокус в терапии</h3>
                             <p class="mt-2 text-sm leading-relaxed text-slate-500">
-                                Список тем, которые помогают быстрее собирать релевантный контекст для дальнейшей работы.
+                                Список тем, которые помогают быстрее собирать релевантный контекст для дальнейшей работы
                             </p>
                         </div>
-                    </div>
-
-                    <div id="selected-topics-count" class="mb-4 inline-flex rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-indigo-700">
-                        {{ client_requested_topics|length }} выбрано
                     </div>
 
                     <div id="selected-topics-container" class="flex flex-wrap gap-2.5">
@@ -441,26 +438,23 @@
 
                 <button type="button"
                         data-modal-open="methods-modal"
-                        class="absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-emerald-100 bg-white/80 shadow-sm hover:bg-emerald-50 text-emerald-500 transition-colors">
+                        class="absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center
+                        rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
                     <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
                 </button>
 
                 <div class="relative z-[1]">
                     <div class="flex items-start gap-3 mb-5">
-                    <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100/90 text-emerald-600 shadow-sm flex-shrink-0">
+                    <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100/80 text-emerald-600 shadow-sm flex-shrink-0">
                         <img src="{% static 'images/menu/method-icon.svg' %}" alt="method" class="w-7 h-7">
                     </span>
                         <div class="min-w-0 pr-12">
-                            <p class="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700/80">Подходы</p>
-                            <h3 class="mt-2 text-2xl font-black tracking-tight text-slate-900">Предпочтительная методика</h3>
+                            <p class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 mb-4 block">Подходы</p>
+                            <h3 class="mt-2 text-xl font-black tracking-tight text-indigo-950/75">Предпочтительная методика</h3>
                             <p class="mt-2 text-sm leading-relaxed text-slate-500">
-                                Здесь собраны подходы, которые вам ближе по стилю работы и ощущению безопасности.
+                                Здесь указываются подходы, которые вам ближе по стилю работы и ощущению безопасности
                             </p>
                         </div>
-                    </div>
-
-                    <div id="selected-methods-count" class="mb-4 inline-flex rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
-                        {{ client_preferred_methods|length }} выбрано
                     </div>
 
                     <div id="selected-methods-container" class="flex flex-wrap gap-2.5">
