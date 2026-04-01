@@ -90,15 +90,10 @@ class ClientAccountView(LoginRequiredMixin, TemplateView):
             slot=slot,
             client_timezone=client_timezone,
         )
-        is_finished_slot = bool(
-            slot.status in ["completed", "cancelled"]
-            or slot.end_datetime < current_datetime
-        )
 
         return {
             "slot": slot,
             "description": event.description,
-            "is_finished_slot": is_finished_slot,
             "counterpart_full_name": (
                 f"{counterpart_user.first_name} {counterpart_user.last_name}".strip()
                 if counterpart_user

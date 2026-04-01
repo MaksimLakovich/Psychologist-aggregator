@@ -156,7 +156,7 @@
                         <div class="relative overflow-hidden rounded-[1.7rem] border border-white/80 bg-white/40 p-6 md:p-8 shadow-[0_20px_50px_rgba(99,102,241,0.08)] backdrop-blur-2xl flex flex-col justify-between transition-all duration-300 hover:shadow-[0_25px_60px_rgba(99,102,241,0.12)]">
                             {% if upcoming_event %}
                                 <div class="relative z-10">
-                                    <div class="flex flex-wrap gap-2 mb-8">
+                                    <div class="flex flex-wrap gap-3 mb-8">
                                         <span class="inline-flex rounded-full bg-indigo-100/80 px-3 py-1
                                         text-sm font-bold tracking-wide text-indigo-900/75 border border-indigo-200/70">
                                             {{ upcoming_event.specialist_profile.get_therapy_format_display|default:"Онлайн" }}
@@ -168,29 +168,6 @@
                                         <span class="inline-flex rounded-full bg-indigo-100/80 px-3 py-1
                                         text-sm font-bold tracking-wide text-indigo-900/75 border border-indigo-200/70">
                                             {{ upcoming_event.frequency_display }}
-                                        </span>
-                                        <!-- Цвет статуса синхронизируем с архивной/активной логикой экрана: активные встречи - indigo, завершенные - slate -->
-                                        <span
-                                            class="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-bold rounded-full
-                                            {% if upcoming_event.is_finished_slot %}
-                                                bg-slate-100/90 text-slate-800 border border-slate-200/70
-                                            {% elif upcoming_event.slot.status == 'started' %}
-                                                bg-emerald-100/90 text-emerald-800 border border-emerald-200/70
-                                            {% else %}
-                                                bg-indigo-100/80 text-indigo-800 border border-indigo-200/50
-                                            {% endif %}"
-                                        >
-                                            <span
-                                                class="w-2 h-2 rounded-full
-                                                {% if upcoming_event.is_finished_slot %}
-                                                    bg-slate-500
-                                                {% elif upcoming_event.slot.status == 'started' %}
-                                                    bg-emerald-500 animate-pulse
-                                                {% else %}
-                                                    bg-indigo-500 animate-pulse
-                                                {% endif %}"
-                                            ></span>
-                                            {{ upcoming_event.status_display }}
                                         </span>
                                     </div>
 
