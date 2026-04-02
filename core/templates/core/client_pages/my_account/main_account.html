@@ -114,16 +114,16 @@
                         {% if upcoming_event %}
                             <div class="relative z-10">
                                 <div class="flex flex-wrap gap-3 mb-8">
-                                    <span class="inline-flex rounded-full bg-slate-200/80 px-3 py-1
-                                    text-sm font-bold tracking-wide text-slate-700/75 border border-slate-300/70">
+                                    <span class="inline-flex rounded-full bg-indigo-200/80 px-3 py-1
+                                    text-sm font-bold tracking-wide text-indigo-900/85 border border-indigo-300/70">
                                         {{ upcoming_event.specialist_profile.get_therapy_format_display|default:"Онлайн" }}
                                     </span>
-                                    <span class="inline-flex rounded-full bg-slate-200/80 px-3 py-1
-                                    text-sm font-bold tracking-wide text-slate-700/75 border border-slate-300/70">
+                                    <span class="inline-flex rounded-full bg-indigo-200/80 px-3 py-1
+                                    text-sm font-bold tracking-wide text-indigo-900/85 border border-indigo-300/70">
                                         {{ upcoming_event.event_type_display }}
                                     </span>
-                                    <span class="inline-flex rounded-full bg-slate-200/80 px-3 py-1
-                                    text-sm font-bold tracking-wide text-slate-700/75 border border-slate-300/70">
+                                    <span class="inline-flex rounded-full bg-indigo-200/80 px-3 py-1
+                                    text-sm font-bold tracking-wide text-indigo-900/85 border border-indigo-300/70">
                                         {{ upcoming_event.frequency_display }}
                                     </span>
                                 </div>
@@ -165,7 +165,7 @@
                                                   transition-all duration-300 hover:bg-indigo-700 hover:shadow-[0_10px_30px_rgba(79,70,229,0.3)]
                                                   active:scale-95 w-full sm:w-auto">
                                             <div class="absolute inset-0 w-3 bg-white/20 skew-x-[-30deg] -translate-x-12 group-hover:translate-x-[150px] transition-transform duration-700 ease-in-out"></div>
-                                            <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-5 h-5 transition-transform group-hover:rotate-12">
+                                            <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-5 h-5 transition-transform group-hover:-rotate-12">
                                             <span>Войти в видеочат</span>
                                         </a>
                                     </div>
@@ -175,9 +175,9 @@
                                 <!-- Если у события есть описание, показываем его отдельным блоком ниже,
                                      чтобы клиент видел дополнительный контекст именно этой встречи -->
                                 {% if upcoming_event.description %}
-                                    <div class="grid grid-cols-1 gap-5 pt-6 mt-6 border-t border-zinc-300/70">
+                                    <div class="grid grid-cols-1 gap-5 pt-6 mt-6 border-t border-indigo-200/75">
                                         <div>
-                                            <p class="text-xs font-bold uppercase tracking-widest text-slate-700/75 mb-1">Описание события</p>
+                                            <p class="text-sm font-bold uppercase tracking-widest text-slate-700/75 mb-1">Описание события</p>
                                             <p class="text-base leading-relaxed text-zinc-800">{{ upcoming_event.description }}</p>
                                         </div>
                                     </div>
@@ -229,8 +229,9 @@
                                 </ul>
                             </div>
                             <a href="{{ upcoming_event.detail_url }}"
-                               class="mt-6 inline-flex w-full items-center justify-center rounded-[1.2rem] bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-indigo-50">
-                                Посмотреть детали встречи
+                               class="group relative mt-6 inline-flex w-full items-center justify-center overflow-hidden rounded-[1.2rem] bg-white px-5 py-3 text-sm font-bold text-slate-900 transition-all duration-300 hover:bg-indigo-50 hover:shadow-[0_10px_30px_rgba(99,102,241,0.18)] active:scale-[0.99]">
+                                <div class="absolute inset-0 w-3 -translate-x-12 skew-x-[-30deg] bg-indigo-300/50 transition-transform duration-700 ease-in-out group-hover:translate-x-[350px]"></div>
+                                <span class="relative z-10">Посмотреть детали встречи</span>
                             </a>
                         {% else %}
                             <p class="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-200/80">Следующий шаг</p>
