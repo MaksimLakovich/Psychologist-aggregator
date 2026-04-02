@@ -154,9 +154,11 @@
                 {% include "core/event_pages/therapy_session_detail/_session_overview.html" %}
                 <!-- БЛОК 2: Подключение клиента к встрече -->
                 {% include "core/event_pages/therapy_session_detail/_session_connection_client.html" %}
-                <!-- БЛОК 3: Управление встречей -->
+                <!-- БЛОК 3: Подключение и показ результатов встречи если они были добавлены -->
+                {% include "core/event_pages/therapy_session_detail/_session_meeting_resume.html" %}
+                <!-- БЛОК 4: Управление встречей -->
                 {% include "core/event_pages/therapy_session_detail/_session_actions_client.html" %}
-                <!-- БЛОК 4: Комментарии к встрече / форум -->
+                <!-- БЛОК 5: Комментарии к встрече / форум -->
                 {% include "core/event_pages/therapy_session_detail/_session_comments_form.html" %}
 
             </div>
