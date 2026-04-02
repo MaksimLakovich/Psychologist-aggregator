@@ -296,6 +296,7 @@
 │    ├── mixins/                      # Миксины
 │    │    ├── creator_mixin.py           # Автоматически заполняет поле creator текущим пользователем при создании объекта модели
 │    │    ├── anonymous_only_mixin.py    # Ограничивает доступ к форме/странице только для неавторизованных пользователей
+│    │    ├── role_required_mixin.py     # Миксины для доступов на основе role: ClientRequiredMixin / PsychologistRequiredMixin
 │    │    └── ...
 │    ├── tests/                       # Тесты
 │    │    ├── api/
