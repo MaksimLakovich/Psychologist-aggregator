@@ -4649,6 +4649,22 @@ input:checked + .toggle-bg {
   background-color: rgb(229 237 255 / 0.45);
 }
 
+.bg-indigo-900\/35 {
+  background-color: rgb(54 47 120 / 0.35);
+}
+
+.bg-slate-900\/35 {
+  background-color: rgb(15 23 42 / 0.35);
+}
+
+.bg-slate-900\/45 {
+  background-color: rgb(15 23 42 / 0.45);
+}
+
+.bg-slate-900\/15 {
+  background-color: rgb(15 23 42 / 0.15);
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }

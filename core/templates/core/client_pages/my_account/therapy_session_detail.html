@@ -84,6 +84,29 @@
         border-color: #6366f1;
         box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
     }
+
+    /* ========================================================= */
+    /* Общий shine-эффект для CTA-кнопок страницы */
+    /* ========================================================= */
+    .cta-shine-button {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-shine-button__glint {
+        position: absolute;
+        inset: 0;
+        width: 0.75rem;
+        background: rgba(255, 255, 255, 0.2);
+        transform: skewX(-30deg) translateX(-3rem);
+        transition: transform 700ms ease-in-out;
+        pointer-events: none;
+    }
+
+    .cta-shine-button:hover .cta-shine-button__glint {
+        transform: skewX(-30deg) translateX(12rem);
+    }
+
 </style>
 {% endblock %}
 

@@ -14,21 +14,23 @@
                 <button
                     type="button"
                     data-open-reschedule-modal
-                    class="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3 gap-3 rounded-xl bg-sky-600/85
+                    class="cta-shine-button group w-full sm:w-auto inline-flex items-center justify-center px-7 py-3 gap-3 rounded-xl bg-sky-600/85
                     text-white font-semibold transition-all duration-200 hover:bg-sky-600 border border-transparent"
                 >
-                    <img src="{% static 'images/booking/reschedule-event-white.svg' %}" alt="reschedule" class="w-6 h-6">
-                    Перенести встречу
+                    <span class="cta-shine-button__glint"></span>
+                    <img src="{% static 'images/booking/reschedule-event-white.svg' %}" alt="reschedule" class="relative z-10 w-6 h-6 transition-transform duration-300 group-hover:-rotate-12">
+                    <span class="relative z-10">Перенести встречу</span>
                 </button>
 
                 <button
                     type="button"
                     data-open-cancel-modal
-                    class="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3 gap-3 rounded-xl bg-slate-500/85
+                    class="cta-shine-button group w-full sm:w-auto inline-flex items-center justify-center px-7 py-3 gap-3 rounded-xl bg-slate-500/85
                     text-white font-semibold transition-all duration-200 hover:bg-slate-500 border border-transparent"
                 >
-                    <img src="{% static 'images/booking/cancel-event-white.svg' %}" alt="cancel" class="w-6 h-6">
-                    Отменить встречу
+                    <span class="cta-shine-button__glint"></span>
+                    <img src="{% static 'images/booking/cancel-event-white.svg' %}" alt="cancel" class="relative z-10 w-6 h-6 transition-transform duration-300 group-hover:-rotate-12">
+                    <span class="relative z-10">Отменить встречу</span>
                 </button>
             </div>
         </div>
