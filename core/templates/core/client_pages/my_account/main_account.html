@@ -128,7 +128,7 @@
                                     </span>
                                 </div>
 
-                                <div class="flex flex-col lg:flex-row lg:items-center gap-6 md:gap-8">
+                                <div class="flex flex-col lg:flex-row lg:items-center gap-6 md:gap-10">
 
                                     <div class="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-[1.6rem]
                                     border border-indigo-200/70 bg-gradient-to-br from-indigo-500 via-indigo-500 to-sky-400
@@ -156,20 +156,37 @@
                                         </p>
                                     </div>
 
-                                    {% if upcoming_event.slot.meeting_url %}
                                     <div class="lg:ml-auto">
-                                        <a href="{{ upcoming_event.slot.meeting_url }}"
-                                           target="_blank"
-                                           class="group relative inline-flex items-center justify-center px-7 py-3 gap-3
-                                                  overflow-hidden rounded-2xl bg-indigo-600 text-white font-bold
-                                                  transition-all duration-300 hover:bg-indigo-700 hover:shadow-[0_10px_30px_rgba(79,70,229,0.3)]
-                                                  active:scale-95 w-full sm:w-auto">
-                                            <div class="absolute inset-0 w-3 bg-white/20 skew-x-[-30deg] -translate-x-12 group-hover:translate-x-[150px] transition-transform duration-700 ease-in-out"></div>
-                                            <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-5 h-5 transition-transform group-hover:-rotate-12">
-                                            <span>Войти в видеочат</span>
-                                        </a>
+                                        {% if upcoming_event.slot.meeting_url %}
+                                            <a href="{{ upcoming_event.slot.meeting_url }}"
+                                               target="_blank"
+                                               class="group relative inline-flex items-center justify-center px-7 py-3 gap-3
+                                                      overflow-hidden rounded-2xl bg-indigo-600 text-white font-bold
+                                                      transition-all duration-300 hover:bg-indigo-700 hover:shadow-[0_10px_30px_rgba(79,70,229,0.3)]
+                                                      active:scale-95 w-full sm:w-auto">
+                                                <div class="absolute inset-0 w-3 bg-white/20 skew-x-[-30deg] -translate-x-12 group-hover:translate-x-[150px] transition-transform duration-700 ease-in-out"></div>
+                                                <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-5 h-5 transition-transform group-hover:-rotate-12">
+                                                <span>Войти в видеочат</span>
+                                            </a>
+                                        {% else %}
+                                            <div class="group relative inline-flex w-full sm:w-auto">
+                                                <button type="button"
+                                                        disabled
+                                                        aria-disabled="true"
+                                                        class="inline-flex items-center justify-center px-7 py-3 gap-3
+                                                        rounded-2xl bg-indigo-600/35 hover:bg-indigo-600/45 text-white/75 hover:text-white/95 font-bold shadow-none cursor-not-allowed
+                                                        active:scale-95 w-full sm:w-auto">
+                                                    <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-5 h-5 opacity-75 grayscale">
+                                                    <span>Войти в видеочат</span>
+                                                </button>
+                                                <span class="pointer-events-none absolute bottom-full left-1/2 z-30 mb-3 w-64 -translate-x-1/2
+                                                rounded-xl bg-indigo-950/85 px-3 py-2 text-center text-[11px] font-semibold leading-relaxed text-white
+                                                opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+                                                    Доступ к видеочату появится ближе к началу встречи
+                                                </span>
+                                            </div>
+                                        {% endif %}
                                     </div>
-                                    {% endif %}
                                 </div>
                                 <!-- Горизонтальная разделяющая черта + данные встречи -->
                                 <!-- Если у события есть описание, показываем его отдельным блоком ниже,
