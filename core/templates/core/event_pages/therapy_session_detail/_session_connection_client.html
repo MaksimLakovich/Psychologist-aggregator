@@ -7,6 +7,32 @@
      - после завершения встречи он превращается в блок "Итоги встречи", если специалист заполнил meeting_resume.
      Если архивная встреча завершилась без meeting_resume, блок целиком скрываем, чтобы не показывать пустую секцию -->
 
+
+<style>
+    /* ========================================================= */
+    /* Общий shine-эффект для CTA-кнопок страницы */
+    /* ========================================================= */
+    .cta-shine-button {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-shine-button__glint {
+        position: absolute;
+        inset: 0;
+        width: 0.75rem;
+        background: rgba(255, 255, 255, 0.2);
+        transform: skewX(-30deg) translateX(-3rem);
+        transition: transform 700ms ease-in-out;
+        pointer-events: none;
+    }
+
+    .cta-shine-button:hover .cta-shine-button__glint {
+        transform: skewX(-30deg) translateX(12rem);
+    }
+</style>
+
+
 {% if slot %}
 
     {% if is_finished_slot %}
@@ -27,10 +53,11 @@
         {% if slot.meeting_url and can_open_meeting_url %}
             <div class="space-y-4 pl-8 animate-fade-in-up delay-200">
                 <a href="{{ slot.meeting_url }}" target="_blank"
-                   class="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3 gap-3 rounded-xl bg-violet-500/95
+                   class="cta-shine-button group w-full sm:w-auto inline-flex items-center justify-center px-7 py-3 gap-3 rounded-xl bg-violet-500/95
                    text-white font-bold transition-all duration-200 hover:bg-violet-600 border border-transparent">
-                    <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-6 h-6">
-                    Перейти в видеочат
+                    <span class="cta-shine-button__glint"></span>
+                    <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="relative z-10 w-6 h-6 transition-transform duration-300 group-hover:-rotate-12">
+                    <span class="relative z-10">Перейти в видеочат</span>
                 </a>
             </div>
         {% else %}

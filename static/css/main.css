@@ -3713,6 +3713,18 @@ input:checked + .toggle-bg {
   border-color: rgb(203 213 225 / 0.8);
 }
 
+.border-indigo-100\/70 {
+  border-color: rgb(229 237 255 / 0.7);
+}
+
+.border-indigo-200\/40 {
+  border-color: rgb(205 219 254 / 0.4);
+}
+
+.border-indigo-200\/60 {
+  border-color: rgb(205 219 254 / 0.6);
+}
+
 .\!bg-gray-50 {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1)) !important;
@@ -4631,6 +4643,10 @@ input:checked + .toggle-bg {
 
 .bg-indigo-600\/35 {
   background-color: rgb(88 80 236 / 0.35);
+}
+
+.bg-indigo-100\/45 {
+  background-color: rgb(229 237 255 / 0.45);
 }
 
 .bg-gradient-to-br {
@@ -5889,6 +5905,10 @@ input:checked + .toggle-bg {
 
 .text-white\/75 {
   color: rgb(255 255 255 / 0.75);
+}
+
+.text-indigo-950\/65 {
+  color: rgb(30 27 75 / 0.65);
 }
 
 .line-through {
