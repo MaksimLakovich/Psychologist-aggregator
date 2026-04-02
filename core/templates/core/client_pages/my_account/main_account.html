@@ -53,7 +53,7 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 4px;
+        height: 8px;
         background: linear-gradient(90deg, rgba(99, 102, 241, 0.82), rgba(129, 140, 248, 0.35));
     }
 
@@ -113,7 +113,7 @@
                     <div class="rounded-[1.7rem] bg-transparent p-6 md:p-8 flex flex-col justify-between transition-all duration-300">
                         {% if upcoming_event %}
                             <div class="relative z-10">
-                                <div class="flex flex-wrap gap-3 mb-8">
+                                <div class="flex flex-wrap gap-3">
                                     <span class="inline-flex rounded-full bg-indigo-200/80 px-3 py-1
                                     text-sm font-bold tracking-wide text-indigo-900/85 border border-indigo-300/70">
                                         {{ upcoming_event.specialist_profile.get_therapy_format_display|default:"Онлайн" }}
@@ -127,72 +127,74 @@
                                         {{ upcoming_event.frequency_display }}
                                     </span>
                                 </div>
+                                <!-- Горизонтальная разделяющая черта + данные встречи -->
+                                <div class="grid grid-cols-1 gap-5 pt-6 mt-6 border-t border-indigo-300/75">
+                                    <div class="flex flex-col lg:flex-row lg:items-center gap-6 md:gap-10">
 
-                                <div class="flex flex-col lg:flex-row lg:items-center gap-6 md:gap-10">
+                                        <div class="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-[1.6rem]
+                                        border border-indigo-200/70 bg-gradient-to-br from-indigo-500 via-indigo-500 to-sky-400
+                                        text-white shadow-[0_18px_40px_rgba(79,70,229,0.24)]">
+                                            <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                            <span class="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-indigo-100/90 relative z-10">
+                                                {{ upcoming_event.display_month_short|upper }}
+                                            </span>
+                                            <span class="text-3xl font-black leading-none mt-1 relative z-10">
+                                                {{ upcoming_event.display_day_number }}
+                                            </span>
+                                        </div>
 
-                                    <div class="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-[1.6rem]
-                                    border border-indigo-200/70 bg-gradient-to-br from-indigo-500 via-indigo-500 to-sky-400
-                                    text-white shadow-[0_18px_40px_rgba(79,70,229,0.24)]">
-                                        <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                                        <span class="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-indigo-100/90 relative z-10">
-                                            {{ upcoming_event.display_month_short|upper }}
-                                        </span>
-                                        <span class="text-3xl font-black leading-none mt-1 relative z-10">
-                                            {{ upcoming_event.display_day_number }}
-                                        </span>
-                                    </div>
-
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <p class="text-base font-bold uppercase tracking-[0.15em] text-indigo-500">
-                                                {{ upcoming_event.display_weekday }}
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <p class="text-base font-bold uppercase tracking-[0.15em] text-indigo-500">
+                                                    {{ upcoming_event.display_weekday }}
+                                                </p>
+                                            </div>
+                                            <h2 class="text-2xl md:text-3xl font-black tracking-tight text-indigo-900/75 flex items-baseline gap-2">
+                                                {{ upcoming_event.display_time_range }}
+                                            </h2>
+                                            <p class="mt-1 text-xs font-medium tracking-widest text-indigo-500 flex items-center gap-1.5">
+                                                {{ upcoming_event.display_client_timezone }}
                                             </p>
                                         </div>
-                                        <h2 class="text-2xl md:text-3xl font-black tracking-tight text-indigo-900/75 flex items-baseline gap-2">
-                                            {{ upcoming_event.display_time_range }}
-                                        </h2>
-                                        <p class="mt-1 text-xs font-medium tracking-widest text-indigo-500 flex items-center gap-1.5">
-                                            {{ upcoming_event.display_client_timezone }}
-                                        </p>
-                                    </div>
 
-                                    <div class="lg:ml-auto">
-                                        {% if upcoming_event.slot.meeting_url %}
-                                            <a href="{{ upcoming_event.slot.meeting_url }}"
-                                               target="_blank"
-                                               class="group relative inline-flex items-center justify-center px-7 py-3 gap-3
-                                                      overflow-hidden rounded-2xl bg-indigo-600 text-white font-bold
-                                                      transition-all duration-300 hover:bg-indigo-700 hover:shadow-[0_10px_30px_rgba(79,70,229,0.3)]
-                                                      active:scale-95 w-full sm:w-auto">
-                                                <div class="absolute inset-0 w-3 bg-white/20 skew-x-[-30deg] -translate-x-12 group-hover:translate-x-[150px] transition-transform duration-700 ease-in-out"></div>
-                                                <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-5 h-5 transition-transform group-hover:-rotate-12">
-                                                <span>Войти в видеочат</span>
-                                            </a>
-                                        {% else %}
-                                            <div class="group relative inline-flex w-full sm:w-auto">
-                                                <button type="button"
-                                                        disabled
-                                                        aria-disabled="true"
-                                                        class="inline-flex items-center justify-center px-7 py-3 gap-3
-                                                        rounded-2xl bg-indigo-600/35 hover:bg-indigo-600/45 text-white/75 hover:text-white/95 font-bold shadow-none cursor-not-allowed
-                                                        active:scale-95 w-full sm:w-auto">
-                                                    <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-5 h-5 opacity-75 grayscale">
+                                        <div class="lg:ml-auto">
+                                            {% if upcoming_event.slot.meeting_url %}
+                                                <a href="{{ upcoming_event.slot.meeting_url }}"
+                                                   target="_blank"
+                                                   class="group relative inline-flex items-center justify-center px-7 py-3 gap-3
+                                                          overflow-hidden rounded-2xl bg-indigo-600 text-white font-bold
+                                                          transition-all duration-300 hover:bg-indigo-700 hover:shadow-[0_10px_30px_rgba(79,70,229,0.3)]
+                                                          active:scale-95 w-full sm:w-auto">
+                                                    <div class="absolute inset-0 w-3 bg-white/20 skew-x-[-30deg] -translate-x-12 group-hover:translate-x-[150px] transition-transform duration-700 ease-in-out"></div>
+                                                    <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-5 h-5 transition-transform group-hover:-rotate-12">
                                                     <span>Войти в видеочат</span>
-                                                </button>
-                                                <span class="pointer-events-none absolute bottom-full left-1/2 z-30 mb-3 w-64 -translate-x-1/2
-                                                rounded-xl bg-indigo-950/85 px-3 py-2 text-center text-[11px] font-semibold leading-relaxed text-white
-                                                opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
-                                                    Доступ к видеочату появится ближе к началу встречи
-                                                </span>
-                                            </div>
-                                        {% endif %}
+                                                </a>
+                                            {% else %}
+                                                <div class="group relative inline-flex w-full sm:w-auto">
+                                                    <button type="button"
+                                                            disabled
+                                                            aria-disabled="true"
+                                                            class="inline-flex items-center justify-center px-7 py-3 gap-3
+                                                            rounded-2xl bg-indigo-600/35 hover:bg-indigo-600/45 text-white/75 hover:text-white/95 font-bold shadow-none cursor-not-allowed
+                                                            active:scale-95 w-full sm:w-auto">
+                                                        <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-5 h-5 opacity-75 grayscale">
+                                                        <span>Войти в видеочат</span>
+                                                    </button>
+                                                    <span class="pointer-events-none absolute bottom-full left-1/2 z-30 mb-3 w-64 -translate-x-1/2
+                                                    rounded-xl bg-indigo-950/85 px-3 py-2 text-center text-[11px] font-semibold leading-relaxed text-white
+                                                    opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+                                                        Доступ к видеочату появится ближе к началу встречи
+                                                    </span>
+                                                </div>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- Горизонтальная разделяющая черта + данные встречи -->
                                 <!-- Если у события есть описание, показываем его отдельным блоком ниже,
                                      чтобы клиент видел дополнительный контекст именно этой встречи -->
                                 {% if upcoming_event.description %}
-                                    <div class="grid grid-cols-1 gap-5 pt-6 mt-6 border-t border-indigo-200/75">
+                                    <div class="grid grid-cols-1 gap-5 pt-6 mt-6 border-t border-indigo-300/75">
                                         <div>
                                             <p class="text-sm font-bold uppercase tracking-widest text-slate-700/75 mb-1">Описание события</p>
                                             <p class="text-base leading-relaxed text-zinc-800">{{ upcoming_event.description }}</p>
@@ -401,7 +403,7 @@
             </div>
 
             <!-- ===== Новости ===== -->
-            <div class="md:col-span-1 lg:col-span-4 bg-white/60 backdrop-blur-md rounded-3xl p-6
+            <div class="selection-card md:col-span-1 lg:col-span-4 bg-white/60 backdrop-blur-md rounded-3xl p-6
             border border-indigo-100/80 shadow-sm relative min-w-0">
                 <h3 class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 mb-4 block">Новости</h3>
                 <div class="space-y-3">

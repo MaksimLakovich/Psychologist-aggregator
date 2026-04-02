@@ -3725,6 +3725,14 @@ input:checked + .toggle-bg {
   border-color: rgb(205 219 254 / 0.6);
 }
 
+.border-indigo-400\/75 {
+  border-color: rgb(141 162 251 / 0.75);
+}
+
+.border-indigo-300\/75 {
+  border-color: rgb(180 198 252 / 0.75);
+}
+
 .\!bg-gray-50 {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1)) !important;
@@ -5180,6 +5188,10 @@ input:checked + .toggle-bg {
   padding-right: 3rem;
 }
 
+.pb-5 {
+  padding-bottom: 1.25rem;
+}
+
 .text-left {
   text-align: left;
 }
@@ -5925,6 +5937,19 @@ input:checked + .toggle-bg {
 
 .text-indigo-950\/65 {
   color: rgb(30 27 75 / 0.65);
+}
+
+.text-indigo-700\/65 {
+  color: rgb(81 69 205 / 0.65);
+}
+
+.text-lime-700\/70 {
+  color: rgb(77 124 15 / 0.7);
+}
+
+.text-lime-700 {
+  --tw-text-opacity: 1;
+  color: rgb(77 124 15 / var(--tw-text-opacity, 1));
 }
 
 .line-through {
