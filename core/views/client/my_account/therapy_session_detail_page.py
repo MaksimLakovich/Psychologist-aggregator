@@ -11,6 +11,10 @@ from django.views.generic import FormView
 from calendar_engine.booking.exceptions import CreateBookingValidationError
 from calendar_engine.booking.services import build_specialist_live_indicator
 from calendar_engine.lifecycle.exceptions import LifecycleActionValidationError
+from calendar_engine.lifecycle.services.reschedule_chain_resolver import \
+    get_latest_rescheduled_descendant
+from calendar_engine.lifecycle.services.slot_status_display import \
+    build_calendar_slot_status_display
 from calendar_engine.lifecycle.use_cases.cancel_event import cancel_event_slot
 from calendar_engine.lifecycle.use_cases.reschedule_therapy_session import \
     reschedule_therapy_session_slot
@@ -114,6 +118,7 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
         context["current_sidebar_key"] = "all-events"
         context["event"] = self.event
         context["slot"] = self.slot
+        context["slot_status_display"] = build_calendar_slot_status_display(slot=self.slot)
         context["counterpart_full_name"] = (
             self.detail_data.counterpart_full_name or "Специалист будет указан позже"
         )
@@ -147,6 +152,8 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
         context["message_items"] = message_items
         context["can_manage_slot_messages"] = self._can_manage_slot_messages()
         context["can_manage_session_actions"] = self._can_manage_session_actions()
+        context["session_change_reason_label"] = self._get_session_change_reason_label()
+        context["rescheduled_event_url"] = self._get_rescheduled_event_url()
         context["cancel_session_form"] = CancelTherapySessionForm(
             initial={
                 "action": "cancel_session",
@@ -372,6 +379,31 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
         messages.success(self.request, "Встреча перенесена!")
 
         return redirect(self._get_event_detail_url(event_id=booking_result["event"].id))
+
+    def _get_session_change_reason_label(self):
+        """Возвращает заголовок для блока с описанием причины "Отмены" или "Переноса" текущей встречи."""
+        if not self.slot or self.slot.status != "cancelled" or not self.slot.cancel_reason:
+            return None
+
+        if self.slot.cancel_reason_type == "rescheduled":
+            return "Причина переноса встречи"
+
+        return "Причина отмены встречи"
+
+    def _get_rescheduled_event_url(self):
+        """Возвращает ссылку на новую следующую встречу после переноса."""
+        if not self.slot or self.slot.cancel_reason_type != "rescheduled":
+            return None
+
+        # get_latest_rescheduled_descendant() - возвращает актуального потомка события по цепочке previous_event
+        rescheduled_event = get_latest_rescheduled_descendant(
+            event=self.event,
+            viewer_user=self.request.user,
+        )
+        if rescheduled_event is None:
+            return None
+
+        return self._get_event_detail_url(event_id=rescheduled_event.id)
 
     def _get_specialist_profile(self):
         """Возвращает профиль специалиста из shared detail loader для клиентской страницы.

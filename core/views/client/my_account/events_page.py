@@ -6,6 +6,8 @@ from django.utils.formats import date_format
 from django.views.generic import TemplateView
 
 from calendar_engine.booking.services import build_specialist_live_indicator
+from calendar_engine.lifecycle.services.slot_status_display import \
+    build_calendar_slot_status_display
 from calendar_engine.lifecycle.use_cases.apply_time_based_status_transitions import \
     apply_time_based_status_transitions_for_user
 from calendar_engine.models import CalendarEvent, EventParticipant, TimeSlot
@@ -418,7 +420,7 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
                     ),
                     "visibility_display": event.get_visibility_display() or "Приватная",
                     "event_type_display": event.get_event_type_display() or "Индивидуальная сессия",
-                    "status_display": slot.get_status_display() or "Запланировано",
+                    "status_display": build_calendar_slot_status_display(slot=slot),
                     "duration_minutes": (
                         int((slot.end_datetime - slot.start_datetime).total_seconds() // 60)
                         if slot
