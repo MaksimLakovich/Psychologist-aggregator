@@ -8,10 +8,11 @@ from core.services.anonymous_client_flow_for_search_and_booking import (
     get_guest_matching_state, update_guest_personal_state)
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 from core.services.topic_groups import build_topics_grouped_by_type
+from users.mixins.role_required_mixin import ClientRequiredMixin
 from users.models import ClientProfile, Method
 
 
-class ClientPersonalQuestionsPageView(SpecialistMatchingLayoutMixin, FormView):
+class ClientPersonalQuestionsPageView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, FormView):
     """Контроллер на основе FormView для отображения страницы *Персональные вопросы* - предпочтения клиента.
 
     Вью работает в двух сценариях:
@@ -21,6 +22,7 @@ class ClientPersonalQuestionsPageView(SpecialistMatchingLayoutMixin, FormView):
 
     template_name = "core/client_pages/specialist_matching/home_client_personal_questions.html"
     form_class = ClientPersonalQuestionsForm
+    allow_anonymous = True
 
     def get_initial(self):
         """Возвращает initial-значения формы для двух сценариев шага "Персональные вопросы":

@@ -1,4 +1,3 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Min, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -13,10 +12,11 @@ from core.services.calendar_event_slot_selector import get_event_active_slot
 from core.services.calendar_slot_time_display import \
     build_calendar_slot_time_display
 from core.services.topic_groups import build_topics_grouped_by_type
+from users.mixins.role_required_mixin import ClientRequiredMixin
 from users.models import ClientProfile, Method
 
 
-class ClientAccountView(LoginRequiredMixin, TemplateView):
+class ClientAccountView(ClientRequiredMixin, TemplateView):
     """Класс-контроллер на основе Generic для отображения *Кабинета клиента*.
 
     - Используется как точка для работы с профилем (редактирование) и работы с функционалом платформы (поиск

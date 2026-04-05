@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -31,9 +30,10 @@ from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 from core.services.therapy_session.therapy_session_detail_loader import \
     load_therapy_session_detail_data
 from users.constants import LANGUAGE_CHOICES
+from users.mixins.role_required_mixin import ClientRequiredMixin
 
 
-class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, FormView):
+class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, FormView):
     """Детальная страница одной терапевтической сессии клиента."""
 
     template_name = "core/client_pages/my_account/therapy_session_detail.html"
@@ -66,6 +66,11 @@ class ClientTherapySessionDetailView(SpecialistMatchingLayoutMixin, LoginRequire
             - значит остальные методы класса могут работать уже с готовыми self.detail_data,
               self.event и self.slot без повторной загрузки одной и той же встречи из БД.
         """
+        # check_role_access() - проверяет доступ и возвращает HttpResponse только если доступ запрещен
+        access_response = self.check_role_access(request)
+        if access_response is not None:
+            return access_response
+
         # load_therapy_session_detail_data(...) загружает общую detail-основу для терапевтической встречи
         self.detail_data = load_therapy_session_detail_data(
             viewer_user=request.user,

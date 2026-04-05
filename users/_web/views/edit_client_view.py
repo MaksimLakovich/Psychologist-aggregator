@@ -1,30 +1,21 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import FormView
 from django_ratelimit.decorators import ratelimit
 
 from users._web.forms.edit_client_form import EditClientProfileForm
+from users.mixins.role_required_mixin import ClientRequiredMixin
 from users.models import AppUser
 
 
 @method_decorator(ratelimit(key="ip", rate="5/m", block=True), name="post")
-class EditClientProfilePageView(LoginRequiredMixin, FormView):
+class EditClientProfilePageView(ClientRequiredMixin, FormView):
     """Web-контроллер для редактирования профиля клиента."""
 
     form_class = EditClientProfileForm
     template_name = "users/edit_client.html"
     success_url = reverse_lazy("users:web:profile-edit")
-
-    def dispatch(self, request, *args, **kwargs):
-        """Ограничиваем доступ: редактирование профиля клиента доступно только для role_id=2."""
-        if getattr(request.user, "role_id", None) != 2:
-            messages.error(request, "Доступ к редактированию профиля клиента ограничен.")
-            return redirect("core:start-page")
-
-        return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         """Передаем текущего пользователя в форму как instance."""

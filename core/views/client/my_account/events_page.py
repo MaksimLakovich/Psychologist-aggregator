@@ -1,4 +1,3 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Max, Min, Prefetch, Q
 from django.utils import timezone
 from django.utils.dateparse import parse_date
@@ -16,9 +15,10 @@ from core.services.calendar_event_slot_selector import (
 from core.services.calendar_slot_time_display import \
     build_calendar_slot_time_display
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
+from users.mixins.role_required_mixin import ClientRequiredMixin
 
 
-class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, TemplateView):
+class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, TemplateView):
     """Контроллер страницы *Мой кабинет / Мой календарь*.
 
     Бизнес-смысл страницы:

@@ -6,9 +6,10 @@ from core.forms.client.specialist_matching.form_general_questions import \
 from core.services.anonymous_client_flow_for_search_and_booking import (
     get_guest_matching_state, update_guest_general_state)
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
+from users.mixins.role_required_mixin import ClientRequiredMixin
 
 
-class ClientGeneralQuestionsPageView(SpecialistMatchingLayoutMixin, FormView):
+class ClientGeneralQuestionsPageView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, FormView):
     """Контроллер на основе FormView для отображения страницы *Общие вопросы*.
 
     Вью работает в двух сценариях:
@@ -18,6 +19,7 @@ class ClientGeneralQuestionsPageView(SpecialistMatchingLayoutMixin, FormView):
 
     template_name = "core/client_pages/specialist_matching/home_client_general_questions.html"
     form_class = ClientGeneralQuestionsForm
+    allow_anonymous = True
 
     def get_form_kwargs(self):
         """Передает в форму режим работы поля email для двух сценариев.
