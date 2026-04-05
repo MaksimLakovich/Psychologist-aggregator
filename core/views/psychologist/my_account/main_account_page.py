@@ -3,10 +3,10 @@ from django.views.generic import TemplateView
 from users.mixins.role_required_mixin import PsychologistRequiredMixin
 
 
-class PsychologistAccountStubPageView(PsychologistRequiredMixin, TemplateView):
+class PsychologistAccountView(PsychologistRequiredMixin, TemplateView):
     """Временная стартовая страница кабинета психолога до реализации полного psychologist-flow."""
 
-    template_name = "core/psychologist_pages/account_stub.html"
+    template_name = "core/psychologist_pages/my_account/main_account.html"
 
     def get_context_data(self, **kwargs):
         """Формирует контекст временной заглушки кабинета психолога."""
