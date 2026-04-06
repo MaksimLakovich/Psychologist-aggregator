@@ -20,8 +20,8 @@ from calendar_engine.application.factories.generate_specialist_schedule_factory 
 from calendar_engine.application.use_cases.get_domain_slots_use_case import \
     GetDomainSlotsUseCase
 from calendar_engine.models import AvailabilityException, AvailabilityRule
-from core.services.get_client_profile_for_request import \
-    get_client_profile_for_request
+from core.services.anonymous_client_flow_for_search_and_booking import \
+    build_guest_profile
 from users.models import PsychologistProfile
 from users.permissions import IsPsychologistOrAdmin
 
@@ -210,6 +210,34 @@ class AvailabilityExceptionDeactivateView(APIView):
 # ВСЕ ВОЗМОЖНЫЕ ДОМЕННЫЕ СЛОТЫ + СЛОТЫ ОТФИЛЬТРОВАННЫЕ НА ОСНОВЕ РАБОЧЕГО РАСПИСАНИЯ СПЕЦИАЛИСТА
 # =====
 
+
+def _resolve_schedule_viewer_context(request) -> tuple[object, str | None]:
+    """Возвращает viewer-user и preferred-consultation-type для чтения/просмотра schedule-preview специалистов.
+
+    Почему здесь нельзя использовать get_client_profile_for_request(...):
+        - этот helper по смыслу и по реализации предназначен именно для client-flow;
+        - на catalog/detail-экраны теперь могут заходить и другие роли, например psychologist и гость;
+        - у psychologist/admin нет client_profile, поэтому schedule-preview специалиста должен уметь работать
+          без client-profile, опираясь только на timezone текущего пользователя и на consultation_type из query.
+
+    Контракт:
+        - guest-anonymous -> берем временный guest-profile из session;
+        - авторизованный client -> используем request.user и его preferred_topic_type из client_profile;
+        - любой другой авторизованный пользователь -> используем request.user, а preferred-consultation-type
+          не подставляем (fallback произойдет позже до 'individual').
+    """
+    if request.user.is_authenticated:
+        user = request.user
+        try:
+            preferred_consultation_type = user.client_profile.preferred_topic_type
+        except ObjectDoesNotExist:
+            preferred_consultation_type = None
+        return user, preferred_consultation_type
+
+    guest_profile = build_guest_profile(request.session)
+    return guest_profile.user, guest_profile.preferred_topic_type
+
+
 class GetDomainSlotsAjaxView(View):
     """Возвращает клиенту на UI все возможные доменные временные слоты (общее правило домена).
     Read-only эндпоинт только для показа возможных слотов на странице пользователя, без сохранения в БД.
@@ -221,15 +249,13 @@ class GetDomainSlotsAjaxView(View):
 
     def get(self, request, *args, **kwargs):
         """Получить все доменные временные слоты."""
-
-        # get_client_profile_for_request(request) - возвращает профиль, с которым дальше должен работать flow:
-        #   - если клиент уже авторизован, то используется реальный ClientProfile из БД;
-        #   - если клиент еще гость, то используется session и временный профиль гостя
-        profile = get_client_profile_for_request(request)
-        user = profile.user
+        # Для чтения/просмотра schedule-preview специалиста достаточно timezone текущего viewer'а.
+        # Важно: здесь поддерживаем не только client/guest, но и psychologist/admin, которые тоже могут открыть
+        # каталог и фильтры по времени.
+        viewer_user, _ = _resolve_schedule_viewer_context(request)
 
         use_case = GetDomainSlotsUseCase(
-            timezone=user.timezone
+            timezone=viewer_user.timezone
         )
 
         result = use_case.execute()
@@ -250,20 +276,21 @@ class GetDomainSlotsAjaxView(View):
 
 
 class GetSpecialistScheduleAjaxView(View):
-    """Возвращает клиенту на UI в карточке конкретного специалиста актуальное расписание данного специалиста:
+    """Возвращает viewer'у на UI в карточке конкретного специалиста актуальное расписание данного специалиста:
         - ближайший доступный слот;
         - все доступные слоты в блоке "Расписание".
 
-    Все слоты ОТОБРАЖЕНЫ в TZ КЛИЕНТА.
+    Все слоты ОТОБРАЖЕНЫ в TZ текущего viewer'а.
     Read-only эндпоинт только для показа доступных слотов из расписания специалиста, без сохранения в БД.
 
-    Работает с двумя сценариями:
-        - сценарий 1: работает зарегистрированный авторизованный пользователь;
-        - сценарий 2: работает guest-anonymous.
+    Работает с тремя сценариями:
+        - сценарий 1: работает guest-anonymous;
+        - сценарий 2: работает авторизованный client;
+        - сценарий 3: работает авторизованный psychologist/admin.
     """
 
     def get(self, request, *args, **kwargs):
-        """Получить расписание специалиста (доступные слоты) в TZ клиента.
+        """Получить расписание специалиста (доступные слоты) в TZ текущего viewer'а.
 
         Важно: используем 'consultation_type', который нужен для понимания того, какой тип сессии будем
         использовать при расчете доступности специалиста.
@@ -278,11 +305,7 @@ class GetSpecialistScheduleAjaxView(View):
             - старт 07:00 для couple уже НЕДОПУСТИМ, потому что сессия выйдет за границу рабочего окна.
         Т.е., без consultation_type система не может понять, какой именно duration проверять для этого расписания.
         """
-        # get_client_profile_for_request(request) - возвращает профиль, с которым дальше должен работать flow:
-        #   - если клиент уже авторизован, то используется реальный ClientProfile из БД;
-        #   - если клиент еще гость, то используется session и временный профиль гостя
-        profile = get_client_profile_for_request(request)
-        user = profile.user
+        viewer_user, preferred_consultation_type = _resolve_schedule_viewer_context(request)
 
         profile_id = kwargs["profile_id"]
         consultation_type = request.GET.get("consultation_type")
@@ -306,14 +329,11 @@ class GetSpecialistScheduleAjaxView(View):
                 return tz_value
             return ZoneInfo(str(tz_value))
 
-        client_tz = normalize_tz(getattr(user, "timezone", None))
-        specialist_tz = normalize_tz(getattr(specialist_profile.user, "timezone", None)) or client_tz
+        viewer_tz = normalize_tz(getattr(viewer_user, "timezone", None))
+        specialist_tz = normalize_tz(getattr(specialist_profile.user, "timezone", None)) or viewer_tz
 
         if consultation_type not in ("individual", "couple"):
-            try:
-                consultation_type = profile.preferred_topic_type
-            except ObjectDoesNotExist:
-                consultation_type = "individual"
+            consultation_type = preferred_consultation_type or "individual"
 
         use_case = build_generate_specialist_schedule_use_case(
             specialist_profile=specialist_profile,
@@ -334,16 +354,16 @@ class GetSpecialistScheduleAjaxView(View):
         slots = use_case.execute()
 
         # ВАЖНО: кроме сгенерированного расписания нам необходимо передать на фронт еще текущее время
-        # клиента (now_iso_client) и текущее время специалиста (now_iso_specialist), потому что определять
-        # его по времени сервера неправильно. Так как клиент/специалист в настройках своего профиля
+        # viewer'а (now_iso_client) и текущее время специалиста (now_iso_specialist), потому что определять
+        # его по времени сервера неправильно. Так как viewer/специалист в настройках своего профиля
         # указывает свой timezone и он может отличаться от сервера (путешествует например).
         # ОБОСНОВАНИЕ: полезно для отладки и тестирования.
-        now_client = now().astimezone(client_tz) if client_tz else now()
+        now_client = now().astimezone(viewer_tz) if viewer_tz else now()
         now_specialist = now().astimezone(specialist_tz) if specialist_tz else now()
 
-        # Use-case генерирует слоты в TZ специалиста, но ответ должен быть в TZ клиента.
+        # Use-case генерирует слоты в TZ специалиста, но ответ должен быть в TZ текущего viewer'а.
         # Изначально отправляется raw SlotDTO, так что клиент увидит время специалиста.
-        # Нужна конвертация: локализовать (day+start_time) в TZ специалиста и перевести в TZ клиента,
+        # Нужна конвертация: локализовать (day+start_time) в TZ специалиста и перевести в TZ viewer'а,
         # затем отдать ISO/строку.
         schedule = []
 
@@ -364,13 +384,13 @@ class GetSpecialistScheduleAjaxView(View):
                 continue
 
             slot_start_client = (
-                slot_start_spec.astimezone(client_tz)
-                if client_tz
+                slot_start_spec.astimezone(viewer_tz)
+                if viewer_tz
                 else slot_start_spec
             )
             slot_end_client = (
-                slot_end_spec.astimezone(client_tz)
-                if client_tz
+                slot_end_spec.astimezone(viewer_tz)
+                if viewer_tz
                 else slot_end_spec
             )
 

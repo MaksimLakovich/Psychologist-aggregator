@@ -12,17 +12,6 @@
 {% block extra_style %}
 <style>
     /* ========================================================= */
-    /* Плавный фон */
-    /* ========================================================= */
-    body {
-        background-image: url('{% static "images/background/background-start.jpg" %}');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed; /* красиво фиксирует фон */
-    }
-
-    /* ========================================================= */
     /* Анимации входа блоков (как на странице редактирования профиля) */
     /* ========================================================= */
     @keyframes fadeInUp {
@@ -135,7 +124,7 @@
         font-family: inherit;
         /* Убираем дефолтную заливку сегодня из переменных, чтобы она не красила td целиком (иначе будут острые углы) */
         --fc-today-bg-color: transparent;
-        --fc-border-color: rgba(161, 161, 170, 0.25);
+        --fc-border-color: oklch(92.9% 0.013 255.508); /* slate-200 */
         --fc-page-bg-color: transparent;
         --fc-neutral-bg-color: transparent;
     }
@@ -210,7 +199,7 @@
         margin: 4px; /* Создает эффект плавающих карточек, вместо слипшейся таблицы */
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         min-height: 4rem !important; /* Даем чуть больше воздуха по высоте */
-        background-color: transparent;
+        background-color: oklch(96.8% 0.007 247.896); /* bg-slate-100 */
     }
 
     /* Если в ячейке дня есть хотя бы один badge, делаем этот день кликабельным,
@@ -222,7 +211,7 @@
     /* Hover эффект только для активных дней месяца */
     .planned-session-calendar .fc-daygrid-day:not(.fc-day-other) .fc-daygrid-day-frame:hover {
         background-color: oklch(92.9% 0.013 255.508);
-        border-color: rgba(161, 161, 170, 0.4);
+        border-color: oklch(92.9% 0.013 255.508); /* slate-200 */
         transform: translateY(-2px); /* Легкое поднятие карточки */
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
     }
@@ -320,7 +309,7 @@
 {% block content %}
 
 
-<section class="relative min-h-screen bg-white/80 backdrop-blur-[2px] w-full">
+<section class="relative min-h-screen bg-white backdrop-blur-[2px] w-full">
 
     <div class="relative z-10 w-full px-6 sm:px-8 py-10
         {% if show_sidebar %} lg:px-24 {% else %} lg:px-40 xl:px-80 {% endif %}">
@@ -516,7 +505,7 @@
 
                 <!-- ===== ВИДЖЕТ КАЛЕНДАРЯ ===== -->
                 <aside class="xl:col-span-4 lg:sticky lg:top-14 self-start h-fit animate-fade-in-right planned-session-calendar">
-                    <div class="rounded-[1.5rem] bg-slate-200/50 border border-zinc-300/25 p-4 shadow-xs backdrop-blur-xl ring-1 ring-black/5">
+                    <div class="rounded-[1.5rem] bg-slate-50/25 border border-zinc-300/25 p-4 shadow-xs backdrop-blur-xl ring-1 ring-black/5">
 
                         <div class="mb-6 pb-6 flex flex-col items-center justify-center border-b border-slate-400/40">
                             <h2 class="text-xl font-extrabold text-indigo-900 tracking-tight">Календарь</h2>

@@ -7,17 +7,6 @@
 {% block extra_style %}
 <style>
     /* ========================================================= */
-    /* Плавный фон */
-    /* ========================================================= */
-    body {
-        background-image: url('{% static "images/background/background-start.jpg" %}');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }
-
-    /* ========================================================= */
     /* Анимации входа блоков */
     /* ========================================================= */
     @keyframes fadeInUp {
@@ -113,7 +102,7 @@
 {% block content %}
 
 
-<section class="relative overflow-hidden min-h-screen bg-white/40 backdrop-blur-[2px] w-full">
+<section class="relative overflow-hidden min-h-screen bg-white backdrop-blur-[2px] w-full">
 
     <div class="relative z-10 w-full px-6 sm:px-8 py-10
         {% if show_sidebar %} lg:px-12 xl:px-24 {% else %} max-w-7xl mx-auto {% endif %}">

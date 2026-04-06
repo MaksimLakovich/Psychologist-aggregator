@@ -1,10 +1,40 @@
 {% extends "core/base.html" %}
 
+{% load static %}
+
 {% block title %}{{ title_psychologist_account_view }}{% endblock %}
 
 {% block content %}
-<section class="min-h-[70vh] bg-gradient-to-b from-indigo-50 via-white to-white">
-    <div class="mx-auto max-w-5xl px-6 py-16 sm:px-8 lg:px-10">
+
+{% block extra_style %}
+<style>
+    /* Анимации входа блоков (как на странице редактирования профиля) */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .animate-fade-in-up {
+        opacity: 0;
+        animation: fadeInUp 1.0s ease-out forwards;
+    }
+    .animate-fade-in-left {
+        opacity: 0;
+        animation: fadeInLeft 0.9s ease-out forwards;
+    }
+</style>
+{% endblock %}
+
+
+<section class="relative overflow-hidden min-h-screen bg-white backdrop-blur-[2px] w-full">
+
+    <!-- СТРАНИЦА -->
+
+    <div class="animate-fade-in-left mx-auto max-w-5xl px-6 py-16 sm:px-8 lg:px-10">
         <div class="overflow-hidden rounded-[2rem] border border-indigo-100 bg-white shadow-xl shadow-indigo-100/60">
             <div class="border-b border-indigo-100 bg-indigo-600 px-8 py-8 text-white">
                 <p class="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-100">Psychologist Account</p>
