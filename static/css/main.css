@@ -4755,6 +4755,30 @@ input:checked + .toggle-bg {
   background-color: rgb(241 245 249 / 0.85);
 }
 
+.bg-purple-200\/65 {
+  background-color: rgb(220 215 254 / 0.65);
+}
+
+.bg-indigo-200\/65 {
+  background-color: rgb(205 219 254 / 0.65);
+}
+
+.bg-gray-200\/65 {
+  background-color: rgb(229 231 235 / 0.65);
+}
+
+.bg-indigo-950\/65 {
+  background-color: rgb(30 27 75 / 0.65);
+}
+
+.bg-indigo-950\/95 {
+  background-color: rgb(30 27 75 / 0.95);
+}
+
+.bg-cyan-200\/65 {
+  background-color: rgb(165 243 252 / 0.65);
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }

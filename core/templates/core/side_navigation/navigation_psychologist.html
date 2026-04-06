@@ -134,8 +134,21 @@
                     <li>
                         <a href="#"
                            data-nav-item
+                           data-nav-key="available-rule"
+                           data-nav-parent-group="available"
+                           class="{{ nav_sub_item_classes }} {% if current_sidebar_key == 'available-rule' %}bg-gray-300/25 !text-indigo-700{% endif %}"
+                           {% if current_sidebar_key == 'available-rule' %}data-nav-active-server="1" aria-current="page"{% endif %}>
+                            <img src="{% static 'images/menu/num_point.svg' %}"
+                                 alt="point"
+                                 class="transition-transform duration-200 group-hover:scale-110">
+                            <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Рабочее расписание</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#"
+                           data-nav-item
                            data-nav-key="psychologist-profile-edit"
-                           data-nav-parent-group="auth"
+                           data-nav-parent-group="edit"
                            class="{{ nav_sub_item_classes }} {% if current_sidebar_key == 'psychologist-profile-edit' %}bg-gray-300/25 !text-indigo-700{% endif %}"
                            {% if current_sidebar_key == 'psychologist-profile-edit' %}data-nav-active-server="1" aria-current="page"{% endif %}>
                             <img src="{% static 'images/menu/num_point.svg' %}"
