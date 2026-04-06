@@ -25,7 +25,9 @@ class PsychologistAccountView(PsychologistRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         context["title_psychologist_account_view"] = "Кабинет специалиста в сервисе ОПОРА"
+
         # Параметр, который передаем в menu.html и на его основе там настраиваем показ САЙДБАРА
+        context["show_sidebar"] = "sidebar"
 
         # Источник истины для серверной подсветки (route-based) текущего выбранного пункта в БОКОВОЙ НАВИГАЦИИ
         context["current_sidebar_key"] = "psychologist-account"
