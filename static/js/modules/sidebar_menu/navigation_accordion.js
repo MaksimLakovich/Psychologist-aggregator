@@ -9,7 +9,7 @@
 
 /** Кнопки групп клиентской НАВИГАЦИИ, управляющие панелями через aria-controls. */
 const groupButtons = Array.from(
-  document.querySelectorAll('button[data-collapse-group="client-nav"][aria-controls]')
+  document.querySelectorAll('button[data-collapse-group="side-navigation"][aria-controls]')
 );
 
 /** Быстрый доступ к панелям групп по id из aria-controls. */
