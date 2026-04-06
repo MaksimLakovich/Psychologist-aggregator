@@ -3,7 +3,7 @@ from django.urls import path
 from core.apps import CoreConfig
 from core.views.client.my_account.events_page import ClientEventsView
 from core.views.client.my_account.main_account_page import ClientAccountView
-from core.views.client.my_account.ps_catalog import (
+from core.views.catalog.ps_catalog import (
     PsychologistCardDetailPageView, PsychologistCatalogFilterAjaxView,
     PsychologistCatalogPageView)
 from core.views.client.my_account.questions_answers import \
@@ -18,6 +18,8 @@ from core.views.client.specialist_matching.view_payment_card import \
     ClientAddPaymentCardPageView
 from core.views.client.specialist_matching.view_personal_questions import \
     ClientPersonalQuestionsPageView
+from core.views.psychologist.my_account.main_account_page import \
+    PsychologistAccountView
 from core.views.start_view import StartPageView
 
 app_name = CoreConfig.name
@@ -40,12 +42,15 @@ urlpatterns = [
     path(
         "psychologist_catalog/filter/",
         PsychologistCatalogFilterAjaxView.as_view(),
-        name="psychologist-catalog-filter"
+        name="psychologist-catalog-filter",
     ),
 
     # Работа с личным КАБИНЕТОМ
     path("client-account/", ClientAccountView.as_view(), name="client-account"),
     path("client-account/events/", ClientEventsView.as_view(), name="client-events"),
+    path(
+        "psychologist-account/", PsychologistAccountView.as_view(), name="psychologist-account",
+    ),
     path(
         "client-account/sessions/<uuid:event_id>/",
         ClientTherapySessionDetailView.as_view(),

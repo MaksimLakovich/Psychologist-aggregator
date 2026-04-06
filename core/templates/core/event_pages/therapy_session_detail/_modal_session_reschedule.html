@@ -1,0 +1,85 @@
+<div
+    id="reschedule-session-modal"
+    tabindex="-1"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4"
+    data-schedule-url="{{ specialist_schedule_url|default:'' }}"
+    data-consultation-type="{{ session_consultation_type }}"
+    data-client-timezone="{{ client_timezone_value }}"
+    data-current-slot-start-iso="{{ current_slot_start_iso }}"
+>
+    <div class="relative w-full max-w-4xl h-[90vh] max-h-[90vh] rounded-2xl bg-white p-6 shadow-lg flex flex-col">
+        <div class="flex items-center justify-between pb-6">
+            <div>
+                <h3 class="text-2xl font-extrabold text-indigo-950">
+                    Перенос встречи
+                </h3>
+            </div>
+            <button
+                type="button"
+                class="text-gray-400 hover:text-gray-900"
+                data-close-reschedule-modal
+            >
+                ✕
+            </button>
+        </div>
+
+        <form method="post" action="" class="border-t border-default flex flex-col gap-5 flex-1 min-h-0 overflow-hidden">
+            {% csrf_token %}
+            {{ reschedule_session_form.action }}
+            {{ reschedule_session_form.cancel_reason_type }}
+            {{ reschedule_session_form.previous_event_id }}
+            {{ reschedule_session_form.slot_start_iso }}
+
+            <div class="space-y-2 pt-6">
+                <div class="flex items-baseline justify-between">
+                    <label for="{{ reschedule_session_form.cancel_reason.id_for_label }}"
+                           class="text-sm font-bold uppercase tracking-widest text-indigo-950">
+                        Причина переноса
+                        <span class="ml-2 text-xs font-semibold tracking-wider text-pink-300 lowercase italic">
+                            (обязательно)
+                        </span>
+                    </label>
+                </div>
+
+                <div class="glass-input">
+                    {{ reschedule_session_form.cancel_reason }}
+                </div>
+
+                {% if reschedule_session_form.cancel_reason.errors %}
+                    <div class="text-xs text-red-500 mt-1">
+                        {{ reschedule_session_form.cancel_reason.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="min-h-0 flex-1">
+                <div class="h-full min-h-0 overflow-y-auto px-0 lg:px-16 xl:px-28">
+                    <div id="reschedule-schedule-list" class="space-y-4">
+                        <div class="flex h-48 items-center justify-center text-sm font-medium text-zinc-400">
+                            Откройте модальное окно, чтобы загрузить доступные слоты
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-end">
+                <button
+                    type="button"
+                    class="rounded-xl border border-zinc-200 px-6 py-3 text-sm font-bold text-zinc-600 transition hover:bg-zinc-50"
+                    data-close-reschedule-modal
+                >
+                    Отмена
+                </button>
+                <button
+                    type="submit"
+                    id="reschedule-session-submit"
+                    class="rounded-xl bg-indigo-700 hover:bg-indigo-800 px-6 py-3 text-sm font-bold text-white transition
+                    disabled:cursor-not-allowed disabled:bg-zinc-300"
+                    disabled
+                >
+                    Перенести встречу
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

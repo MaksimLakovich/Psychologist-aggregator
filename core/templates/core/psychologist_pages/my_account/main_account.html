@@ -1,0 +1,43 @@
+{% extends "core/base.html" %}
+
+{% block title %}{{ title_psychologist_account_view }}{% endblock %}
+
+{% block content %}
+<section class="min-h-[70vh] bg-gradient-to-b from-indigo-50 via-white to-white">
+    <div class="mx-auto max-w-5xl px-6 py-16 sm:px-8 lg:px-10">
+        <div class="overflow-hidden rounded-[2rem] border border-indigo-100 bg-white shadow-xl shadow-indigo-100/60">
+            <div class="border-b border-indigo-100 bg-indigo-600 px-8 py-8 text-white">
+                <p class="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-100">Psychologist Account</p>
+                <h1 class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Кабинет специалиста в разработке</h1>
+                <p class="mt-4 max-w-2xl text-base leading-7 text-indigo-50 sm:text-lg">
+                    Для роли психолога уже закрыт доступ в клиентский интерфейс. Следующим шагом здесь появится
+                    отдельный кабинет со своим календарем, виджетами и рабочими сценариями специалиста.
+                </p>
+            </div>
+
+            <div class="grid gap-6 px-8 py-8 md:grid-cols-3">
+                <a href="{% url 'core:psychologist-catalog' %}"
+                   class="rounded-3xl border border-zinc-200 bg-zinc-50 px-6 py-6 transition hover:border-indigo-300 hover:bg-indigo-50">
+                    <p class="text-sm font-semibold uppercase tracking-[0.22em] text-zinc-500">Общее</p>
+                    <h2 class="mt-3 text-xl font-semibold text-zinc-900">Каталог психологов</h2>
+                    <p class="mt-3 text-sm leading-6 text-zinc-600">Публичный каталог остается доступным для любой авторизованной роли.</p>
+                </a>
+
+                <a href="{% url 'core:faq-page' %}"
+                   class="rounded-3xl border border-zinc-200 bg-zinc-50 px-6 py-6 transition hover:border-indigo-300 hover:bg-indigo-50">
+                    <p class="text-sm font-semibold uppercase tracking-[0.22em] text-zinc-500">Помощь</p>
+                    <h2 class="mt-3 text-xl font-semibold text-zinc-900">Вопросы и ответы</h2>
+                    <p class="mt-3 text-sm leading-6 text-zinc-600">Общая справочная страница доступна без ролевых ограничений.</p>
+                </a>
+
+                <a href="{% url 'users:web:password-change' %}"
+                   class="rounded-3xl border border-zinc-200 bg-zinc-50 px-6 py-6 transition hover:border-indigo-300 hover:bg-indigo-50">
+                    <p class="text-sm font-semibold uppercase tracking-[0.22em] text-zinc-500">Безопасность</p>
+                    <h2 class="mt-3 text-xl font-semibold text-zinc-900">Смена пароля</h2>
+                    <p class="mt-3 text-sm leading-6 text-zinc-600">Общие настройки аккаунта уже доступны и не зависят от роли пользователя.</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -496,7 +496,7 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
         чтобы не расходилась верстка между SSR и AJAX.
         """
         return render_to_string(
-            "core/client_pages/my_account/short_cards.html",
+            "core/catalog_pages/short_cards.html",
             {
                 "profiles": page_data["profiles"],
                 "layout_mode": layout_mode,

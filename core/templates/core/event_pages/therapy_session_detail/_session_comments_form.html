@@ -1,5 +1,6 @@
-<!-- БЛОК 3: Сообщения внутри встречи -->
-{% if message_items or can_manage_slot_messages %}
+<!-- БЛОК 5: Сообщения внутри встречи -->
+
+{% if slot or message_items or can_manage_slot_messages %}
 <article class="rounded-[2rem] border border-white/60 bg-white/50 p-6 sm:p-8 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
 
     <!-- Шапка блока и подсчет количества сообщений -->
@@ -111,12 +112,12 @@
 
             <!-- Кнопка "Показать еще" -->
             {% if remaining_comments_count > 0 %}
-                <div class="pt-4 text-center">
+                <div class="pt-3 text-center">
                     <button type="button"
                             data-show-more-comments
                             data-show-more-count="{{ remaining_comments_count }}"
-                            class="inline-flex items-center justify-center rounded-xl border border-zinc-200 px-5 py-3
-                            text-sm font-semibold w-full sm:w-auto bg-indigo-900/85 text-white transition-all duration-200 hover:bg-indigo-900">
+                            class="w-full sm:w-auto inline-flex items-center justify-center
+                            text-sm italic text-slate-400 transition-all duration-200 hover:text-indigo-900">
                         Показать еще {{ remaining_comments_count }}
                     </button>
                 </div>
@@ -151,7 +152,8 @@
 
             <div class="pt-1 flex flex-col sm:flex-row gap-4 items-center">
                 <button type="submit"
-                        class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-indigo-600 text-white font-bold transition-all duration-200 hover:bg-indigo-700">
+                        class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-3 rounded-xl
+                        text-sm font-semibold tracking-wider bg-indigo-600/90 text-white transition-all duration-200 hover:bg-indigo-700">
                     Добавить сообщение
                 </button>
             </div>

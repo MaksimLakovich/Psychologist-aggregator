@@ -1,4 +1,3 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Max, Min, Prefetch, Q
 from django.utils import timezone
 from django.utils.dateparse import parse_date
@@ -6,15 +5,20 @@ from django.utils.formats import date_format
 from django.views.generic import TemplateView
 
 from calendar_engine.booking.services import build_specialist_live_indicator
+from calendar_engine.lifecycle.services.slot_status_display import \
+    build_calendar_slot_status_display
+from calendar_engine.lifecycle.use_cases.apply_time_based_status_transitions import \
+    apply_time_based_status_transitions_for_user
 from calendar_engine.models import CalendarEvent, EventParticipant, TimeSlot
 from core.services.calendar_event_slot_selector import (
     get_event_active_slot, get_event_completed_slot)
 from core.services.calendar_slot_time_display import \
     build_calendar_slot_time_display
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
+from users.mixins.role_required_mixin import ClientRequiredMixin
 
 
-class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, TemplateView):
+class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, TemplateView):
     """Контроллер страницы *Мой кабинет / Мой календарь*.
 
     Бизнес-смысл страницы:
@@ -44,6 +48,8 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
                 - какие данные передать в правый календарный виджет.
         """
         context = super().get_context_data(**kwargs)
+        # Запуск автоматического обновления/определения статусов event/slot по фактическому времени
+        apply_time_based_status_transitions_for_user(participant_user=self.request.user)
 
         # Вспомогательная функция, которая определяет, хочет ли клиент видеть архив вместо активных событий
         show_completed = self._should_show_completed_events()
@@ -202,8 +208,12 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
             #   - либо событие имеет "нормальный" статус planned / started / completed;
             #   - либо even если статусная модель не успела обновиться, но последнее окно latest_slot_end
             #     уже в прошлом, такое событие все равно нужно включить
+            selected_day_filter = (
+                Q(status__in=["planned", "started", "completed", "cancelled"])
+                | Q(latest_slot_end__lt=current_datetime)
+            )
             events = events.filter(
-                Q(status__in=["planned", "started", "completed"]) | Q(latest_slot_end__lt=current_datetime)
+                selected_day_filter
             ).annotate(
                 # annotate(...) добавляет к каждому событию вычисляемое поле прямо на уровне SQL-запроса.
                 # Здесь first_slot_start = минимальное slots__start_datetime.
@@ -214,15 +224,19 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
             )
         # 2) Для фильтра и показа всех АРХИВНЫХ событий
         elif show_completed:
+            archived_slot_filter = (
+                Q(slots__status__in=["completed", "cancelled"])
+                | Q(slots__end_datetime__lt=current_datetime)
+            )
             events = events.filter(
-                Q(status="completed") | Q(latest_slot_end__lt=current_datetime)
+                Q(status__in=["completed", "cancelled"]) | Q(latest_slot_end__lt=current_datetime)
             ).annotate(
                 # annotate(...) добавляет к каждому событию вычисляемое поле прямо на уровне SQL-запроса.
                 # Для архива нужен не самый ранний, а самый свежий завершенный слот, чтобы сверху были последние
                 # прошедшие встречи клиента
                 first_slot_start=Max(
                     "slots__start_datetime",
-                    filter=Q(slots__status="completed") | Q(slots__end_datetime__lt=current_datetime),
+                    filter=archived_slot_filter,
                 )
             )
         # 3) Для фильтра и показа всех ЗАПЛАНИРОВАННЫХ событий
@@ -406,7 +420,7 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
                     ),
                     "visibility_display": event.get_visibility_display() or "Приватная",
                     "event_type_display": event.get_event_type_display() or "Индивидуальная сессия",
-                    "status_display": slot.get_status_display() or "Запланировано",
+                    "status_display": build_calendar_slot_status_display(slot=slot),
                     "duration_minutes": (
                         int((slot.end_datetime - slot.start_datetime).total_seconds() // 60)
                         if slot
@@ -436,6 +450,7 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
                     "is_archived_card": (
                         show_completed
                         or slot.status == "completed"
+                        or slot.status == "cancelled"
                         or slot.end_datetime < current_datetime
                     ),
                 }
@@ -488,7 +503,7 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
                 latest_slot_end=Max("slots__end_datetime"),
             )
             .filter(
-                Q(status__in=["planned", "started", "completed"])
+                Q(status__in=["planned", "started", "completed", "cancelled"])
                 | Q(latest_slot_end__lt=current_datetime)
             )
             .prefetch_related(
@@ -504,7 +519,7 @@ class ClientEventsView(SpecialistMatchingLayoutMixin, LoginRequiredMixin, Templa
             #   - завершенные встречи.
             # Поэтому использую флаг is_completed_events = True/False
             is_completed_events = (
-                event.status == "completed"
+                event.status in ["completed", "cancelled"]
                 or (
                     getattr(event, "latest_slot_end", None) is not None
                     and event.latest_slot_end < current_datetime

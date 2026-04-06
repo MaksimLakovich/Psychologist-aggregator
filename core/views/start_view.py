@@ -1,14 +1,17 @@
 from django.views.generic import TemplateView
 
+from users.mixins.role_required_mixin import ClientRequiredMixin
 
-class StartPageView(TemplateView):
+
+class StartPageView(ClientRequiredMixin, TemplateView):
     """Класс-контроллер на основе Generic для отображения *Стартовой страницы сайта*.
-    1) Используется как стартовая точка для всех пользователей - здесь размещается базовая информация о проекте,
-    его назначении и ключевых возможностях.
+    1) Используется как стартовая точка только для гостя и клиента - здесь размещается базовая информация о проекте,
+    поиск психолога и клиентские CTA.
     2) HTML-шаблон получает данные через контекст (title / header / description), чтобы гибко управлять контентом
     в интерфейсе."""
 
     template_name = "core/start_page.html"
+    allow_anonymous = True  # страницу можно открыть не только клиенту, но и вообще гостю без логина
 
     def get_context_data(self, **kwargs):
         """Формирование контекста для передачи данных в шаблон.

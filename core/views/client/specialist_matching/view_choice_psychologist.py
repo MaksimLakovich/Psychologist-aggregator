@@ -7,9 +7,10 @@ from core.forms.client.specialist_matching.form_choice_psychologist import \
 from core.services.get_client_timezone_value import \
     get_client_timezone_value_for_request
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
+from users.mixins.role_required_mixin import ClientRequiredMixin
 
 
-class ClientChoicePsychologistPageView(SpecialistMatchingLayoutMixin, FormView):
+class ClientChoicePsychologistPageView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, FormView):
     """Контроллер на основе FormView для отображения страницы *Выбор психолога*.
 
     Вью работает в двух сценариях:
@@ -19,6 +20,7 @@ class ClientChoicePsychologistPageView(SpecialistMatchingLayoutMixin, FormView):
 
     template_name = "core/client_pages/specialist_matching/home_client_choice_psychologist.html"
     form_class = ClientChoicePsychologistForm
+    allow_anonymous = True
 
     def get(self, request, *args, **kwargs):
         """Одноразово потребляет query-параметр reset=1 и очищает URL страницы.

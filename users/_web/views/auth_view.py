@@ -19,11 +19,12 @@ from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
 from django_ratelimit.decorators import ratelimit
 
-from calendar_engine.booking.exceptions import \
-    CreateTherapySessionValidationError
+from calendar_engine.booking.exceptions import CreateBookingValidationError
 from calendar_engine.booking.services import normalize_user_timezone
 from calendar_engine.booking.use_cases.therapy_session_create import \
     CreateTherapySessionUseCase
+from calendar_engine.lifecycle.use_cases.apply_time_based_status_transitions import \
+    apply_time_based_status_transitions_for_user
 from calendar_engine.models import CalendarEvent
 from core.services.anonymous_client_flow_for_search_and_booking import (
     apply_guest_state_to_user, build_choice_psychologist_url,
@@ -49,6 +50,8 @@ def _has_planned_or_started_sessions(user) -> bool:
         - если встречи уже есть, открываем страницу "Мой кабинет";
         - если встреч еще нет, открываем первый шаг "Подбор психолога".
     """
+    # Запуск автоматического обновления/определения статусов event/slot по фактическому времени
+    apply_time_based_status_transitions_for_user(participant_user=user)
     return CalendarEvent.objects.filter(
         participants__user=user,
         status__in=["planned", "started"],
@@ -56,16 +59,29 @@ def _has_planned_or_started_sessions(user) -> bool:
 
 
 def _build_post_login_redirect_url(user) -> str:
-    """Возвращает стартовый URL для уже авторизованного клиента.
+    """Возвращает стартовый URL для уже авторизованного пользователя.
 
     Используется в двух местах:
         - после обычного входа по email и паролю;
         - после подтверждения email, когда система автоматически логинит пользователя.
     """
-    if _has_planned_or_started_sessions(user):
-        return f"{reverse_lazy('core:client-events')}?layout=sidebar"
+    # Первый getattr(user, "role", None) ищет атрибут role у пользователя.
+    # Второй getattr(..., "role", None) ищет атрибут role уже внутри этой связанной модели.
+    # Можно так записать:
+    # role_obj = getattr(user, "role", None)
+    # role_value = getattr(role_obj, "role", None)
+    role_value = getattr(getattr(user, "role", None), "role", None)
 
-    return str(reverse_lazy("core:general-questions"))
+    if role_value == "psychologist":
+        return str(reverse_lazy("core:psychologist-account"))
+
+    if role_value == "client":
+        if _has_planned_or_started_sessions(user):  # проверяет, есть ли у client события planned или started
+            return f"{reverse_lazy('core:client-events')}?layout=sidebar"
+
+        return str(reverse_lazy("core:general-questions"))
+
+    return str(reverse_lazy("core:start-page"))
 
 
 # ===== Вспомогательные функции для определения отдельного экрана завершения записи для гостя и его наполнения
@@ -168,7 +184,7 @@ def _resume_pending_booking_after_authentication(request, *, user, booking_paylo
             slot_start_iso=booking_payload["slot_start_iso"],
             consultation_type=booking_payload["consultation_type"],
         )
-    except CreateTherapySessionValidationError as exc:
+    except CreateBookingValidationError as exc:
         # Сервис clear_guest_matching_state() очищает старый guest-черновик,
         # потому что он уже не должен повторно использоваться после неудачной попытки resume-booking
         clear_guest_matching_state(request.session)

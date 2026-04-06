@@ -1,4 +1,5 @@
 <!-- БЛОК 1: Общие данные встречи -->
+
 <article class="relative overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 p-1 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl animate-fade-in-up delay-100">
     <!-- Градиентная вертикальная полоска по левому краю карточки встречи -->
     <!-- Если встреча уже архивная, переводим акцент карточки в slate-палитру, чтобы detail-screen визуально совпадал со списком событий -->
@@ -9,52 +10,70 @@
 
     <div class="relative z-20 p-6 sm:p-8 pl-10 sm:pl-12">
 
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
             <!-- Цвет статуса синхронизируем с архивной/активной логикой экрана: активные встречи - indigo, завершенные - slate -->
-            <span class="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-bold rounded-full {% if is_finished_slot %}bg-slate-100/90 text-slate-800 border border-slate-200/70{% else %}bg-indigo-100/80 text-indigo-800 border border-indigo-200/50{% endif %}">
-                <span class="w-2 h-2 rounded-full {% if is_finished_slot %}bg-slate-500{% else %}bg-indigo-500 animate-pulse{% endif %}"></span>
-                {{ slot.get_status_display }}
+            <span
+                class="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-bold rounded-full
+                {% if is_finished_slot %}
+                    bg-slate-100/90 text-slate-800 border border-slate-200/70
+                {% elif slot.status == 'started' %}
+                    bg-emerald-100/90 text-emerald-800 border border-emerald-200/70
+                {% else %}
+                    bg-indigo-100/80 text-indigo-800 border border-indigo-200/50
+                {% endif %}"
+            >
+                <span
+                    class="w-2 h-2 rounded-full
+                    {% if is_finished_slot %}
+                        bg-slate-500
+                    {% elif slot.status == 'started' %}
+                        bg-emerald-500 animate-pulse
+                    {% else %}
+                        bg-indigo-500 animate-pulse
+                    {% endif %}"
+                ></span>
+                {{ slot_status_display }}
             </span>
             <div class="flex flex-wrap items-center justify-end gap-2">
-                <span class="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-bold tracking-wide text-zinc-700 border border-zinc-200/70">
+                <span class="inline-flex rounded-full bg-indigo-100/45 px-3 py-1 text-sm font-bold tracking-wide text-indigo-950/65 border border-indigo-200/60">
                     {{ event.get_event_type_display }}
                 </span>
-                <span class="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-bold tracking-wide text-zinc-700 border border-zinc-200/70">
+                <span class="inline-flex rounded-full bg-indigo-100/45 px-3 py-1 text-sm font-bold tracking-wide text-indigo-950/65 border border-indigo-200/60">
                     {{ event.get_visibility_display }}
                 </span>
-                <span class="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-bold tracking-wide text-zinc-700 border border-zinc-200/70">
+                <span class="inline-flex rounded-full bg-indigo-100/45 px-3 py-1 text-sm font-bold tracking-wide text-indigo-950/65 border border-indigo-200/60">
                     {{ event.get_source_display }}
                 </span>
             </div>
         </div>
 
-        <h1 class="text-3xl sm:text-4xl font-black text-indigo-950 tracking-tight mb-2">
+        <h1 class="text-3xl sm:text-4xl font-black text-indigo-950 tracking-tight mb-8">
             {{ event.title }}
         </h1>
 
         <!-- Горизонтальная разделяющая черта + данные встречи -->
         <!-- Основная мета-информация о встрече готовится во view через slot_display,
              чтобы и список событий, и detail-screen одинаково показывали время в текущем TZ клиента -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-5 pt-6 border-t border-zinc-700/70">
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-5 pt-5 pb-5 border-t border-slate-300/70">
             <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">День недели</p>
-                <p class="text-xl font-bold text-zinc-900">{{ slot_display.display_weekday }}</p>
+                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">День недели</p>
+                <p class="text-xl font-bold text-indigo-600">{{ slot_display.display_weekday }}</p>
                 {% if slot_display.is_today %}
-                    <p class="text-sm font-semibold text-emerald-600 mt-0.5">Сегодня</p>
+                    <p class="text-xs font-medium text-zinc-500 mt-0.5">Сегодня</p>
                 {% endif %}
             </div>
             <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Дата</p>
-                <p class="text-xl font-bold text-zinc-900">{{ slot_display.display_date }}</p>
+                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Дата</p>
+                <p class="text-xl font-bold text-indigo-600">{{ slot_display.display_date }}</p>
             </div>
             <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Время</p>
+                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Время</p>
                 <p class="text-xl font-bold text-indigo-600">{{ slot_display.display_time_range }}</p>
-                <p class="text-xs font-medium text-zinc-500 mt-1">{{ slot_display.display_client_timezone }}</p>
+                <p class="text-xs font-medium text-zinc-500 mt-0.5">{{ slot_display.display_client_timezone }}</p>
             </div>
             <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Формат встречи</p>
-                <p class="text-lg font-semibold text-zinc-900">{{ specialist_profile.get_therapy_format_display }}</p>
+                <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Формат встречи</p>
+                <p class="text-xl font-semibold text-indigo-600">{{ specialist_profile.get_therapy_format_display }}</p>
             </div>
         </div>
 
@@ -62,7 +81,7 @@
         <!-- Если у события есть описание, показываем его отдельным блоком ниже,
              чтобы клиент видел дополнительный контекст именно этой встречи -->
         {% if event.description %}
-            <div class="grid grid-cols-1 gap-5 pt-6 border-t border-zinc-700/70">
+            <div class="grid grid-cols-1 gap-5 pt-5 border-t border-slate-300/70">
                 <div>
                     <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Описание события</p>
                     <p class="text-base leading-relaxed text-zinc-700">{{ event.description }}</p>

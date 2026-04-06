@@ -178,8 +178,14 @@
 │    │    │    │    ├── detail_card_session_choice.js       # Модуль централизованно управляет: хранением выбранного слота; доступностью кнопки оплаты и шага "Запись и оплата".
 │    │    │    │    ├── detail_card_render.js               # Основной рендер карточки психолога (структура/стили)
 │    │    │    │    └── ...
-│    │    │    ├── messages_forum/                     # 💡 модули для "ФОРУМА / Сообщения между участниками"
-│    │    │    │    ├── therapy_session_detail_forum.js     # Модуль оживляет messages-блок на detail-странице события
+│    │    │    ├── main_account_page/           # 💡 модуль для страницы "ГЛАВНАЯ"
+│    │    │    │    ├── main_account_modals.js         # Модуль управляет модалками тем и методов на странице "Главная"
+│    │    │    │    └── ...
+│    │    │    ├── messages_forum/              # 💡 модули для "ФОРУМА / Сообщения между участниками"
+│    │    │    │    ├── event_forum.js                 # Модуль оживляет messages-блок на detail-странице события
+│    │    │    │    └── ...
+│    │    │    ├── session_actions/             # 💡 модули для "ПЕРЕНОС СОБЫТИЯ" / "ОТМЕНА СОБЫТИЯ"
+│    │    │    │    ├── cancel_reschedule_actions.js   # модуль управляет двумя действиями клиента внутри детальной карточки встречи: 1) отменой встречи; 2) переносом встречи
 │    │    │    │    └── ...
 │    │    │    ├── add_appointment_payment.js          # Добавление карты и подтверждение бронирования
 │    │    │    ├── autosave_age.js                     # Автосохранение выбранных значений "preferred_ps_age" (ВОЗРАСТ) в БД без нажатия кнопки "Далее" (для моментальной фильтрации психологов)
@@ -290,6 +296,7 @@
 │    ├── mixins/                      # Миксины
 │    │    ├── creator_mixin.py           # Автоматически заполняет поле creator текущим пользователем при создании объекта модели
 │    │    ├── anonymous_only_mixin.py    # Ограничивает доступ к форме/странице только для неавторизованных пользователей
+│    │    ├── role_required_mixin.py     # Миксины для доступов на основе role: ClientRequiredMixin / PsychologistRequiredMixin
 │    │    └── ...
 │    ├── tests/                       # Тесты
 │    │    ├── api/
@@ -308,18 +315,84 @@
 │    ├── permissions.py               # Кастомные права доступов как для DRF так и для CBV ("владелец?", "админ?" и прочее)
 │    └── urls.py                      # Корневой маршрутизатор users/
 │
-├── calendar_engine/            # ⭐️ Приложение django-проекта ("Календарь")
-#│    ├── _api/
-#│    │    └── 
-#│    ├── _web/
-#│    │    └── 
-#│    ├── services/
-#│    │    └── calendar_service.py     # Управление расписаниями и записями: создание, перенос, отмена, проверка пересечений, генерация доступных слотов
-#│    ├── apps.py
-#│    ├── constants.py                 # Статические справочники и переменные
-#│    ├── models.py                    # Модели данных
-#│    ├── admin.py                     # Админки для моделей данных
-#│    └── urls.py                      # Корневой маршрутизатор calendar_engine/
+├── calendar_engine/            # ⭐️ Приложение django-проекта ("Календарь"). Управление расписаниями и записями: создание, перенос, отмена, проверка пересечений, генерация доступных слотов
+│    ├── _api/
+│    │    ├── serializers/
+│    │    │    ├── availability.py
+│    │    │    ├── events.py
+│    │    │    └── ...
+│    │    ├── views/
+│    │    │    ├── availability.py
+│    │    │    ├── events.py
+│    │    │    └── ...
+│    │    └── urls.py
+│    ├── _web/
+│    │    ├── views/
+│    │    │    └── ...
+│    │    └── urls.py
+│    ├── domain/
+│    │    ├── time_policy/
+│    │    │    ├── base.py
+│    │    │    ├── exceptions.py
+│    │    │    ├── policy.py
+│    │    │    └── ...
+│    │    ├── matching/
+│    │    │    ├── base.py
+│    │    │    ├── dto.py
+│    │    │    ├── matcher.py
+│    │    │    └── ...
+│    │    └── availability/
+│    │         ├── base.py
+│    │         ├── domain_slot_generator.py
+│    │         ├── dto.py
+│    │         ├── get_user_slots.py
+│    │         ├── user_exceptions.py
+│    │         ├── user_rules.py
+│    │         └── ...
+│    ├── application/
+│    │    ├── factories/
+│    │    │    ├── generate_and_match_factory.py
+│    │    │    ├── generate_specialist_schedule_factory.py
+│    │    │    └── ...
+│    │    ├── mappers/
+│    │    │    ├── exception_mapper.py
+│    │    │    ├── match_result_mapper.py
+│    │    │    ├── preferred_slots_mapper.py
+│    │    │    ├── rule_mapper.py
+│    │    │    └── ...
+│    │    └── use_cases/
+│    │         ├── base.py
+│    │         ├── filter_and_match_availability.py
+│    │         ├── get_domain_slots_use_case.py
+│    │         ├── specialist_schedule.py
+│    │         └── ...
+│    ├── booking/
+│    │    ├── use_cases/
+│    │    │    └── therapy_session_create.py
+│    │    ├── exceptions.py
+│    │    ├── services.py
+│    │    ├── throttles.py
+│    │    └── validators.py
+│    ├── lifecycle/
+│    │    ├── services/
+│    │    │    ├── event_status_resolver.py
+│    │    │    ├── reschedule_chain_resolver.py
+│    │    │    ├── slot_action_validator.py
+│    │    │    ├── slot_status_display.py
+│    │    │    └── ...
+│    │    ├── use_cases/
+│    │    │    ├── apply_time_based_status_transitions.py
+│    │    │    ├── cancel_event.py
+│    │    │    ├── reschedule_therapy_session.py
+│    │    │    └── ...
+│    │    └── exceptions.py
+│    ├── migrations/
+│    ├── apps.py
+│    ├── constants.py                 # Статические справочники и переменные
+│    ├── models.py                    # Модели данных
+│    ├── admin.py                     # Админки для моделей данных
+│    ├── services.py                  # normalize_range()
+│    └── urls.py                      # Корневой маршрутизатор calendar_engine/
 │
 ├── aggregator/                 # ⭐️ Приложение django-проекта ("ПУБЛИЧНЫЙ КАТАЛОГ ПСИХОЛОГОВ - подбор психолога")
 │    ├── _api/                        # ℹ️ API-часть (DRF)
@@ -328,10 +401,10 @@
 │    │    ├── views.py                # Публичный каталог психологов / AJAX-запрос для автоматического запуска фильтрации + возврат JSON с готовыми данными для карточки психолога
 │    │    └── urls.py                         # Все API-роуты
 │    ├── _web/                        # ℹ️ WEB-часть (формы + HTML)
-│    │    ├── selectors.py
+│    │    ├── selectors/
 │    │    │    ├── psychologist_selectors.py    # Отдельные методы фильтрации психологов по различным параметрам + аннотация доп полей (расчет коэфф совпадения и т.д.)
 │    │    │    └── ...
-│    │    ├── services.py
+│    │    ├── services/
 │    │    │    ├── topic_type_mapping.py        # Явный mapping-слой (адаптер) между полем TYPE в users_topic (где указано "Индивидуальная"/"Парная") и полем PREFERRED_TOPIC_TYPE в users_clientprofile (где указано "Individual"/"Couple" на английском)
 │    │    │    ├── age_bucket_mapping.py        # Явный mapping-слой (адаптер) между полем BUCKET и тем какие значения (числа) в него входят. Например, в "25-35" значения от >=25, но меньше 35
 │    │    │    ├── scoring.py                   # Метод аннотирует (рассчитывает в БД) итоговый scoring, где: topic_score - главный критерий; method_score - вторичный критерий (внутри одинакового topic_score)
