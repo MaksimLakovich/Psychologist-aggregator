@@ -37,7 +37,7 @@
         {% with nav_group_button_classes="group flex items-center p-2 w-full text-base md:text-lg font-medium tracking-wide text-slate-700 rounded-xl transition-all duration-200 hover:bg-indigo-400/25 hover:text-indigo-700 active:scale-95 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white" %}
 
         <!-- ЛОГО -->
-        <a href="{% url 'core:start-page' %}" class="flex mr-4">
+        <a href="{% url 'core:psychologist-account' %}" class="flex mr-4">
             <img src="{% static 'images/menu/opora-base.png' %}"
                  alt="Side logo"
                  class="-mt-10">
@@ -46,11 +46,11 @@
         <!-- ГРУППЫ / ПУНКТЫ -->
         <ul class="space-y-2">
             <li>
-                <a href="{% url 'core:client-account' %}"
+                <a href="{% url 'core:psychologist-account' %}"
                    data-nav-item
-                   data-nav-key="client-account"
-                   class="{{ nav_item_classes }} {% if current_sidebar_key == 'client-account' %}bg-gray-300/25 !text-indigo-700{% endif %}"
-                   {% if current_sidebar_key == 'client-account' %}data-nav-active-server="1" aria-current="page"{% endif %}>
+                   data-nav-key="psychologist-account"
+                   class="{{ nav_item_classes }} {% if current_sidebar_key == 'psychologist-account' %}bg-gray-300/25 !text-indigo-700{% endif %}"
+                   {% if current_sidebar_key == 'psychologist-account' %}data-nav-active-server="1" aria-current="page"{% endif %}>
                     <img src="{% static 'images/menu/my-account.svg' %}"
                          alt="account"
                          class="transition-transform duration-200 group-hover:scale-110">
@@ -58,7 +58,7 @@
                 </a>
             </li>
             <li>
-                <a href="{% url 'core:client-events' %}?layout=sidebar"
+                <a href="#?layout=sidebar"
                    data-nav-item
                    data-nav-key="all-events"
                    class="{{ nav_item_classes }} {% if current_sidebar_key == 'all-events' %}bg-gray-300/25 !text-indigo-700{% endif %}"
@@ -93,24 +93,11 @@
                 </button>
                 <ul id="dropdown-psychologist"
                     class="space-y-2 overflow-hidden transition-all duration-300 ease-out transform
-                        {% if current_sidebar_key == 'psychologist-match' or current_sidebar_key == 'psychologist-catalog' %}
+                        {% if current_sidebar_key == 'psychologist-catalog' %}
                         max-h-80 opacity-100 translate-y-0 pointer-events-auto py-2
                         {% else %}
                         max-h-0 opacity-0 -translate-y-1 pointer-events-none
                         {% endif %}">
-                    <li>
-                        <a href="{% url 'core:general-questions' %}?layout=sidebar"
-                           data-nav-item
-                           data-nav-key="psychologist-match"
-                           data-nav-parent-group="psychologist"
-                           class="{{ nav_sub_item_classes }} {% if current_sidebar_key == 'psychologist-match' %}bg-gray-300/25 !text-indigo-700{% endif %}"
-                           {% if current_sidebar_key == 'psychologist-match' %}data-nav-active-server="1" aria-current="page"{% endif %}>
-                            <img src="{% static 'images/menu/num_point.svg' %}"
-                                 alt="point"
-                                 class="transition-transform duration-200 group-hover:scale-110">
-                            <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Подобрать и записаться</span>
-                        </a>
-                    </li>
                     <li>
                         <a href="{% url 'core:psychologist-catalog' %}?layout=sidebar"
                            data-nav-item
@@ -167,18 +154,18 @@
                 <ul
                         id="dropdown-authentication"
                         class="space-y-2 overflow-hidden transition-all duration-300 ease-out transform
-                        {% if current_sidebar_key == 'profile-edit' or current_sidebar_key == 'password-change' %}
+                        {% if current_sidebar_key == 'psychologist-profile-edit' or current_sidebar_key == 'password-change' %}
                         max-h-80 opacity-100 translate-y-0 pointer-events-auto py-2
                         {% else %}
                         max-h-0 opacity-0 -translate-y-1 pointer-events-none
                         {% endif %}">
                     <li>
-                        <a href="{% url 'users:web:profile-edit' %}"
+                        <a href="#"
                            data-nav-item
-                           data-nav-key="profile-edit"
+                           data-nav-key="psychologist-profile-edit"
                            data-nav-parent-group="auth"
-                           class="{{ nav_sub_item_classes }} {% if current_sidebar_key == 'profile-edit' %}bg-gray-300/25 !text-indigo-700{% endif %}"
-                           {% if current_sidebar_key == 'profile-edit' %}data-nav-active-server="1" aria-current="page"{% endif %}>
+                           class="{{ nav_sub_item_classes }} {% if current_sidebar_key == 'psychologist-profile-edit' %}bg-gray-300/25 !text-indigo-700{% endif %}"
+                           {% if current_sidebar_key == 'psychologist-profile-edit' %}data-nav-active-server="1" aria-current="page"{% endif %}>
                             <img src="{% static 'images/menu/num_point.svg' %}"
                                  alt="point"
                                  class="transition-transform duration-200 group-hover:scale-110">

@@ -130,7 +130,7 @@ class ClientAccountView(ClientRequiredMixin, TemplateView):
         3) Возвращает:
             - dict: словарь со всеми данными, доступными внутри HTML-шаблона."""
         context = super().get_context_data(**kwargs)
-        context["title_client_account_view"] = "Мой кабинет на ОПОРА"
+        context["title_client_account_view"] = "Кабинет клиента в сервисе ОПОРА"
 
         # Параметр, который передаем в menu.html и на его основе там настраиваем показ САЙДБАРА
         context["show_sidebar"] = "sidebar"
