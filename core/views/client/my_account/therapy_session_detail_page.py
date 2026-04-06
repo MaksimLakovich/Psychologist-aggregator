@@ -66,7 +66,19 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
             - значит остальные методы класса могут работать уже с готовыми self.detail_data,
               self.event и self.slot без повторной загрузки одной и той же встречи из БД.
         """
-        # check_role_access() - проверяет доступ и возвращает HttpResponse только если доступ запрещен
+        # ВАЖНО:
+        # check_role_access(...) вызываем здесь вручную ДО загрузки detail_data из БД.
+        # Это нужно:
+        # 1) Эта client-view теперь наследуется от ClientRequiredMixin.
+        # 2) Но в этой конкретной странице мы сами переопределили dispatch(), а значит сначала выполняется
+        #    код этого метода, и только потом super().dispatch(...).
+        # 3) Если не сделать раннюю проверку роли здесь, то psychologist сначала успеет зайти в
+        #    load_therapy_session_detail_data(...), и только потом сработает общий dispatch mixin'а.
+        # 4) Нам это не подходит: для чужой роли нужно остановиться как можно раньше и вообще не начинать
+        #    загрузку client-специфических данных detail-экрана.
+        # Итого:
+        #   - если доступ разрешен, check_role_access(...) вернет None и мы продолжим;
+        #   - если доступ запрещен, метод вернет готовый HttpResponse (redirect / 403), который сразу возвращаем.
         access_response = self.check_role_access(request)
         if access_response is not None:
             return access_response

@@ -8,15 +8,6 @@
 
 {% block extra_style %}
 <style>
-    /* Фоновое изображение страницы кабинета */
-    body {
-        background-image: url('{% static "images/background/background-start.jpg" %}');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed; /* красиво фиксирует фон */
-    }
-
     /* Анимации входа блоков (как на странице редактирования профиля) */
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
@@ -82,7 +73,7 @@
 {% endblock %}
 
 
-<section class="relative overflow-hidden min-h-screen bg-white/80 backdrop-blur-[2px] w-full">
+<section class="relative overflow-hidden min-h-screen bg-white backdrop-blur-[2px] w-full">
 
     <!-- СТРАНИЦА -->
 
