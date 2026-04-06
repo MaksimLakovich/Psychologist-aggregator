@@ -106,31 +106,99 @@
 
 <!-- ======= АВТОРИЗОВАННЫЙ ПСИХОЛОГ / АДМИН ======= -->
 {% elif user.is_authenticated %}
-<header class="bg-white shadow p-4">
 
-    <div class="mx-auto max-w-7xl px-4 py-1">
-        <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5">
-            <div class="flex flex-wrap justify-between items-center">
+    <!-- 1. Вариант для определенных страниц, которые есть и в МЕНЮ и в САЙДБАРЕ и мы показываем: -->
+    <!--    а) или только верхнее МЕНЮ без сайдбара, если перешли на эту страницу из МЕНЮ -->
+    <!--    б) или только САЙДБАР без меню, если перешли на эту страницу из САЙДБАРА -->
+    {% if menu_variant == "without-sidebar" %}
+    <header class="bg-white shadow p-4">
+        <div class="mx-auto max-w-7xl px-4 py-1">
+            <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5">
+                <div class="flex flex-wrap justify-between items-center">
 
-                <div class="flex justify-start items-center">
-                    <a href="{% url 'core:start-page' %}" class="flex mr-4">
-                        <img src="{% static 'images/logo/opora-logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo"/>
-                        <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
-                    </a>
+                    <div class="flex justify-start items-center">
+                        <a href="{% url 'core:psychologist-account' %}" class="flex mr-4">
+                            <img src="{% static 'images/logo/opora-logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo"/>
+                            <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
+                        </a>
+                    </div>
+
+                    <div class="flex items-center lg:order-2 gap-1">
+                        <!-- Подключаем кнопку МОЙ ПРОФИЛЬ в меню -->
+                        {% include 'core/menu/menu_ps_profile.html' %}
+                    </div>
+
                 </div>
+            </nav>
+        </div>
+    </header>
 
-                <div class="flex items-center lg:order-2 gap-1">
+    {% else %}
 
-                    <!-- Подключаем кнопку МОЙ ПРОФИЛЬ в меню -->
-                    {% include 'core/menu/menu_ps_profile.html' %}
+        <!-- 2. Вариант только с САЙДБАРОМ для psychologist-страниц личного кабинета -->
+        {% if show_sidebar %}
 
-                </div>
+        <header class="bg-white p-4">
+            <div class="mx-auto px-4 py-1">
+                <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5">
+                    <div class="flex flex-wrap justify-between items-center">
 
+                        <!-- Показываем САЙДБАР -->
+                        <div class="flex justify-start items-center">
+                            {% include 'core/side_navigation/navigation_psychologist.html' %}
+                        </div>
+
+                        <!-- А вместо верхнего меню добавляем кнопку НАЗАД в кабинет специалиста -->
+                        <div class="flex items-center">
+                            <a href="{% url 'core:psychologist-account' %}"
+                               class="flex items-center gap-2 px-3 py-2 mr-1 rounded-lg text-zinc-700 hover:text-indigo-700 hover:bg-gray-100
+                               text-lg font-medium tracking-wide md:text-xl active:scale-95 transition-all duration-150">
+                                <span
+                                        class="w-7 h-7 bg-current inline-block"
+                                        aria-hidden="true"
+                                        style="
+                                        -webkit-mask: url('{% static " images/menu/back-icon.svg" %}') no-repeat center / contain;
+                                        mask: url('{% static "images/menu/back-icon.svg" %}') no-repeat center / contain;
+                                        ">
+                                </span>
+                                <span>
+                                    Назад
+                                </span>
+                            </a>
+                        </div>
+
+                    </div>
+                </nav>
             </div>
-        </nav>
-    </div>
+        </header>
 
-</header>
+        <!-- 3. Вариант только с верхним МЕНЮ и ЛОГО для общих psychologist/admin-страниц -->
+        {% else %}
+        <header class="bg-white shadow p-4">
+            <div class="mx-auto max-w-7xl px-4 py-1">
+                <nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5">
+                    <div class="flex flex-wrap justify-between items-center">
+
+                        <div class="flex justify-start items-center">
+                            <a href="{% url 'core:psychologist-account' %}" class="flex mr-4">
+                                <img src="{% static 'images/logo/opora-logo.svg' %}" class="w-12 h-auto mr-0" alt="Logo"/>
+                                <span class="text-4xl font-extrabold tracking-tight text-indigo-700 sm:text-5xl">ОПОРА</span>
+                            </a>
+                        </div>
+
+                        <div class="flex items-center lg:order-2 gap-1">
+                            <!-- Подключаем кнопку МОЙ ПРОФИЛЬ в меню -->
+                            {% include 'core/menu/menu_ps_profile.html' %}
+                        </div>
+
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        {% endif %}
+
+{% endif %}
 
 
 <!-- ======= МЕНЮ НА СТРАНИЦЕ "СТАРТОВАЯ" ДЛЯ НЕАВТОРИЗОВАННОГО ПОЛЬЗОВАТЕЛЯ ======= -->
