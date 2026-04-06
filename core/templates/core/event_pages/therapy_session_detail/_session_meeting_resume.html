@@ -1,0 +1,22 @@
+{% load static %}
+
+<!-- БЛОК 3: Подключение и показ результатов встречи если они были добавлены -->
+
+{% if slot %}
+
+    {% if is_finished_slot %}
+        {% if slot.meeting_resume %}
+            <article class="rounded-[2rem] border border-white/60 bg-white/50 p-6 sm:p-8 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
+                <h2 class="text-2xl font-extrabold text-indigo-950 mb-6 flex items-center gap-3">
+                    Итоги встречи
+                </h2>
+
+                <div class="pl-4">
+                    <p class="whitespace-pre-line text-base leading-relaxed text-zinc-700">{{ slot.meeting_resume }}</p>
+                </div>
+            </article>
+        {% endif %}
+
+    {% endif %}
+
+{% endif %}

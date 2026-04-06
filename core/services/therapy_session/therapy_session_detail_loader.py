@@ -4,6 +4,8 @@ from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
+from calendar_engine.lifecycle.use_cases.apply_time_based_status_transitions import \
+    apply_time_based_status_transitions_for_event
 from calendar_engine.models import CalendarEvent, TimeSlotMessage
 from core.services.calendar_event_slot_selector import (
     get_event_active_slot, get_event_completed_slot)
@@ -128,6 +130,11 @@ def load_therapy_session_detail_data(*, viewer_user, event_id, viewer_timezone):
             - какие блоки показывать в боковой колонке;
             - какие бизнесовые тексты и CTA нужны этой роли.
     """
+    # Запуск автоматического обновления/определения статусов event/slot по фактическому времени
+    apply_time_based_status_transitions_for_event(
+        participant_user=viewer_user,
+        event_id=event_id,
+    )
     event = _get_event_for_viewer(
         viewer_user=viewer_user,
         event_id=event_id,

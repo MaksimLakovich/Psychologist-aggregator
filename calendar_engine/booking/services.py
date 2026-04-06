@@ -2,8 +2,7 @@ from zoneinfo import ZoneInfo
 
 from django.utils import timezone
 
-from calendar_engine.booking.exceptions import \
-    CreateTherapySessionValidationError
+from calendar_engine.booking.exceptions import CreateBookingValidationError
 from calendar_engine.models import (AvailabilityException, AvailabilityRule,
                                     TimeSlot)
 from calendar_engine.services import normalize_range
@@ -20,7 +19,7 @@ def get_specialist_profile_for_booking_therapy_session(*, specialist_profile_id:
     try:
         return PsychologistProfile.objects.select_related("user").get(pk=specialist_profile_id)
     except PsychologistProfile.DoesNotExist as exc:
-        raise CreateTherapySessionValidationError("Выбранный специалист не найден.") from exc
+        raise CreateBookingValidationError("Выбранный специалист не найден.") from exc
 
 
 def normalize_user_timezone(*, timezone_value):
@@ -30,7 +29,7 @@ def normalize_user_timezone(*, timezone_value):
     Перед расчетом расписания и сравнением слотов backend приводит это поле к одному предсказуемому виду.
     """
     if timezone_value is None:
-        raise CreateTherapySessionValidationError(
+        raise CreateBookingValidationError(
             "У пользователя не указан timezone. Невозможно корректно выполнить booking-операцию."
         )
 

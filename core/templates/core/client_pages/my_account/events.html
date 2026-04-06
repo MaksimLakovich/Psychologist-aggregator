@@ -106,6 +106,28 @@
     }
 
     /* ========================================================= */
+    /* Общий shine-эффект для CTA-кнопок страницы */
+    /* ========================================================= */
+    .cta-shine-button {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-shine-button__glint {
+        position: absolute;
+        inset: 0;
+        width: 0.75rem;
+        background: rgba(255, 255, 255, 0.2);
+        transform: skewX(-30deg) translateX(-3rem);
+        transition: transform 700ms ease-in-out;
+        pointer-events: none;
+    }
+
+    .cta-shine-button:hover .cta-shine-button__glint {
+        transform: skewX(-30deg) translateX(8rem);
+    }
+
+    /* ========================================================= */
     /* Стили для ВИДЖЕТА month-calendar от FULLCALENDAR */
     /* ========================================================= */
 
@@ -461,24 +483,27 @@
                                         {% if item.slot.meeting_url and not item.is_archived_card %}
                                             <a href="{{ item.slot.meeting_url }}"
                                                 target="_blank"
-                                                class="inline-flex items-center justify-center w-full sm:w-auto mt-1 px-6 py-2 gap-3
+                                                class="cta-shine-button group inline-flex items-center justify-center w-full sm:w-auto mt-1 px-6 py-2 gap-3
                                                 border border-transparent text-base font-medium rounded-xl text-white bg-violet-500 hover:bg-violet-600
                                                 transition-all duration-200">
-                                                <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-6 h-6">
-                                                Видеочат
+                                                <span class="cta-shine-button__glint"></span>
+                                                <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="relative z-10 w-6 h-6 transition-transform duration-300 group-hover:-rotate-12">
+                                                <span class="relative z-10">Видеочат</span>
                                             </a>
                                             <a href="{% url 'core:client-therapy-session-detail' item.event.id %}{{ layout_query }}"
-                                                class="inline-flex items-center justify-center w-full sm:w-auto mt-0 px-6 py-2 gap-3
+                                                class="cta-shine-button group inline-flex items-center justify-center w-full sm:w-auto mt-0 px-6 py-2 gap-3
                                                 border border-transparent text-base font-medium rounded-xl text-white bg-indigo-700 hover:bg-indigo-800
                                                 transition-all duration-200">
-                                                Посмотреть
+                                                <span class="cta-shine-button__glint"></span>
+                                                <span class="relative z-10">Посмотреть</span>
                                             </a>
                                         {% else %}
                                             <a href="{% url 'core:client-therapy-session-detail' item.event.id %}{{ layout_query }}"
-                                                class="inline-flex items-center justify-center w-full sm:w-auto mt-1 px-6 py-2 gap-3
+                                                class="cta-shine-button group inline-flex items-center justify-center w-full sm:w-auto mt-1 px-6 py-2 gap-3
                                                 border border-transparent text-base font-medium rounded-xl text-white bg-indigo-700 hover:bg-indigo-800
                                                 transition-all duration-200">
-                                                Посмотреть
+                                                <span class="cta-shine-button__glint"></span>
+                                                <span class="relative z-10">Посмотреть</span>
                                             </a>
                                         {% endif %}
 
@@ -539,12 +564,13 @@
                 </p>
                 <a
                     href="{% url 'core:general-questions' %}{{ layout_query }}"
-                    class="inline-flex items-center justify-center w-full sm:w-auto mt-6 px-6 py-2 gap-3
+                    class="cta-shine-button group inline-flex items-center justify-center w-full sm:w-auto mt-6 px-6 py-2 gap-3
                     border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
                     focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
                     transition-all duration-200 shadow-md hover:shadow-lg">
-                    Подобрать специалиста
-                    <img src="{% static 'images/menu/look-for-white.svg' %}" alt="look-for" class="w-8 h-8">
+                    <span class="cta-shine-button__glint"></span>
+                    <span class="relative z-10">Подобрать специалиста</span>
+                    <img src="{% static 'images/menu/look-for-white.svg' %}" alt="look-for" class="relative z-10 w-8 h-8">
                 </a>
             </div>
 

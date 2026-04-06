@@ -127,6 +127,7 @@ def _build_specialist_busy_intervals(
     specialist_tz,
     rule,
     exceptions,
+    exclude_event_ids=None,
 ) -> list[tuple[datetime, datetime]]:
     """Строит список уже занятых интервалов специалиста. Т.е., функция нужна для одной конкретной задачи:
     “Определить какие уже существующие встречи специалиста должны сделать часть доменных стартов (слотов)
@@ -182,6 +183,14 @@ def _build_specialist_busy_intervals(
         .order_by("start_datetime")
     )
 
+    # Когда клиент открывает модалку “Перенести встречу”, фронт запрашивает у backend доступные слоты специалиста.
+    # Но есть нюанс:
+    # - старая встреча еще существует в БД и она уже занимает время у специалиста;
+    # - если просто построить расписание "как есть", backend посчитает, что это время занято и старая встреча
+    # начнет блокировать перенос сама на себя
+    if exclude_event_ids:
+        specialist_slots = specialist_slots.exclude(event_id__in=exclude_event_ids)
+
     # 4) Собираем итоговые busy intervals специалиста.
     # Это не "новые слоты", а именно интервалы занятого времени, которые потом нужны только для того,
     # чтобы скрыть конфликтующие доменные старты в UI-расписании.
@@ -222,6 +231,7 @@ def build_specialist_schedule_runtime_context(
     *,
     specialist_profile: PsychologistProfile,
     consultation_type: str = "individual",
+    exclude_event_ids=None,
 ) -> dict | None:
     """Собирает единый runtime-context для availability и booking логики специалиста.
 
@@ -289,6 +299,7 @@ def build_specialist_schedule_runtime_context(
         specialist_tz=current_specialist_time.tzinfo,
         rule=rule,
         exceptions=exceptions,
+        exclude_event_ids=exclude_event_ids,
     )
 
     # 7) Генератор доменных слотов
@@ -308,6 +319,7 @@ def build_specialist_schedule_runtime_context(
 def build_generate_specialist_schedule_use_case(
     specialist_profile: PsychologistProfile,
     consultation_type: str = "individual",
+    exclude_event_ids=None,
 ) -> GenerateSpecialistScheduleUseCase | None:
     """Factory финальной сборки use-case генерации расписания специалиста.
 
@@ -323,6 +335,12 @@ def build_generate_specialist_schedule_use_case(
     runtime_context = build_specialist_schedule_runtime_context(
         specialist_profile=specialist_profile,
         consultation_type=consultation_type,
+        # Когда клиент открывает модалку “Перенести встречу”, фронт запрашивает у backend доступные слоты специалиста.
+        # Но есть нюанс:
+        # - старая встреча еще существует в БД и она уже занимает время у специалиста;
+        # - если просто построить расписание "как есть", backend посчитает, что это время занято и старая встреча
+        # начнет блокировать перенос сама на себя
+        exclude_event_ids=exclude_event_ids,
     )
 
     if runtime_context is None:

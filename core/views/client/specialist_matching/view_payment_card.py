@@ -3,8 +3,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import FormView
 
-from calendar_engine.booking.exceptions import \
-    CreateTherapySessionValidationError
+from calendar_engine.booking.exceptions import CreateBookingValidationError
 from calendar_engine.booking.use_cases.therapy_session_create import \
     CreateTherapySessionUseCase
 from core.forms.client.specialist_matching.form_payment_card import \
@@ -14,9 +13,10 @@ from core.services.anonymous_client_flow_for_search_and_booking import (
 from core.services.get_client_timezone_value import \
     get_client_timezone_value_for_request
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
+from users.mixins.role_required_mixin import ClientRequiredMixin
 
 
-class ClientAddPaymentCardPageView(SpecialistMatchingLayoutMixin, FormView):
+class ClientAddPaymentCardPageView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, FormView):
     """Контроллер на основе FormView для отображения страницы *Завершение записи и добавление платежной карты*.
 
     Вью работает в двух сценариях:
@@ -26,6 +26,7 @@ class ClientAddPaymentCardPageView(SpecialistMatchingLayoutMixin, FormView):
 
     template_name = "core/client_pages/specialist_matching/home_client_payment_card.html"
     form_class = ClientAddPaymentCardForm
+    allow_anonymous = True
 
     def get_success_url(self):
         """Формирует URL следующего шага с сохранением текущего layout."""
@@ -100,7 +101,7 @@ class ClientAddPaymentCardPageView(SpecialistMatchingLayoutMixin, FormView):
                 slot_start_iso=form.cleaned_data["slot_start_iso"],
                 consultation_type=form.cleaned_data["consultation_type"],
             )
-        except CreateTherapySessionValidationError as exc:
+        except CreateBookingValidationError as exc:
             # Если backend не смог создать встречу, возвращаем клиента на эту же страницу
             # и показываем понятное сообщение прямо над формой.
             # Пример:

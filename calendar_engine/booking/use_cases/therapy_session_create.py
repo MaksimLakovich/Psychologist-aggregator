@@ -8,14 +8,13 @@ from calendar_engine.application.factories.generate_specialist_schedule_factory 
     build_specialist_schedule_runtime_context
 from calendar_engine.application.use_cases.specialist_schedule import \
     GenerateSpecialistScheduleUseCase
-from calendar_engine.booking.exceptions import \
-    CreateTherapySessionValidationError
+from calendar_engine.booking.exceptions import CreateBookingValidationError
 from calendar_engine.booking.services import (
     get_specialist_profile_for_booking_therapy_session,
     normalize_user_timezone)
 from calendar_engine.booking.validators import (
-    parse_requested_slot_start, validate_client_can_create_therapy_session,
-    validate_client_has_no_overlapping_therapy_sessions,
+    parse_requested_slot_start, validate_client_can_create_booking,
+    validate_client_has_no_overlapping_bookings,
     validate_consultation_type_in_therapy_session)
 from calendar_engine.models import (CalendarEvent, EventParticipant,
                                     SlotParticipant, TimeSlot)
@@ -56,7 +55,7 @@ class CreateTherapySessionUseCase:
             if slot_start_datetime == requested_start_in_specialist_tz:
                 return slot
 
-        raise CreateTherapySessionValidationError(
+        raise CreateBookingValidationError(
             "Выбранный слот уже занят. Пожалуйста, выберите другое время"
         )
 
@@ -69,10 +68,19 @@ class CreateTherapySessionUseCase:
         )
 
     @transaction.atomic
-    def execute(self, *, client_user, specialist_profile_id: int, slot_start_iso: str, consultation_type: str) -> dict:
+    def execute(
+        self,
+        *,
+        client_user,
+        specialist_profile_id: int,
+        slot_start_iso: str,
+        consultation_type: str,
+        previous_event=None,
+        previous_event_id=None,
+    ) -> dict:
         """Запускает процесс booking-flow и создает встречу."""
         # 1) Запускаем кастомные первоначальные валидации
-        validate_client_can_create_therapy_session(client_user=client_user)
+        validate_client_can_create_booking(client_user=client_user)
         validate_consultation_type_in_therapy_session(consultation_type=consultation_type)
         requested_slot_start_datetime = parse_requested_slot_start(slot_start_iso=slot_start_iso)
 
@@ -94,7 +102,7 @@ class CreateTherapySessionUseCase:
         )
 
         if len(locked_users) != 2:
-            raise CreateTherapySessionValidationError(
+            raise CreateBookingValidationError(
                 "Не удалось получить блокировку участников для безопасного создания бронирования."
             )
 
@@ -118,7 +126,7 @@ class CreateTherapySessionUseCase:
         )
 
         if runtime_context is None:
-            raise CreateTherapySessionValidationError(
+            raise CreateBookingValidationError(
                 "У специалиста нет активного рабочего расписания для бронирования."
             )
 
@@ -160,10 +168,11 @@ class CreateTherapySessionUseCase:
         # 9) Дополнительно защищаем клиента от двойной записи на одно и то же время.
         # Даже если слот свободен у специалиста, backend не должен создавать новую сессию,
         # если у самого клиента уже есть другая встреча с пересечением по времени.
-        validate_client_has_no_overlapping_therapy_sessions(
+        validate_client_has_no_overlapping_bookings(
             client_user=client_user,
             slot_start_datetime=slot_start_datetime,
             slot_end_datetime=slot_end_datetime,
+            previous_event_id=previous_event_id,
         )
 
         # # 10) Формируем понятный заголовок события для календаря клиента.
@@ -188,6 +197,7 @@ class CreateTherapySessionUseCase:
             visibility="private",
             source="internal",
             is_recurring=False,
+            previous_event=previous_event,
         )
         event.full_clean()
         event.save()

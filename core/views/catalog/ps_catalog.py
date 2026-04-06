@@ -128,7 +128,7 @@ class PsychologistCatalogPageView(LoginRequiredMixin, CatalogLayoutModeMixin, Ca
           фильтры в query-параметрах.
     """
 
-    template_name = "core/client_pages/my_account/psychologist_catalog.html"
+    template_name = "core/catalog_pages/psychologist_catalog.html"
 
     def get_context_data(self, **kwargs):
         """Формирование контекста для HTML-шаблона каталога (первый входа в каталог).
@@ -227,7 +227,7 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, CatalogLayoutModeMixin,
         - CatalogBackLinkMixin: чтобы собрать короткий server fallback для кнопки "Назад в каталог".
     """
 
-    template_name = "core/client_pages/my_account/psychologist_card_detail.html"
+    template_name = "core/catalog_pages/psychologist_card_detail.html"
 
     def get_context_data(self, **kwargs):
         """Формирование контекста для HTML-шаблона детальной страницы психолога.

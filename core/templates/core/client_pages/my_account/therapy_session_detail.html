@@ -64,6 +64,7 @@
     /* Унифицированный стиль полей формы */
     /* ========================================================= */
     .glass-input input,
+    .glass-input select,
     .glass-input textarea {
         width: 100%;
         background-color: rgba(255, 255, 255, 0.6);
@@ -76,12 +77,36 @@
     }
 
     .glass-input input:focus,
+    .glass-input select:focus,
     .glass-input textarea:focus {
         outline: none;
         background-color: #ffffff;
         border-color: #6366f1;
         box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
     }
+
+    /* ========================================================= */
+    /* Общий shine-эффект для CTA-кнопок страницы */
+    /* ========================================================= */
+    .cta-shine-button {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-shine-button__glint {
+        position: absolute;
+        inset: 0;
+        width: 0.75rem;
+        background: rgba(255, 255, 255, 0.2);
+        transform: skewX(-30deg) translateX(-3rem);
+        transition: transform 700ms ease-in-out;
+        pointer-events: none;
+    }
+
+    .cta-shine-button:hover .cta-shine-button__glint {
+        transform: skewX(-30deg) translateX(12rem);
+    }
+
 </style>
 {% endblock %}
 
@@ -129,7 +154,11 @@
                 {% include "core/event_pages/therapy_session_detail/_session_overview.html" %}
                 <!-- БЛОК 2: Подключение клиента к встрече -->
                 {% include "core/event_pages/therapy_session_detail/_session_connection_client.html" %}
-                <!-- БЛОК 3: Комментарии к встрече / форум -->
+                <!-- БЛОК 3: Подключение и показ результатов встречи если они были добавлены -->
+                {% include "core/event_pages/therapy_session_detail/_session_meeting_resume.html" %}
+                <!-- БЛОК 4: Управление встречей -->
+                {% include "core/event_pages/therapy_session_detail/_session_actions_client.html" %}
+                <!-- БЛОК 5: Комментарии к встрече / форум -->
                 {% include "core/event_pages/therapy_session_detail/_session_comments_form.html" %}
 
             </div>
@@ -203,8 +232,10 @@
                                 {% endif %}
 
                                 {% if specialist_methods %}
-                                    <div class="{% if specialist_specialisations %}mt-5 pt-5 border-t border-zinc-700/70{% endif %}">
-                                        <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-3">Методы работы</h3>
+                                    <div class="{% if specialist_specialisations %}mt-5 pt-5 border-t border-slate-300/70{% endif %}">
+                                        <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-2">
+                                            Методы работы
+                                        </h3>
                                         <div class="flex flex-wrap gap-2">
                                             {% for method in specialist_methods %}
                                                 <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100
@@ -216,8 +247,8 @@
                                     </div>
                                 {% endif %}
 
-                                <div class="{% if specialist_methods %}mt-5 pt-5 border-t border-zinc-700/70{% endif %}">
-                                    <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-3 flex items-center justify-between">
+                                <div class="{% if specialist_methods %}mt-5 pt-5 border-t border-slate-300/70{% endif %}">
+                                    <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-2 flex items-center justify-between">
                                         Совпадения по вашей анкете
                                         <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold">
                                             {{ matched_topics|length|default:"0" }}
@@ -256,7 +287,11 @@
 
 </section>
 
+{% include "core/event_pages/therapy_session_detail/_modal_session_cancel.html" %}
+{% include "core/event_pages/therapy_session_detail/_modal_session_reschedule.html" %}
+
 <script type="module" src="{% static 'js/modules/auto_hide_message.js' %}"></script>
-<script type="module" src="{% static 'js/modules/messages_forum/therapy_session_detail_forum.js' %}"></script>
+<script type="module" src="{% static 'js/modules/messages_forum/event_forum.js' %}"></script>
+<script type="module" src="{% static 'js/modules/session_actions/cancel_reschedule_actions.js' %}"></script>
 
 {% endblock %}
