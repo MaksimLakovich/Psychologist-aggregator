@@ -4,43 +4,6 @@
 
 {% block title %} {{ title_psychologist_catalog_detail_page_view|default:"ОПОРА" }} {% endblock %}
 
-{% block extra_style %}
-{% if show_sidebar %}
-<style>
-    /*
-      Сохраняем фон страницы для полупрозрачного сайдбара но перекрываем контентную область main белым слоем.
-      Это убирает "вспышку" фоновой картинки в зоне контента при первом рендере.
-    */
-    body {
-        background-image: url('{% static "images/background/background-start.jpg" %}');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }
-
-    @media (min-width: 1024px) {
-        /* 20rem = ширина сайдбара (w-80) */
-        main {
-            background: linear-gradient(
-                to right,
-                transparent 0,
-                transparent 20rem,
-                #ffffff 20rem,
-                #ffffff 100%
-            );
-        }
-    }
-
-    @media (max-width: 1023.98px) {
-        main {
-            background-color: #ffffff;
-        }
-    }
-</style>
-{% endif %}
-{% endblock %}
-
 {% block content %}
 
 
