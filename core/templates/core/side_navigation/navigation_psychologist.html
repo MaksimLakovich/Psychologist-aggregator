@@ -72,46 +72,18 @@
                 </a>
             </li>
             <li>
-                <button type="button"
-                        data-collapse-group="side-navigation"
-                        data-nav-group-button
-                        data-nav-group="psychologist"
-                        class="{{ nav_group_button_classes }}"
-                        aria-controls="dropdown-psychologist">
+                <a href="{% url 'core:psychologist-catalog' %}?layout=sidebar"
+                   data-nav-item
+                   data-nav-key="psychologist-catalog"
+                   class="{{ nav_item_classes }} {% if current_sidebar_key == 'psychologist-catalog' %}bg-gray-300/25 !text-indigo-700{% endif %}"
+                   {% if current_sidebar_key == 'psychologist-catalog' %}data-nav-active-server="1" aria-current="page"{% endif %}>
                     <img src="{% static 'images/menu/search-user.svg' %}"
-                         alt="search"
+                         alt="point"
                          class="transition-transform duration-200 group-hover:scale-110">
-                    <span class="flex-1 ml-3 text-left whitespace-nowrap transition-transform duration-200 group-hover:scale-105 origin-left">
-                        Наши психологи
+                    <span class="ml-3 transition-transform duration-200 group-hover:scale-105 origin-left">
+                        Каталог психологов
                     </span>
-                    <svg aria-hidden="true" data-nav-chevron class="w-6 h-6 transition-transform duration-200 group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20"
-                         xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd"
-                              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                              clip-rule="evenodd"></path>
-                    </svg>
-                </button>
-                <ul id="dropdown-psychologist"
-                    class="space-y-2 overflow-hidden transition-all duration-300 ease-out transform
-                        {% if current_sidebar_key == 'psychologist-catalog' %}
-                        max-h-80 opacity-100 translate-y-0 pointer-events-auto py-2
-                        {% else %}
-                        max-h-0 opacity-0 -translate-y-1 pointer-events-none
-                        {% endif %}">
-                    <li>
-                        <a href="{% url 'core:psychologist-catalog' %}?layout=sidebar"
-                           data-nav-item
-                           data-nav-key="psychologist-catalog"
-                           data-nav-parent-group="psychologist"
-                           class="{{ nav_sub_item_classes }} {% if current_sidebar_key == 'psychologist-catalog' %}bg-gray-300/25 !text-indigo-700{% endif %}"
-                           {% if current_sidebar_key == 'psychologist-catalog' %}data-nav-active-server="1" aria-current="page"{% endif %}>
-                            <img src="{% static 'images/menu/num_point.svg' %}"
-                                 alt="point"
-                                 class="transition-transform duration-200 group-hover:scale-110">
-                            <span class="transition-transform duration-200 group-hover:scale-105 origin-left">Каталог</span>
-                        </a>
-                    </li>
-                </ul>
+                </a>
             </li>
             <li>
                 <a href="#"
