@@ -23,11 +23,46 @@ document.addEventListener("DOMContentLoaded", function () {
   const displayActions = document.getElementById("display-actions");
   const addEducationButton = document.getElementById("education-add-button");
   const hasErrors = form.dataset.hasErrors === "1";
-  const activeTab = form.dataset.activeTab || "personal";
+  const activeTab = form.dataset.activeTab || "profile";
 
   const editableInputs = Array.from(form.querySelectorAll("[data-editable-field='1']"));
   const editableChoiceInputs = Array.from(form.querySelectorAll(".choice-card input"));
   const removeEducationButtons = Array.from(form.querySelectorAll("[data-remove-education-form]"));
+  const expertiseEditButtons = Array.from(form.querySelectorAll("[data-expertise-edit-button]"));
+
+  const modalConfigs = {
+    "topics-modal": {
+      modalId: "topics-modal",
+      saveButtonId: "save-topics-button",
+      errorId: "topics-modal-error",
+      checkboxSelector: ".topic-checkbox",
+      containerId: "selected-topics-container",
+      badgeClassName: "selection-badge topic-badge",
+      emptyText: "Темы пока не выбраны",
+    },
+    "methods-modal": {
+      modalId: "methods-modal",
+      saveButtonId: "save-methods-button",
+      errorId: "methods-modal-error",
+      checkboxSelector: ".method-checkbox",
+      containerId: "selected-methods-container",
+      badgeClassName: "selection-badge method-badge",
+      emptyText: "Методы пока не выбраны",
+    },
+    "specialisations-modal": {
+      modalId: "specialisations-modal",
+      saveButtonId: "save-specialisations-button",
+      errorId: "specialisations-modal-error",
+      checkboxSelector: ".specialisation-checkbox",
+      containerId: "selected-specialisations-container",
+      badgeClassName: "selection-badge specialisation-badge",
+      emptyText: "Специализации пока не выбраны",
+    },
+  };
+
+  const modalState = new Map();
+  const openButtons = document.querySelectorAll("[data-modal-open]");
+  const modals = document.querySelectorAll("[data-modal]");
 
   initTabs(activeTab);
 
@@ -105,12 +140,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     removeEducationButtons.forEach((button) => {
       button.classList.toggle("hidden", !isEditing);
+      button.classList.toggle("inline-flex", isEditing);
     });
 
-    if (addEducationButton) {
-      addEducationButton.classList.toggle("hidden", !isEditing);
-      addEducationButton.classList.toggle("inline-flex", isEditing);
-    }
+    expertiseEditButtons.forEach((button) => {
+      button.classList.toggle("hidden", !isEditing);
+      button.classList.toggle("flex", isEditing);
+    });
 
     if (isEditing) {
       editActions.classList.remove("hidden");
@@ -118,6 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       editActions.classList.add("hidden");
       displayActions.classList.remove("hidden");
+      closeAllModals();
     }
   }
 
@@ -129,6 +166,8 @@ document.addEventListener("DOMContentLoaded", function () {
    * - добавить новую карточку образования;
    * - убрать ненужную карточку;
    * - при этом сервер должен получить корректную структуру formset.
+   * - пустая форма больше не показывается заранее.
+   * - Новая карточка появляется только тогда, когда специалист явно нажимает "Добавить еще".
    */
   function initEducationFormset() {
     const list = document.querySelector("[data-education-formset-list]");
@@ -138,6 +177,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!list || !template || !totalFormsInput || !addEducationButton) return;
 
     addEducationButton.addEventListener("click", () => {
+      if (form.dataset.editMode !== "1") {
+        setEditMode(true);
+      }
+
       const nextIndex = Number(totalFormsInput.value);
       const html = template.innerHTML.replace(/__prefix__/g, String(nextIndex));
       list.insertAdjacentHTML("beforeend", html);
@@ -173,11 +216,6 @@ document.addEventListener("DOMContentLoaded", function () {
   /**
    * Настраивает переключение вкладок на странице профиля.
    *
-   * Это нужно, чтобы большой экран с множеством данных оставался понятным:
-   * - личные данные;
-   * - образование;
-   * - темы и методы.
-   *
    * Метод также умеет открыть нужную вкладку сразу после ответа сервера, если именно в этом блоке произошла ошибка.
    */
   function initTabs(initialTab) {
@@ -204,10 +242,172 @@ document.addEventListener("DOMContentLoaded", function () {
     activateTab(initialTab);
   }
 
+  function getModalConfigById(modalId) {
+    return modalConfigs[modalId] || null;
+  }
+
+  function readCheckedValues(checkboxSelector) {
+    return Array.from(document.querySelectorAll(`${checkboxSelector}:checked`)).map((checkbox) => checkbox.value);
+  }
+
+  function getCheckboxes(checkboxSelector) {
+    return Array.from(document.querySelectorAll(checkboxSelector));
+  }
+
+  function applyCheckedValues(checkboxSelector, values) {
+    const valuesSet = new Set(values);
+    getCheckboxes(checkboxSelector).forEach((checkbox) => {
+      checkbox.checked = valuesSet.has(checkbox.value);
+    });
+  }
+
+  function clearModalError(errorElement) {
+    if (!errorElement) return;
+    errorElement.textContent = "";
+    errorElement.classList.add("hidden");
+  }
+
+  function showModalError(errorElement, message) {
+    if (!errorElement) return;
+    errorElement.textContent = message;
+    errorElement.classList.remove("hidden");
+  }
+
+  /**
+   * Перерисовывает бейджи на карточках после нажатия "Применить" в модалке.
+   *
+   * Важно: это пока только обновление интерфейса текущей страницы.
+   * Реальное сохранение в БД произойдет после общего сохранения профиля.
+   */
+  function renderBadges(containerId, labels, badgeClassName, emptyText) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (!labels.length) {
+      const emptyState = document.createElement("span");
+      emptyState.className = "text-sm text-zinc-500";
+      emptyState.textContent = emptyText;
+      container.appendChild(emptyState);
+      return;
+    }
+
+    labels.forEach((label) => {
+      const badge = document.createElement("span");
+      badge.className = badgeClassName;
+      badge.textContent = label;
+      container.appendChild(badge);
+    });
+  }
+
+  function collectSelectedLabels(checkboxSelector) {
+    return Array.from(document.querySelectorAll(`${checkboxSelector}:checked`))
+      .map((checkbox) => checkbox.dataset.label || "")
+      .filter(Boolean);
+  }
+
+  function syncBodyScrollLock() {
+    const hasOpenedModal = Array.from(modals).some((modal) => !modal.classList.contains("hidden"));
+    document.body.classList.toggle("overflow-hidden", hasOpenedModal);
+  }
+
+  function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    const modalConfig = getModalConfigById(modalId);
+    if (!modal || !modalConfig || form.dataset.editMode !== "1") return;
+
+    applyCheckedValues(modalConfig.checkboxSelector, modalState.get(modalId) || []);
+    clearModalError(document.getElementById(modalConfig.errorId));
+    modal.classList.remove("hidden");
+    syncBodyScrollLock();
+  }
+
+  function closeModal(modalId, { restoreSavedState = true } = {}) {
+    const modal = document.getElementById(modalId);
+    const modalConfig = getModalConfigById(modalId);
+    if (!modal || !modalConfig) return;
+
+    if (restoreSavedState) {
+      applyCheckedValues(modalConfig.checkboxSelector, modalState.get(modalId) || []);
+    }
+
+    clearModalError(document.getElementById(modalConfig.errorId));
+    modal.classList.add("hidden");
+    syncBodyScrollLock();
+  }
+
+  function closeAllModals() {
+    Object.keys(modalConfigs).forEach((modalId) => closeModal(modalId));
+  }
+
+  /**
+   * Локально "сохраняет" выбор модалки на самой странице:
+   * - фиксирует выбранные чекбоксы как текущее состояние окна;
+   * - обновляет карточки с бейджами;
+   * - закрывает модалку.
+   *
+   * В БД эти данные уйдут только после общего submit формы профиля.
+   */
+  function applyModalSelection(modalId) {
+    const modalConfig = getModalConfigById(modalId);
+    if (!modalConfig) return;
+
+    const selectedValues = readCheckedValues(modalConfig.checkboxSelector);
+    const selectedLabels = collectSelectedLabels(modalConfig.checkboxSelector);
+
+    modalState.set(modalId, selectedValues);
+    renderBadges(
+      modalConfig.containerId,
+      selectedLabels,
+      modalConfig.badgeClassName,
+      modalConfig.emptyText,
+    );
+    closeModal(modalId, { restoreSavedState: false });
+  }
+
   applySkipIntroAnimationsIfNeeded();
   setEditMode(hasErrors);
   initEducationFormset();
 
+  Object.values(modalConfigs).forEach((modalConfig) => {
+    modalState.set(modalConfig.modalId, readCheckedValues(modalConfig.checkboxSelector));
+  });
+
+  openButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      openModal(button.dataset.modalOpen);
+    });
+  });
+
+  modals.forEach((modal) => {
+    modal.querySelectorAll("[data-modal-close]").forEach((button) => {
+      button.addEventListener("click", () => {
+        closeModal(modal.id);
+      });
+    });
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        closeModal(modal.id);
+      }
+    });
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+
+    const openedModal = Array.from(modals).find((modal) => !modal.classList.contains("hidden"));
+    if (openedModal) {
+      closeModal(openedModal.id);
+    }
+  });
+
+  Object.values(modalConfigs).forEach((modalConfig) => {
+    document.getElementById(modalConfig.saveButtonId)?.addEventListener("click", () => {
+      applyModalSelection(modalConfig.modalId);
+    });
+  });
   // После нажатия "Сохранить" не хотим заново проигрывать все стартовые анимации.
   form.addEventListener("submit", function () {
     markSkipIntroAnimationsOnce();

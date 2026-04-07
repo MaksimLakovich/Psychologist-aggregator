@@ -179,16 +179,6 @@ class EditPsychologistProfileForm(forms.ModelForm):
         required=False,
         widget=forms.CheckboxSelectMultiple,
     )
-    remove_photo = forms.BooleanField(
-        label="Удалить текущее фото",
-        required=False,
-        widget=forms.CheckboxInput(
-            attrs={
-                "data-editable-field": "1",
-                "class": "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500",
-            }
-        ),
-    )
 
     class Meta:
         model = PsychologistProfile
@@ -206,7 +196,6 @@ class EditPsychologistProfileForm(forms.ModelForm):
             "specialisations",
             "methods",
             "topics",
-            "remove_photo",
         )
         widgets = {
             "gender": forms.Select(
@@ -309,7 +298,6 @@ class EditPsychologistProfileForm(forms.ModelForm):
         self.fields["specialisations"].queryset = Specialisation.objects.order_by("name")
         self.fields["methods"].queryset = Method.objects.order_by("name")
         self.fields["topics"].queryset = Topic.objects.order_by("group_name", "name")
-        self.fields["remove_photo"].help_text = None
         # Для checkbox-групп используем отдельную отрисовку в шаблоне,
         # поэтому класс назначаем контейнеру каждого input через renderer уже в HTML
         self.fields["languages"].initial = self.instance.languages if self.instance.pk else ["russian"]
@@ -323,6 +311,20 @@ class EditPsychologistProfileForm(forms.ModelForm):
         потому что в модели языки хранятся как ArrayField, а ему нужен именно список значений.
         """
         return list(self.cleaned_data.get("languages") or [])
+
+    def clean(self):
+        """Проверяем, что у специалиста всегда есть фото профиля:
+            - фотографию можно заменить;
+            - оставить профиль совсем без фото нельзя.
+        """
+        cleaned_data = super().clean()
+        uploaded_photo = cleaned_data.get("photo")
+        existing_photo = getattr(self.instance, "photo", None)
+
+        if not uploaded_photo and not existing_photo:
+            self.add_error("photo", "Добавьте фотографию профиля. Для специалиста фото является обязательной частью публичной карточки.")
+
+        return cleaned_data
 
 
 class PsychologistEducationForm(forms.ModelForm):
@@ -431,6 +433,6 @@ class PsychologistEducationForm(forms.ModelForm):
 PsychologistEducationFormSet = modelformset_factory(
     Education,
     form=PsychologistEducationForm,
-    extra=1,
+    extra=0,  # Сколько еще пустых форм дополнительно показываем (например можно указать 1 для добавления нового)
     can_delete=True,
 )

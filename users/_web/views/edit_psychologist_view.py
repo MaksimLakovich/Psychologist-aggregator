@@ -6,11 +6,13 @@ from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from django_ratelimit.decorators import ratelimit
 
+from calendar_engine.models import AvailabilityRule
+from core.services.topic_groups import build_topics_grouped_by_type
 from users._web.forms.edit_psychologist_form import (
     EditPsychologistAccountForm, EditPsychologistProfileForm,
     PsychologistEducationFormSet)
 from users.mixins.role_required_mixin import PsychologistRequiredMixin
-from users.models import AppUser, Education
+from users.models import AppUser, Education, Method, Specialisation
 
 
 @method_decorator(ratelimit(key="ip", rate="5/m", block=True), name="post")
@@ -123,6 +125,27 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
         context["db_user"] = user
         context["db_profile"] = profile
         context["education_records_count"] = self.get_education_queryset().count()
+        context["has_active_working_schedule"] = AvailabilityRule.objects.filter(
+            creator=self.request.user,
+            is_active=True,
+        ).exists()
+        context["topics_by_type"] = build_topics_grouped_by_type()
+        context["all_methods"] = Method.objects.all().order_by("name")
+        context["all_specialisations"] = Specialisation.objects.all().order_by("name")
+        context["selected_topics"] = self.get_bound_profile_ids(context["profile_form"], "topics")
+        context["selected_methods"] = self.get_bound_profile_ids(context["profile_form"], "methods")
+        context["selected_specialisations"] = self.get_bound_profile_ids(context["profile_form"], "specialisations")
+        context["psychologist_topics"] = profile.topics.filter(id__in=context["selected_topics"]).order_by(
+            "type",
+            "group_name",
+            "name",
+        )
+        context["psychologist_methods"] = Method.objects.filter(
+            id__in=context["selected_methods"]
+        ).order_by("name")
+        context["psychologist_specialisations"] = Specialisation.objects.filter(
+            id__in=context["selected_specialisations"]
+        ).order_by("name")
         context["has_form_errors"] = bool(
             context["account_form"].errors
             or context["profile_form"].errors
@@ -130,13 +153,26 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
             or context["education_formset"].non_form_errors()
         )
         context["active_profile_tab"] = self.get_active_profile_tab(
+            account_form=context["account_form"],
             profile_form=context["profile_form"],
             education_formset=context["education_formset"],
         )
 
         return context
 
-    def get_active_profile_tab(self, *, profile_form, education_formset) -> str:
+    def get_bound_profile_ids(self, profile_form, field_name: str) -> list[str]:
+        """Возвращает список выбранных значений для M2M-поля профиля в виде строковых ID.
+
+        Это нужно, чтобы шаблон всегда показывал актуальный выбор:
+            - при обычном открытии страницы берем значения из БД;
+            - после неудачного сохранения берем значения из bound-формы, чтобы пользователь не терял свой выбор.
+        """
+        value = profile_form[field_name].value()
+        if not value:
+            return []
+        return [str(item) for item in value]
+
+    def get_active_profile_tab(self, *, account_form, profile_form, education_formset) -> str:
         """Определяет, какую вкладку открыть после проверки данных на сервере.
 
         СУТЬ:
@@ -144,18 +180,23 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
         а не на первую попавшуюся вкладку.
 
         Поэтому поведение такое:
-            - если ошибка в образовании, пользователь сразу видит вкладку "Образование" - education_formset;
-            - если ошибка в темах/методах/языках, сразу открываем профильную вкладку - profile_form;
-            - в остальных случаях оставляем стартовую вкладку с личными данными - это account_form.
+            - если ошибка в образовании, пользователь сразу видит вкладку "Образование";
+            - если ошибка в темах/методах/специализациях, открываем вкладку "Темы и методы";
+            - если ошибка в email/телефоне, открываем вкладку "Персональные данные";
+            - в остальных случаях открываем вкладку "Данные профиля".
         """
         if education_formset.non_form_errors() or any(form.errors for form in education_formset.forms):
             return "education"
 
-        expertise_fields = {"languages", "specialisations", "methods", "topics"}
+        expertise_fields = {"specialisations", "methods", "topics"}
         if any(field_name in profile_form.errors for field_name in expertise_fields):
             return "expertise"
 
-        return "personal"
+        personal_fields = {"email", "phone_number"}
+        if any(field_name in account_form.errors for field_name in personal_fields):
+            return "personal"
+
+        return "profile"
 
     def get(self, request, *args, **kwargs):
         """Обрабатывает обычное открытие страницы через GET-запрос:
@@ -171,23 +212,45 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
             - либо весь профиль обновился целиком;
             - либо страница вернулась с ошибками и ничего не сохранилось частично.
         """
-        account_form = self.get_account_form(data=request.POST)
-        profile_form = self.get_profile_form(data=request.POST, files=request.FILES)
-        education_formset = self.get_education_formset(data=request.POST, files=request.FILES)
+        post_data = request.POST.copy()
+        current_profile = self.get_profile_instance()
+
+        # На странице специалиста для выбора тем мы переиспользуем клиентскую модалку без переписывания ее HTML.
+        # Поэтому чекбоксы приходят под старым именем "requested_topics", а здесь мы переводим их
+        # в поле "topics", которое ожидает форма профиля специалиста.
+        if "topics_submitted" in post_data:
+            post_data.setlist("topics", post_data.getlist("requested_topics"))
+
+        # По той же причине для методов сохраняем client-имя поля в partial без изменений,
+        # а здесь переводим его в имя поля формы специалиста.
+        if "methods_submitted" in post_data:
+            post_data.setlist("methods", post_data.getlist("preferred_methods"))
+
+        # Темы, методы и специализации теперь редактируются через модальные окна внутри этой страницы.
+        # Если пользователь ничего не выбрал и явно нажал "Применить", браузер отправит пустой список,
+        # и это поведение нужно сохранить. Поэтому fallback к текущим значениям используем
+        # только если модальный блок вообще не участвовал в POST.
+        if "topics_submitted" not in post_data:
+            post_data.setlist("topics", [str(pk) for pk in current_profile.topics.values_list("pk", flat=True)])
+
+        if "methods_submitted" not in post_data:
+            post_data.setlist("methods", [str(pk) for pk in current_profile.methods.values_list("pk", flat=True)])
+
+        if "specialisations_submitted" not in post_data:
+            post_data.setlist(
+                "specialisations",
+                [str(pk) for pk in current_profile.specialisations.values_list("pk", flat=True)],
+            )
+
+        account_form = self.get_account_form(data=post_data)
+        profile_form = self.get_profile_form(data=post_data, files=request.FILES)
+        education_formset = self.get_education_formset(data=post_data, files=request.FILES)
 
         if account_form.is_valid() and profile_form.is_valid() and education_formset.is_valid():
             account_form.save()
 
             profile = profile_form.save(commit=False)
             profile.user = request.user
-
-            # Фото профиля управляется прямо на этой странице:
-            # - если пользователь отметил "Удалить текущее фото" и не загрузил новое, очищаем изображение;
-            # - если загружен новый файл, Django сам подставит его в поле photo через ModelForm
-            if profile_form.cleaned_data.get("remove_photo") and not profile_form.cleaned_data.get("photo"):
-                if profile.photo:
-                    profile.photo.delete(save=False)
-                profile.photo = None
 
             profile.save()
             profile_form.save_m2m()

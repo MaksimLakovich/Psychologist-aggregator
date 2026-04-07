@@ -84,6 +84,53 @@
         transform: translateY(-1px);
         box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1) !important;
     }
+
+    .selection-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(224, 231, 255, 0.95);
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(246, 248, 255, 0.8)),
+            radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%);
+        box-shadow: 0 18px 40px rgba(99, 102, 241, 0.09);
+    }
+
+    .selection-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 8px;
+        background: linear-gradient(90deg, rgba(99, 102, 241, 0.82), rgba(129, 140, 248, 0.35));
+    }
+
+    .selection-badge {
+        border-radius: 9999px;
+        padding: 0.6rem 0.95rem;
+        font-size: 0.82rem;
+        font-weight: 700;
+        line-height: 1.2;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .selection-badge.topic-badge {
+        border: 1px solid rgba(165, 180, 252, 0.35);
+        background: linear-gradient(180deg, rgba(224, 231, 255, 0.95), rgba(238, 242, 255, 0.8));
+        color: rgb(67 56 202);
+    }
+
+    .selection-badge.method-badge {
+        border: 1px solid rgba(110, 231, 183, 0.4);
+        background: linear-gradient(180deg, rgba(209, 250, 229, 0.95), rgba(236, 253, 245, 0.82));
+        color: rgb(4 120 87);
+    }
+
+    .selection-badge.specialisation-badge {
+        border: 1px solid rgba(232, 121, 249, 0.3);
+        background: linear-gradient(180deg, rgba(250, 232, 255, 0.95), rgba(253, 244, 255, 0.82));
+        color: rgb(162 28 175);
+    }
 </style>
 {% endblock %}
 
@@ -107,7 +154,7 @@
                 Профиль <span class="text-indigo-600">специалиста</span>
             </h1>
             <p class="mt-4 text-lg md:text-xl text-zinc-600 font-medium leading-relaxed">
-                Управляйте своей профессиональной карточкой и персональными данными
+                Управляйте своей публичной карточкой, контактными данными и профессиональными настройками
             </p>
         </div>
 
@@ -143,11 +190,16 @@
                         <div class="space-y-6">
 
                             <div class="flex justify-center">
-                                <div class="grid w-full max-w-3xl gap-3 sm:grid-cols-3">
+                                <div class="grid w-full max-w-4xl gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                                    <button type="button"
+                                            data-tab-button="profile"
+                                            class="rounded-2xl px-4 py-3 text-sm font-bold uppercase tracking-[0.18em] text-center text-zinc-500 transition-all duration-200 hover:bg-zinc-100">
+                                        Данные профиля
+                                    </button>
                                     <button type="button"
                                             data-tab-button="personal"
                                             class="rounded-2xl px-4 py-3 text-sm font-bold uppercase tracking-[0.18em] text-center text-zinc-500 transition-all duration-200 hover:bg-zinc-100">
-                                        Личные данные
+                                        Персональные данные
                                     </button>
                                     <button type="button"
                                             data-tab-button="education"
@@ -170,7 +222,7 @@
                                             focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
                                             transition-all duration-200 shadow-md hover:shadow-lg">
                                         <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="w-5 h-5">
-                                        Редактировать данные
+                                        Редактировать профиль
                                     </button>
                                 </div>
                                 <div id="profile-edit-actions" class="hidden flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -195,7 +247,7 @@
 
                     <!-- Данные для каждой вкладки -->
                     <div class="px-6 py-6 sm:px-8 sm:py-8">
-                        <div data-tab-panel="personal" class="space-y-8">
+                        <div data-tab-panel="profile" class="space-y-8">
                             {% if account_form.non_field_errors or profile_form.non_field_errors %}
                             <div class="p-4 rounded-2xl text-sm font-semibold bg-rose-50 text-rose-700 border border-rose-100 shadow-sm">
                                 {% for err in account_form.non_field_errors %}{{ err }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
@@ -208,33 +260,28 @@
                                     <img src="{% static 'images/menu/my-profile.svg' %}" alt="profile" class="w-8 h-8">
                                     <div>
                                         <h2 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">
-                                            Личные данные
+                                            Данные профиля
                                         </h2>
                                         <p class="mt-1 text-sm leading-6 text-zinc-500">
-                                            Здесь объединены персональные и рабочие параметры специалиста: контакты, часовой пояс, опыт практики, формат работы и краткая информация о себе.
+                                            Здесь находятся данные, которые помогают сформировать вашу публичную карточку в каталоге и дают клиенту первое понятное впечатление о вас как о специалисте.
                                         </p>
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                                     {% for field in account_form %}
-                                    <div class="space-y-2 {% if field.name == 'email' %}md:col-span-2{% endif %}">
-                                        <div class="flex justify-between items-center min-h-[20px]">
+                                        {% if field.name != 'email' and field.name != 'phone_number' %}
+                                        <div class="space-y-2">
                                             <label for="{{ field.id_for_label }}"
                                                    class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
                                                 {{ field.label }}
                                             </label>
-                                            {% if field.name == 'email' %}
-                                            <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400">Только чтение</span>
-                                            {% else %}
-                                            <span class="invisible text-[10px] uppercase tracking-wider font-bold">Только чтение</span>
+                                            {{ field }}
+                                            {% if field.errors %}
+                                            <p class="mt-2 text-sm tracking-wide text-pink-700">{{ field.errors.0 }}</p>
                                             {% endif %}
                                         </div>
-                                        {{ field }}
-                                        {% if field.errors %}
-                                        <p class="mt-2 text-sm tracking-wide text-pink-700">{{ field.errors.0 }}</p>
                                         {% endif %}
-                                    </div>
                                     {% endfor %}
 
                                     <div class="space-y-2">
@@ -316,35 +363,46 @@
                                 </div>
 
                                 <div class="mt-8 space-y-6">
+                                    <div class="space-y-3">
+                                        <p class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">{{ profile_form.languages.label }}</p>
+                                        <div class="grid gap-3 sm:grid-cols-2">
+                                            {% for checkbox in profile_form.languages %}
+                                            <label class="choice-card cursor-pointer">
+                                                {{ checkbox.tag }}
+                                                <span class="block rounded-2xl border border-zinc-200 bg-white px-4 py-4 text-base font-semibold text-zinc-700 transition-all duration-200 hover:border-indigo-200 hover:bg-indigo-50/60">
+                                                    {{ checkbox.choice_label }}
+                                                </span>
+                                            </label>
+                                            {% endfor %}
+                                        </div>
+                                        {% if profile_form.languages.errors %}<p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.languages.errors.0 }}</p>{% endif %}
+                                    </div>
+
                                     <div class="rounded-[1.5rem] border border-white bg-white p-5 shadow-sm shadow-zinc-200/60">
-                                        <div class="mb-5 flex flex-col gap-5 sm:flex-row sm:items-start">
-                                            <div class="overflow-hidden rounded-[1.25rem] bg-indigo-50 shrink-0">
-                                                <img src="{{ request.user.avatar_url }}"
-                                                     alt="avatar"
-                                                     class="h-40 w-32 object-cover object-center">
+                                        <div class="space-y-5">
+                                            <div>
+                                                <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Фото профиля</p>
+                                                <p class="mt-2 text-sm leading-6 text-zinc-500">
+                                                    Фото помогает клиенту быстрее узнать вас в каталоге и почувствовать, что за карточкой стоит живой специалист.
+                                                </p>
                                             </div>
 
-                                            <div class="flex-1 space-y-4">
-                                                <div>
-                                                    <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Фото профиля</p>
-                                                    <p class="mt-2 text-sm leading-6 text-zinc-500">
-                                                        Загрузите фото или измените текущее. Это изображение используется в каталоге, во встречах и отображается пользователям приложения.
-                                                    </p>
+                                            <div class="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start">
+                                                <div class="rounded-[1.5rem] border border-indigo-100 bg-indigo-50/70 p-4">
+                                                    <div class="flex h-[20rem] items-center justify-center overflow-hidden rounded-[1.25rem] bg-white">
+                                                        <img src="{{ request.user.avatar_url }}"
+                                                             alt="avatar"
+                                                             class="max-h-full max-w-full object-contain">
+                                                    </div>
                                                 </div>
 
-                                                <div class="space-y-2">
+                                                <div class="space-y-3">
                                                     {{ profile_form.photo }}
                                                     {% if profile_form.photo.errors %}
                                                     <p class="text-sm tracking-wide text-pink-700">{{ profile_form.photo.errors.0 }}</p>
                                                     {% endif %}
                                                 </div>
 
-                                                {% if db_profile.photo %}
-                                                <label class="inline-flex items-center gap-3 text-sm font-medium text-zinc-600">
-                                                    {{ profile_form.remove_photo }}
-                                                    {{ profile_form.remove_photo.label }}
-                                                </label>
-                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>
@@ -363,27 +421,53 @@
                             </div>
                         </div>
 
+                        <div data-tab-panel="personal" class="hidden space-y-8">
+                            <div class="rounded-[1.75rem] border border-zinc-100 bg-zinc-50/70 px-5 py-6 sm:px-6">
+                                <div class="mb-6 flex items-center gap-3">
+                                    <img src="{% static 'images/menu/contact-data.svg' %}" alt="contact-data" class="w-8 h-8">
+                                    <div>
+                                        <h2 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">Персональные данные</h2>
+                                        <p class="mt-1 text-sm leading-6 text-zinc-500">
+                                            Эти данные не показываются другим пользователям. Они нужны для входа в систему, связи с вами и безопасной работы аккаунта.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                    {% for field in account_form %}
+                                        {% if field.name == 'email' or field.name == 'phone_number' %}
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between items-center min-h-[20px]">
+                                                <label for="{{ field.id_for_label }}" class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                                    {{ field.label }}
+                                                </label>
+                                                {% if field.name == 'email' %}
+                                                <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400">Только чтение</span>
+                                                {% else %}
+                                                <span class="invisible text-[10px] uppercase tracking-wider font-bold">Только чтение</span>
+                                                {% endif %}
+                                            </div>
+                                            {{ field }}
+                                            {% if field.errors %}<p class="mt-2 text-sm tracking-wide text-pink-700">{{ field.errors.0 }}</p>{% endif %}
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
                         <div data-tab-panel="education" class="hidden space-y-8">
                             <div class="rounded-[1.75rem] border border-zinc-100 bg-zinc-50/70 px-5 py-6 sm:px-6">
-                                <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <img src="{% static 'images/menu/test.svg' %}" alt="education" class="w-8 h-8">
-                                        <div>
-                                            <h2 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">
-                                                Образование и документы
-                                            </h2>
-                                            <p class="mt-1 text-sm leading-6 text-zinc-500">
-                                                Каждую ступень обучения лучше хранить отдельной записью. Так вам проще поддерживать порядок, а модерации проще проверять документы.
-                                            </p>
-                                        </div>
+                                <div class="mb-6 flex items-center gap-3">
+                                    <img src="{% static 'images/menu/test.svg' %}" alt="education" class="w-8 h-8">
+                                    <div>
+                                        <h2 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">
+                                            Образование и документы
+                                        </h2>
+                                        <p class="mt-1 text-sm leading-6 text-zinc-500">
+                                            Добавляйте каждую ступень обучения отдельной записью.
+                                        </p>
                                     </div>
-
-                                    <button type="button"
-                                            id="education-add-button"
-                                            data-add-education-form
-                                            class="hidden inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg">
-                                        Добавить образование
-                                    </button>
                                 </div>
 
                                 {{ education_formset.management_form }}
@@ -447,7 +531,20 @@
                                         <div class="hidden">{{ form.DELETE }}</div>
                                         {% endif %}
                                     </div>
+                                    {% empty %}
+                                    <div class="rounded-[1.5rem] border border-dashed border-indigo-200 bg-indigo-50/60 px-5 py-6 text-sm leading-6 text-zinc-500">
+                                        Пока записи об образовании не добавлены. Нажмите <span class="font-semibold text-indigo-700">«Добавить еще»</span>, чтобы создать запись.
+                                    </div>
                                     {% endfor %}
+                                </div>
+
+                                <div class="mt-6 flex justify-end">
+                                    <button type="button"
+                                            id="education-add-button"
+                                            data-add-education-form
+                                            class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg">
+                                        Добавить еще
+                                    </button>
                                 </div>
 
                                 <template id="education-empty-form-template">
@@ -495,88 +592,116 @@
                                             Темы, методы и специализации
                                         </h2>
                                         <p class="mt-1 text-sm leading-6 text-zinc-500">
-                                            Этот блок влияет на то, как сервис будет показывать вас в каталоге и как в будущем подбирать коллег и клиентов по тематике работы.
+                                            Здесь вы настраиваете свой профессиональный профиль для клиентов. Эти параметры помогают клиенту понять ваш фокус, а сервису точнее показывать вашу карточку в каталоге.
                                         </p>
                                     </div>
                                 </div>
 
-                                <div class="space-y-8">
-                                    <div>
-                                        <div class="mb-4">
-                                            <p class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">{{ profile_form.languages.label }}</p>
-                                        </div>
-                                        <div class="grid gap-3 sm:grid-cols-2">
-                                            {% for checkbox in profile_form.languages %}
-                                            <label class="choice-card cursor-pointer">
-                                                {{ checkbox.tag }}
-                                                <span class="block rounded-2xl border border-zinc-200 bg-white px-4 py-4 text-base font-semibold text-zinc-700 transition-all duration-200 hover:border-indigo-200 hover:bg-indigo-50/60">
-                                                    {{ checkbox.choice_label }}
+                                <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+                                    <div class="selection-card rounded-[2rem] p-6 relative min-w-0">
+                                        <button type="button"
+                                                data-modal-open="topics-modal"
+                                                data-expertise-edit-button
+                                                class="hidden absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
+                                            <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
+                                        </button>
+
+                                        <div class="relative z-[1]">
+                                            <div class="flex items-start gap-3 mb-5">
+                                                <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100/80 text-indigo-600 shadow-sm flex-shrink-0">
+                                                    <img src="{% static 'images/menu/topic-icon.svg' %}" alt="topic" class="w-7 h-7">
                                                 </span>
-                                            </label>
-                                            {% endfor %}
+                                                <div class="min-w-0 pr-12">
+                                                    <p class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 mb-4 block">Темы</p>
+                                                    <h3 class="mt-2 text-xl font-black tracking-tight text-indigo-950/75">С чем вы работаете</h3>
+                                                    <p class="mt-2 text-sm leading-relaxed text-slate-500">
+                                                        Темы помогают клиенту быстрее понять, на какие запросы вы откликаетесь увереннее всего.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div id="selected-topics-container" class="flex flex-wrap gap-2.5">
+                                                {% for topic in psychologist_topics %}
+                                                <span class="selection-badge topic-badge">{{ topic.name }}</span>
+                                                {% empty %}
+                                                <span class="text-sm text-zinc-500">Темы пока не выбраны</span>
+                                                {% endfor %}
+                                            </div>
                                         </div>
-                                        {% if profile_form.languages.errors %}
-                                        <p class="mt-3 text-sm tracking-wide text-pink-700">{{ profile_form.languages.errors.0 }}</p>
-                                        {% endif %}
                                     </div>
 
-                                    <div>
-                                        <div class="mb-4">
-                                            <p class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">{{ profile_form.specialisations.label }}</p>
-                                        </div>
-                                        <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                                            {% for checkbox in profile_form.specialisations %}
-                                            <label class="choice-card cursor-pointer">
-                                                {{ checkbox.tag }}
-                                                <span class="block rounded-2xl border border-zinc-200 bg-white px-4 py-4 text-base font-semibold text-zinc-700 transition-all duration-200 hover:border-indigo-200 hover:bg-indigo-50/60">
-                                                    {{ checkbox.choice_label }}
+                                    <div class="selection-card rounded-[2rem] p-6 relative min-w-0">
+                                        <button type="button"
+                                                data-modal-open="methods-modal"
+                                                data-expertise-edit-button
+                                                class="hidden absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
+                                            <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
+                                        </button>
+
+                                        <div class="relative z-[1]">
+                                            <div class="flex items-start gap-3 mb-5">
+                                                <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100/80 text-emerald-600 shadow-sm flex-shrink-0">
+                                                    <img src="{% static 'images/menu/method-icon.svg' %}" alt="method" class="w-7 h-7">
                                                 </span>
-                                            </label>
-                                            {% endfor %}
+                                                <div class="min-w-0 pr-12">
+                                                    <p class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 mb-4 block">Методы</p>
+                                                    <h3 class="mt-2 text-xl font-black tracking-tight text-indigo-950/75">Как вы работаете</h3>
+                                                    <p class="mt-2 text-sm leading-relaxed text-slate-500">
+                                                        Методы показывают клиенту ваш рабочий стиль и помогают понять, какой подход он встретит на сессии.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div id="selected-methods-container" class="flex flex-wrap gap-2.5">
+                                                {% for method in psychologist_methods %}
+                                                <span class="selection-badge method-badge">{{ method.name }}</span>
+                                                {% empty %}
+                                                <span class="text-sm text-zinc-500">Методы пока не выбраны</span>
+                                                {% endfor %}
+                                            </div>
                                         </div>
-                                        {% if profile_form.specialisations.errors %}
-                                        <p class="mt-3 text-sm tracking-wide text-pink-700">{{ profile_form.specialisations.errors.0 }}</p>
-                                        {% endif %}
                                     </div>
 
-                                    <div>
-                                        <div class="mb-4">
-                                            <p class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">{{ profile_form.methods.label }}</p>
-                                        </div>
-                                        <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                                            {% for checkbox in profile_form.methods %}
-                                            <label class="choice-card cursor-pointer">
-                                                {{ checkbox.tag }}
-                                                <span class="block rounded-2xl border border-zinc-200 bg-white px-4 py-4 text-base font-semibold text-zinc-700 transition-all duration-200 hover:border-indigo-200 hover:bg-indigo-50/60">
-                                                    {{ checkbox.choice_label }}
-                                                </span>
-                                            </label>
-                                            {% endfor %}
-                                        </div>
-                                        {% if profile_form.methods.errors %}
-                                        <p class="mt-3 text-sm tracking-wide text-pink-700">{{ profile_form.methods.errors.0 }}</p>
-                                        {% endif %}
-                                    </div>
+                                    <div class="selection-card rounded-[2rem] p-6 relative min-w-0">
+                                        <button type="button"
+                                                data-modal-open="specialisations-modal"
+                                                data-expertise-edit-button
+                                                class="hidden absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
+                                            <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
+                                        </button>
 
-                                    <div>
-                                        <div class="mb-4">
-                                            <p class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">{{ profile_form.topics.label }}</p>
-                                        </div>
-                                        <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                                            {% for checkbox in profile_form.topics %}
-                                            <label class="choice-card cursor-pointer">
-                                                {{ checkbox.tag }}
-                                                <span class="block rounded-2xl border border-zinc-200 bg-white px-4 py-4 text-base font-semibold text-zinc-700 transition-all duration-200 hover:border-indigo-200 hover:bg-indigo-50/60">
-                                                    {{ checkbox.choice_label }}
+                                        <div class="relative z-[1]">
+                                            <div class="flex items-start gap-3 mb-5">
+                                                <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100/80 text-fuchsia-600 shadow-sm flex-shrink-0">
+                                                    <img src="{% static 'images/menu/my-profile.svg' %}" alt="specialisation" class="w-7 h-7">
                                                 </span>
-                                            </label>
-                                            {% endfor %}
+                                                <div class="min-w-0 pr-12">
+                                                    <p class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 mb-4 block">Специализации</p>
+                                                    <h3 class="mt-2 text-xl font-black tracking-tight text-indigo-950/75">Ваша профессиональная школа</h3>
+                                                    <p class="mt-2 text-sm leading-relaxed text-slate-500">
+                                                        Специализации помогают точнее описать вашу практику и то, в какой парадигме вы ведете работу.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div id="selected-specialisations-container" class="flex flex-wrap gap-2.5">
+                                                {% for specialisation in psychologist_specialisations %}
+                                                <span class="selection-badge specialisation-badge">{{ specialisation.name }}</span>
+                                                {% empty %}
+                                                <span class="text-sm text-zinc-500">Специализации пока не выбраны</span>
+                                                {% endfor %}
+                                            </div>
                                         </div>
-                                        {% if profile_form.topics.errors %}
-                                        <p class="mt-3 text-sm tracking-wide text-pink-700">{{ profile_form.topics.errors.0 }}</p>
-                                        {% endif %}
                                     </div>
                                 </div>
+
+                                {% if profile_form.topics.errors or profile_form.methods.errors or profile_form.specialisations.errors %}
+                                <div class="mt-6 rounded-2xl border border-rose-100 bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-700 shadow-sm">
+                                    {% if profile_form.topics.errors %}<div>{{ profile_form.topics.errors.0 }}</div>{% endif %}
+                                    {% if profile_form.methods.errors %}<div>{{ profile_form.methods.errors.0 }}</div>{% endif %}
+                                    {% if profile_form.specialisations.errors %}<div>{{ profile_form.specialisations.errors.0 }}</div>{% endif %}
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -621,10 +746,32 @@
                             <span class="font-semibold">Образование:</span>
                             {{ db_profile.is_all_education_verified|yesno:"Подтверждено,Ожидает проверки" }}
                         </div>
+                        <div class="rounded-2xl bg-white/10 px-4 py-3">
+                            <span class="font-semibold">Рабочий график:</span>
+                            {{ has_active_working_schedule|yesno:"Создан,Пока не создан" }}
+                        </div>
                     </div>
                 </div>
 
+                <div class="rounded-[2rem] border border-zinc-100 bg-white p-6 shadow-lg shadow-zinc-200/40">
+                    <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Что важно не забыть</p>
+                    <ul class="mt-4 space-y-3 text-sm leading-6 text-zinc-600">
+                        <li>Фото и биография помогают клиенту быстрее понять, насколько комфортно ему будет с вами работать.</li>
+                        <li>Образование лучше вносить отдельными карточками, чтобы профиль выглядел аккуратно и прозрачно.</li>
+                        <li>Если рабочий график еще не создан, обязательно настройте его в соседнем разделе кабинета.</li>
+                    </ul>
+                </div>
+
             </aside>
+
+            <input type="hidden" name="topics_submitted" value="1">
+            {% include 'users/_modal_add_topics.html' %}
+
+            <input type="hidden" name="methods_submitted" value="1">
+            {% include 'users/_modal_add_methods.html' %}
+
+            <input type="hidden" name="specialisations_submitted" value="1">
+            {% include 'users/_modal_add_specialisations.html' %}
 
         </form>
 
