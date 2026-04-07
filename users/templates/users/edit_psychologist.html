@@ -87,24 +87,31 @@
 </style>
 {% endblock %}
 
+
 {% block content %}
+
 <section class="relative overflow-hidden min-h-screen bg-white backdrop-blur-[2px] w-full px-6 sm:px-8 lg:px-24 py-10">
 
+    <!-- Фоновое ЛОГО в нижний правый угол -->
     <div class="hidden lg:block absolute bottom-10 right-10 p-8 pointer-events-none z-0 select-none opacity-10 blur-[2px]">
-        <img src="{% static 'images/menu/opora-base.png' %}" alt="" class="w-80 h-auto">
+        <img src="{% static 'images/menu/opora-base.png' %}"
+             alt=""
+             class="w-80 h-auto">
     </div>
 
     <div class="max-w-7xl mx-auto relative z-10">
 
+        <!-- ШАПКА -->
         <div class="mb-12 max-w-3xl animate-fade-in-left">
             <h1 class="text-4xl md:text-5xl font-black text-indigo-900 tracking-tight leading-tight">
                 Профиль <span class="text-indigo-600">специалиста</span>
             </h1>
             <p class="mt-4 text-lg md:text-xl text-zinc-600 font-medium leading-relaxed">
-                Управляйте своей профессиональной карточкой, образованием и направлениями работы в одном экране.
+                Управляйте своей профессиональной карточкой и персональными данными
             </p>
         </div>
 
+        <!-- УВЕДОМЛЕНИЯ -->
         {% if messages %}
         <div class="mb-8 space-y-3">
             {% for message in messages %}
@@ -117,6 +124,7 @@
         </div>
         {% endif %}
 
+        <!-- ДАННЫЕ ПОЛЬЗОВАТЕЛЯ -->
         <form method="post"
               enctype="multipart/form-data"
               id="psychologist-profile-form"
@@ -126,13 +134,13 @@
               class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
             {% csrf_token %}
 
+            <!-- ОСНОВНОЙ БЛОК С ПОЛЬЗОВАТЕЛЬСКИМИ ДАННЫМИ -->
             <div class="space-y-8 animate-fade-in-up" style="animation-delay: 0.05s;">
                 <div class="rounded-[2rem] border border-indigo-100 bg-white shadow-xl shadow-indigo-100/50 overflow-hidden">
-                    <div class="border-b border-indigo-100 bg-gradient-to-r from-indigo-50 via-white to-indigo-50 px-6 py-5 sm:px-8">
+
+                    <!-- Перечень вкладок / кнопки для работы со страницей -->
+                    <div class="border-b border-indigo-100 bg-gradient-to-r from-indigo-50 via-white to-indigo-50 px-6 py-6 sm:px-8">
                         <div class="space-y-6">
-                            <div class="text-center">
-                                <p class="text-sm font-bold uppercase tracking-[0.24em] text-indigo-400">Рабочий экран специалиста</p>
-                            </div>
 
                             <div class="flex justify-center">
                                 <div class="grid w-full max-w-3xl gap-3 sm:grid-cols-3">
@@ -154,11 +162,7 @@
                                 </div>
                             </div>
 
-                            <div class="flex flex-col gap-4 border-t border-indigo-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                                <div class="text-sm leading-6 text-zinc-500">
-                                    По умолчанию профиль открыт в режиме просмотра. Это снижает риск случайно изменить данные или потерять структуру карточки.
-                                </div>
-
+                            <div class="flex flex-col gap-4 border-t border-indigo-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
                                 <div id="display-actions">
                                     <button type="button" id="profile-edit-toggle"
                                             class="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 gap-2
@@ -166,10 +170,9 @@
                                             focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
                                             transition-all duration-200 shadow-md hover:shadow-lg">
                                         <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="w-5 h-5">
-                                        Редактировать профиль
+                                        Редактировать данные
                                     </button>
                                 </div>
-
                                 <div id="profile-edit-actions" class="hidden flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                                     <button type="submit"
                                             class="inline-flex items-center justify-center px-6 py-3
@@ -186,9 +189,11 @@
                                     </button>
                                 </div>
                             </div>
+
                         </div>
                     </div>
 
+                    <!-- Данные для каждой вкладки -->
                     <div class="px-6 py-6 sm:px-8 sm:py-8">
                         <div data-tab-panel="personal" class="space-y-8">
                             {% if account_form.non_field_errors or profile_form.non_field_errors %}
@@ -323,7 +328,7 @@
                                                 <div>
                                                     <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Фото профиля</p>
                                                     <p class="mt-2 text-sm leading-6 text-zinc-500">
-                                                        Загрузите новое фото или удалите текущее. Это изображение используется в меню, в каталоге и в будущих кабинетах специалиста.
+                                                        Загрузите фото или измените текущее. Это изображение используется в каталоге, во встречах и отображается пользователям приложения.
                                                     </p>
                                                 </div>
 
@@ -575,10 +580,13 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
 
+            <!-- БЛОК СО СВОДКОЙ ПРОФИЛЯ -->
             <aside class="animate-fade-in-up space-y-6" style="animation-delay: 0.1s;">
+
                 <div class="rounded-[2rem] border border-indigo-100 bg-gradient-to-br from-indigo-600 via-indigo-700 to-slate-800 p-6 text-white shadow-2xl shadow-indigo-200/60">
                     <p class="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-100">Сводка профиля</p>
                     <div class="mt-5 flex items-center gap-4">
@@ -624,11 +632,16 @@
                         <li>Темы, методы и специализации влияют на то, как сервис показывает вас в каталоге.</li>
                     </ul>
                 </div>
+
             </aside>
+
         </form>
+
     </div>
+
 </section>
 
 <script src="{% static 'js/modules/edit_profile/edit_psychologist_profile.js' %}"></script>
 <script type="module" src="{% static 'js/modules/auto_hide_message.js' %}"></script>
+
 {% endblock %}
