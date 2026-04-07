@@ -242,18 +242,36 @@ document.addEventListener("DOMContentLoaded", function () {
     activateTab(initialTab);
   }
 
+  /**
+   * Возвращает настройки конкретной модалки по ее `id`.
+   * Это нужно, чтобы вся общая логика открытия, закрытия и обновления бейджей
+   * работала одинаково для тем, методов и специализаций без дублирования кода.
+   */
   function getModalConfigById(modalId) {
     return modalConfigs[modalId] || null;
   }
 
+  /**
+   * Читает список выбранных значений из чекбоксов внутри конкретной модалки.
+   * По сути это ответ на вопрос: что сейчас отмечено пользователем в окне выбора.
+   */
   function readCheckedValues(checkboxSelector) {
     return Array.from(document.querySelectorAll(`${checkboxSelector}:checked`)).map((checkbox) => checkbox.value);
   }
 
+  /**
+   * Возвращает все чекбоксы нужной модалки.
+   * Этот помощник нужен, когда надо массово восстановить или обновить состояние выбора.
+   */
   function getCheckboxes(checkboxSelector) {
     return Array.from(document.querySelectorAll(checkboxSelector));
   }
 
+  /**
+   * Восстанавливает чекбоксы в то состояние, которое сейчас считается "актуальным" для страницы.
+   * Это важно, когда пользователь открыл модалку, что-то пощелкал и закрыл окно без применения:
+   * при следующем открытии он должен увидеть не случайный промежуточный выбор, а последнее подтвержденное состояние.
+   */
   function applyCheckedValues(checkboxSelector, values) {
     const valuesSet = new Set(values);
     getCheckboxes(checkboxSelector).forEach((checkbox) => {
@@ -261,12 +279,20 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  /**
+   * Очищает текст ошибки внутри модалки.
+   * Пользователь не должен видеть старое сообщение об ошибке при каждом новом открытии окна.
+   */
   function clearModalError(errorElement) {
     if (!errorElement) return;
     errorElement.textContent = "";
     errorElement.classList.add("hidden");
   }
 
+  /**
+   * Показывает сообщение об ошибке прямо внутри модального окна.
+   * Это нужно, чтобы пользователь понимал, что именно пошло не так, не теряя контекст текущего выбора.
+   */
   function showModalError(errorElement, message) {
     if (!errorElement) return;
     errorElement.textContent = message;
@@ -301,17 +327,31 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  /**
+   * Собирает подписи выбранных элементов.
+   * Они нужны не для отправки на сервер, а для красивого обновления карточек на самой странице:
+   * вместо внутренних ID пользователь сразу видит понятные названия тем, методов и специализаций.
+   */
   function collectSelectedLabels(checkboxSelector) {
     return Array.from(document.querySelectorAll(`${checkboxSelector}:checked`))
       .map((checkbox) => checkbox.dataset.label || "")
       .filter(Boolean);
   }
 
+  /**
+   * Управляет блокировкой прокрутки основного экрана, пока открыта хотя бы одна модалка.
+   * Это делает взаимодействие с окном выбора спокойнее и не дает странице "уезжать" на фоне.
+   */
   function syncBodyScrollLock() {
     const hasOpenedModal = Array.from(modals).some((modal) => !modal.classList.contains("hidden"));
     document.body.classList.toggle("overflow-hidden", hasOpenedModal);
   }
 
+  /**
+   * Открывает нужную модалку только в режиме редактирования.
+   * Перед открытием система возвращает в чекбоксах последнее подтвержденное состояние,
+   * чтобы пользователь всегда начинал работу с понятной и ожидаемой точки.
+   */
   function openModal(modalId) {
     const modal = document.getElementById(modalId);
     const modalConfig = getModalConfigById(modalId);
@@ -323,6 +363,11 @@ document.addEventListener("DOMContentLoaded", function () {
     syncBodyScrollLock();
   }
 
+  /**
+   * Закрывает модалку и при необходимости откатывает несохраненный выбор.
+   * Если пользователь просто закрыл окно, мы возвращаем предыдущее состояние.
+   * Если он нажал "Сохранить" внутри модалки, откат уже не нужен.
+   */
   function closeModal(modalId, { restoreSavedState = true } = {}) {
     const modal = document.getElementById(modalId);
     const modalConfig = getModalConfigById(modalId);
@@ -337,6 +382,11 @@ document.addEventListener("DOMContentLoaded", function () {
     syncBodyScrollLock();
   }
 
+  /**
+   * Закрывает сразу все модалки на странице.
+   * Это используется, например, когда пользователь выходит из режима редактирования,
+   * чтобы на экране не оставались случайно открытые окна выбора.
+   */
   function closeAllModals() {
     Object.keys(modalConfigs).forEach((modalId) => closeModal(modalId));
   }
@@ -370,16 +420,21 @@ document.addEventListener("DOMContentLoaded", function () {
   setEditMode(hasErrors);
   initEducationFormset();
 
+  // При первой загрузке страницы запоминаем текущее состояние чекбоксов в каждой модалке.
+  // Это становится "точкой возврата", если пользователь откроет окно и закроет его без применения.
   Object.values(modalConfigs).forEach((modalConfig) => {
     modalState.set(modalConfig.modalId, readCheckedValues(modalConfig.checkboxSelector));
   });
 
+  // Кнопки-иконки на карточках открывают соответствующие модальные окна выбора.
   openButtons.forEach((button) => {
     button.addEventListener("click", () => {
       openModal(button.dataset.modalOpen);
     });
   });
 
+  // Каждая модалка закрывается по своей кнопке-крестику/кнопке "Отмена"
+  // и по клику на затемненный фон вокруг окна.
   modals.forEach((modal) => {
     modal.querySelectorAll("[data-modal-close]").forEach((button) => {
       button.addEventListener("click", () => {
@@ -394,6 +449,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // Клавиша Escape закрывает только текущее открытое окно, не затрагивая остальные данные формы.
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
 
@@ -403,6 +459,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // Кнопка "Сохранить" внутри каждой модалки пока обновляет только сам экран,
+  // а не отправляет отдельный запрос на сервер: реальное сохранение происходит общим submit формы профиля.
   Object.values(modalConfigs).forEach((modalConfig) => {
     document.getElementById(modalConfig.saveButtonId)?.addEventListener("click", () => {
       applyModalSelection(modalConfig.modalId);
