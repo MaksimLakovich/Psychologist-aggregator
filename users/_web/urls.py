@@ -27,5 +27,5 @@ urlpatterns = [
     path("password-reset-confirm/", PasswordResetConfirmPageView.as_view(), name="password-reset-confirm"),
     path("password-change/", ChangePasswordPageView.as_view(), name="password-change"),
     path("profile-edit/", EditClientProfilePageView.as_view(), name="profile-edit"),
-    path("psychologist-profile-edit/", EditPsychologistProfilePageView.as_view(), name="psychologist-profile-edit"),
+    path("ps-profile-edit/", EditPsychologistProfilePageView.as_view(), name="psychologist-profile-edit"),
 ]

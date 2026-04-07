@@ -2493,6 +2493,10 @@ input:checked + .toggle-bg {
   height: 50%;
 }
 
+.h-40 {
+  height: 10rem;
+}
+
 .max-h-0 {
   max-height: 0px;
 }
