@@ -2351,6 +2351,10 @@ input:checked + .toggle-bg {
   display: none;
 }
 
+.aspect-\[4\/5\] {
+  aspect-ratio: 4/5;
+}
+
 .size-5 {
   width: 1.25rem;
   height: 1.25rem;
@@ -3162,6 +3166,12 @@ input:checked + .toggle-bg {
   margin-bottom: calc(2rem * var(--tw-space-y-reverse));
 }
 
+.space-y-10 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(2.5rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(2.5rem * var(--tw-space-y-reverse));
+}
+
 .divide-y > :not([hidden]) ~ :not([hidden]) {
   --tw-divide-y-reverse: 0;
   border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
@@ -3321,6 +3331,10 @@ input:checked + .toggle-bg {
 
 .rounded-\[1\.8rem\] {
   border-radius: 1.8rem;
+}
+
+.rounded-\[1\.75rem\] {
+  border-radius: 1.75rem;
 }
 
 .rounded-e-lg {
@@ -4779,6 +4793,10 @@ input:checked + .toggle-bg {
   background-color: rgb(165 243 252 / 0.65);
 }
 
+.bg-zinc-50\/70 {
+  background-color: rgb(250 250 250 / 0.7);
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
@@ -4909,6 +4927,11 @@ input:checked + .toggle-bg {
   --tw-gradient-stops: var(--tw-gradient-from), #ffffff var(--tw-gradient-via-position), var(--tw-gradient-to);
 }
 
+.via-indigo-700 {
+  --tw-gradient-to: rgb(81 69 205 / 0)  var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), #5145CD var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
+
 .to-indigo-200 {
   --tw-gradient-to: #CDDBFE var(--tw-gradient-to-position);
 }
@@ -4967,6 +4990,14 @@ input:checked + .toggle-bg {
 
 .to-slate-50 {
   --tw-gradient-to: #f8fafc var(--tw-gradient-to-position);
+}
+
+.to-indigo-50 {
+  --tw-gradient-to: #F0F5FF var(--tw-gradient-to-position);
+}
+
+.to-slate-800 {
+  --tw-gradient-to: #1e293b var(--tw-gradient-to-position);
 }
 
 .object-contain {
@@ -5448,6 +5479,10 @@ input:checked + .toggle-bg {
 
 .leading-7 {
   line-height: 1.75rem;
+}
+
+.leading-5 {
+  line-height: 1.25rem;
 }
 
 .tracking-\[0\.2em\] {
@@ -6318,6 +6353,26 @@ input:checked + .toggle-bg {
   --tw-shadow: var(--tw-shadow-colored);
 }
 
+.shadow-indigo-100\/50 {
+  --tw-shadow-color: rgb(229 237 255 / 0.5);
+  --tw-shadow: var(--tw-shadow-colored);
+}
+
+.shadow-indigo-200\/60 {
+  --tw-shadow-color: rgb(205 219 254 / 0.6);
+  --tw-shadow: var(--tw-shadow-colored);
+}
+
+.shadow-zinc-200\/40 {
+  --tw-shadow-color: rgb(228 228 231 / 0.4);
+  --tw-shadow: var(--tw-shadow-colored);
+}
+
+.shadow-zinc-200\/60 {
+  --tw-shadow-color: rgb(228 228 231 / 0.6);
+  --tw-shadow: var(--tw-shadow-colored);
+}
+
 .outline {
   outline-style: solid;
 }
@@ -6371,6 +6426,11 @@ input:checked + .toggle-bg {
 .ring-slate-100 {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(241 245 249 / var(--tw-ring-opacity, 1));
+}
+
+.ring-zinc-200 {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(228 228 231 / var(--tw-ring-opacity, 1));
 }
 
 .blur {
@@ -7779,6 +7839,10 @@ input:checked + .toggle-bg {
     justify-content: center;
   }
 
+  .sm\:justify-between {
+    justify-content: space-between;
+  }
+
   .sm\:gap-6 {
     gap: 1.5rem;
   }
@@ -7842,6 +7906,11 @@ input:checked + .toggle-bg {
   .sm\:py-6 {
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
+  }
+
+  .sm\:py-8 {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
   }
 
   .sm\:pt-2 {
@@ -8020,6 +8089,10 @@ input:checked + .toggle-bg {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
+  .md\:grid-cols-\[minmax\(0\2c 1fr\)_minmax\(0\2c 1fr\)_auto\] {
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr) auto;
+  }
+
   .md\:flex-row {
     flex-direction: row;
   }
@@ -8032,8 +8105,16 @@ input:checked + .toggle-bg {
     align-items: flex-start;
   }
 
+  .md\:items-end {
+    align-items: flex-end;
+  }
+
   .md\:items-center {
     align-items: center;
+  }
+
+  .md\:justify-between {
+    justify-content: space-between;
   }
 
   .md\:gap-1\.5 {
@@ -8572,6 +8653,14 @@ input:checked + .toggle-bg {
 
   .xl\:grid-cols-\[minmax\(0\2c 1\.45fr\)_minmax\(280px\2c 0\.9fr\)\] {
     grid-template-columns: minmax(0,1.45fr) minmax(280px,0.9fr);
+  }
+
+  .xl\:grid-cols-\[minmax\(0\2c 1fr\)_22rem\] {
+    grid-template-columns: minmax(0,1fr) 22rem;
+  }
+
+  .xl\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .xl\:flex-row {
