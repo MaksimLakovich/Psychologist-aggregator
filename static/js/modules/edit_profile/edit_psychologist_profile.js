@@ -27,6 +27,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const editableInputs = Array.from(form.querySelectorAll("[data-editable-field='1']"));
   const editableChoiceInputs = Array.from(form.querySelectorAll(".choice-card input"));
+  const editableModalCheckboxes = Array.from(
+    form.querySelectorAll(".topic-checkbox, .method-checkbox, .specialisation-checkbox"),
+  );
   const removeEducationButtons = Array.from(form.querySelectorAll("[data-remove-education-form]"));
   const expertiseEditButtons = Array.from(form.querySelectorAll("[data-expertise-edit-button]"));
 
@@ -135,6 +138,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     editableInputs.forEach((field) => setFieldState(field, isEditing));
     editableChoiceInputs.forEach((field) => {
+      field.disabled = !isEditing;
+    });
+    editableModalCheckboxes.forEach((field) => {
       field.disabled = !isEditing;
     });
 
@@ -287,16 +293,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!errorElement) return;
     errorElement.textContent = "";
     errorElement.classList.add("hidden");
-  }
-
-  /**
-   * Показывает сообщение об ошибке прямо внутри модального окна.
-   * Это нужно, чтобы пользователь понимал, что именно пошло не так, не теряя контекст текущего выбора.
-   */
-  function showModalError(errorElement, message) {
-    if (!errorElement) return;
-    errorElement.textContent = message;
-    errorElement.classList.remove("hidden");
   }
 
   /**

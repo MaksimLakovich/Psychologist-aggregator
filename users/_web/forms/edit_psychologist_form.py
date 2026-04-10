@@ -300,7 +300,10 @@ class EditPsychologistProfileForm(forms.ModelForm):
         self.fields["topics"].queryset = Topic.objects.order_by("group_name", "name")
         # Для checkbox-групп используем отдельную отрисовку в шаблоне,
         # поэтому класс назначаем контейнеру каждого input через renderer уже в HTML
-        self.fields["languages"].initial = self.instance.languages if self.instance.pk else ["russian"]
+        if self.instance.pk:
+            self.fields["languages"].initial = list(self.instance.languages or [])
+        else:
+            self.fields["languages"].initial = ["russian"]
 
     def clean_languages(self):
         """Возвращаем список языков в том формате, который ожидает ArrayField модели.

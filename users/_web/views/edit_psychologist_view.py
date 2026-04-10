@@ -38,11 +38,16 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
     success_url = reverse_lazy("users:web:psychologist-profile-edit")
 
     def get_user_instance(self) -> AppUser:
-        """Возвращает актуальный объект пользователя из БД.
-
-        Это нужно, чтобы страница всегда работала с "живыми" данными из БД, а не со старой копией объекта из request.
-        """
-        return AppUser.objects.select_related("psychologist_profile").get(pk=self.request.user.pk)
+        """Возвращает актуальный объект пользователя из БД."""
+        # ВАЖНО: здесь используем внутренний кеш потому что:
+        #   - в рамках одного открытия страницы этот метод вызывается несколько раз;
+        #   - без кеша каждый такой вызов повторно ходил бы в БД за одним и тем же пользователем;
+        #   - поэтому первый вызов загружает пользователя, а остальные просто переиспользуют уже полученный объект
+        if not hasattr(self, "_cached_user_instance"):
+            self._cached_user_instance = AppUser.objects.select_related("psychologist_profile").get(
+                pk=self.request.user.pk
+            )
+        return self._cached_user_instance
 
     def get_profile_instance(self):
         """Возвращает профессиональный профиль текущего специалиста.
@@ -53,7 +58,13 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
             - стоимость сессий;
             - фото и другие параметры публичной карточки.
         """
-        return self.get_user_instance().psychologist_profile
+        # ВАЖНО: здесь тоже используем внутренний кеш потому что:
+        #   - профиль нужен и для формы, и для контекста, и для сохранения;
+        #   - это все еще один и тот же профиль в рамках одного запроса;
+        #   - поэтому мы один раз берем его у пользователя и дальше используем повторно
+        if not hasattr(self, "_cached_profile_instance"):
+            self._cached_profile_instance = self.get_user_instance().psychologist_profile
+        return self._cached_profile_instance
 
     def get_education_queryset(self):
         """Все записи образования текущего специалиста.
@@ -63,7 +74,16 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
             - для formset при POST;
             - для защиты от случайного доступа к чужим документам.
         """
-        return Education.objects.filter(creator=self.request.user).order_by("-year_start", "-created_at")
+        # ВАЖНО: здесь тоже используем внутренний кеш потому что:
+        #   - страница несколько раз обращается к одному и тому же набору образования;
+        #   - без кеша мы бы несколько раз собирали одинаковый queryset;
+        #   - так код остается простым: есть один метод и одна точка входа для данных об образовании
+        if not hasattr(self, "_cached_education_queryset"):
+            self._cached_education_queryset = Education.objects.filter(creator=self.request.user).order_by(
+                "-year_start",
+                "-created_at",
+            )
+        return self._cached_education_queryset
 
     def get_account_form(self, *, data=None):
         """Собирает форму с базовыми данными аккаунта специалиста. Отвечает за данные:
@@ -101,65 +121,6 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
             prefix="education",
         )
 
-    def get_context_data(self, **kwargs):
-        """Формирование контекста страницы редактирования профиля специалиста.
-
-        На уровне HTML странице нужны не только формы, но и вспомогательные данные:
-            - заголовок страницы;
-            - параметры для боковой навигации;
-            - текущие данные пользователя и профиля;
-            - флаг, есть ли ошибки;
-            - подсказка, какую вкладку открыть после неудачного сохранения.
-        """
-        context = super().get_context_data(**kwargs)
-        user = self.get_user_instance()
-        profile = user.psychologist_profile
-
-        context.setdefault("account_form", self.get_account_form())
-        context.setdefault("profile_form", self.get_profile_form())
-        context.setdefault("education_formset", self.get_education_formset())
-
-        context["title_edit_psychologist_page_view"] = "Редактирование профиля специалиста в сервисе ОПОРА"
-        context["show_sidebar"] = "sidebar"
-        context["current_sidebar_key"] = "psychologist-profile-edit"
-        context["db_user"] = user
-        context["db_profile"] = profile
-        context["education_records_count"] = self.get_education_queryset().count()
-        context["has_active_working_schedule"] = AvailabilityRule.objects.filter(
-            creator=self.request.user,
-            is_active=True,
-        ).exists()
-        context["topics_by_type"] = build_topics_grouped_by_type()
-        context["all_methods"] = Method.objects.all().order_by("name")
-        context["all_specialisations"] = Specialisation.objects.all().order_by("name")
-        context["selected_topics"] = self.get_bound_profile_ids(context["profile_form"], "topics")
-        context["selected_methods"] = self.get_bound_profile_ids(context["profile_form"], "methods")
-        context["selected_specialisations"] = self.get_bound_profile_ids(context["profile_form"], "specialisations")
-        context["psychologist_topics"] = profile.topics.filter(id__in=context["selected_topics"]).order_by(
-            "type",
-            "group_name",
-            "name",
-        )
-        context["psychologist_methods"] = Method.objects.filter(
-            id__in=context["selected_methods"]
-        ).order_by("name")
-        context["psychologist_specialisations"] = Specialisation.objects.filter(
-            id__in=context["selected_specialisations"]
-        ).order_by("name")
-        context["has_form_errors"] = bool(
-            context["account_form"].errors
-            or context["profile_form"].errors
-            or context["education_formset"].errors
-            or context["education_formset"].non_form_errors()
-        )
-        context["active_profile_tab"] = self.get_active_profile_tab(
-            account_form=context["account_form"],
-            profile_form=context["profile_form"],
-            education_formset=context["education_formset"],
-        )
-
-        return context
-
     def get_bound_profile_ids(self, profile_form, field_name: str) -> list[str]:
         """Возвращает список выбранных значений для M2M-поля профиля в виде строковых ID.
 
@@ -171,6 +132,41 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
         if not value:
             return []
         return [str(item) for item in value]
+
+    def normalize_profile_post_data(self, post_data, current_profile):
+        """Приводит POST-данные страницы к тому виду, который ожидает форма профиля.
+
+        Здесь спрятана вся техническая часть переиспользования модалок:
+            - часть partials исторически пришла из client-flow;
+            - имена чекбоксов в этих окнах отличаются от имен полей формы специалиста;
+            - если пользователь не открывал модалку, мы не должны случайно затирать уже сохраненный выбор.
+        """
+        # На странице специалиста для выбора тем мы переиспользуем клиентскую модалку без переписывания ее HTML.
+        # Поэтому чекбоксы приходят под старым именем "requested_topics", а здесь мы переводим их
+        # в поле "topics", которое ожидает форма профиля специалиста
+        if "topics_submitted" in post_data:
+            post_data.setlist("topics", post_data.getlist("requested_topics"))
+        # Темы, методы и специализации теперь редактируются через модальные окна внутри этой страницы.
+        # Если пользователь ничего не выбрал и явно нажал "Применить", браузер отправит пустой список,
+        # и это поведение нужно сохранить. Поэтому fallback к текущим значениям используем
+        # только если модальный блок вообще не участвовал в POST
+        else:
+            post_data.setlist("topics", [str(pk) for pk in current_profile.topics.values_list("pk", flat=True)])
+
+        # По той же причине для методов сохраняем client-имя поля в partial без изменений,
+        # а здесь переводим его в имя поля формы специалиста
+        if "methods_submitted" in post_data:
+            post_data.setlist("methods", post_data.getlist("preferred_methods"))
+        else:
+            post_data.setlist("methods", [str(pk) for pk in current_profile.methods.values_list("pk", flat=True)])
+
+        if "specialisations_submitted" not in post_data:
+            post_data.setlist(
+                "specialisations",
+                [str(pk) for pk in current_profile.specialisations.values_list("pk", flat=True)],
+            )
+
+        return post_data
 
     def get_active_profile_tab(self, *, account_form, profile_form, education_formset) -> str:
         """Определяет, какую вкладку открыть после проверки данных на сервере.
@@ -198,6 +194,69 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
 
         return "profile"
 
+    def get_context_data(self, **kwargs):
+        """Формирование контекста страницы редактирования профиля специалиста.
+
+        На уровне HTML странице нужны не только формы, но и вспомогательные данные:
+            - заголовок страницы;
+            - параметры для боковой навигации;
+            - текущие данные пользователя и профиля;
+            - флаг, есть ли ошибки;
+            - подсказка, какую вкладку открыть после неудачного сохранения.
+        """
+        context = super().get_context_data(**kwargs)
+        user = self.get_user_instance()
+        profile = self.get_profile_instance()
+
+        context.setdefault("account_form", self.get_account_form())
+        context.setdefault("profile_form", self.get_profile_form())
+        context.setdefault("education_formset", self.get_education_formset())
+
+        context["title_edit_psychologist_page_view"] = "Редактирование профиля специалиста в сервисе ОПОРА"
+        context["show_sidebar"] = "sidebar"
+        context["current_sidebar_key"] = "psychologist-profile-edit"
+        context["db_user"] = user
+        context["db_profile"] = profile
+        context["education_records_count"] = self.get_education_queryset().count()
+        context["has_active_working_schedule"] = AvailabilityRule.objects.filter(
+            creator=self.request.user,
+            is_active=True,
+        ).exists()
+        context["topics_by_type"] = build_topics_grouped_by_type()
+        context["all_methods"] = Method.objects.all().order_by("name")
+        context["all_specialisations"] = Specialisation.objects.all().order_by("name")
+        context["selected_topics"] = self.get_bound_profile_ids(
+            context["profile_form"], "topics"
+        )
+        context["selected_methods"] = self.get_bound_profile_ids(
+            context["profile_form"], "methods"
+        )
+        context["selected_specialisations"] = self.get_bound_profile_ids(
+            context["profile_form"], "specialisations"
+        )
+        context["psychologist_topics"] = profile.topics.filter(id__in=context["selected_topics"]).order_by(
+            "type",
+            "group_name",
+            "name",
+        )
+        context["psychologist_methods"] = Method.objects.filter(id__in=context["selected_methods"]).order_by("name")
+        context["psychologist_specialisations"] = Specialisation.objects.filter(
+            id__in=context["selected_specialisations"]
+        ).order_by("name")
+        context["has_form_errors"] = bool(
+            context["account_form"].errors
+            or context["profile_form"].errors
+            or context["education_formset"].errors
+            or context["education_formset"].non_form_errors()
+        )
+        context["active_profile_tab"] = self.get_active_profile_tab(
+            account_form=context["account_form"],
+            profile_form=context["profile_form"],
+            education_formset=context["education_formset"],
+        )
+
+        return context
+
     def get(self, request, *args, **kwargs):
         """Обрабатывает обычное открытие страницы через GET-запрос:
             - открыть страницу;
@@ -214,33 +273,7 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
         """
         post_data = request.POST.copy()
         current_profile = self.get_profile_instance()
-
-        # На странице специалиста для выбора тем мы переиспользуем клиентскую модалку без переписывания ее HTML.
-        # Поэтому чекбоксы приходят под старым именем "requested_topics", а здесь мы переводим их
-        # в поле "topics", которое ожидает форма профиля специалиста.
-        if "topics_submitted" in post_data:
-            post_data.setlist("topics", post_data.getlist("requested_topics"))
-
-        # По той же причине для методов сохраняем client-имя поля в partial без изменений,
-        # а здесь переводим его в имя поля формы специалиста.
-        if "methods_submitted" in post_data:
-            post_data.setlist("methods", post_data.getlist("preferred_methods"))
-
-        # Темы, методы и специализации теперь редактируются через модальные окна внутри этой страницы.
-        # Если пользователь ничего не выбрал и явно нажал "Применить", браузер отправит пустой список,
-        # и это поведение нужно сохранить. Поэтому fallback к текущим значениям используем
-        # только если модальный блок вообще не участвовал в POST.
-        if "topics_submitted" not in post_data:
-            post_data.setlist("topics", [str(pk) for pk in current_profile.topics.values_list("pk", flat=True)])
-
-        if "methods_submitted" not in post_data:
-            post_data.setlist("methods", [str(pk) for pk in current_profile.methods.values_list("pk", flat=True)])
-
-        if "specialisations_submitted" not in post_data:
-            post_data.setlist(
-                "specialisations",
-                [str(pk) for pk in current_profile.specialisations.values_list("pk", flat=True)],
-            )
+        post_data = self.normalize_profile_post_data(post_data, current_profile)
 
         account_form = self.get_account_form(data=post_data)
         profile_form = self.get_profile_form(data=post_data, files=request.FILES)
