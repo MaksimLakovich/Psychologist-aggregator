@@ -1,4 +1,4 @@
-<div id="specialisations-modal"
+<div id="psychologist-specialisations-modal"
      data-modal
      class="fixed inset-0 z-[90] hidden bg-indigo-950/45 px-4 py-6 backdrop-blur-sm sm:px-6">
     <div class="mx-auto flex min-h-full max-w-4xl items-center justify-center">
@@ -21,21 +21,21 @@
             </div>
 
             <div class="min-h-0 flex-1 overflow-y-auto px-6 py-6 sm:px-8">
-                <div id="specialisations-modal-error" class="mb-5 hidden rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700"></div>
+                <div id="psychologist-specialisations-modal-error" class="mb-5 hidden rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700"></div>
 
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {% for specialisation in all_specialisations %}
-                        <label class="flex items-center gap-3 rounded-2xl border border-indigo-100 bg-white px-4 py-3 text-sm font-medium text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] transition hover:border-fuchsia-200 hover:bg-fuchsia-50/60">
-                            <input
-                                    id="account-specialisation-{{ specialisation.pk }}"
-                                    type="checkbox"
-                                    name="specialisations"
-                                    value="{{ specialisation.pk }}"
-                                    data-label="{{ specialisation.name }}"
-                                    class="specialisation-checkbox h-4 w-4 rounded border-zinc-300 text-fuchsia-600 focus:ring-fuchsia-500"
-                                    {% if specialisation.pk|stringformat:"s" in selected_specialisations %}checked{% endif %}
-                            >
-                            <span>{{ specialisation.name }}</span>
+                        <label class="psychologist-modal-choice flex items-center gap-3 rounded-2xl">
+                            <input id="account-specialisation-{{ specialisation.pk }}"
+                                   type="checkbox"
+                                   name="specialisations"
+                                   value="{{ specialisation.pk }}"
+                                   data-label="{{ specialisation.name }}"
+                                   class="psychologist-specialisation-checkbox h-5 w-5 rounded border-fuchsia-300 text-fuchsia-600 focus:ring-fuchsia-500"
+                                   {% if specialisation.pk|stringformat:"s" in selected_specialisations %}checked{% endif %}>
+                            <span class="flex-1 rounded-2xl border border-indigo-100 bg-white px-4 py-3 text-sm font-medium text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] transition">
+                                {{ specialisation.name }}
+                            </span>
                         </label>
                     {% empty %}
                         <p class="text-sm text-zinc-500">Специализации не найдены.</p>
@@ -51,7 +51,7 @@
                         Отмена
                     </button>
                     <button type="button"
-                            id="save-specialisations-button"
+                            id="save-psychologist-specialisations-button"
                             class="inline-flex items-center justify-center rounded-2xl bg-fuchsia-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-700">
                         Сохранить
                     </button>

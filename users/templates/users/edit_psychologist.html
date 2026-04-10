@@ -131,6 +131,12 @@
         background: linear-gradient(180deg, rgba(250, 232, 255, 0.95), rgba(253, 244, 255, 0.82));
         color: rgb(162 28 175);
     }
+
+    .psychologist-modal-choice input:checked + span {
+        border-color: rgba(99, 102, 241, 0.32);
+        background: linear-gradient(135deg, rgba(79, 70, 229, 0.10), rgba(99, 102, 241, 0.12));
+        box-shadow: 0 12px 30px -20px rgba(79, 70, 229, 0.45);
+    }
 </style>
 {% endblock %}
 
@@ -600,7 +606,7 @@
                                 <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
                                     <div class="selection-card rounded-[2rem] p-6 relative min-w-0">
                                         <button type="button"
-                                                data-modal-open="topics-modal"
+                                                data-modal-open="psychologist-topics-modal"
                                                 data-expertise-edit-button
                                                 class="hidden absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
                                             <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
@@ -632,7 +638,7 @@
 
                                     <div class="selection-card rounded-[2rem] p-6 relative min-w-0">
                                         <button type="button"
-                                                data-modal-open="methods-modal"
+                                                data-modal-open="psychologist-methods-modal"
                                                 data-expertise-edit-button
                                                 class="hidden absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
                                             <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
@@ -664,7 +670,7 @@
 
                                     <div class="selection-card rounded-[2rem] p-6 relative min-w-0">
                                         <button type="button"
-                                                data-modal-open="specialisations-modal"
+                                                data-modal-open="psychologist-specialisations-modal"
                                                 data-expertise-edit-button
                                                 class="hidden absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
                                             <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
@@ -764,14 +770,26 @@
 
             </aside>
 
-            <input type="hidden" name="topics_submitted" value="1">
-            {% include 'users/_modal_add_topics.html' %}
+            <input type="hidden"
+                   name="topics_submitted"
+                   value="1"
+                   disabled
+                   data-modal-submitted-marker="psychologist-topics-modal">
+            {% include 'users/_modal_add_psychologist_topics.html' %}
 
-            <input type="hidden" name="methods_submitted" value="1">
-            {% include 'users/_modal_add_methods.html' %}
+            <input type="hidden"
+                   name="methods_submitted"
+                   value="1"
+                   disabled
+                   data-modal-submitted-marker="psychologist-methods-modal">
+            {% include 'users/_modal_add_psychologist_methods.html' %}
 
-            <input type="hidden" name="specialisations_submitted" value="1">
-            {% include 'users/_modal_add_specialisations.html' %}
+            <input type="hidden"
+                   name="specialisations_submitted"
+                   value="1"
+                   disabled
+                   data-modal-submitted-marker="psychologist-specialisations-modal">
+            {% include 'users/_modal_add_psychologist_specialisations.html' %}
 
         </form>
 

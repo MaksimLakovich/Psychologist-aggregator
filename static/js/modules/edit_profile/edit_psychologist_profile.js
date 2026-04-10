@@ -28,35 +28,38 @@ document.addEventListener("DOMContentLoaded", function () {
   const editableInputs = Array.from(form.querySelectorAll("[data-editable-field='1']"));
   const editableChoiceInputs = Array.from(form.querySelectorAll(".choice-card input"));
   const editableModalCheckboxes = Array.from(
-    form.querySelectorAll(".topic-checkbox, .method-checkbox, .specialisation-checkbox"),
+    form.querySelectorAll(".psychologist-topic-checkbox, .psychologist-method-checkbox, .psychologist-specialisation-checkbox"),
   );
   const removeEducationButtons = Array.from(form.querySelectorAll("[data-remove-education-form]"));
   const expertiseEditButtons = Array.from(form.querySelectorAll("[data-expertise-edit-button]"));
 
   const modalConfigs = {
-    "topics-modal": {
-      modalId: "topics-modal",
-      saveButtonId: "save-topics-button",
-      errorId: "topics-modal-error",
-      checkboxSelector: ".topic-checkbox",
+    "psychologist-topics-modal": {
+      modalId: "psychologist-topics-modal",
+      saveButtonId: "save-psychologist-topics-button",
+      errorId: "psychologist-topics-modal-error",
+      checkboxSelector: ".psychologist-topic-checkbox",
+      submittedMarkerSelector: '[data-modal-submitted-marker="psychologist-topics-modal"]',
       containerId: "selected-topics-container",
       badgeClassName: "selection-badge topic-badge",
       emptyText: "Темы пока не выбраны",
     },
-    "methods-modal": {
-      modalId: "methods-modal",
-      saveButtonId: "save-methods-button",
-      errorId: "methods-modal-error",
-      checkboxSelector: ".method-checkbox",
+    "psychologist-methods-modal": {
+      modalId: "psychologist-methods-modal",
+      saveButtonId: "save-psychologist-methods-button",
+      errorId: "psychologist-methods-modal-error",
+      checkboxSelector: ".psychologist-method-checkbox",
+      submittedMarkerSelector: '[data-modal-submitted-marker="psychologist-methods-modal"]',
       containerId: "selected-methods-container",
       badgeClassName: "selection-badge method-badge",
       emptyText: "Методы пока не выбраны",
     },
-    "specialisations-modal": {
-      modalId: "specialisations-modal",
-      saveButtonId: "save-specialisations-button",
-      errorId: "specialisations-modal-error",
-      checkboxSelector: ".specialisation-checkbox",
+    "psychologist-specialisations-modal": {
+      modalId: "psychologist-specialisations-modal",
+      saveButtonId: "save-psychologist-specialisations-button",
+      errorId: "psychologist-specialisations-modal-error",
+      checkboxSelector: ".psychologist-specialisation-checkbox",
+      submittedMarkerSelector: '[data-modal-submitted-marker="psychologist-specialisations-modal"]',
       containerId: "selected-specialisations-container",
       badgeClassName: "selection-badge specialisation-badge",
       emptyText: "Специализации пока не выбраны",
@@ -388,6 +391,20 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /**
+   * Включает скрытый marker для той модалки, выбор из которой пользователь уже подтвердил кнопкой "Сохранить".
+   * Это защищает от случайной подмены данных: сервер учитывает только те изменения,
+   * которые специалист действительно применил в окне выбора.
+   */
+  function enableSubmittedMarker(modalConfig) {
+    if (!modalConfig?.submittedMarkerSelector) return;
+
+    const marker = document.querySelector(modalConfig.submittedMarkerSelector);
+    if (!marker) return;
+
+    marker.disabled = false;
+  }
+
+  /**
    * Локально "сохраняет" выбор модалки на самой странице:
    * - фиксирует выбранные чекбоксы как текущее состояние окна;
    * - обновляет карточки с бейджами;
@@ -403,6 +420,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedLabels = collectSelectedLabels(modalConfig.checkboxSelector);
 
     modalState.set(modalId, selectedValues);
+    enableSubmittedMarker(modalConfig);
     renderBadges(
       modalConfig.containerId,
       selectedLabels,
@@ -415,6 +433,15 @@ document.addEventListener("DOMContentLoaded", function () {
   applySkipIntroAnimationsIfNeeded();
   setEditMode(hasErrors);
   initEducationFormset();
+
+  // Если сервер уже вернул страницу с ошибками после POST, то текущий выбор в модалках
+  // уже является частью несохраненной формы. В этом случае снова включаем markers,
+  // чтобы пользователь не потерял свой выбор при повторной попытке сохранения.
+  if (hasErrors) {
+    Object.values(modalConfigs).forEach((modalConfig) => {
+      enableSubmittedMarker(modalConfig);
+    });
+  }
 
   // При первой загрузке страницы запоминаем текущее состояние чекбоксов в каждой модалке.
   // Это становится "точкой возврата", если пользователь откроет окно и закроет его без применения.

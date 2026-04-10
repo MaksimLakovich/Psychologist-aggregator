@@ -136,28 +136,16 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
     def normalize_profile_post_data(self, post_data, current_profile):
         """Приводит POST-данные страницы к тому виду, который ожидает форма профиля.
 
-        Здесь спрятана вся техническая часть переиспользования модалок:
-            - часть partials исторически пришла из client-flow;
-            - имена чекбоксов в этих окнах отличаются от имен полей формы специалиста;
-            - если пользователь не открывал модалку, мы не должны случайно затирать уже сохраненный выбор.
+        Бизнес-смысл метода:
+            - если специалист не открывал модальное окно выбора, нельзя случайно затереть уже сохраненные темы,
+              методы или специализации;
+            - если специалист открыл окно и подтвердил новый выбор, в форму должно попасть именно это новое состояние,
+              даже если пользователь снял все галочки и решил очистить блок полностью.
         """
-        # На странице специалиста для выбора тем мы переиспользуем клиентскую модалку без переписывания ее HTML.
-        # Поэтому чекбоксы приходят под старым именем "requested_topics", а здесь мы переводим их
-        # в поле "topics", которое ожидает форма профиля специалиста
-        if "topics_submitted" in post_data:
-            post_data.setlist("topics", post_data.getlist("requested_topics"))
-        # Темы, методы и специализации теперь редактируются через модальные окна внутри этой страницы.
-        # Если пользователь ничего не выбрал и явно нажал "Применить", браузер отправит пустой список,
-        # и это поведение нужно сохранить. Поэтому fallback к текущим значениям используем
-        # только если модальный блок вообще не участвовал в POST
-        else:
+        if "topics_submitted" not in post_data:
             post_data.setlist("topics", [str(pk) for pk in current_profile.topics.values_list("pk", flat=True)])
 
-        # По той же причине для методов сохраняем client-имя поля в partial без изменений,
-        # а здесь переводим его в имя поля формы специалиста
-        if "methods_submitted" in post_data:
-            post_data.setlist("methods", post_data.getlist("preferred_methods"))
-        else:
+        if "methods_submitted" not in post_data:
             post_data.setlist("methods", [str(pk) for pk in current_profile.methods.values_list("pk", flat=True)])
 
         if "specialisations_submitted" not in post_data:
@@ -288,12 +276,16 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
             profile.save()
             profile_form.save_m2m()
 
+            # У model formset список deleted_objects появляется только после save(commit=False).
+            # Поэтому сначала просим Django собрать итоговые изменения по образованию,
+            # а уже потом отдельно удаляем старые записи и сохраняем новые/обновленные.
+            education_instances = education_formset.save(commit=False)
+
             # Удаление сначала, затем сохранение актуальных записей.
             # Так легче гарантировать, что итоговое состояние образования совпадает с тем, что видит пользователь
             for deleted_education in education_formset.deleted_objects:
                 deleted_education.delete()
 
-            education_instances = education_formset.save(commit=False)
             for education in education_instances:
                 education.creator = request.user
                 education.save()
