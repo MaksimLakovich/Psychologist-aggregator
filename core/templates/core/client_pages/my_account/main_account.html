@@ -408,9 +408,9 @@
     </div>
 </section>
 
-{% include 'core/client_pages/my_account/_modal_main_account_topics.html' %}
-{% include 'core/client_pages/my_account/_modal_main_account_methods.html' %}
+{% include 'users/_modal_add_topics.html' %}
+{% include 'users/_modal_add_methods.html' %}
 
-<script type="module" src="{% static 'js/modules/main_account_page/main_account_modals.js' %}"></script>
+<script type="module" src="{% static 'js/modules/main_account_page/modals_topic_method.js' %}"></script>
 
 {% endblock %}

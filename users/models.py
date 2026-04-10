@@ -526,16 +526,16 @@ class PsychologistProfile(TimeStampedModel):
         decimal_places=2,
         default=0,
         blank=False,
-        verbose_name="Стоимость индивидуальной сессии (руб.)",
-        help_text="Укажите стоимость индивидуальной сессии (руб.)",
+        verbose_name="Стоимость индивидуальной сессии",
+        help_text="Укажите стоимость индивидуальной сессии",
     )
     price_couples = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=0,
         blank=False,
-        verbose_name="Стоимость парной сессии (руб.)",
-        help_text="Укажите стоимость парной сессии (руб.)",
+        verbose_name="Стоимость парной сессии",
+        help_text="Укажите стоимость парной сессии",
     )
     price_currency = models.CharField(
         max_length=3,

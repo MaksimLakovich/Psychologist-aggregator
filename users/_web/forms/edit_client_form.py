@@ -14,7 +14,7 @@ class EditClientProfileForm(forms.ModelForm):
         widgets = {
             "first_name": forms.TextInput(
                 attrs={
-                    "placeholder": "Ваше имя",
+                    "placeholder": "Имя",
                     "class": (
                         "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
                         "text-zinc-500 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
@@ -32,7 +32,7 @@ class EditClientProfileForm(forms.ModelForm):
             ),
             "last_name": forms.TextInput(
                 attrs={
-                    "placeholder": "Ваша фамилия",
+                    "placeholder": "Фамилия",
                     "class": (
                         "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
                         "text-zinc-500 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
@@ -50,7 +50,7 @@ class EditClientProfileForm(forms.ModelForm):
             ),
             "age": forms.NumberInput(
                 attrs={
-                    "placeholder": "Ваш возраст",
+                    "placeholder": "Возраст",
                     "class": (
                         "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
                         "text-zinc-500 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
