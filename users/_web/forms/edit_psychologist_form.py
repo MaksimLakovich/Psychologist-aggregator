@@ -129,6 +129,7 @@ class EditPsychologistAccountForm(forms.ModelForm):
             timezone_choices = list(timezone_field.choices)
             if not timezone_choices or timezone_choices[0][0] != "":
                 timezone_field.choices = [("", "Выберите часовой пояс"), *timezone_choices]
+        self.fields["timezone"].label = "Часовой пояс в котором работаю"
 
         # Дополнительная валидация возраста на уровне формы
         self.fields["age"].validators = [MinValueValidator(18), MaxValueValidator(120)]

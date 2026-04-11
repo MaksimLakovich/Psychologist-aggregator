@@ -36,6 +36,14 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
 
     template_name = "users/edit_psychologist.html"
     success_url = reverse_lazy("users:web:psychologist-profile-edit")
+    allowed_tabs = {"profile", "personal", "education", "expertise"}
+
+    def get_requested_active_tab(self) -> str | None:
+        """Возвращает вкладку, которую пользователь явно запросил через GET или POST."""
+        requested_tab = self.request.POST.get("active_tab") or self.request.GET.get("tab")
+        if requested_tab in self.allowed_tabs:
+            return requested_tab
+        return None
 
     def get_user_instance(self) -> AppUser:
         """Возвращает актуальный объект пользователя из БД."""
@@ -214,7 +222,11 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
             or context["education_formset"].errors
             or context["education_formset"].non_form_errors()
         )
-        context["active_profile_tab"] = self.get_active_profile_tab(
+        requested_get_tab = self.request.GET.get("tab")
+        if requested_get_tab not in self.allowed_tabs:
+            requested_get_tab = None
+
+        context["active_profile_tab"] = requested_get_tab or self.get_active_profile_tab(
             account_form=context["account_form"],
             profile_form=context["profile_form"],
             education_formset=context["education_formset"],
@@ -269,6 +281,9 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
                 request,
                 "Профиль специалиста обновлен!"
             )
+            active_tab = self.get_requested_active_tab()
+            if active_tab:
+                return redirect(f"{self.success_url}?tab={active_tab}")
             return redirect(self.success_url)
 
         messages.error(

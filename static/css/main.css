@@ -6761,6 +6761,14 @@ input:checked + .toggle-bg {
 }
 
 @media (min-width: 1280px) {
+  .xl\:sticky {
+    position: sticky;
+  }
+
+  .xl\:top-8 {
+    top: 2rem;
+  }
+
   .xl\:col-span-4 {
     grid-column: span 4 / span 4;
   }
@@ -6795,6 +6803,10 @@ input:checked + .toggle-bg {
 
   .xl\:grid-cols-\[minmax\(0\2c 1fr\)_22rem\] {
     grid-template-columns: minmax(0,1fr) 22rem;
+  }
+
+  .xl\:items-start {
+    align-items: flex-start;
   }
 
   .xl\:p-0 {

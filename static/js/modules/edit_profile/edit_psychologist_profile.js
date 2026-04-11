@@ -17,20 +17,25 @@ document.addEventListener("DOMContentLoaded", function () {
   const form = document.getElementById("psychologist-profile-form");
   if (!form) return;
 
-  const toggleBtn = document.getElementById("profile-edit-toggle");
-  const cancelBtn = document.getElementById("profile-edit-cancel");
-  const editActions = document.getElementById("profile-edit-actions");
-  const displayActions = document.getElementById("display-actions");
+  const toggleButtons = Array.from(form.querySelectorAll("[data-profile-edit-toggle]"));
+  const cancelButtons = Array.from(form.querySelectorAll("[data-profile-edit-cancel]"));
+  const editActionGroups = Array.from(form.querySelectorAll("[data-profile-edit-actions]"));
+  const displayActionGroups = Array.from(form.querySelectorAll("[data-profile-display-actions]"));
   const addEducationButton = document.getElementById("education-add-button");
+  const activeTabInput = document.getElementById("active-profile-tab-input");
   const hasErrors = form.dataset.hasErrors === "1";
   const activeTab = form.dataset.activeTab || "profile";
+  const shouldStartInProfileEditMode = hasErrors && activeTab !== "education";
 
-  const editableInputs = Array.from(form.querySelectorAll("[data-editable-field='1']"));
-  const editableChoiceInputs = Array.from(form.querySelectorAll(".choice-card input"));
+  const editableInputs = Array.from(
+    form.querySelectorAll(
+      '[data-tab-panel="profile"] [data-editable-field="1"], [data-tab-panel="personal"] [data-editable-field="1"]',
+    ),
+  );
+  const editableChoiceInputs = Array.from(form.querySelectorAll('[data-tab-panel="profile"] .choice-card input'));
   const editableModalCheckboxes = Array.from(
     form.querySelectorAll(".psychologist-topic-checkbox, .psychologist-method-checkbox, .psychologist-specialisation-checkbox"),
   );
-  const removeEducationButtons = Array.from(form.querySelectorAll("[data-remove-education-form]"));
   const expertiseEditButtons = Array.from(form.querySelectorAll("[data-expertise-edit-button]"));
 
   const modalConfigs = {
@@ -124,13 +129,24 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /**
+   * Перед отправкой формы временно снимаем disabled у полей,
+   * иначе браузер просто не включит их в POST и сервер воспримет это как "пустые данные".
+   */
+  function enableDisabledFieldsForSubmit() {
+    form.querySelectorAll(":disabled").forEach((field) => {
+      if (field.name) {
+        field.disabled = false;
+      }
+    });
+  }
+
+  /**
    * Переключает весь экран профиля между двумя состояниями:
    * - пользователь только просматривает данные;
    * - пользователь действительно редактирует профиль.
    *
    * Дополнительно метод управляет кнопками и действиями на странице:
    * - показывает "Редактировать профиль" или "Сохранить изменения / Отмена";
-   * - открывает или скрывает удаление карточек образования;
    * - разрешает или запрещает менять темы, методы, фото и другие поля.
    */
   function setEditMode(isEditing) {
@@ -144,22 +160,17 @@ document.addEventListener("DOMContentLoaded", function () {
       field.disabled = !isEditing;
     });
 
-    removeEducationButtons.forEach((button) => {
-      button.classList.toggle("hidden", !isEditing);
-      button.classList.toggle("inline-flex", isEditing);
-    });
-
     expertiseEditButtons.forEach((button) => {
       button.classList.toggle("hidden", !isEditing);
       button.classList.toggle("flex", isEditing);
     });
 
     if (isEditing) {
-      editActions.classList.remove("hidden");
-      displayActions.classList.add("hidden");
+      editActionGroups.forEach((group) => group.classList.remove("hidden"));
+      displayActionGroups.forEach((group) => group.classList.add("hidden"));
     } else {
-      editActions.classList.add("hidden");
-      displayActions.classList.remove("hidden");
+      editActionGroups.forEach((group) => group.classList.add("hidden"));
+      displayActionGroups.forEach((group) => group.classList.remove("hidden"));
       closeAllModals();
     }
   }
@@ -179,44 +190,175 @@ document.addEventListener("DOMContentLoaded", function () {
     const list = document.querySelector("[data-education-formset-list]");
     const template = document.getElementById("education-empty-form-template");
     const totalFormsInput = document.getElementById("id_education-TOTAL_FORMS");
+    const emptyState = document.querySelector("[data-education-empty-state]");
+    const initialEducationCardValues = new WeakMap();
 
     if (!list || !template || !totalFormsInput || !addEducationButton) return;
 
+    function getEducationCards() {
+      return Array.from(list.querySelectorAll("[data-education-card]"));
+    }
+
+    function getCardEditableFields(card) {
+      return Array.from(card.querySelectorAll("[data-editable-field='1']"));
+    }
+
+    function getCardClearCheckboxes(card) {
+      return Array.from(card.querySelectorAll('input[type="checkbox"][name$="-clear"]'));
+    }
+
+    function syncEducationEmptyState() {
+      if (!emptyState) return;
+      const hasVisibleCards = getEducationCards().some((card) => !card.classList.contains("hidden"));
+      emptyState.classList.toggle("hidden", hasVisibleCards);
+    }
+
+    function captureEducationCardValues(card) {
+      const snapshot = {};
+      card.querySelectorAll("input, select, textarea").forEach((field) => {
+        const key = field.name || field.id;
+        if (!key) return;
+
+        snapshot[key] = {
+          value: field.type === "file" ? "" : field.value,
+          checked: field.checked,
+        };
+      });
+      initialEducationCardValues.set(card, snapshot);
+    }
+
+    function restoreEducationCardValues(card) {
+      const snapshot = initialEducationCardValues.get(card);
+      if (!snapshot) return;
+
+      card.querySelectorAll("input, select, textarea").forEach((field) => {
+        const key = field.name || field.id;
+        const savedState = key ? snapshot[key] : null;
+        if (!savedState) return;
+
+        if (field.type === "file") {
+          field.value = "";
+          return;
+        }
+
+        if (field.type === "checkbox" || field.type === "radio") {
+          field.checked = Boolean(savedState.checked);
+          return;
+        }
+
+        field.value = savedState.value ?? "";
+      });
+    }
+
+    function setEducationCardEditState(card, isEditing) {
+      card.dataset.educationEditing = isEditing ? "1" : "0";
+
+      getCardEditableFields(card).forEach((field) => setFieldState(field, isEditing));
+      getCardClearCheckboxes(card).forEach((field) => {
+        field.disabled = !isEditing;
+      });
+    }
+
+    function getEditingEducationCard(excludedCard = null) {
+      return getEducationCards().find(
+        (card) => card !== excludedCard && !card.classList.contains("hidden") && card.dataset.educationEditing === "1",
+      );
+    }
+
+    function focusEducationCard(card) {
+      const firstField = getCardEditableFields(card).find((field) => !field.disabled && field.type !== "hidden");
+      if (firstField) {
+        firstField.focus({ preventScroll: true });
+      }
+      card.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function hideEducationCard(card) {
+      const deleteCheckbox = card.querySelector('input[type="checkbox"][name$="-DELETE"]');
+      if (deleteCheckbox) {
+        deleteCheckbox.checked = true;
+      }
+
+      setEducationCardEditState(card, false);
+      card.classList.add("hidden");
+      syncEducationEmptyState();
+    }
+
+    function cancelEducationCardEditing(card) {
+      if (card.dataset.educationExisting !== "1") {
+        hideEducationCard(card);
+        return;
+      }
+
+      restoreEducationCardValues(card);
+      setEducationCardEditState(card, false);
+    }
+
+    function openEducationCardForEditing(card) {
+      if (!card || card.classList.contains("hidden")) return;
+      if (card.dataset.educationEditing === "1") {
+        focusEducationCard(card);
+        return;
+      }
+
+      const editingCard = getEditingEducationCard(card);
+      if (editingCard) {
+        focusEducationCard(editingCard);
+        return;
+      }
+
+      setEducationCardEditState(card, true);
+      focusEducationCard(card);
+    }
+
     addEducationButton.addEventListener("click", () => {
-      if (form.dataset.editMode !== "1") {
-        setEditMode(true);
+      const editingCard = getEditingEducationCard();
+      if (editingCard) {
+        focusEducationCard(editingCard);
+        return;
       }
 
       const nextIndex = Number(totalFormsInput.value);
       const html = template.innerHTML.replace(/__prefix__/g, String(nextIndex));
-      list.insertAdjacentHTML("beforeend", html);
+      list.insertAdjacentHTML("afterbegin", html);
       totalFormsInput.value = String(nextIndex + 1);
 
-      const newCard = list.lastElementChild;
+      const newCard = list.firstElementChild;
       if (!newCard) return;
 
-      newCard.querySelectorAll("[data-editable-field='1']").forEach((field) => setFieldState(field, true));
-      const removeButton = newCard.querySelector("[data-remove-education-form]");
-      if (removeButton) {
-        removeButton.classList.remove("hidden");
-        removeButton.classList.add("inline-flex");
-      }
+      captureEducationCardValues(newCard);
+      setEducationCardEditState(newCard, true);
+      syncEducationEmptyState();
+      focusEducationCard(newCard);
     });
 
     list.addEventListener("click", (event) => {
+      const editButton = event.target.closest("[data-education-edit-button]");
+      if (editButton) {
+        openEducationCardForEditing(editButton.closest("[data-education-card]"));
+        return;
+      }
+
+      const cancelButton = event.target.closest("[data-education-cancel-button]");
+      if (cancelButton) {
+        cancelEducationCardEditing(cancelButton.closest("[data-education-card]"));
+        return;
+      }
+
       const removeButton = event.target.closest("[data-remove-education-form]");
       if (!removeButton) return;
 
       const card = removeButton.closest("[data-education-card]");
       if (!card) return;
 
-      const deleteCheckbox = card.querySelector('input[type="checkbox"][name$="-DELETE"]');
-      if (deleteCheckbox) {
-        deleteCheckbox.checked = true;
-      }
-
-      card.classList.add("hidden");
+      hideEducationCard(card);
     });
+
+    getEducationCards().forEach((card) => {
+      captureEducationCardValues(card);
+      setEducationCardEditState(card, card.dataset.educationEditing === "1");
+    });
+    syncEducationEmptyState();
   }
 
   /**
@@ -230,6 +372,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!buttons.length || !panels.length) return;
 
     function activateTab(tabName) {
+      if (activeTabInput) {
+        activeTabInput.value = tabName;
+      }
+
       buttons.forEach((button) => {
         const isActive = button.dataset.tabButton === tabName;
         button.classList.toggle("tab-button-active", isActive);
@@ -439,7 +585,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   applySkipIntroAnimationsIfNeeded();
-  setEditMode(hasErrors);
+  setEditMode(shouldStartInProfileEditMode);
   initEducationFormset();
   syncModalChoiceVisualState();
 
@@ -495,21 +641,18 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   // После нажатия "Сохранить" не хотим заново проигрывать все стартовые анимации.
   form.addEventListener("submit", function () {
+    enableDisabledFieldsForSubmit();
     markSkipIntroAnimationsOnce();
   });
 
-  if (toggleBtn) {
-    // Пользователь явно решил перейти из режима просмотра в режим редактирования.
-    toggleBtn.addEventListener("click", function () {
+  toggleButtons.forEach((button) => {
+    button.addEventListener("click", function () {
       setEditMode(true);
     });
-  }
+  });
 
-  if (cancelBtn) {
-    // "Отмена" не пытается вручную откатывать десятки полей на клиенте.
-    // Вместо этого мы возвращаем страницу к чистому состоянию через повторное открытие GET-версии экрана.
-    // Это надежнее для большого профиля с несколькими блоками и formset.
-    cancelBtn.addEventListener("click", function () {
+  cancelButtons.forEach((button) => {
+    button.addEventListener("click", function () {
       markSkipIntroAnimationsOnce();
 
       const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
@@ -520,5 +663,5 @@ document.addEventListener("DOMContentLoaded", function () {
 
       window.location.assign(currentUrl);
     });
-  }
+  });
 });
