@@ -106,7 +106,7 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
     def get_profile_form(self, *, data=None, files=None):
         """Собирает форму профессионального профиля специалиста. Отвечает за данные:
             - биография;
-            - рабочий статус;
+            - формат работы;
             - стоимость;
             - темы, методы и другие параметры публичной карточки.
         """

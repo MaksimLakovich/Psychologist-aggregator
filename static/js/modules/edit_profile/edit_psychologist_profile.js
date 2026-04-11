@@ -134,6 +134,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /**
+   * Эта функция единообразно показывает или скрывает группы элементов.
+   * За счет этого экран меняет состояние предсказуемо:
+   * нужные действия появляются, а лишние не отвлекают пользователя.
+   */
+  function toggleElementGroups(elements, isVisible, displayClass = null) {
+    elements.forEach((element) => {
+      element.classList.toggle("hidden", !isVisible);
+
+      if (displayClass) {
+        element.classList.toggle(displayClass, isVisible);
+      }
+    });
+  }
+
+  /**
    * Эта функция управляет общим режимом редактирования профиля.
    * Она нужна только для вкладок с базовыми данными и для модалок экспертизы.
    * Блок образования живет отдельно и редактируется локально по карточкам.
@@ -154,8 +169,8 @@ document.addEventListener("DOMContentLoaded", () => {
       button.classList.toggle("flex", isEditing);
     });
 
-    editActionGroups.forEach((group) => group.classList.toggle("hidden", !isEditing));
-    displayActionGroups.forEach((group) => group.classList.toggle("hidden", isEditing));
+    toggleElementGroups(editActionGroups, isEditing, "flex");
+    toggleElementGroups(displayActionGroups, !isEditing);
 
     if (!isEditing) {
       closeAllExpertiseModals();
@@ -489,6 +504,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /**
+     * Эта вложенная функция находит кнопки, которые видны в спокойном режиме карточки.
+     * Обычно это единичное действие "Редактировать".
+     */
+    function getDisplayActionGroups(card) {
+      return Array.from(card.querySelectorAll("[data-education-card-display-actions]"));
+    }
+
+    /**
+     * Эта вложенная функция находит кнопки активного редактирования карточки.
+     * Сюда входят действия, которые нужны только пока пользователь меняет запись.
+     */
+    function getEditActionGroups(card) {
+      return Array.from(card.querySelectorAll("[data-education-card-edit-actions]"));
+    }
+
+    /**
      * Эта вложенная функция показывает или скрывает пустое состояние блока.
      * Если карточек нет, пользователь должен явно видеть, что можно добавить первую запись.
      */
@@ -558,6 +589,8 @@ document.addEventListener("DOMContentLoaded", () => {
       getClearCheckboxes(card).forEach((checkbox) => {
         checkbox.disabled = !isEditing;
       });
+      toggleElementGroups(getDisplayActionGroups(card), !isEditing, "flex");
+      toggleElementGroups(getEditActionGroups(card), isEditing, "flex");
     }
 
     /**

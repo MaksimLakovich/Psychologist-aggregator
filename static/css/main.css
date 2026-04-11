@@ -4844,6 +4844,11 @@ input:checked + .toggle-bg {
   color: rgb(240 245 255 / 0.5);
 }
 
+.text-rose-600 {
+  --tw-text-opacity: 1;
+  color: rgb(225 29 72 / var(--tw-text-opacity, 1));
+}
+
 .line-through {
   text-decoration-line: line-through;
 }
@@ -5056,6 +5061,16 @@ input:checked + .toggle-bg {
 .ring-zinc-200 {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(228 228 231 / var(--tw-ring-opacity, 1));
+}
+
+.ring-indigo-100 {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(229 237 255 / var(--tw-ring-opacity, 1));
+}
+
+.ring-rose-100 {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(255 228 230 / var(--tw-ring-opacity, 1));
 }
 
 .blur {
@@ -5533,6 +5548,11 @@ input:checked + .toggle-bg {
 .hover\:bg-zinc-50:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(250 250 250 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-rose-50:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 241 242 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:text-blue-600:hover {
