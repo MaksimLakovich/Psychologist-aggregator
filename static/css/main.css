@@ -6335,6 +6335,10 @@ input:checked + .toggle-bg {
     grid-template-columns: minmax(0,1fr) minmax(0,1fr) auto;
   }
 
+  .md\:grid-cols-\[minmax\(0\2c 1fr\)_22rem\] {
+    grid-template-columns: minmax(0,1fr) 22rem;
+  }
+
   .md\:flex-row {
     flex-direction: row;
   }
@@ -6556,6 +6560,10 @@ input:checked + .toggle-bg {
     top: 3.5rem;
   }
 
+  .lg\:top-8 {
+    top: 2rem;
+  }
+
   .lg\:order-2 {
     order: 2;
   }
@@ -6639,6 +6647,10 @@ input:checked + .toggle-bg {
 
   .lg\:grid-cols-\[18rem_minmax\(0\2c 1fr\)\] {
     grid-template-columns: 18rem minmax(0,1fr);
+  }
+
+  .lg\:grid-cols-\[minmax\(0\2c 1fr\)_22rem\] {
+    grid-template-columns: minmax(0,1fr) 22rem;
   }
 
   .lg\:flex-row {
@@ -6803,6 +6815,10 @@ input:checked + .toggle-bg {
 
   .xl\:grid-cols-\[minmax\(0\2c 1fr\)_22rem\] {
     grid-template-columns: minmax(0,1fr) 22rem;
+  }
+
+  .xl\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .xl\:items-start {

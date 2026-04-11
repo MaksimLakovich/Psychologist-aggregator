@@ -1,111 +1,103 @@
 /**
- * Скрипт управляет режимами просмотра/редактирования страницы профиля специалиста.
+ * Скрипт управляет экраном редактирования профиля специалиста.
  *
- * Логика близка к клиентскому профилю, но с поправкой на более сложный экран:
- * 1) При загрузке страница открывается в режиме просмотра.
- * 2) После нажатия "Редактировать профиль" доступные поля становятся активными.
- * 3) Появляются кнопки "Сохранить изменения" и "Отмена".
- * 4) "Отмена" не сохраняет данные и возвращает экран к исходному состоянию через перезагрузку GET-страницы.
+ * Здесь есть 4 самостоятельных сценария:
+ * 1) переключение вкладок;
+ * 2) общий режим редактирования для вкладок "Данные профиля" и "Контактные данные";
+ * 3) локальное редактирование карточек образования;
+ * 4) модалки для тем, методов и специализаций.
+ *
+ * Цель скрипта простая:
+ * пользователь всегда должен видеть понятное состояние экрана,
+ * не терять введенные данные и не сталкиваться с "прыгающим" интерфейсом.
  */
-
-document.addEventListener("DOMContentLoaded", function () {
-  // Одноразовый флаг: если пользователь только что сохранял профиль или отменял изменения,
-  // на следующем открытии не запускаем заново вступительные анимации.
-  // Это делает экран спокойнее и убирает ощущение "прыгающего" интерфейса
+document.addEventListener("DOMContentLoaded", () => {
   const SKIP_INTRO_ANIMATIONS_ONCE_KEY = "psychologistProfileEditSkipIntroAnimationsOnce";
 
   const form = document.getElementById("psychologist-profile-form");
   if (!form) return;
 
+  const activeTabInput = document.getElementById("active-profile-tab-input");
   const toggleButtons = Array.from(form.querySelectorAll("[data-profile-edit-toggle]"));
   const cancelButtons = Array.from(form.querySelectorAll("[data-profile-edit-cancel]"));
   const editActionGroups = Array.from(form.querySelectorAll("[data-profile-edit-actions]"));
   const displayActionGroups = Array.from(form.querySelectorAll("[data-profile-display-actions]"));
+  const expertiseEditButtons = Array.from(form.querySelectorAll("[data-expertise-edit-button]"));
   const addEducationButton = document.getElementById("education-add-button");
-  const activeTabInput = document.getElementById("active-profile-tab-input");
-  const hasErrors = form.dataset.hasErrors === "1";
-  const activeTab = form.dataset.activeTab || "profile";
-  const shouldStartInProfileEditMode = hasErrors && activeTab !== "education";
 
-  const editableInputs = Array.from(
+  const hasErrors = form.dataset.hasErrors === "1";
+  const initialTab = form.dataset.activeTab || "profile";
+  const shouldStartInProfileEditMode = hasErrors && initialTab !== "education";
+
+  const profileEditableFields = Array.from(
     form.querySelectorAll(
       '[data-tab-panel="profile"] [data-editable-field="1"], [data-tab-panel="personal"] [data-editable-field="1"]',
     ),
   );
-  const editableChoiceInputs = Array.from(form.querySelectorAll('[data-tab-panel="profile"] .choice-card input'));
-  const editableModalCheckboxes = Array.from(
+  const profileChoiceInputs = Array.from(form.querySelectorAll('[data-tab-panel="profile"] .choice-card input'));
+  const expertiseCheckboxes = Array.from(
     form.querySelectorAll(".psychologist-topic-checkbox, .psychologist-method-checkbox, .psychologist-specialisation-checkbox"),
   );
-  const expertiseEditButtons = Array.from(form.querySelectorAll("[data-expertise-edit-button]"));
 
   const modalConfigs = {
     "psychologist-topics-modal": {
-      modalId: "psychologist-topics-modal",
+      checkboxSelector: ".psychologist-topic-checkbox",
       saveButtonId: "save-psychologist-topics-button",
       errorId: "psychologist-topics-modal-error",
-      checkboxSelector: ".psychologist-topic-checkbox",
       containerId: "selected-topics-container",
       badgeClassName: "selection-badge topic-badge",
       emptyText: "Темы пока не выбраны",
     },
     "psychologist-methods-modal": {
-      modalId: "psychologist-methods-modal",
+      checkboxSelector: ".psychologist-method-checkbox",
       saveButtonId: "save-psychologist-methods-button",
       errorId: "psychologist-methods-modal-error",
-      checkboxSelector: ".psychologist-method-checkbox",
       containerId: "selected-methods-container",
       badgeClassName: "selection-badge method-badge",
       emptyText: "Методы пока не выбраны",
     },
     "psychologist-specialisations-modal": {
-      modalId: "psychologist-specialisations-modal",
+      checkboxSelector: ".psychologist-specialisation-checkbox",
       saveButtonId: "save-psychologist-specialisations-button",
       errorId: "psychologist-specialisations-modal-error",
-      checkboxSelector: ".psychologist-specialisation-checkbox",
       containerId: "selected-specialisations-container",
       badgeClassName: "selection-badge specialisation-badge",
       emptyText: "Специализации пока не выбраны",
     },
   };
 
-  const modalState = new Map();
-  const openButtons = document.querySelectorAll("[data-modal-open]");
-  const modals = document.querySelectorAll("[data-modal]");
-
-  initTabs(activeTab);
+  let closeAllExpertiseModals = () => {};
 
   /**
-   * Если до этого пользователь уже взаимодействовал со страницей, убираем повторный показ анимаций.
-   * Смысл: при обычной работе с профилем пользователь часто нажимает "Сохранить" или "Отмена".
-   * Если после каждого такого действия снова запускать все анимации, экран выглядит менее стабильным.
+   * Эта функция делает экран стабильнее после сохранения или отмены.
+   * Если пользователь уже работал с формой, при следующем открытии
+   * мы не проигрываем заново стартовые анимации и страница выглядит спокойнее.
    */
   function applySkipIntroAnimationsIfNeeded() {
     const shouldSkip = sessionStorage.getItem(SKIP_INTRO_ANIMATIONS_ONCE_KEY) === "1";
     if (!shouldSkip) return;
 
-    const animatedBlocks = document.querySelectorAll(".animate-fade-in-up, .animate-fade-in-left");
-    animatedBlocks.forEach((el) => {
-      el.classList.remove("animate-fade-in-up", "animate-fade-in-left");
-      el.style.opacity = "1";
-      el.style.animation = "none";
+    document.querySelectorAll(".animate-fade-in-up, .animate-fade-in-left").forEach((element) => {
+      element.classList.remove("animate-fade-in-up", "animate-fade-in-left");
+      element.style.opacity = "1";
+      element.style.animation = "none";
     });
 
     sessionStorage.removeItem(SKIP_INTRO_ANIMATIONS_ONCE_KEY);
   }
 
   /**
-   * Помечаем, что при следующей загрузке страницы вступительные анимации нужно пропустить.
-   * Это не меняет данные профиля, а только делает поведение интерфейса аккуратнее после сохранения или отмены действий
+   * Эта функция запоминает, что после текущего действия
+   * стартовые анимации на следующей загрузке лучше пропустить.
    */
-  function markSkipIntroAnimationsOnce() {
+  function rememberSkipIntroAnimationsOnce() {
     sessionStorage.setItem(SKIP_INTRO_ANIMATIONS_ONCE_KEY, "1");
   }
 
   /**
-   * Переключает отдельное поле между режимами "просмотр" и "редактирование".
-   * Суть:
-   * - в режиме просмотра поле должно выглядеть как закрытое для изменения;
-   * - в режиме редактирования то же поле становится активным и получает рабочий стиль формы.
+   * Эта функция переключает отдельное поле между режимом "смотрю" и "редактирую".
+   * Для пользователя это означает одно:
+   * поле либо закрыто от изменений, либо действительно готово к вводу.
    */
   function setFieldState(field, isEditing) {
     const viewClasses = field.dataset.viewClass || field.className;
@@ -129,8 +121,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /**
-   * Перед отправкой формы временно снимаем disabled у полей,
-   * иначе браузер просто не включит их в POST и сервер воспримет это как "пустые данные".
+   * Эта функция включает все disabled-поля прямо перед submit.
+   * Это техническая защита: браузер не отправляет disabled-значения в POST,
+   * а значит сервер мог бы ошибочно подумать, что пользователь их очистил.
    */
   function enableDisabledFieldsForSubmit() {
     form.querySelectorAll(":disabled").forEach((field) => {
@@ -141,22 +134,18 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /**
-   * Переключает весь экран профиля между двумя состояниями:
-   * - пользователь только просматривает данные;
-   * - пользователь действительно редактирует профиль.
-   *
-   * Дополнительно метод управляет кнопками и действиями на странице:
-   * - показывает "Редактировать профиль" или "Сохранить изменения / Отмена";
-   * - разрешает или запрещает менять темы, методы, фото и другие поля.
+   * Эта функция управляет общим режимом редактирования профиля.
+   * Она нужна только для вкладок с базовыми данными и для модалок экспертизы.
+   * Блок образования живет отдельно и редактируется локально по карточкам.
    */
-  function setEditMode(isEditing) {
+  function setProfileEditMode(isEditing) {
     form.dataset.editMode = isEditing ? "1" : "0";
 
-    editableInputs.forEach((field) => setFieldState(field, isEditing));
-    editableChoiceInputs.forEach((field) => {
+    profileEditableFields.forEach((field) => setFieldState(field, isEditing));
+    profileChoiceInputs.forEach((field) => {
       field.disabled = !isEditing;
     });
-    editableModalCheckboxes.forEach((field) => {
+    expertiseCheckboxes.forEach((field) => {
       field.disabled = !isEditing;
     });
 
@@ -165,212 +154,48 @@ document.addEventListener("DOMContentLoaded", function () {
       button.classList.toggle("flex", isEditing);
     });
 
-    if (isEditing) {
-      editActionGroups.forEach((group) => group.classList.remove("hidden"));
-      displayActionGroups.forEach((group) => group.classList.add("hidden"));
-    } else {
-      editActionGroups.forEach((group) => group.classList.add("hidden"));
-      displayActionGroups.forEach((group) => group.classList.remove("hidden"));
-      closeAllModals();
+    editActionGroups.forEach((group) => group.classList.toggle("hidden", !isEditing));
+    displayActionGroups.forEach((group) => group.classList.toggle("hidden", isEditing));
+
+    if (!isEditing) {
+      closeAllExpertiseModals();
     }
   }
 
   /**
-   * Настраивает работу блока "Образование".
-   *
-   * Смысл:
-   * у специалиста может быть несколько записей об обучении, поэтому пользователь должен уметь прямо на странице:
-   * - добавить новую карточку образования;
-   * - убрать ненужную карточку;
-   * - при этом сервер должен получить корректную структуру formset.
-   * - пустая форма больше не показывается заранее.
-   * - Новая карточка появляется только тогда, когда специалист явно нажимает "Добавить еще".
+   * Эта функция возвращает пользователя на "чистую" GET-версию страницы.
+   * Бизнес-смысл простой:
+   * если человек нажал "Отмена", экран должен вернуться в исходное состояние,
+   * без локальных черновиков и без следов серверных ошибок.
    */
-  function initEducationFormset() {
-    const list = document.querySelector("[data-education-formset-list]");
-    const template = document.getElementById("education-empty-form-template");
-    const totalFormsInput = document.getElementById("id_education-TOTAL_FORMS");
-    const emptyState = document.querySelector("[data-education-empty-state]");
-    const initialEducationCardValues = new WeakMap();
+  function reloadCurrentPage({ replaceHistory = false } = {}) {
+    rememberSkipIntroAnimationsOnce();
 
-    if (!list || !template || !totalFormsInput || !addEducationButton) return;
-
-    function getEducationCards() {
-      return Array.from(list.querySelectorAll("[data-education-card]"));
+    const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (replaceHistory) {
+      window.location.replace(currentUrl);
+      return;
     }
 
-    function getCardEditableFields(card) {
-      return Array.from(card.querySelectorAll("[data-editable-field='1']"));
-    }
-
-    function getCardClearCheckboxes(card) {
-      return Array.from(card.querySelectorAll('input[type="checkbox"][name$="-clear"]'));
-    }
-
-    function syncEducationEmptyState() {
-      if (!emptyState) return;
-      const hasVisibleCards = getEducationCards().some((card) => !card.classList.contains("hidden"));
-      emptyState.classList.toggle("hidden", hasVisibleCards);
-    }
-
-    function captureEducationCardValues(card) {
-      const snapshot = {};
-      card.querySelectorAll("input, select, textarea").forEach((field) => {
-        const key = field.name || field.id;
-        if (!key) return;
-
-        snapshot[key] = {
-          value: field.type === "file" ? "" : field.value,
-          checked: field.checked,
-        };
-      });
-      initialEducationCardValues.set(card, snapshot);
-    }
-
-    function restoreEducationCardValues(card) {
-      const snapshot = initialEducationCardValues.get(card);
-      if (!snapshot) return;
-
-      card.querySelectorAll("input, select, textarea").forEach((field) => {
-        const key = field.name || field.id;
-        const savedState = key ? snapshot[key] : null;
-        if (!savedState) return;
-
-        if (field.type === "file") {
-          field.value = "";
-          return;
-        }
-
-        if (field.type === "checkbox" || field.type === "radio") {
-          field.checked = Boolean(savedState.checked);
-          return;
-        }
-
-        field.value = savedState.value ?? "";
-      });
-    }
-
-    function setEducationCardEditState(card, isEditing) {
-      card.dataset.educationEditing = isEditing ? "1" : "0";
-
-      getCardEditableFields(card).forEach((field) => setFieldState(field, isEditing));
-      getCardClearCheckboxes(card).forEach((field) => {
-        field.disabled = !isEditing;
-      });
-    }
-
-    function getEditingEducationCard(excludedCard = null) {
-      return getEducationCards().find(
-        (card) => card !== excludedCard && !card.classList.contains("hidden") && card.dataset.educationEditing === "1",
-      );
-    }
-
-    function focusEducationCard(card) {
-      const firstField = getCardEditableFields(card).find((field) => !field.disabled && field.type !== "hidden");
-      if (firstField) {
-        firstField.focus({ preventScroll: true });
-      }
-      card.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
-    function hideEducationCard(card) {
-      const deleteCheckbox = card.querySelector('input[type="checkbox"][name$="-DELETE"]');
-      if (deleteCheckbox) {
-        deleteCheckbox.checked = true;
-      }
-
-      setEducationCardEditState(card, false);
-      card.classList.add("hidden");
-      syncEducationEmptyState();
-    }
-
-    function cancelEducationCardEditing(card) {
-      if (card.dataset.educationExisting !== "1") {
-        hideEducationCard(card);
-        return;
-      }
-
-      restoreEducationCardValues(card);
-      setEducationCardEditState(card, false);
-    }
-
-    function openEducationCardForEditing(card) {
-      if (!card || card.classList.contains("hidden")) return;
-      if (card.dataset.educationEditing === "1") {
-        focusEducationCard(card);
-        return;
-      }
-
-      const editingCard = getEditingEducationCard(card);
-      if (editingCard) {
-        focusEducationCard(editingCard);
-        return;
-      }
-
-      setEducationCardEditState(card, true);
-      focusEducationCard(card);
-    }
-
-    addEducationButton.addEventListener("click", () => {
-      const editingCard = getEditingEducationCard();
-      if (editingCard) {
-        focusEducationCard(editingCard);
-        return;
-      }
-
-      const nextIndex = Number(totalFormsInput.value);
-      const html = template.innerHTML.replace(/__prefix__/g, String(nextIndex));
-      list.insertAdjacentHTML("afterbegin", html);
-      totalFormsInput.value = String(nextIndex + 1);
-
-      const newCard = list.firstElementChild;
-      if (!newCard) return;
-
-      captureEducationCardValues(newCard);
-      setEducationCardEditState(newCard, true);
-      syncEducationEmptyState();
-      focusEducationCard(newCard);
-    });
-
-    list.addEventListener("click", (event) => {
-      const editButton = event.target.closest("[data-education-edit-button]");
-      if (editButton) {
-        openEducationCardForEditing(editButton.closest("[data-education-card]"));
-        return;
-      }
-
-      const cancelButton = event.target.closest("[data-education-cancel-button]");
-      if (cancelButton) {
-        cancelEducationCardEditing(cancelButton.closest("[data-education-card]"));
-        return;
-      }
-
-      const removeButton = event.target.closest("[data-remove-education-form]");
-      if (!removeButton) return;
-
-      const card = removeButton.closest("[data-education-card]");
-      if (!card) return;
-
-      hideEducationCard(card);
-    });
-
-    getEducationCards().forEach((card) => {
-      captureEducationCardValues(card);
-      setEducationCardEditState(card, card.dataset.educationEditing === "1");
-    });
-    syncEducationEmptyState();
+    window.location.assign(currentUrl);
   }
 
   /**
-   * Настраивает переключение вкладок на странице профиля.
-   *
-   * Метод также умеет открыть нужную вкладку сразу после ответа сервера, если именно в этом блоке произошла ошибка.
+   * Эта функция настраивает вкладки.
+   * Пользователь кликает по названию блока и сразу видит именно тот раздел,
+   * с которым хочет работать сейчас.
    */
-  function initTabs(initialTab) {
-    const buttons = Array.from(document.querySelectorAll("[data-tab-button]"));
-    const panels = Array.from(document.querySelectorAll("[data-tab-panel]"));
+  function initTabs(activeTab) {
+    const buttons = Array.from(form.querySelectorAll("[data-tab-button]"));
+    const panels = Array.from(form.querySelectorAll("[data-tab-panel]"));
     if (!buttons.length || !panels.length) return;
 
+    /**
+     * Эта вложенная функция включает одну конкретную вкладку.
+     * Важный побочный эффект:
+     * мы также записываем активную вкладку в hidden input,
+     * чтобы сервер после сохранения мог вернуть пользователя туда же.
+     */
     function activateTab(tabName) {
       if (activeTabInput) {
         activeTabInput.value = tabName;
@@ -391,277 +216,510 @@ document.addEventListener("DOMContentLoaded", function () {
       button.addEventListener("click", () => activateTab(button.dataset.tabButton));
     });
 
-    activateTab(initialTab);
+    activateTab(activeTab);
   }
 
   /**
-   * Возвращает настройки конкретной модалки по ее `id`.
-   * Это нужно, чтобы вся общая логика открытия, закрытия и обновления бейджей
-   * работала одинаково для тем, методов и специализаций без дублирования кода.
+   * Эта функция настраивает блоки "Темы / Методы / Специализации".
+   * Для пользователя это единый сценарий:
+   * открыть модалку, увидеть текущий выбор, изменить его и применить на странице.
    */
-  function getModalConfigById(modalId) {
-    return modalConfigs[modalId] || null;
-  }
+  function initExpertiseModals() {
+    const modalSelections = new Map();
+    const modalElements = Array.from(document.querySelectorAll("[data-modal]"));
+    const openButtons = Array.from(form.querySelectorAll("[data-modal-open]"));
 
-  /**
-   * Читает список выбранных значений из чекбоксов внутри конкретной модалки.
-   * По сути это ответ на вопрос: что сейчас отмечено пользователем в окне выбора.
-   */
-  function readCheckedValues(checkboxSelector) {
-    return Array.from(document.querySelectorAll(`${checkboxSelector}:checked`)).map((checkbox) => checkbox.value);
-  }
-
-  /**
-   * Возвращает все чекбоксы нужной модалки.
-   * Этот помощник нужен, когда надо массово восстановить или обновить состояние выбора.
-   */
-  function getCheckboxes(checkboxSelector) {
-    return Array.from(document.querySelectorAll(checkboxSelector));
-  }
-
-  /**
-   * Восстанавливает чекбоксы в то состояние, которое сейчас считается "актуальным" для страницы.
-   * Это важно, когда пользователь открыл модалку, что-то пощелкал и закрыл окно без применения:
-   * при следующем открытии он должен увидеть не случайный промежуточный выбор, а последнее подтвержденное состояние.
-   */
-  function applyCheckedValues(checkboxSelector, values) {
-    const valuesSet = new Set(values);
-    getCheckboxes(checkboxSelector).forEach((checkbox) => {
-      checkbox.checked = valuesSet.has(checkbox.value);
-    });
-    syncModalChoiceVisualState();
-  }
-
-  /**
-   * Явно синхронизирует визуальное состояние карточек в модалках с реальным состоянием чекбоксов.
-   * Это защита от браузерных и CSS-особенностей: даже если нативный чекбокс выглядит неочевидно,
-   * пользователь все равно сразу видит, какие значения сейчас выбраны.
-   */
-  function syncModalChoiceVisualState() {
-    form.querySelectorAll(".psychologist-modal-choice").forEach((choice) => {
-      const checkbox = choice.querySelector(
-        ".psychologist-topic-checkbox, .psychologist-method-checkbox, .psychologist-specialisation-checkbox",
-      );
-      if (!checkbox) return;
-
-      choice.classList.toggle("is-selected", checkbox.checked);
-    });
-  }
-
-  /**
-   * Очищает текст ошибки внутри модалки.
-   * Пользователь не должен видеть старое сообщение об ошибке при каждом новом открытии окна.
-   */
-  function clearModalError(errorElement) {
-    if (!errorElement) return;
-    errorElement.textContent = "";
-    errorElement.classList.add("hidden");
-  }
-
-  /**
-   * Перерисовывает бейджи на карточках после нажатия "Применить" в модалке.
-   *
-   * Важно: это пока только обновление интерфейса текущей страницы.
-   * Реальное сохранение в БД произойдет после общего сохранения профиля.
-   */
-  function renderBadges(containerId, labels, badgeClassName, emptyText) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    container.innerHTML = "";
-
-    if (!labels.length) {
-      const emptyState = document.createElement("span");
-      emptyState.className = "text-sm text-zinc-500";
-      emptyState.textContent = emptyText;
-      container.appendChild(emptyState);
-      return;
+    if (!modalElements.length) {
+      return () => {};
     }
 
-    labels.forEach((label) => {
-      const badge = document.createElement("span");
-      badge.className = badgeClassName;
-      badge.textContent = label;
-      container.appendChild(badge);
-    });
-  }
-
-  /**
-   * Собирает подписи выбранных элементов.
-   * Они нужны не для отправки на сервер, а для красивого обновления карточек на самой странице:
-   * вместо внутренних ID пользователь сразу видит понятные названия тем, методов и специализаций.
-   */
-  function collectSelectedLabels(checkboxSelector) {
-    return Array.from(document.querySelectorAll(`${checkboxSelector}:checked`))
-      .map((checkbox) => checkbox.dataset.label || "")
-      .filter(Boolean);
-  }
-
-  /**
-   * Управляет блокировкой прокрутки основного экрана, пока открыта хотя бы одна модалка.
-   * Это делает взаимодействие с окном выбора спокойнее и не дает странице "уезжать" на фоне.
-   */
-  function syncBodyScrollLock() {
-    const hasOpenedModal = Array.from(modals).some((modal) => !modal.classList.contains("hidden"));
-    document.body.classList.toggle("overflow-hidden", hasOpenedModal);
-  }
-
-  /**
-   * Открывает нужную модалку только в режиме редактирования.
-   * Перед открытием система возвращает в чекбоксах последнее подтвержденное состояние,
-   * чтобы пользователь всегда начинал работу с понятной и ожидаемой точки.
-   */
-  function openModal(modalId) {
-    const modal = document.getElementById(modalId);
-    const modalConfig = getModalConfigById(modalId);
-    if (!modal || !modalConfig || form.dataset.editMode !== "1") return;
-
-    const savedValues = modalState.has(modalId)
-      ? modalState.get(modalId)
-      : readCheckedValues(modalConfig.checkboxSelector);
-    applyCheckedValues(modalConfig.checkboxSelector, savedValues || []);
-    clearModalError(document.getElementById(modalConfig.errorId));
-    modal.classList.remove("hidden");
-    syncBodyScrollLock();
-  }
-
-  /**
-   * Закрывает модалку и при необходимости откатывает несохраненный выбор.
-   * Если пользователь просто закрыл окно, мы возвращаем предыдущее состояние.
-   * Если он нажал "Сохранить" внутри модалки, откат уже не нужен.
-   */
-  function closeModal(modalId, { restoreSavedState = true } = {}) {
-    const modal = document.getElementById(modalId);
-    const modalConfig = getModalConfigById(modalId);
-    if (!modal || !modalConfig) return;
-
-    if (restoreSavedState && modalState.has(modalId)) {
-      applyCheckedValues(modalConfig.checkboxSelector, modalState.get(modalId) || []);
+    /**
+     * Эта вложенная функция получает настройки конкретной модалки.
+     * Она нужна, чтобы темы, методы и специализации работали по одной логике.
+     */
+    function getModalConfig(modalId) {
+      return modalConfigs[modalId] || null;
     }
 
-    clearModalError(document.getElementById(modalConfig.errorId));
-    modal.classList.add("hidden");
-    syncBodyScrollLock();
-  }
+    /**
+     * Эта вложенная функция читает выбранные значения в конкретной модалке.
+     * Грубо говоря, это ответ на вопрос:
+     * "Какие пункты сейчас отмечены галочками?"
+     */
+    function readCheckedValues(checkboxSelector) {
+      return Array.from(document.querySelectorAll(`${checkboxSelector}:checked`)).map((checkbox) => checkbox.value);
+    }
 
-  /**
-   * Закрывает сразу все модалки на странице.
-   * Это используется, например, когда пользователь выходит из режима редактирования,
-   * чтобы на экране не оставались случайно открытые окна выбора.
-   */
-  function closeAllModals() {
-    Object.keys(modalConfigs).forEach((modalId) => closeModal(modalId));
-  }
+    /**
+     * Эта вложенная функция собирает человекочитаемые названия выбранных пунктов.
+     * Именно эти подписи потом выводятся в виде бейджей на карточке вкладки.
+     */
+    function readCheckedLabels(checkboxSelector) {
+      return Array.from(document.querySelectorAll(`${checkboxSelector}:checked`))
+        .map((checkbox) => checkbox.dataset.label || "")
+        .filter(Boolean);
+    }
 
-  /**
-   * Локально "сохраняет" выбор модалки на самой странице:
-   * - фиксирует выбранные чекбоксы как текущее состояние окна;
-   * - обновляет карточки с бейджами;
-   * - закрывает модалку.
-   *
-   * В БД эти данные уйдут только после общего submit формы профиля.
-   */
-  function applyModalSelection(modalId) {
-    const modalConfig = getModalConfigById(modalId);
-    if (!modalConfig) return;
-
-    const selectedValues = readCheckedValues(modalConfig.checkboxSelector);
-    const selectedLabels = collectSelectedLabels(modalConfig.checkboxSelector);
-
-    modalState.set(modalId, selectedValues);
-    renderBadges(
-      modalConfig.containerId,
-      selectedLabels,
-      modalConfig.badgeClassName,
-      modalConfig.emptyText,
-    );
-    closeModal(modalId, { restoreSavedState: false });
-  }
-
-  // Стартовое состояние модалок нужно зафиксировать до первого setEditMode(false),
-  // потому что тот вызывает closeAllModals() и раньше обнулял чекбоксы до пустого выбора.
-  Object.values(modalConfigs).forEach((modalConfig) => {
-    modalState.set(modalConfig.modalId, readCheckedValues(modalConfig.checkboxSelector));
-  });
-
-  applySkipIntroAnimationsIfNeeded();
-  setEditMode(shouldStartInProfileEditMode);
-  initEducationFormset();
-  syncModalChoiceVisualState();
-
-  // Кнопки-иконки на карточках открывают соответствующие модальные окна выбора.
-  openButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      openModal(button.dataset.modalOpen);
-    });
-  });
-
-  // Каждая модалка закрывается по своей кнопке-крестику/кнопке "Отмена"
-  // и по клику на затемненный фон вокруг окна.
-  modals.forEach((modal) => {
-    modal.querySelectorAll("[data-modal-close]").forEach((button) => {
-      button.addEventListener("click", () => {
-        closeModal(modal.id);
-      });
-    });
-
-    modal.addEventListener("click", (event) => {
-      if (event.target === modal) {
-        closeModal(modal.id);
-      }
-    });
-
-    modal.addEventListener("change", (event) => {
-      if (
-        event.target.matches(
+    /**
+     * Эта вложенная функция визуально синхронизирует карточки внутри модалок.
+     * Даже если нативный чекбокс браузера ведет себя неидеально,
+     * пользователь все равно видит, какие значения сейчас активны.
+     */
+    function syncModalChoiceCards() {
+      form.querySelectorAll(".psychologist-modal-choice").forEach((choice) => {
+        const checkbox = choice.querySelector(
           ".psychologist-topic-checkbox, .psychologist-method-checkbox, .psychologist-specialisation-checkbox",
-        )
-      ) {
-        syncModalChoiceVisualState();
-      }
-    });
-  });
+        );
+        if (!checkbox) return;
 
-  // Клавиша Escape закрывает только текущее открытое окно, не затрагивая остальные данные формы.
-  document.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape") return;
-
-    const openedModal = Array.from(modals).find((modal) => !modal.classList.contains("hidden"));
-    if (openedModal) {
-      closeModal(openedModal.id);
+        choice.classList.toggle("is-selected", checkbox.checked);
+      });
     }
-  });
 
-  // Кнопка "Сохранить" внутри каждой модалки пока обновляет только сам экран,
-  // а не отправляет отдельный запрос на сервер: реальное сохранение происходит общим submit формы профиля.
-  Object.values(modalConfigs).forEach((modalConfig) => {
-    document.getElementById(modalConfig.saveButtonId)?.addEventListener("click", () => {
-      applyModalSelection(modalConfig.modalId);
-    });
-  });
-  // После нажатия "Сохранить" не хотим заново проигрывать все стартовые анимации.
-  form.addEventListener("submit", function () {
-    enableDisabledFieldsForSubmit();
-    markSkipIntroAnimationsOnce();
-  });
+    /**
+     * Эта вложенная функция массово выставляет галочки внутри модалки.
+     * Она используется при открытии окна и при откате несохраненного выбора.
+     */
+    function setCheckedValues(checkboxSelector, values) {
+      const valuesSet = new Set(values);
+      document.querySelectorAll(checkboxSelector).forEach((checkbox) => {
+        checkbox.checked = valuesSet.has(checkbox.value);
+      });
+      syncModalChoiceCards();
+    }
 
-  toggleButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      setEditMode(true);
-    });
-  });
+    /**
+     * Эта вложенная функция очищает старое сообщение об ошибке внутри модалки.
+     * Пользователь не должен видеть вчерашнюю ошибку при новом открытии окна.
+     */
+    function clearModalError(errorElement) {
+      if (!errorElement) return;
+      errorElement.textContent = "";
+      errorElement.classList.add("hidden");
+    }
 
-  cancelButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      markSkipIntroAnimationsOnce();
+    /**
+     * Эта вложенная функция перерисовывает бейджи на карточке блока.
+     * База здесь еще не сохраняется:
+     * пользователь просто получает понятную визуальную обратную связь на самой странице.
+     */
+    function renderBadges(containerId, labels, badgeClassName, emptyText) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
 
-      const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-      if (hasErrors) {
-        window.location.replace(currentUrl);
+      container.innerHTML = "";
+
+      if (!labels.length) {
+        const emptyState = document.createElement("span");
+        emptyState.className = "text-sm text-zinc-500";
+        emptyState.textContent = emptyText;
+        container.appendChild(emptyState);
         return;
       }
 
-      window.location.assign(currentUrl);
+      labels.forEach((label) => {
+        const badge = document.createElement("span");
+        badge.className = badgeClassName;
+        badge.textContent = label;
+        container.appendChild(badge);
+      });
+    }
+
+    /**
+     * Эта вложенная функция включает или выключает прокрутку фона.
+     * Пока открыта модалка, страница под ней не должна "уезжать".
+     */
+    function syncBodyScrollLock() {
+      const hasOpenedModal = modalElements.some((modal) => !modal.classList.contains("hidden"));
+      document.body.classList.toggle("overflow-hidden", hasOpenedModal);
+    }
+
+    /**
+     * Эта вложенная функция открывает конкретную модалку.
+     * Перед открытием она возвращает последний подтвержденный выбор,
+     * чтобы пользователь не видел случайный промежуточный черновик.
+     */
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const modalConfig = getModalConfig(modalId);
+      if (!modal || !modalConfig || form.dataset.editMode !== "1") return;
+
+      const savedValues = modalSelections.get(modalId) || readCheckedValues(modalConfig.checkboxSelector);
+      setCheckedValues(modalConfig.checkboxSelector, savedValues);
+      clearModalError(document.getElementById(modalConfig.errorId));
+      modal.classList.remove("hidden");
+      syncBodyScrollLock();
+    }
+
+    /**
+     * Эта вложенная функция закрывает конкретную модалку.
+     * Если пользователь закрыл окно без применения,
+     * экран возвращается к последнему подтвержденному состоянию.
+     */
+    function closeModal(modalId, { restoreSavedState = true } = {}) {
+      const modal = document.getElementById(modalId);
+      const modalConfig = getModalConfig(modalId);
+      if (!modal || !modalConfig) return;
+
+      if (restoreSavedState && modalSelections.has(modalId)) {
+        setCheckedValues(modalConfig.checkboxSelector, modalSelections.get(modalId));
+      }
+
+      clearModalError(document.getElementById(modalConfig.errorId));
+      modal.classList.add("hidden");
+      syncBodyScrollLock();
+    }
+
+    /**
+     * Эта вложенная функция закрывает все модалки сразу.
+     * Она нужна, когда пользователь выходит из режима редактирования страницы.
+     */
+    function closeAllModals() {
+      Object.keys(modalConfigs).forEach((modalId) => closeModal(modalId));
+    }
+
+    /**
+     * Эта вложенная функция применяет изменения из модалки к текущему экрану.
+     * Смысл для пользователя такой:
+     * выбор уже виден на странице, а в БД он уйдет после общего сохранения профиля.
+     */
+    function applyModalSelection(modalId) {
+      const modalConfig = getModalConfig(modalId);
+      if (!modalConfig) return;
+
+      const selectedValues = readCheckedValues(modalConfig.checkboxSelector);
+      const selectedLabels = readCheckedLabels(modalConfig.checkboxSelector);
+
+      modalSelections.set(modalId, selectedValues);
+      renderBadges(
+        modalConfig.containerId,
+        selectedLabels,
+        modalConfig.badgeClassName,
+        modalConfig.emptyText,
+      );
+      closeModal(modalId, { restoreSavedState: false });
+    }
+
+    Object.entries(modalConfigs).forEach(([modalId, modalConfig]) => {
+      modalSelections.set(modalId, readCheckedValues(modalConfig.checkboxSelector));
     });
+
+    syncModalChoiceCards();
+
+    openButtons.forEach((button) => {
+      button.addEventListener("click", () => openModal(button.dataset.modalOpen));
+    });
+
+    modalElements.forEach((modal) => {
+      modal.querySelectorAll("[data-modal-close]").forEach((button) => {
+        button.addEventListener("click", () => closeModal(modal.id));
+      });
+
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+          closeModal(modal.id);
+        }
+      });
+
+      modal.addEventListener("change", (event) => {
+        if (
+          event.target.matches(
+            ".psychologist-topic-checkbox, .psychologist-method-checkbox, .psychologist-specialisation-checkbox",
+          )
+        ) {
+          syncModalChoiceCards();
+        }
+      });
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+
+      const openedModal = modalElements.find((modal) => !modal.classList.contains("hidden"));
+      if (openedModal) {
+        closeModal(openedModal.id);
+      }
+    });
+
+    Object.entries(modalConfigs).forEach(([modalId, modalConfig]) => {
+      document.getElementById(modalConfig.saveButtonId)?.addEventListener("click", () => {
+        applyModalSelection(modalId);
+      });
+    });
+
+    return closeAllModals;
+  }
+
+  /**
+   * Эта функция настраивает карточки образования.
+   * В отличие от остальных вкладок здесь нет общего режима редактирования:
+   * каждая карточка редактируется отдельно и не мешает соседним.
+   */
+  function initEducationCards() {
+    const list = form.querySelector("[data-education-formset-list]");
+    const template = document.getElementById("education-empty-form-template");
+    const totalFormsInput = document.getElementById("id_education-TOTAL_FORMS");
+    const emptyState = form.querySelector("[data-education-empty-state]");
+    const savedCardState = new WeakMap();
+
+    if (!list || !template || !totalFormsInput || !addEducationButton) return;
+
+    /**
+     * Эта вложенная функция возвращает все видимые карточки образования.
+     * Она нужна как базовый список для остальных действий блока.
+     */
+    function getCards() {
+      return Array.from(list.querySelectorAll("[data-education-card]"));
+    }
+
+    /**
+     * Эта вложенная функция находит все поля, которыми реально управляет пользователь.
+     * Скрытые технические поля formset сюда не входят.
+     */
+    function getEditableFields(card) {
+      return Array.from(card.querySelectorAll("[data-editable-field='1']"));
+    }
+
+    /**
+     * Эта вложенная функция находит чекбоксы "clear" у файлов.
+     * Их тоже надо включать только во время редактирования карточки.
+     */
+    function getClearCheckboxes(card) {
+      return Array.from(card.querySelectorAll('input[type="checkbox"][name$="-clear"]'));
+    }
+
+    /**
+     * Эта вложенная функция показывает или скрывает пустое состояние блока.
+     * Если карточек нет, пользователь должен явно видеть, что можно добавить первую запись.
+     */
+    function syncEmptyState() {
+      if (!emptyState) return;
+
+      const hasVisibleCards = getCards().some((card) => !card.classList.contains("hidden"));
+      emptyState.classList.toggle("hidden", hasVisibleCards);
+    }
+
+    /**
+     * Эта вложенная функция запоминает текущее состояние карточки.
+     * Это нужно, чтобы кнопка "Отмена" возвращала пользователя
+     * к последним сохраненным данным, а не к случайному промежуточному вводу.
+     */
+    function rememberCardValues(card) {
+      const snapshot = {};
+
+      card.querySelectorAll("input, select, textarea").forEach((field) => {
+        const key = field.name || field.id;
+        if (!key) return;
+
+        snapshot[key] = {
+          value: field.type === "file" ? "" : field.value,
+          checked: field.checked,
+        };
+      });
+
+      savedCardState.set(card, snapshot);
+    }
+
+    /**
+     * Эта вложенная функция восстанавливает карточку из ранее сохраненного снимка.
+     * Для пользователя это и есть поведение кнопки "Отмена".
+     */
+    function restoreCardValues(card) {
+      const snapshot = savedCardState.get(card);
+      if (!snapshot) return;
+
+      card.querySelectorAll("input, select, textarea").forEach((field) => {
+        const key = field.name || field.id;
+        const savedValue = key ? snapshot[key] : null;
+        if (!savedValue) return;
+
+        if (field.type === "file") {
+          field.value = "";
+          return;
+        }
+
+        if (field.type === "checkbox" || field.type === "radio") {
+          field.checked = Boolean(savedValue.checked);
+          return;
+        }
+
+        field.value = savedValue.value ?? "";
+      });
+    }
+
+    /**
+     * Эта вложенная функция переводит одну карточку в режим просмотра или редактирования.
+     * В этот момент включаются или выключаются поля, file-операции и action-иконки.
+     */
+    function setCardEditMode(card, isEditing) {
+      card.dataset.educationEditing = isEditing ? "1" : "0";
+
+      getEditableFields(card).forEach((field) => setFieldState(field, isEditing));
+      getClearCheckboxes(card).forEach((checkbox) => {
+        checkbox.disabled = !isEditing;
+      });
+    }
+
+    /**
+     * Эта вложенная функция ищет карточку, которая уже открыта на редактирование.
+     * Она нужна, чтобы не допускать одновременное редактирование нескольких записей:
+     * иначе экран быстро становится шумным и неочевидным.
+     */
+    function findEditingCard(excludedCard = null) {
+      return getCards().find(
+        (card) => card !== excludedCard && !card.classList.contains("hidden") && card.dataset.educationEditing === "1",
+      );
+    }
+
+    /**
+     * Эта вложенная функция переводит фокус на открытую карточку.
+     * После добавления или включения редактирования пользователь сразу попадает туда, где должен работать.
+     */
+    function focusCard(card) {
+      const firstEditableField = getEditableFields(card).find((field) => !field.disabled && field.type !== "hidden");
+      if (firstEditableField) {
+        firstEditableField.focus({ preventScroll: true });
+      }
+      card.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    /**
+     * Эта вложенная функция скрывает карточку и отмечает ее на удаление.
+     * Для существующей записи это означает удаление при следующем сохранении формы.
+     * Для новой пустой карточки это означает просто убрать черновик с экрана.
+     */
+    function hideCard(card) {
+      const deleteCheckbox = card.querySelector('input[type="checkbox"][name$="-DELETE"]');
+      if (deleteCheckbox) {
+        deleteCheckbox.checked = true;
+      }
+
+      setCardEditMode(card, false);
+      card.classList.add("hidden");
+      syncEmptyState();
+    }
+
+    /**
+     * Эта вложенная функция обрабатывает "Отмену" для одной карточки.
+     * Если карточка новая, мы просто убираем ее.
+     * Если карточка старая, возвращаем последние запомненные значения.
+     */
+    function cancelCardEditing(card) {
+      if (card.dataset.educationExisting !== "1") {
+        hideCard(card);
+        return;
+      }
+
+      restoreCardValues(card);
+      setCardEditMode(card, false);
+    }
+
+    /**
+     * Эта вложенная функция открывает одну карточку на редактирование.
+     * Если другая карточка уже редактируется, вместо конфликта мы просто ведем пользователя к ней.
+     */
+    function openCardEditing(card) {
+      if (!card || card.classList.contains("hidden")) return;
+
+      if (card.dataset.educationEditing === "1") {
+        focusCard(card);
+        return;
+      }
+
+      const editingCard = findEditingCard(card);
+      if (editingCard) {
+        focusCard(editingCard);
+        return;
+      }
+
+      setCardEditMode(card, true);
+      focusCard(card);
+    }
+
+    /**
+     * Эта вложенная функция добавляет новую карточку образования в начало списка.
+     * Такое поведение экономит внимание пользователя:
+     * он сразу видит новый блок наверху и не ищет его внизу страницы.
+     */
+    function addNewCard() {
+      const editingCard = findEditingCard();
+      if (editingCard) {
+        focusCard(editingCard);
+        return;
+      }
+
+      const nextIndex = Number(totalFormsInput.value);
+      const html = template.innerHTML.replace(/__prefix__/g, String(nextIndex));
+      list.insertAdjacentHTML("afterbegin", html);
+      totalFormsInput.value = String(nextIndex + 1);
+
+      const newCard = list.firstElementChild;
+      if (!newCard) return;
+
+      rememberCardValues(newCard);
+      setCardEditMode(newCard, true);
+      syncEmptyState();
+      focusCard(newCard);
+    }
+
+    addEducationButton.addEventListener("click", addNewCard);
+
+    list.addEventListener("click", (event) => {
+      const editButton = event.target.closest("[data-education-edit-button]");
+      if (editButton) {
+        openCardEditing(editButton.closest("[data-education-card]"));
+        return;
+      }
+
+      const cancelButton = event.target.closest("[data-education-cancel-button]");
+      if (cancelButton) {
+        cancelCardEditing(cancelButton.closest("[data-education-card]"));
+        return;
+      }
+
+      const removeButton = event.target.closest("[data-remove-education-form]");
+      if (removeButton) {
+        hideCard(removeButton.closest("[data-education-card]"));
+      }
+    });
+
+    getCards().forEach((card) => {
+      rememberCardValues(card);
+      setCardEditMode(card, card.dataset.educationEditing === "1");
+    });
+
+    syncEmptyState();
+  }
+
+  /**
+   * Эта функция настраивает кнопки редактирования и отмены для вкладок профиля.
+   * Она описывает ровно тот сценарий, который пользователь ожидает:
+   * "войти в редактирование" и "выйти без сохранения".
+   */
+  function initProfileActionButtons() {
+    toggleButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        setProfileEditMode(true);
+      });
+    });
+
+    cancelButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        reloadCurrentPage({ replaceHistory: hasErrors });
+      });
+    });
+  }
+
+  closeAllExpertiseModals = initExpertiseModals();
+  initTabs(initialTab);
+  initEducationCards();
+  initProfileActionButtons();
+
+  applySkipIntroAnimationsIfNeeded();
+  setProfileEditMode(shouldStartInProfileEditMode);
+
+  form.addEventListener("submit", () => {
+    enableDisabledFieldsForSubmit();
+    rememberSkipIntroAnimationsOnce();
   });
 });
