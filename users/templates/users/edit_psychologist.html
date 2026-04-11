@@ -594,7 +594,7 @@
                                     {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
                                     <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
-                                            <p class="mt-2 xl:text-2xl text-xl font-black tracking-tight text-indigo-950/75">Запись об образовании {{ forloop.counter }}</p>
+                                            <p class="mt-2 xl:text-2xl text-xl font-bold tracking-tight text-indigo-950/50">Запись об образовании {{ forloop.counter }}</p>
                                             {% if form.instance.pk %}
                                             <div class="mt-2 inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold
                                                  {% if form.instance.is_verified %}border-emerald-200 bg-emerald-50 text-emerald-700{% else %}border-amber-200 bg-amber-50 text-amber-700{% endif %}">
