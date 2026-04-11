@@ -41,6 +41,7 @@
                                                 <label class="psychologist-modal-choice{% if topic.pk|stringformat:"s" in selected_topics %} is-selected{% endif %} block rounded-2xl">
                                                     <input type="checkbox"
                                                            name="topics"
+                                                           form="psychologist-profile-form"
                                                            value="{{ topic.pk }}"
                                                            data-label="{{ topic.name }}"
                                                            class="psychologist-topic-checkbox"

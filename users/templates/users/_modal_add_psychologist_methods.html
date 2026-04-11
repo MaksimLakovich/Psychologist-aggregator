@@ -28,6 +28,7 @@
                         <label class="psychologist-modal-choice{% if method.pk|stringformat:"s" in selected_methods %} is-selected{% endif %} block rounded-2xl">
                             <input type="checkbox"
                                    name="methods"
+                                   form="psychologist-profile-form"
                                    value="{{ method.pk }}"
                                    data-label="{{ method.name }}"
                                    class="psychologist-method-checkbox"

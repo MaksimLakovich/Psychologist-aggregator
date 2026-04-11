@@ -22,8 +22,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const cancelButtons = Array.from(form.querySelectorAll("[data-profile-edit-cancel]"));
   const editActionGroups = Array.from(form.querySelectorAll("[data-profile-edit-actions]"));
   const displayActionGroups = Array.from(form.querySelectorAll("[data-profile-display-actions]"));
-  const expertiseEditButtons = Array.from(form.querySelectorAll("[data-expertise-edit-button]"));
   const addEducationButton = document.getElementById("education-add-button");
+  const photoUploadTrigger = form.querySelector("[data-photo-upload-trigger]");
+  const photoFileInput = form.querySelector("[data-photo-upload-input-container] input[type='file']");
+  const photoSelectedFileLabel = form.querySelector("[data-photo-selected-file]");
 
   const hasErrors = form.dataset.hasErrors === "1";
   const initialTab = form.dataset.activeTab || "profile";
@@ -33,10 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
     form.querySelectorAll(
       '[data-tab-panel="profile"] [data-editable-field="1"], [data-tab-panel="personal"] [data-editable-field="1"]',
     ),
-  );
-  const profileChoiceInputs = Array.from(form.querySelectorAll('[data-tab-panel="profile"] .choice-card input'));
-  const expertiseCheckboxes = Array.from(
-    form.querySelectorAll(".psychologist-topic-checkbox, .psychologist-method-checkbox, .psychologist-specialisation-checkbox"),
   );
 
   const modalConfigs = {
@@ -150,24 +148,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /**
    * Эта функция управляет общим режимом редактирования профиля.
-   * Она нужна только для вкладок с базовыми данными и для модалок экспертизы.
-   * Блок образования живет отдельно и редактируется локально по карточкам.
+   * Она нужна только для вкладок с базовыми данными профиля и аккаунта.
+   * Блок образования и блок экспертизы живут отдельно и редактируются своим сценарием.
    */
   function setProfileEditMode(isEditing) {
     form.dataset.editMode = isEditing ? "1" : "0";
 
     profileEditableFields.forEach((field) => setFieldState(field, isEditing));
-    profileChoiceInputs.forEach((field) => {
-      field.disabled = !isEditing;
-    });
-    expertiseCheckboxes.forEach((field) => {
-      field.disabled = !isEditing;
-    });
-
-    expertiseEditButtons.forEach((button) => {
-      button.classList.toggle("hidden", !isEditing);
-      button.classList.toggle("flex", isEditing);
-    });
 
     toggleElementGroups(editActionGroups, isEditing, "flex");
     toggleElementGroups(displayActionGroups, !isEditing);
@@ -238,6 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
    * Эта функция настраивает блоки "Темы / Методы / Специализации".
    * Для пользователя это единый сценарий:
    * открыть модалку, увидеть текущий выбор, изменить его и применить на странице.
+   * Этот сценарий работает независимо от общего режима редактирования профиля.
    */
   function initExpertiseModals() {
     const modalSelections = new Map();
@@ -357,7 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function openModal(modalId) {
       const modal = document.getElementById(modalId);
       const modalConfig = getModalConfig(modalId);
-      if (!modal || !modalConfig || form.dataset.editMode !== "1") return;
+      if (!modal || !modalConfig) return;
 
       const savedValues = modalSelections.get(modalId) || readCheckedValues(modalConfig.checkboxSelector);
       setCheckedValues(modalConfig.checkboxSelector, savedValues);
@@ -520,6 +508,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /**
+     * Эта вложенная функция находит обертки для file-контролов в карточке образования.
+     * В спокойном режиме они скрыты, чтобы карточка не выглядела перегруженной.
+     */
+    function getFileControlGroups(card) {
+      return Array.from(card.querySelectorAll("[data-education-file-controls]"));
+    }
+
+    /**
      * Эта вложенная функция меняет визуальное состояние карточки образования.
      * Пользователь должен сразу видеть, что сейчас перед ним:
      * спокойный просмотр записи или активное редактирование.
@@ -601,6 +597,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       toggleElementGroups(getDisplayActionGroups(card), !isEditing, "flex");
       toggleElementGroups(getEditActionGroups(card), isEditing, "flex");
+      toggleElementGroups(getFileControlGroups(card), isEditing);
       syncCardAppearance(card, isEditing);
     }
 
@@ -754,10 +751,42 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  /**
+   * Эта функция запускает отдельный сценарий обновления фото профиля.
+   * Пользователь жмет кнопку рядом с аватаром, после чего сразу выбирает новый файл,
+   * а система сама переводит страницу в режим, где изменение можно сохранить.
+   */
+  function initPhotoUploadTrigger() {
+    if (!photoUploadTrigger || !photoFileInput) return;
+
+    photoUploadTrigger.addEventListener("click", () => {
+      if (form.dataset.editMode !== "1") {
+        setProfileEditMode(true);
+      }
+
+      photoFileInput.click();
+    });
+
+    photoFileInput.addEventListener("change", () => {
+      if (!photoSelectedFileLabel) return;
+
+      const selectedFile = photoFileInput.files?.[0];
+      if (!selectedFile) {
+        photoSelectedFileLabel.textContent = "";
+        photoSelectedFileLabel.classList.add("hidden");
+        return;
+      }
+
+      photoSelectedFileLabel.textContent = `Выбран файл: ${selectedFile.name}`;
+      photoSelectedFileLabel.classList.remove("hidden");
+    });
+  }
+
   closeAllExpertiseModals = initExpertiseModals();
   initTabs(initialTab);
   initEducationCards();
   initProfileActionButtons();
+  initPhotoUploadTrigger();
 
   applySkipIntroAnimationsIfNeeded();
   setProfileEditMode(shouldStartInProfileEditMode);

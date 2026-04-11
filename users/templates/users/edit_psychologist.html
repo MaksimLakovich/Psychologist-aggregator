@@ -69,26 +69,6 @@
         box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.22);
     }
 
-    /* ========================================================= */
-    /* Карточки выбора языков: скрываем native input и красим выбранное состояние */
-    /* ========================================================= */
-    .choice-card input:checked + span {
-        background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(99, 102, 241, 0.18));
-        border-color: rgba(79, 70, 229, 0.35);
-        color: rgb(55 48 163);
-        box-shadow: 0 10px 25px -16px rgba(79, 70, 229, 0.65);
-    }
-
-    .choice-card input {
-        position: absolute;
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    #psychologist-profile-form[data-edit-mode="0"] .choice-card {
-        pointer-events: none;
-    }
-
     #psychologist-profile-form[data-edit-mode="1"] input:not([type="hidden"]):not([readonly]):not(:disabled):focus,
     #psychologist-profile-form[data-edit-mode="1"] select:not(:disabled):focus,
     #psychologist-profile-form[data-edit-mode="1"] textarea:not([readonly]):not(:disabled):focus {
@@ -436,19 +416,19 @@
                                     <div data-profile-display-actions>
                                         <button type="button"
                                                 data-profile-edit-toggle
-                                                class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
+                                                class="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
                                             <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
                                             Редактировать профиль
                                         </button>
                                     </div>
                                     <div data-profile-edit-actions class="hidden w-full flex-col gap-3 sm:w-auto sm:flex-row">
                                         <button type="submit"
-                                                class="inline-flex items-center justify-center rounded-xl border border-transparent bg-emerald-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-emerald-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-emerald-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-emerald-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
                                             Сохранить изменения
                                         </button>
                                         <button type="button"
                                                 data-profile-edit-cancel
-                                                class="inline-flex items-center justify-center rounded-xl border border-transparent bg-white px-6 py-3 text-base font-medium text-zinc-500 shadow-md transition-all duration-200 hover:bg-gray-100 hover:shadow-lg">
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-white px-6 py-3 text-base font-medium text-zinc-500 shadow-md transition-all duration-200 hover:bg-gray-100 hover:shadow-lg">
                                             Отмена
                                         </button>
                                     </div>
@@ -542,23 +522,22 @@
                             <div class="mt-8 space-y-6">
                                 <div class="space-y-3">
                                     <p class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">{{ profile_form.languages.label }}</p>
-                                    <div class="grid gap-3 sm:grid-cols-2">
-                                        {% for checkbox in profile_form.languages %}
-                                        <label class="choice-card cursor-pointer">
-                                            {{ checkbox.tag }}
-                                            <span class="block rounded-2xl border border-zinc-200 bg-white px-4 py-4 text-base font-semibold text-zinc-700 transition-all duration-200 hover:border-indigo-200 hover:bg-indigo-50/60">
-                                                {{ checkbox.choice_label }}
-                                            </span>
-                                        </label>
-                                        {% endfor %}
-                                    </div>
+                                    {{ profile_form.languages }}
+                                    <p id="profile-languages-help" class="text-sm leading-6 text-zinc-500">
+                                        Можно выбрать несколько языков. На macOS используйте Cmd, на Windows Ctrl.
+                                    </p>
                                     {% if profile_form.languages.errors %}<p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.languages.errors.0 }}</p>{% endif %}
                                 </div>
 
                                 <div class="rounded-[1.5rem] border border-white bg-white p-5 shadow-sm shadow-zinc-200/60">
                                     <div class="space-y-5">
-                                        <div>
+                                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                             <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Фото профиля</p>
+                                            <button type="button"
+                                                    data-photo-upload-trigger
+                                                    class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-transparent bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                Загрузить новое фото
+                                            </button>
                                         </div>
 
                                         <div class="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start">
@@ -571,7 +550,13 @@
                                             </div>
 
                                             <div class="space-y-3">
-                                                {{ profile_form.photo }}
+                                                <p class="text-sm leading-6 text-zinc-500">
+                                                    Текущее фото уже отображается в карточке специалиста. Для замены нажмите кнопку «Загрузить новое фото».
+                                                </p>
+                                                <div class="hidden" data-photo-upload-input-container>
+                                                    {{ profile_form.photo }}
+                                                </div>
+                                                <p data-photo-selected-file class="hidden text-sm font-medium text-indigo-600"></p>
                                                 {% if profile_form.photo.errors %}
                                                 <p class="text-sm tracking-wide text-pink-700">{{ profile_form.photo.errors.0 }}</p>
                                                 {% endif %}
@@ -608,19 +593,19 @@
                                     <div data-profile-display-actions>
                                         <button type="button"
                                                 data-profile-edit-toggle
-                                                class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
+                                                class="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
                                             <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
                                             Редактировать данные
                                         </button>
                                     </div>
                                     <div data-profile-edit-actions class="hidden w-full flex-col gap-3 sm:w-auto sm:flex-row">
                                         <button type="submit"
-                                                class="inline-flex items-center justify-center rounded-xl border border-transparent bg-emerald-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-emerald-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-emerald-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-emerald-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
                                             Сохранить изменения
                                         </button>
                                         <button type="button"
                                                 data-profile-edit-cancel
-                                                class="inline-flex items-center justify-center rounded-xl border border-transparent bg-white px-6 py-3 text-base font-medium text-zinc-500 shadow-md transition-all duration-200 hover:bg-gray-100 hover:shadow-lg">
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-white px-6 py-3 text-base font-medium text-zinc-500 shadow-md transition-all duration-200 hover:bg-gray-100 hover:shadow-lg">
                                             Отмена
                                         </button>
                                     </div>
@@ -664,7 +649,7 @@
                                 <button type="button"
                                         id="education-add-button"
                                         data-add-education-form
-                                        class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
+                                        class="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
                                     Добавить еще
                                 </button>
                             </div>
@@ -733,15 +718,26 @@
                                                 <label for="{{ field.id_for_label }}" class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
                                                     {{ field.label }}
                                                 </label>
-                                                {{ field }}
+                                                {% if field.name == 'document' %}
+                                                <div data-education-file-controls class="{% if form.errors or form.non_field_errors %}{% else %}hidden{% endif %}">
+                                                    {{ field }}
+                                                </div>
                                                 {% if field.errors %}
                                                 <p class="mt-2 text-sm tracking-wide text-pink-700">{{ field.errors.0 }}</p>
                                                 {% endif %}
-                                                {% if field.name == 'document' and form.instance.document %}
+                                                {% if form.instance.document %}
                                                 <a href="{{ form.instance.document.url }}" target="_blank" rel="noopener"
                                                    class="inline-flex items-center text-sm font-semibold text-indigo-600 hover:text-indigo-700">
                                                     Открыть загруженный документ
                                                 </a>
+                                                {% else %}
+                                                <p class="text-sm text-zinc-500">Документы еще не загружены.</p>
+                                                {% endif %}
+                                                {% else %}
+                                                {{ field }}
+                                                {% if field.errors %}
+                                                <p class="mt-2 text-sm tracking-wide text-pink-700">{{ field.errors.0 }}</p>
+                                                {% endif %}
                                                 {% endif %}
                                             </div>
                                             {% endif %}
@@ -801,7 +797,14 @@
                                             {% if field.name != 'DELETE' %}
                                             <div class="space-y-2 {% if field.name == 'document' %}md:col-span-2{% endif %}">
                                                 <label class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">{{ field.label }}</label>
+                                                {% if field.name == 'document' %}
+                                                <div data-education-file-controls>
+                                                    {{ field }}
+                                                </div>
+                                                <p class="text-sm text-zinc-500">Документы еще не загружены.</p>
+                                                {% else %}
                                                 {{ field }}
+                                                {% endif %}
                                             </div>
                                             {% endif %}
                                         {% endfor %}
@@ -836,7 +839,7 @@
                                     <button type="button"
                                             data-modal-open="psychologist-topics-modal"
                                             data-expertise-edit-button
-                                            class="hidden absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
+                                            class="absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
                                         <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
                                     </button>
 
@@ -866,7 +869,7 @@
                                     <button type="button"
                                             data-modal-open="psychologist-methods-modal"
                                             data-expertise-edit-button
-                                            class="hidden absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
+                                            class="absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
                                         <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
                                     </button>
 
@@ -896,7 +899,7 @@
                                     <button type="button"
                                             data-modal-open="psychologist-specialisations-modal"
                                             data-expertise-edit-button
-                                            class="hidden absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
+                                            class="absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
                                         <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
                                     </button>
 
@@ -992,17 +995,17 @@
 
             </aside>
 
-            {% include 'users/_modal_add_psychologist_topics.html' %}
-
-            {% include 'users/_modal_add_psychologist_methods.html' %}
-
-            {% include 'users/_modal_add_psychologist_specialisations.html' %}
-
         </form>
 
     </div>
 
 </section>
+
+{% include 'users/_modal_add_psychologist_topics.html' %}
+
+{% include 'users/_modal_add_psychologist_methods.html' %}
+
+{% include 'users/_modal_add_psychologist_specialisations.html' %}
 
 <script src="{% static 'js/modules/edit_profile/edit_psychologist_profile.js' %}"></script>
 <script type="module" src="{% static 'js/modules/auto_hide_message.js' %}"></script>
