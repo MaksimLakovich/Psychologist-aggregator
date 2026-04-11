@@ -304,7 +304,7 @@
 
             <!-- ОСНОВНОЙ БЛОК С ПОЛЬЗОВАТЕЛЬСКИМИ ДАННЫМИ -->
             <div class="space-y-8 animate-fade-in-up" style="animation-delay: 0.05s;">
-                <div class="rounded-[2rem] border border-indigo-100 bg-white shadow-xl shadow-indigo-100/50 overflow-hidden">
+                <div class="rounded-[2rem] border border-indigo-100 bg-white shadow-xl shadow-indigo-50/60 overflow-hidden">
 
                     <!-- Перечень вкладок / кнопки для работы со страницей -->
                     <div class="border-b border-indigo-100 bg-gradient-to-r from-indigo-50 via-white to-indigo-50 px-6 py-5 sm:px-8">
@@ -590,11 +590,11 @@
                                 <div data-education-card
                                      data-education-existing="{% if form.instance.pk %}1{% else %}0{% endif %}"
                                      data-education-editing="{% if form.errors or form.non_field_errors %}1{% else %}0{% endif %}"
-                                     class="rounded-[1.5rem] border border-indigo-100 bg-indigo-100/15 p-5">
+                                     class="rounded-[1.5rem] border-2 border-slate-100/50 bg-slate-50/75 p-5">
                                     {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
                                     <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
-                                            <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Запись об образовании {{ forloop.counter }}</p>
+                                            <p class="mt-2 xl:text-2xl text-xl font-black tracking-tight text-indigo-950/75">Запись об образовании {{ forloop.counter }}</p>
                                             {% if form.instance.pk %}
                                             <div class="mt-2 inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold
                                                  {% if form.instance.is_verified %}border-emerald-200 bg-emerald-50 text-emerald-700{% else %}border-amber-200 bg-amber-50 text-amber-700{% endif %}">
@@ -745,8 +745,10 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
-                                <div class="selection-card rounded-[2rem] p-6 relative min-w-0">
+                            <div class="grid grid-cols-1 gap-6">
+
+                                <!-- Темы -->
+                                <div class="rounded-[2rem] border-2 border-slate-100/50 bg-slate-50/75 p-5 relative min-w-0">
                                     <button type="button"
                                             data-modal-open="psychologist-topics-modal"
                                             data-expertise-edit-button
@@ -756,13 +758,10 @@
 
                                     <div class="relative z-[1]">
                                         <div class="flex items-start gap-3 mb-5">
-                                            <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100/80 text-indigo-600 shadow-sm flex-shrink-0">
-                                                <img src="{% static 'images/menu/topic-icon.svg' %}" alt="topic" class="w-7 h-7">
-                                            </span>
                                             <div class="min-w-0 pr-12">
-                                                <p class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 mb-4 block">Темы</p>
-                                                <h3 class="mt-2 text-xl font-black tracking-tight text-indigo-950/75">С чем вы работаете</h3>
-                                                <p class="mt-2 text-sm leading-relaxed text-slate-500">
+                                                <p class="mt-2 xl:text-2xl text-xl font-black tracking-tight text-indigo-950/75">Темы</p>
+                                                <h3 class="mt-3 xl:text-xl text-lg font-semibold tracking-tight text-indigo-950/60">С чем вы работаете?</h3>
+                                                <p class="mt-0 mb-5 text-base leading-relaxed text-slate-500">
                                                     Темы помогают клиенту быстрее понять, на какие запросы вы откликаетесь увереннее всего.
                                                 </p>
                                             </div>
@@ -778,7 +777,8 @@
                                     </div>
                                 </div>
 
-                                <div class="selection-card rounded-[2rem] p-6 relative min-w-0">
+                                <!-- Методы -->
+                                <div class="rounded-[2rem] border-2 border-slate-100/50 bg-slate-50/75 p-5 relative min-w-0">
                                     <button type="button"
                                             data-modal-open="psychologist-methods-modal"
                                             data-expertise-edit-button
@@ -788,13 +788,10 @@
 
                                     <div class="relative z-[1]">
                                         <div class="flex items-start gap-3 mb-5">
-                                            <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100/80 text-emerald-600 shadow-sm flex-shrink-0">
-                                                <img src="{% static 'images/menu/method-icon.svg' %}" alt="method" class="w-7 h-7">
-                                            </span>
                                             <div class="min-w-0 pr-12">
-                                                <p class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 mb-4 block">Методы</p>
-                                                <h3 class="mt-2 text-xl font-black tracking-tight text-indigo-950/75">Как вы работаете</h3>
-                                                <p class="mt-2 text-sm leading-relaxed text-slate-500">
+                                                <p class="mt-2 xl:text-2xl text-xl font-black tracking-tight text-indigo-950/75">Методы</p>
+                                                <h3 class="mt-3 xl:text-xl text-lg font-semibold tracking-tight text-indigo-950/60">Как вы работаете?</h3>
+                                                <p class="mt-0 mb-5 text-base leading-relaxed text-slate-500">
                                                     Методы показывают клиенту ваш рабочий стиль и помогают понять, какой подход он встретит на сессии.
                                                 </p>
                                             </div>
@@ -810,7 +807,8 @@
                                     </div>
                                 </div>
 
-                                <div class="selection-card rounded-[2rem] p-6 relative min-w-0">
+                                <!-- Специализации -->
+                                <div class="rounded-[2rem] border-2 border-slate-100/50 bg-slate-50/75 p-5 relative min-w-0">
                                     <button type="button"
                                             data-modal-open="psychologist-specialisations-modal"
                                             data-expertise-edit-button
@@ -820,13 +818,10 @@
 
                                     <div class="relative z-[1]">
                                         <div class="flex items-start gap-3 mb-5">
-                                            <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100/80 text-fuchsia-600 shadow-sm flex-shrink-0">
-                                                <img src="{% static 'images/menu/my-profile.svg' %}" alt="specialisation" class="w-7 h-7">
-                                            </span>
                                             <div class="min-w-0 pr-12">
-                                                <p class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 mb-4 block">Специализации</p>
-                                                <h3 class="mt-2 text-xl font-black tracking-tight text-indigo-950/75">Ваша профессиональная школа</h3>
-                                                <p class="mt-2 text-sm leading-relaxed text-slate-500">
+                                                <p class="mt-2 xl:text-2xl text-xl font-black tracking-tight text-indigo-950/75">Специализации</p>
+                                                <h3 class="mt-3 xl:text-xl text-lg font-semibold tracking-tight text-indigo-950/60">Ваша профессиональная школа?</h3>
+                                                <p class="mt-0 mb-5 text-base leading-relaxed text-slate-500">
                                                     Специализации помогают точнее описать вашу практику и то, в какой парадигме вы ведете работу.
                                                 </p>
                                             </div>
@@ -902,7 +897,7 @@
                     </div>
                 </div>
 
-                <div class="rounded-[2rem] border border-zinc-100 bg-white p-6 shadow-lg shadow-zinc-200/40">
+                <div class="rounded-[2rem] border border-indigo-100 bg-white p-6 shadow-2xl shadow-indigo-200/60">
                     <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Что важно не забыть</p>
                     <ul class="mt-4 space-y-3 text-sm leading-6 text-zinc-600">
                         <li>Фото и биография помогают клиенту быстрее понять, насколько комфортно ему будет с вами работать.</li>
