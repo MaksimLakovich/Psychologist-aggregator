@@ -39,7 +39,6 @@ document.addEventListener("DOMContentLoaded", function () {
       saveButtonId: "save-psychologist-topics-button",
       errorId: "psychologist-topics-modal-error",
       checkboxSelector: ".psychologist-topic-checkbox",
-      submittedMarkerSelector: '[data-modal-submitted-marker="psychologist-topics-modal"]',
       containerId: "selected-topics-container",
       badgeClassName: "selection-badge topic-badge",
       emptyText: "Темы пока не выбраны",
@@ -49,7 +48,6 @@ document.addEventListener("DOMContentLoaded", function () {
       saveButtonId: "save-psychologist-methods-button",
       errorId: "psychologist-methods-modal-error",
       checkboxSelector: ".psychologist-method-checkbox",
-      submittedMarkerSelector: '[data-modal-submitted-marker="psychologist-methods-modal"]',
       containerId: "selected-methods-container",
       badgeClassName: "selection-badge method-badge",
       emptyText: "Методы пока не выбраны",
@@ -59,7 +57,6 @@ document.addEventListener("DOMContentLoaded", function () {
       saveButtonId: "save-psychologist-specialisations-button",
       errorId: "psychologist-specialisations-modal-error",
       checkboxSelector: ".psychologist-specialisation-checkbox",
-      submittedMarkerSelector: '[data-modal-submitted-marker="psychologist-specialisations-modal"]',
       containerId: "selected-specialisations-container",
       badgeClassName: "selection-badge specialisation-badge",
       emptyText: "Специализации пока не выбраны",
@@ -286,6 +283,23 @@ document.addEventListener("DOMContentLoaded", function () {
     getCheckboxes(checkboxSelector).forEach((checkbox) => {
       checkbox.checked = valuesSet.has(checkbox.value);
     });
+    syncModalChoiceVisualState();
+  }
+
+  /**
+   * Явно синхронизирует визуальное состояние карточек в модалках с реальным состоянием чекбоксов.
+   * Это защита от браузерных и CSS-особенностей: даже если нативный чекбокс выглядит неочевидно,
+   * пользователь все равно сразу видит, какие значения сейчас выбраны.
+   */
+  function syncModalChoiceVisualState() {
+    form.querySelectorAll(".psychologist-modal-choice").forEach((choice) => {
+      const checkbox = choice.querySelector(
+        ".psychologist-topic-checkbox, .psychologist-method-checkbox, .psychologist-specialisation-checkbox",
+      );
+      if (!checkbox) return;
+
+      choice.classList.toggle("is-selected", checkbox.checked);
+    });
   }
 
   /**
@@ -356,7 +370,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const modalConfig = getModalConfigById(modalId);
     if (!modal || !modalConfig || form.dataset.editMode !== "1") return;
 
-    applyCheckedValues(modalConfig.checkboxSelector, modalState.get(modalId) || []);
+    const savedValues = modalState.has(modalId)
+      ? modalState.get(modalId)
+      : readCheckedValues(modalConfig.checkboxSelector);
+    applyCheckedValues(modalConfig.checkboxSelector, savedValues || []);
     clearModalError(document.getElementById(modalConfig.errorId));
     modal.classList.remove("hidden");
     syncBodyScrollLock();
@@ -372,7 +389,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const modalConfig = getModalConfigById(modalId);
     if (!modal || !modalConfig) return;
 
-    if (restoreSavedState) {
+    if (restoreSavedState && modalState.has(modalId)) {
       applyCheckedValues(modalConfig.checkboxSelector, modalState.get(modalId) || []);
     }
 
@@ -391,20 +408,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /**
-   * Включает скрытый marker для той модалки, выбор из которой пользователь уже подтвердил кнопкой "Сохранить".
-   * Это защищает от случайной подмены данных: сервер учитывает только те изменения,
-   * которые специалист действительно применил в окне выбора.
-   */
-  function enableSubmittedMarker(modalConfig) {
-    if (!modalConfig?.submittedMarkerSelector) return;
-
-    const marker = document.querySelector(modalConfig.submittedMarkerSelector);
-    if (!marker) return;
-
-    marker.disabled = false;
-  }
-
-  /**
    * Локально "сохраняет" выбор модалки на самой странице:
    * - фиксирует выбранные чекбоксы как текущее состояние окна;
    * - обновляет карточки с бейджами;
@@ -420,7 +423,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedLabels = collectSelectedLabels(modalConfig.checkboxSelector);
 
     modalState.set(modalId, selectedValues);
-    enableSubmittedMarker(modalConfig);
     renderBadges(
       modalConfig.containerId,
       selectedLabels,
@@ -430,24 +432,16 @@ document.addEventListener("DOMContentLoaded", function () {
     closeModal(modalId, { restoreSavedState: false });
   }
 
-  applySkipIntroAnimationsIfNeeded();
-  setEditMode(hasErrors);
-  initEducationFormset();
-
-  // Если сервер уже вернул страницу с ошибками после POST, то текущий выбор в модалках
-  // уже является частью несохраненной формы. В этом случае снова включаем markers,
-  // чтобы пользователь не потерял свой выбор при повторной попытке сохранения.
-  if (hasErrors) {
-    Object.values(modalConfigs).forEach((modalConfig) => {
-      enableSubmittedMarker(modalConfig);
-    });
-  }
-
-  // При первой загрузке страницы запоминаем текущее состояние чекбоксов в каждой модалке.
-  // Это становится "точкой возврата", если пользователь откроет окно и закроет его без применения.
+  // Стартовое состояние модалок нужно зафиксировать до первого setEditMode(false),
+  // потому что тот вызывает closeAllModals() и раньше обнулял чекбоксы до пустого выбора.
   Object.values(modalConfigs).forEach((modalConfig) => {
     modalState.set(modalConfig.modalId, readCheckedValues(modalConfig.checkboxSelector));
   });
+
+  applySkipIntroAnimationsIfNeeded();
+  setEditMode(hasErrors);
+  initEducationFormset();
+  syncModalChoiceVisualState();
 
   // Кнопки-иконки на карточках открывают соответствующие модальные окна выбора.
   openButtons.forEach((button) => {
@@ -468,6 +462,16 @@ document.addEventListener("DOMContentLoaded", function () {
     modal.addEventListener("click", (event) => {
       if (event.target === modal) {
         closeModal(modal.id);
+      }
+    });
+
+    modal.addEventListener("change", (event) => {
+      if (
+        event.target.matches(
+          ".psychologist-topic-checkbox, .psychologist-method-checkbox, .psychologist-specialisation-checkbox",
+        )
+      ) {
+        syncModalChoiceVisualState();
       }
     });
   });

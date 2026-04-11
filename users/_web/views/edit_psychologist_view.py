@@ -133,29 +133,6 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
             return []
         return [str(item) for item in value]
 
-    def normalize_profile_post_data(self, post_data, current_profile):
-        """Приводит POST-данные страницы к тому виду, который ожидает форма профиля.
-
-        Бизнес-смысл метода:
-            - если специалист не открывал модальное окно выбора, нельзя случайно затереть уже сохраненные темы,
-              методы или специализации;
-            - если специалист открыл окно и подтвердил новый выбор, в форму должно попасть именно это новое состояние,
-              даже если пользователь снял все галочки и решил очистить блок полностью.
-        """
-        if "topics_submitted" not in post_data:
-            post_data.setlist("topics", [str(pk) for pk in current_profile.topics.values_list("pk", flat=True)])
-
-        if "methods_submitted" not in post_data:
-            post_data.setlist("methods", [str(pk) for pk in current_profile.methods.values_list("pk", flat=True)])
-
-        if "specialisations_submitted" not in post_data:
-            post_data.setlist(
-                "specialisations",
-                [str(pk) for pk in current_profile.specialisations.values_list("pk", flat=True)],
-            )
-
-        return post_data
-
     def get_active_profile_tab(self, *, account_form, profile_form, education_formset) -> str:
         """Определяет, какую вкладку открыть после проверки данных на сервере.
 
@@ -260,8 +237,6 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
             - либо страница вернулась с ошибками и ничего не сохранилось частично.
         """
         post_data = request.POST.copy()
-        current_profile = self.get_profile_instance()
-        post_data = self.normalize_profile_post_data(post_data, current_profile)
 
         account_form = self.get_account_form(data=post_data)
         profile_form = self.get_profile_form(data=post_data, files=request.FILES)

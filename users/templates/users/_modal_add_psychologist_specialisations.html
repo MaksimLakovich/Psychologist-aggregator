@@ -25,16 +25,19 @@
 
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {% for specialisation in all_specialisations %}
-                        <label class="psychologist-modal-choice flex items-center gap-3 rounded-2xl">
+                        <label class="psychologist-modal-choice{% if specialisation.pk|stringformat:"s" in selected_specialisations %} is-selected{% endif %} block rounded-2xl">
                             <input id="account-specialisation-{{ specialisation.pk }}"
                                    type="checkbox"
                                    name="specialisations"
                                    value="{{ specialisation.pk }}"
                                    data-label="{{ specialisation.name }}"
-                                   class="psychologist-specialisation-checkbox h-5 w-5 rounded border-fuchsia-300 text-fuchsia-600 focus:ring-fuchsia-500"
+                                   class="psychologist-specialisation-checkbox"
                                    {% if specialisation.pk|stringformat:"s" in selected_specialisations %}checked{% endif %}>
-                            <span class="flex-1 rounded-2xl border border-indigo-100 bg-white px-4 py-3 text-sm font-medium text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] transition">
-                                {{ specialisation.name }}
+                            <span class="psychologist-modal-choice__card">
+                                <span class="psychologist-modal-choice__indicator psychologist-modal-choice__indicator--specialisation" aria-hidden="true"></span>
+                                <span class="psychologist-modal-choice__label">
+                                    {{ specialisation.name }}
+                                </span>
                             </span>
                         </label>
                     {% empty %}

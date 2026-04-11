@@ -38,15 +38,18 @@
                                         <h3 class="mb-2 text-lg font-semibold text-indigo-950/75">{{ group_name }}</h3>
                                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                             {% for topic in items %}
-                                                <label class="psychologist-modal-choice flex items-center gap-3 rounded-2xl">
+                                                <label class="psychologist-modal-choice{% if topic.pk|stringformat:"s" in selected_topics %} is-selected{% endif %} block rounded-2xl">
                                                     <input type="checkbox"
                                                            name="topics"
                                                            value="{{ topic.pk }}"
                                                            data-label="{{ topic.name }}"
-                                                           class="psychologist-topic-checkbox h-5 w-5 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500"
+                                                           class="psychologist-topic-checkbox"
                                                            {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}>
-                                                    <span class="flex-1 rounded-2xl border border-indigo-100 bg-white px-4 py-3 text-sm font-medium text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] transition">
-                                                        {{ topic.name }}
+                                                    <span class="psychologist-modal-choice__card">
+                                                        <span class="psychologist-modal-choice__indicator psychologist-modal-choice__indicator--topic" aria-hidden="true"></span>
+                                                        <span class="psychologist-modal-choice__label">
+                                                            {{ topic.name }}
+                                                        </span>
                                                     </span>
                                                 </label>
                                             {% empty %}
