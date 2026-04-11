@@ -4,8 +4,7 @@ from django.forms import modelformset_factory
 from timezone_field import TimeZoneFormField
 
 from users.constants import (CURRENCY_CHOICES, GENDER_CHOICES,
-                             LANGUAGE_CHOICES, THERAPY_FORMAT_CHOICES,
-                             WORK_STATUS_CHOICES)
+                             LANGUAGE_CHOICES, THERAPY_FORMAT_CHOICES)
 from users.models import (AppUser, Education, Method, PsychologistProfile,
                           Specialisation, Topic)
 
@@ -198,7 +197,6 @@ class EditPsychologistProfileForm(forms.ModelForm):
             "price_individual",
             "price_couples",
             "price_currency",
-            "work_status",
             "specialisations",
             "methods",
             "topics",
@@ -283,15 +281,6 @@ class EditPsychologistProfileForm(forms.ModelForm):
                     "style": "-webkit-text-fill-color: rgb(113 113 122);",
                 }
             ),
-            "work_status": forms.Select(
-                attrs={
-                    "class": READONLY_SELECT_CLASS,
-                    "data-view-class": READONLY_SELECT_CLASS,
-                    "data-edit-class": BASE_INPUT_CLASS,
-                    "data-editable-field": "1",
-                    "style": "-webkit-text-fill-color: rgb(113 113 122);",
-                }
-            ),
         }
 
     def __init__(self, *args, **kwargs):
@@ -304,7 +293,6 @@ class EditPsychologistProfileForm(forms.ModelForm):
         self.fields["gender"].choices = [("", "Выберите пол"), *GENDER_CHOICES]
         self.fields["therapy_format"].choices = [("", "Выберите формат"), *THERAPY_FORMAT_CHOICES]
         self.fields["price_currency"].choices = [("", "Выберите валюту"), *list(CURRENCY_CHOICES)]
-        self.fields["work_status"].choices = [("", "Выберите рабочий статус"), *WORK_STATUS_CHOICES]
         self.fields["specialisations"].queryset = Specialisation.objects.order_by("name")
         self.fields["methods"].queryset = Method.objects.order_by("name")
         self.fields["topics"].queryset = Topic.objects.order_by("group_name", "name")
