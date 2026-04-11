@@ -520,6 +520,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /**
+     * Эта вложенная функция меняет визуальное состояние карточки образования.
+     * Пользователь должен сразу видеть, что сейчас перед ним:
+     * спокойный просмотр записи или активное редактирование.
+     */
+    function syncCardAppearance(card, isEditing) {
+      card.classList.toggle("education-card--editing", isEditing);
+      card.classList.toggle("education-card--view", !isEditing);
+    }
+
+    /**
      * Эта вложенная функция показывает или скрывает пустое состояние блока.
      * Если карточек нет, пользователь должен явно видеть, что можно добавить первую запись.
      */
@@ -591,6 +601,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       toggleElementGroups(getDisplayActionGroups(card), !isEditing, "flex");
       toggleElementGroups(getEditActionGroups(card), isEditing, "flex");
+      syncCardAppearance(card, isEditing);
     }
 
     /**

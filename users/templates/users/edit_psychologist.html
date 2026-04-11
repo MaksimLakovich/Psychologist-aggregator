@@ -98,28 +98,101 @@
     }
 
     /* ========================================================= */
-    /* Карточки тем, методов и специализаций на основной странице */
+    /* Карточки образования: отдельные состояния просмотра и редактирования */
     /* ========================================================= */
-    .selection-card {
-        position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(224, 231, 255, 0.95);
-        background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(246, 248, 255, 0.8)),
-            radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%);
-        box-shadow: 0 18px 40px rgba(99, 102, 241, 0.09);
+    .education-card {
+        border-width: 2px;
+        border-radius: 1.75rem;
+        padding: 1.5rem;
+        transition:
+            border-color 0.2s ease,
+            background-color 0.2s ease,
+            box-shadow 0.2s ease,
+            transform 0.2s ease;
     }
 
-    .selection-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 8px;
-        background: linear-gradient(90deg, rgba(99, 102, 241, 0.82), rgba(129, 140, 248, 0.35));
+    .education-card--view {
+        border-color: rgb(248 250 252);
+        background: rgba(248, 250, 252, 0.75);
+        box-shadow: 0 16px 32px rgba(148, 163, 184, 0.08);
     }
 
+    .education-card--editing {
+        border-color: rgb(245 243 255);
+        background: rgba(196, 181, 253, 0.10);
+        box-shadow: 0 20px 38px rgba(124, 58, 237, 0.10);
+    }
+
+    /* ========================================================= */
+    /* Кнопки действий внутри карточек образования */
+    /* ========================================================= */
+    .education-card-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.7rem;
+        border-radius: 1rem;
+        padding: 0.85rem 1.25rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        line-height: 1.2;
+        transition:
+            background-color 0.2s ease,
+            border-color 0.2s ease,
+            color 0.2s ease,
+            box-shadow 0.2s ease,
+            transform 0.2s ease;
+    }
+
+    .education-card-action:hover {
+        transform: translateY(-1px);
+    }
+
+    .education-card-action:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 3px rgba(255, 255, 255, 0.95),
+            0 0 0 5px rgba(99, 102, 241, 0.22);
+    }
+
+    .education-card-action--primary {
+        border: 1px solid transparent;
+        background: rgb(79 70 229);
+        color: white;
+        box-shadow: 0 14px 30px rgba(79, 70, 229, 0.22);
+    }
+
+    .education-card-action--primary:hover {
+        background: rgb(67 56 202);
+        box-shadow: 0 18px 34px rgba(79, 70, 229, 0.26);
+    }
+
+    .education-card-action--neutral {
+        border: 1px solid rgb(226 232 240);
+        background: rgba(255, 255, 255, 0.96);
+        color: rgb(71 85 105);
+        box-shadow: 0 10px 24px rgba(148, 163, 184, 0.10);
+    }
+
+    .education-card-action--neutral:hover {
+        background: rgb(248 250 252);
+    }
+
+    .education-card-action--danger {
+        border: 1px solid transparent;
+        background: rgb(244 63 94);
+        color: white;
+        box-shadow: 0 14px 30px rgba(244, 63, 94, 0.18);
+    }
+
+    .education-card-action--danger:hover {
+        background: rgb(225 29 72);
+        box-shadow: 0 18px 34px rgba(244, 63, 94, 0.22);
+    }
+
+    /* ========================================================= */
+    /* Бейджи выбранных тем, методов и специализаций на основной странице */
+    /* ========================================================= */
     .selection-badge {
         border-radius: 9999px;
         padding: 0.6rem 0.95rem;
@@ -335,36 +408,6 @@
                                 </div>
                             </div>
 
-                            <div class="flex flex-col gap-4 pt-0 sm:flex-row sm:items-center sm:justify-between">
-                                <div id="display-actions" data-profile-display-actions>
-                                    <button type="button" id="profile-edit-toggle" data-profile-edit-toggle
-                                            class="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 gap-2
-                                            border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
-                                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                                            transition-all duration-200 shadow-md hover:shadow-lg">
-                                        <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="w-5 h-5">
-                                        Редактировать профиль
-                                    </button>
-                                </div>
-                                <div id="profile-edit-actions"
-                                     data-profile-edit-actions
-                                     class="hidden flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                                    <button type="submit"
-                                            class="inline-flex items-center justify-center px-6 py-3
-                                            border border-transparent text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-700
-                                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500
-                                            transition-all duration-200 shadow-md hover:shadow-lg">
-                                        Сохранить изменения
-                                    </button>
-                                    <button type="button" id="profile-edit-cancel" data-profile-edit-cancel
-                                            class="inline-flex items-center justify-center px-6 py-3
-                                            border border-transparent text-base font-medium rounded-xl text-zinc-500 bg-white hover:bg-gray-100
-                                            transition-all duration-200 shadow-md hover:shadow-lg">
-                                        Отмена
-                                    </button>
-                                </div>
-                            </div>
-
                         </div>
                     </div>
 
@@ -380,7 +423,7 @@
                             </div>
                             {% endif %}
 
-                            <div class="mt-0 flex items-center gap-3">
+                            <div class="mt-0 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                                 <div>
                                     <h2 class="text-2xl md:text-3xl text-indigo-700/90 font-semibold tracking-wide">
                                         Данные профиля
@@ -388,6 +431,27 @@
                                     <p class="mt-2 text-base leading-6 text-zinc-500">
                                         Здесь находятся данные, которые помогают сформировать вашу публичную карточку в каталоге и дают клиенту первое понятное впечатление о вас как о специалисте.
                                     </p>
+                                </div>
+                                <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center lg:justify-end">
+                                    <div data-profile-display-actions>
+                                        <button type="button"
+                                                data-profile-edit-toggle
+                                                class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
+                                            <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
+                                            Редактировать профиль
+                                        </button>
+                                    </div>
+                                    <div data-profile-edit-actions class="hidden w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center rounded-xl border border-transparent bg-emerald-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-emerald-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                            Сохранить изменения
+                                        </button>
+                                        <button type="button"
+                                                data-profile-edit-cancel
+                                                class="inline-flex items-center justify-center rounded-xl border border-transparent bg-white px-6 py-3 text-base font-medium text-zinc-500 shadow-md transition-all duration-200 hover:bg-gray-100 hover:shadow-lg">
+                                            Отмена
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -533,12 +597,33 @@
                         <!-- ПЕРСОНАЛЬНЫЕ ДАННЫЕ -->
                         <div data-tab-panel="personal" class="hidden space-y-8">
 
-                            <div class="mt-0 flex items-center gap-3">
+                            <div class="mt-0 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                                 <div>
                                     <h2 class="text-2xl md:text-3xl text-indigo-700/90 font-semibold tracking-wide">Персональные данные</h2>
                                     <p class="mt-2 text-base leading-6 text-zinc-500">
                                         Эти данные <strong>не показываются</strong> другим пользователям. Они нужны для входа в систему, связи с вами и безопасной работы аккаунта.
                                     </p>
+                                </div>
+                                <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center lg:justify-end">
+                                    <div data-profile-display-actions>
+                                        <button type="button"
+                                                data-profile-edit-toggle
+                                                class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
+                                            <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
+                                            Редактировать данные
+                                        </button>
+                                    </div>
+                                    <div data-profile-edit-actions class="hidden w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center rounded-xl border border-transparent bg-emerald-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-emerald-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                            Сохранить изменения
+                                        </button>
+                                        <button type="button"
+                                                data-profile-edit-cancel
+                                                class="inline-flex items-center justify-center rounded-xl border border-transparent bg-white px-6 py-3 text-base font-medium text-zinc-500 shadow-md transition-all duration-200 hover:bg-gray-100 hover:shadow-lg">
+                                            Отмена
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -567,7 +652,7 @@
                         <!-- ОБРАЗОВАНИЕ -->
                         <div data-tab-panel="education" class="hidden space-y-8">
 
-                            <div class="mt-0 flex items-center gap-3">
+                            <div class="mt-0 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                                 <div>
                                     <h2 class="text-2xl md:text-3xl text-indigo-700/90 font-semibold tracking-wide">
                                         Образование и документы
@@ -576,6 +661,12 @@
                                         Добавляйте каждую ступень обучения отдельной записью.
                                     </p>
                                 </div>
+                                <button type="button"
+                                        id="education-add-button"
+                                        data-add-education-form
+                                        class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
+                                    Добавить еще
+                                </button>
                             </div>
 
                             {{ education_formset.management_form }}
@@ -585,12 +676,12 @@
                             </div>
                             {% endif %}
 
-                            <div data-education-formset-list class="space-y-5">
+                            <div data-education-formset-list class="space-y-10">
                                 {% for form in education_formset %}
                                 <div data-education-card
                                      data-education-existing="{% if form.instance.pk %}1{% else %}0{% endif %}"
                                      data-education-editing="{% if form.errors or form.non_field_errors %}1{% else %}0{% endif %}"
-                                     class="rounded-[1.5rem] border-2 border-slate-100/50 bg-slate-50/75 p-5">
+                                     class="education-card {% if form.errors or form.non_field_errors %}education-card--editing{% else %}education-card--view{% endif %}">
                                     {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
                                     <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
@@ -608,7 +699,8 @@
                                                  class="{% if form.errors or form.non_field_errors %}hidden{% else %}flex{% endif %}">
                                                 <button type="button"
                                                         data-education-edit-button
-                                                        class="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-indigo-600 shadow-sm ring-1 ring-indigo-100 transition-all duration-200 hover:bg-indigo-50">
+                                                        class="education-card-action education-card-action--primary">
+                                                    <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
                                                     Редактировать
                                                 </button>
                                             </div>
@@ -616,12 +708,12 @@
                                                  class="{% if form.errors or form.non_field_errors %}flex{% else %}hidden{% endif %} flex-wrap items-center gap-3">
                                                 <button type="button"
                                                         data-education-cancel-button
-                                                        class="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-500 shadow-sm ring-1 ring-zinc-200 transition-all duration-200 hover:bg-zinc-100">
+                                                        class="education-card-action education-card-action--neutral">
                                                     Отмена
                                                 </button>
                                                 <button type="button"
                                                         data-remove-education-form
-                                                        class="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-rose-600 shadow-sm ring-1 ring-rose-100 transition-all duration-200 hover:bg-rose-50">
+                                                        class="education-card-action education-card-action--danger">
                                                     Удалить запись
                                                 </button>
                                             </div>
@@ -668,44 +760,36 @@
                                 Пока записи об образовании не добавлены. Нажмите <span class="font-semibold text-indigo-700">«Добавить еще»</span>, чтобы создать запись.
                             </div>
 
-                            <div class="mt-6 flex justify-end">
-                                <button type="button"
-                                        id="education-add-button"
-                                        data-add-education-form
-                                        class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg">
-                                    Добавить еще
-                                </button>
-                            </div>
-
                             <template id="education-empty-form-template">
                                 {% with form=education_formset.empty_form %}
                                 <div data-education-card
                                      data-education-existing="0"
                                      data-education-editing="0"
-                                     class="rounded-[1.5rem] border border-white bg-white p-5 shadow-sm shadow-zinc-200/60">
+                                     class="education-card education-card--view">
                                     {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
                                     <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
-                                            <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Новая запись об образовании</p>
+                                            <p class="mt-2 xl:text-2xl text-xl font-bold tracking-tight text-indigo-950/50">Новая запись об образовании</p>
                                         </div>
 
                                         <div class="flex flex-wrap items-center gap-3">
                                             <div data-education-card-display-actions class="hidden">
                                                 <button type="button"
                                                         data-education-edit-button
-                                                        class="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-indigo-600 shadow-sm ring-1 ring-indigo-100 transition-all duration-200 hover:bg-indigo-50">
+                                                        class="education-card-action education-card-action--primary">
+                                                    <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
                                                     Редактировать
                                                 </button>
                                             </div>
                                             <div data-education-card-edit-actions class="flex flex-wrap items-center gap-3">
                                                 <button type="button"
                                                         data-education-cancel-button
-                                                        class="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-500 shadow-sm ring-1 ring-zinc-200 transition-all duration-200 hover:bg-zinc-100">
+                                                        class="education-card-action education-card-action--neutral">
                                                     Отмена
                                                 </button>
                                                 <button type="button"
                                                         data-remove-education-form
-                                                        class="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-rose-600 shadow-sm ring-1 ring-rose-100 transition-all duration-200 hover:bg-rose-50">
+                                                        class="education-card-action education-card-action--danger">
                                                     Удалить запись
                                                 </button>
                                             </div>
