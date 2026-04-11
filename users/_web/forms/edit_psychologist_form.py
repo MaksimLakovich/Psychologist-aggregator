@@ -18,6 +18,11 @@ READONLY_INPUT_CLASS = (
     "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
     "text-zinc-500 shadow-sm cursor-not-allowed"
 )
+READONLY_SELECT_CLASS = (
+    "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
+    "text-zinc-500 shadow-sm cursor-not-allowed opacity-100 disabled:opacity-100 "
+    "disabled:text-zinc-500 disabled:bg-gray-100 disabled:border-gray-100"
+)
 TEXTAREA_CLASS = (
     "block min-h-[9rem] w-full rounded-2xl border border-gray-100 bg-white px-4 py-3 text-lg "
     "text-zinc-800 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm transition-all duration-200"
@@ -104,10 +109,11 @@ class EditPsychologistAccountForm(forms.ModelForm):
             ),
             "timezone": forms.Select(
                 attrs={
-                    "class": READONLY_INPUT_CLASS,
-                    "data-view-class": READONLY_INPUT_CLASS,
+                    "class": READONLY_SELECT_CLASS,
+                    "data-view-class": READONLY_SELECT_CLASS,
                     "data-edit-class": BASE_INPUT_CLASS,
                     "data-editable-field": "1",
+                    "style": "-webkit-text-fill-color: rgb(113 113 122);",
                 }
             ),
         }
@@ -200,10 +206,11 @@ class EditPsychologistProfileForm(forms.ModelForm):
         widgets = {
             "gender": forms.Select(
                 attrs={
-                    "class": READONLY_INPUT_CLASS,
-                    "data-view-class": READONLY_INPUT_CLASS,
+                    "class": READONLY_SELECT_CLASS,
+                    "data-view-class": READONLY_SELECT_CLASS,
                     "data-edit-class": BASE_INPUT_CLASS,
                     "data-editable-field": "1",
+                    "style": "-webkit-text-fill-color: rgb(113 113 122);",
                 }
             ),
             "biography": forms.Textarea(
@@ -238,10 +245,11 @@ class EditPsychologistProfileForm(forms.ModelForm):
             ),
             "therapy_format": forms.Select(
                 attrs={
-                    "class": READONLY_INPUT_CLASS,
-                    "data-view-class": READONLY_INPUT_CLASS,
+                    "class": READONLY_SELECT_CLASS,
+                    "data-view-class": READONLY_SELECT_CLASS,
                     "data-edit-class": BASE_INPUT_CLASS,
                     "data-editable-field": "1",
+                    "style": "-webkit-text-fill-color: rgb(113 113 122);",
                 }
             ),
             "price_individual": forms.NumberInput(
@@ -268,18 +276,20 @@ class EditPsychologistProfileForm(forms.ModelForm):
             ),
             "price_currency": forms.Select(
                 attrs={
-                    "class": READONLY_INPUT_CLASS,
-                    "data-view-class": READONLY_INPUT_CLASS,
+                    "class": READONLY_SELECT_CLASS,
+                    "data-view-class": READONLY_SELECT_CLASS,
                     "data-edit-class": BASE_INPUT_CLASS,
                     "data-editable-field": "1",
+                    "style": "-webkit-text-fill-color: rgb(113 113 122);",
                 }
             ),
             "work_status": forms.Select(
                 attrs={
-                    "class": READONLY_INPUT_CLASS,
-                    "data-view-class": READONLY_INPUT_CLASS,
+                    "class": READONLY_SELECT_CLASS,
+                    "data-view-class": READONLY_SELECT_CLASS,
                     "data-edit-class": BASE_INPUT_CLASS,
                     "data-editable-field": "1",
+                    "style": "-webkit-text-fill-color: rgb(113 113 122);",
                 }
             ),
         }
@@ -351,11 +361,12 @@ class PsychologistEducationForm(forms.ModelForm):
         widgets = {
             "country": forms.Select(
                 attrs={
-                    "class": READONLY_INPUT_CLASS,
-                    "data-view-class": READONLY_INPUT_CLASS,
+                    "class": READONLY_SELECT_CLASS,
+                    "data-view-class": READONLY_SELECT_CLASS,
                     "data-edit-class": BASE_INPUT_CLASS,
                     "data-editable-field": "1",
                     "placeholder": "Страна учебного учреждения",
+                    "style": "-webkit-text-fill-color: rgb(113 113 122);",
                 }
             ),
             "institution": forms.TextInput(

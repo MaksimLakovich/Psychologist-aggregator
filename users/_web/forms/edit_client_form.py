@@ -5,6 +5,21 @@ from timezone_field import TimeZoneFormField
 from users.models import AppUser
 
 
+BASE_INPUT_CLASS = (
+    "block w-full rounded-xl border border-gray-100 bg-white px-4 py-3 text-lg "
+    "text-zinc-800 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+)
+READONLY_INPUT_CLASS = (
+    "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
+    "text-zinc-500 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
+)
+READONLY_SELECT_CLASS = (
+    "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
+    "text-zinc-500 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm "
+    "opacity-100 disabled:opacity-100 disabled:text-zinc-500 disabled:bg-gray-100 disabled:border-gray-100"
+)
+
+
 class EditClientProfileForm(forms.ModelForm):
     """Форма для редактирования профиля клиента."""
 
@@ -15,54 +30,27 @@ class EditClientProfileForm(forms.ModelForm):
             "first_name": forms.TextInput(
                 attrs={
                     "placeholder": "Имя",
-                    "class": (
-                        "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
-                        "text-zinc-500 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
-                    ),
-                    "data-view-class": (
-                        "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
-                        "text-zinc-500 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
-                    ),
-                    "data-edit-class": (
-                        "block w-full rounded-xl border border-gray-100 bg-white px-4 py-3 text-lg "
-                        "text-zinc-800 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
-                    ),
+                    "class": READONLY_INPUT_CLASS,
+                    "data-view-class": READONLY_INPUT_CLASS,
+                    "data-edit-class": BASE_INPUT_CLASS,
                     "autocomplete": "given-name",
                 }
             ),
             "last_name": forms.TextInput(
                 attrs={
                     "placeholder": "Фамилия",
-                    "class": (
-                        "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
-                        "text-zinc-500 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
-                    ),
-                    "data-view-class": (
-                        "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
-                        "text-zinc-500 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
-                    ),
-                    "data-edit-class": (
-                        "block w-full rounded-xl border border-gray-100 bg-white px-4 py-3 text-lg "
-                        "text-zinc-800 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
-                    ),
+                    "class": READONLY_INPUT_CLASS,
+                    "data-view-class": READONLY_INPUT_CLASS,
+                    "data-edit-class": BASE_INPUT_CLASS,
                     "autocomplete": "family-name",
                 }
             ),
             "age": forms.NumberInput(
                 attrs={
                     "placeholder": "Возраст",
-                    "class": (
-                        "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
-                        "text-zinc-500 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
-                    ),
-                    "data-view-class": (
-                        "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
-                        "text-zinc-500 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
-                    ),
-                    "data-edit-class": (
-                        "block w-full rounded-xl border border-gray-100 bg-white px-4 py-3 text-lg "
-                        "text-zinc-800 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
-                    ),
+                    "class": READONLY_INPUT_CLASS,
+                    "data-view-class": READONLY_INPUT_CLASS,
+                    "data-edit-class": BASE_INPUT_CLASS,
                     "min": 18,
                     "max": 120,
                 }
@@ -87,35 +75,18 @@ class EditClientProfileForm(forms.ModelForm):
             "phone_number": forms.TextInput(
                 attrs={
                     "placeholder": "+7XXXXXXXXXX",
-                    "class": (
-                        "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
-                        "text-zinc-500 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
-                    ),
-                    "data-view-class": (
-                        "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
-                        "text-zinc-500 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
-                    ),
-                    "data-edit-class": (
-                        "block w-full rounded-xl border border-gray-100 bg-white px-4 py-3 text-lg "
-                        "text-zinc-800 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
-                    ),
+                    "class": READONLY_INPUT_CLASS,
+                    "data-view-class": READONLY_INPUT_CLASS,
+                    "data-edit-class": BASE_INPUT_CLASS,
                     "autocomplete": "tel",
                 }
             ),
             "timezone": forms.Select(
                 attrs={
-                    "class": (
-                        "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
-                        "text-zinc-500 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
-                    ),
-                    "data-view-class": (
-                        "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
-                        "text-zinc-500 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
-                    ),
-                    "data-edit-class": (
-                        "block w-full rounded-xl border border-gray-100 bg-white px-4 py-3 text-lg "
-                        "text-zinc-800 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"
-                    ),
+                    "class": READONLY_SELECT_CLASS,
+                    "data-view-class": READONLY_SELECT_CLASS,
+                    "data-edit-class": BASE_INPUT_CLASS,
+                    "style": "-webkit-text-fill-color: rgb(113 113 122);",
                 }
             ),
         }
