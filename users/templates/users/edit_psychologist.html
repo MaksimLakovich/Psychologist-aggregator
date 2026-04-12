@@ -499,7 +499,6 @@
                             <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center lg:justify-end">
                                 <button type="button"
                                         id="education-add-button"
-                                        data-add-education-form
                                         class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
                                         border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
                                         hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
@@ -520,7 +519,7 @@
                                 <div data-education-card
                                      data-education-existing="{% if form.instance.pk %}1{% else %}0{% endif %}"
                                      data-education-editing="{% if form.errors or form.non_field_errors %}1{% else %}0{% endif %}"
-                                     class="rounded-[1.75rem] border-[3px] px-6 py-6 transition-all duration-200 {% if form.errors or form.non_field_errors %}border-violet-50 bg-violet-300/10 shadow-lg{% else %}border-slate-50 bg-transparent shadow-lg{% endif %}">
+                                     class="rounded-3xl border-2 px-6 py-6 transition-all duration-200 {% if form.errors or form.non_field_errors %}border-violet-50 bg-violet-300/10 shadow-lg{% else %}border-slate-100 bg-slate-50 shadow-md{% endif %}">
                                     {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
 
                                     <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -550,12 +549,12 @@
                                                  class="{% if form.errors or form.non_field_errors %}flex{% else %}hidden{% endif %} flex-wrap items-center gap-3">
                                                 <button type="button"
                                                         data-education-cancel-button
-                                                        class="inline-flex items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white/95 px-5 py-3 text-[0.95rem] font-semibold leading-[1.2] text-slate-600 shadow-[0_10px_24px_rgba(148,163,184,0.10)] transition-all duration-200 hover:-translate-y-[1px] hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                        class="inline-flex items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                                     Отмена
                                                 </button>
                                                 <button type="button"
                                                         data-remove-education-form
-                                                        class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-rose-500 px-5 py-3 text-[0.95rem] font-semibold leading-[1.2] text-white shadow-[0_14px_30px_rgba(244,63,94,0.18)] transition-all duration-200 hover:-translate-y-[1px] hover:bg-rose-600 hover:shadow-[0_18px_34px_rgba(244,63,94,0.22)] focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2">
+                                                        class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-rose-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-600 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2">
                                                     Удалить запись
                                                 </button>
                                             </div>
@@ -609,7 +608,7 @@
                             </div>
 
                             <div data-education-empty-state
-                                 class="{% if education_formset.forms %}hidden {% endif %}rounded-[1.5rem] border border-dashed border-indigo-200 bg-indigo-50/60 px-5 py-6 text-sm leading-6 text-zinc-500">
+                                 class="{% if education_formset.forms %}hidden {% endif %}rounded-3xl border border-dashed border-indigo-200 bg-indigo-50/60 px-5 py-6 text-sm leading-6 text-zinc-500">
                                 Пока записи об образовании не добавлены. Нажмите <span class="font-semibold text-indigo-700">«Добавить еще»</span>, чтобы создать запись.
                             </div>
 
@@ -618,7 +617,7 @@
                                 <div data-education-card
                                      data-education-existing="0"
                                      data-education-editing="0"
-                                     class="rounded-[1.75rem] border-[3px] border-slate-50 bg-transparent px-6 py-6 shadow-lg transition-all duration-200">
+                                     class="rounded-3xl border-2 border-violet-100 bg-violet-50 px-6 py-6 shadow-lg transition-all duration-200">
                                     {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
                                     <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
@@ -629,7 +628,7 @@
                                             <div data-education-card-display-actions class="hidden">
                                                 <button type="button"
                                                         data-education-edit-button
-                                                        class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-indigo-600 px-5 py-3 text-[0.95rem] font-semibold leading-[1.2] text-white shadow-[0_14px_30px_rgba(79,70,229,0.22)] transition-all duration-200 hover:-translate-y-[1px] hover:bg-indigo-700 hover:shadow-[0_18px_34px_rgba(79,70,229,0.26)] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                        class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                                     <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
                                                     Редактировать
                                                 </button>
@@ -637,12 +636,12 @@
                                             <div data-education-card-edit-actions class="flex flex-wrap items-center gap-3">
                                                 <button type="button"
                                                         data-education-cancel-button
-                                                        class="inline-flex items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white/95 px-5 py-3 text-[0.95rem] font-semibold leading-[1.2] text-slate-600 shadow-[0_10px_24px_rgba(148,163,184,0.10)] transition-all duration-200 hover:-translate-y-[1px] hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                        class="inline-flex items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                                     Отмена
                                                 </button>
                                                 <button type="button"
                                                         data-remove-education-form
-                                                        class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-rose-500 px-5 py-3 text-[0.95rem] font-semibold leading-[1.2] text-white shadow-[0_14px_30px_rgba(244,63,94,0.18)] transition-all duration-200 hover:-translate-y-[1px] hover:bg-rose-600 hover:shadow-[0_18px_34px_rgba(244,63,94,0.22)] focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2">
+                                                        class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-rose-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-600 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2">
                                                     Удалить запись
                                                 </button>
                                             </div>

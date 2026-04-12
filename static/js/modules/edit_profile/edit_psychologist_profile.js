@@ -604,6 +604,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalFormsInput = document.getElementById("id_education-TOTAL_FORMS");
     const emptyState = form.querySelector("[data-education-empty-state]");
     const savedCardState = new WeakMap();
+    const educationEditingClasses = ["border-violet-100", "bg-violet-50", "shadow-lg"];
+    const educationViewClasses = ["border-slate-100", "bg-slate-50", "shadow-md"];
 
     if (!list || !template || !totalFormsInput || !addEducationButton) return;
 
@@ -661,13 +663,13 @@ document.addEventListener("DOMContentLoaded", () => {
      * спокойный просмотр записи или активное редактирование.
      */
     function syncCardAppearance(card, isEditing) {
-      card.classList.toggle("border-violet-50", isEditing);
-      card.classList.toggle("bg-violet-300/10", isEditing);
-      card.classList.toggle("shadow-[0_20px_38px_rgba(124,58,237,0.10)]", isEditing);
+      educationEditingClasses.forEach((className) => {
+        card.classList.toggle(className, isEditing);
+      });
 
-      card.classList.toggle("border-slate-50", !isEditing);
-      card.classList.toggle("bg-transparent", !isEditing);
-      card.classList.toggle("shadow-[0_16px_32px_rgba(148,163,184,0.08)]", !isEditing);
+      educationViewClasses.forEach((className) => {
+        card.classList.toggle(className, !isEditing);
+      });
     }
 
     /**
