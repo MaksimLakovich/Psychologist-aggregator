@@ -5268,6 +5268,11 @@ input:checked + .toggle-bg {
   --tw-shadow: var(--tw-shadow-colored);
 }
 
+.shadow-slate-50\/60 {
+  --tw-shadow-color: rgb(248 250 252 / 0.6);
+  --tw-shadow: var(--tw-shadow-colored);
+}
+
 .outline {
   outline-style: solid;
 }
