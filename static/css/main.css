@@ -5880,6 +5880,10 @@ input:checked + .toggle-bg {
   background-color: rgb(225 29 72 / var(--tw-bg-opacity, 1));
 }
 
+.hover\:bg-indigo-100\/85:hover {
+  background-color: rgb(229 237 255 / 0.85);
+}
+
 .hover\:text-blue-600:hover {
   --tw-text-opacity: 1;
   color: rgb(28 100 242 / var(--tw-text-opacity, 1));
