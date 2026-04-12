@@ -18,24 +18,22 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!form) return;
 
   const activeTabInput = document.getElementById("active-profile-tab-input");
-  const toggleButtons = Array.from(form.querySelectorAll("[data-profile-edit-toggle]"));
-  const cancelButtons = Array.from(form.querySelectorAll("[data-profile-edit-cancel]"));
-  const editActionGroups = Array.from(form.querySelectorAll("[data-profile-edit-actions]"));
-  const displayActionGroups = Array.from(form.querySelectorAll("[data-profile-display-actions]"));
   const addEducationButton = document.getElementById("education-add-button");
   const photoUploadTrigger = form.querySelector("[data-photo-upload-trigger]");
+  const photoDisplayActionGroups = Array.from(form.querySelectorAll("[data-photo-display-actions]"));
+  const photoEditActionGroups = Array.from(form.querySelectorAll("[data-photo-edit-actions]"));
+  const photoCancelButtons = Array.from(form.querySelectorAll("[data-photo-cancel]"));
+  const photoInputContainer = form.querySelector("[data-photo-upload-input-container]");
   const photoFileInput = form.querySelector("[data-photo-upload-input-container] input[type='file']");
   const photoSelectedFileLabel = form.querySelector("[data-photo-selected-file]");
 
   const hasErrors = form.dataset.hasErrors === "1";
+  const photoHasErrors = form.dataset.photoHasErrors === "1";
   const initialTab = form.dataset.activeTab || "profile";
-  const shouldStartInProfileEditMode = hasErrors && initialTab !== "education";
-
-  const profileEditableFields = Array.from(
-    form.querySelectorAll(
-      '[data-tab-panel="profile"] [data-editable-field="1"], [data-tab-panel="personal"] [data-editable-field="1"]',
-    ),
-  );
+  const profileEditableFields = Array.from(form.querySelectorAll('[data-tab-panel="profile"] [data-editable-field="1"]'));
+  const personalEditableFields = Array.from(form.querySelectorAll('[data-tab-panel="personal"] [data-editable-field="1"]'));
+  const scopeSnapshots = new Map();
+  let activeEditScope = null;
 
   const modalConfigs = {
     "psychologist-topics-modal": {
@@ -147,21 +145,158 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /**
-   * Эта функция управляет общим режимом редактирования профиля.
-   * Она нужна только для вкладок с базовыми данными профиля и аккаунта.
-   * Блок образования и блок экспертизы живут отдельно и редактируются своим сценарием.
+   * Эта функция возвращает поля конкретного сценария редактирования.
+   * Так мы явно разделяем независимые процессы:
+   * профиль, персональные данные и отдельную загрузку фото.
    */
-  function setProfileEditMode(isEditing) {
-    form.dataset.editMode = isEditing ? "1" : "0";
+  function getScopeFields(scope) {
+    if (scope === "profile") return profileEditableFields;
+    if (scope === "personal") return personalEditableFields;
+    return [];
+  }
 
-    profileEditableFields.forEach((field) => setFieldState(field, isEditing));
+  /**
+   * Эта функция находит display-группы кнопок для конкретного сценария.
+   * В обычном состоянии пользователь видит только стартовое действие.
+   */
+  function getDisplayActionGroups(scope) {
+    return Array.from(form.querySelectorAll(`[data-edit-display-actions][data-edit-scope="${scope}"]`));
+  }
 
-    toggleElementGroups(editActionGroups, isEditing, "flex");
-    toggleElementGroups(displayActionGroups, !isEditing);
+  /**
+   * Эта функция находит edit-группы кнопок для конкретного сценария.
+   * Они появляются только тогда, когда пользователь уже меняет данные.
+   */
+  function getEditActionGroups(scope) {
+    return Array.from(form.querySelectorAll(`[data-edit-actions][data-edit-scope="${scope}"]`));
+  }
 
-    if (!isEditing) {
-      closeAllExpertiseModals();
+  /**
+   * Эта функция говорит, какой вкладке принадлежит конкретный режим редактирования.
+   * Это позволяет автоматически "отменять" один сценарий при переходе в другой раздел.
+   */
+  function getTabNameForScope(scope) {
+    if (scope === "profile" || scope === "photo") return "profile";
+    if (scope === "personal") return "personal";
+    return null;
+  }
+
+  /**
+   * Эта функция делает снимок текущих значений полей.
+   * Он нужен, чтобы локальная "Отмена" действительно возвращала человека к исходным данным.
+   */
+  function createFieldsSnapshot(fields) {
+    return fields.map((field) => ({
+      field,
+      value: field.value,
+      checked: field.checked,
+      selectedValues: field instanceof HTMLSelectElement && field.multiple
+        ? Array.from(field.selectedOptions).map((option) => option.value)
+        : null,
+    }));
+  }
+
+  /**
+   * Эта функция восстанавливает поля из сохраненного снимка.
+   * Для пользователя это означает честный откат всех локальных изменений в рамках одного блока.
+   */
+  function restoreFieldsSnapshot(snapshot) {
+    snapshot.forEach((item) => {
+      const { field, value, checked, selectedValues } = item;
+
+      if (field instanceof HTMLSelectElement && field.multiple && selectedValues) {
+        const selectedSet = new Set(selectedValues);
+        Array.from(field.options).forEach((option) => {
+          option.selected = selectedSet.has(option.value);
+        });
+        return;
+      }
+
+      if (field.type === "checkbox" || field.type === "radio") {
+        field.checked = checked;
+        return;
+      }
+
+      field.value = value;
+    });
+  }
+
+  /**
+   * Эта функция включает или выключает редактирование в одном конкретном блоке.
+   * Каждый блок управляется отдельно, чтобы вкладки не тащили состояние друг друга.
+   */
+  function setSectionEditMode(scope, isEditing) {
+    getScopeFields(scope).forEach((field) => setFieldState(field, isEditing));
+    toggleElementGroups(getEditActionGroups(scope), isEditing, "flex");
+    toggleElementGroups(getDisplayActionGroups(scope), !isEditing);
+  }
+
+  /**
+   * Эта функция полностью отключает отдельный сценарий загрузки фото.
+   * В спокойном режиме кнопка загрузки видна, а file-контрол и служебные действия спрятаны.
+   */
+  function setPhotoEditMode(isEditing) {
+    toggleElementGroups(photoEditActionGroups, isEditing, "flex");
+    toggleElementGroups(photoDisplayActionGroups, !isEditing);
+
+    if (photoInputContainer) {
+      photoInputContainer.classList.toggle("hidden", !isEditing);
     }
+
+    if (photoFileInput) {
+      photoFileInput.disabled = !isEditing;
+      if (!isEditing) {
+        photoFileInput.value = "";
+      }
+    }
+
+    if (!isEditing && photoSelectedFileLabel) {
+      photoSelectedFileLabel.textContent = "";
+      photoSelectedFileLabel.classList.add("hidden");
+    }
+  }
+
+  /**
+   * Эта функция отменяет активный сценарий редактирования.
+   * Если у блока есть локальный снимок значений, он восстанавливается без полной перезагрузки страницы.
+   */
+  function cancelActiveEditing({ reloadOnError = false } = {}) {
+    if (!activeEditScope) return;
+
+    if (reloadOnError && hasErrors) {
+      reloadCurrentPage({ replaceHistory: true });
+      return;
+    }
+
+    if (activeEditScope === "photo") {
+      setPhotoEditMode(false);
+      activeEditScope = null;
+      return;
+    }
+
+    const snapshot = scopeSnapshots.get(activeEditScope);
+    if (snapshot) {
+      restoreFieldsSnapshot(snapshot);
+    }
+
+    setSectionEditMode(activeEditScope, false);
+    activeEditScope = null;
+  }
+
+  /**
+   * Эта функция включает редактирование только для выбранного блока.
+   * Перед стартом нового сценария мы аккуратно закрываем предыдущий, если он был активен.
+   */
+  function startSectionEditing(scope) {
+    if (activeEditScope === scope) return;
+
+    if (activeEditScope) {
+      cancelActiveEditing();
+    }
+
+    scopeSnapshots.set(scope, createFieldsSnapshot(getScopeFields(scope)));
+    setSectionEditMode(scope, true);
+    activeEditScope = scope;
   }
 
   /**
@@ -199,6 +334,14 @@ document.addEventListener("DOMContentLoaded", () => {
      * чтобы сервер после сохранения мог вернуть пользователя туда же.
      */
     function activateTab(tabName) {
+      if (activeEditScope && getTabNameForScope(activeEditScope) !== tabName) {
+        cancelActiveEditing();
+      }
+
+      if (tabName !== "expertise") {
+        closeAllExpertiseModals();
+      }
+
       if (activeTabInput) {
         activeTabInput.value = tabName;
       }
@@ -264,22 +407,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /**
-     * Эта вложенная функция визуально синхронизирует карточки внутри модалок.
-     * Даже если нативный чекбокс браузера ведет себя неидеально,
-     * пользователь все равно видит, какие значения сейчас активны.
-     */
-    function syncModalChoiceCards() {
-      form.querySelectorAll(".psychologist-modal-choice").forEach((choice) => {
-        const checkbox = choice.querySelector(
-          ".psychologist-topic-checkbox, .psychologist-method-checkbox, .psychologist-specialisation-checkbox",
-        );
-        if (!checkbox) return;
-
-        choice.classList.toggle("is-selected", checkbox.checked);
-      });
-    }
-
-    /**
      * Эта вложенная функция массово выставляет галочки внутри модалки.
      * Она используется при открытии окна и при откате несохраненного выбора.
      */
@@ -288,7 +415,6 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(checkboxSelector).forEach((checkbox) => {
         checkbox.checked = valuesSet.has(checkbox.value);
       });
-      syncModalChoiceCards();
     }
 
     /**
@@ -407,8 +533,6 @@ document.addEventListener("DOMContentLoaded", () => {
       modalSelections.set(modalId, readCheckedValues(modalConfig.checkboxSelector));
     });
 
-    syncModalChoiceCards();
-
     openButtons.forEach((button) => {
       button.addEventListener("click", () => openModal(button.dataset.modalOpen));
     });
@@ -424,15 +548,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      modal.addEventListener("change", (event) => {
-        if (
-          event.target.matches(
-            ".psychologist-topic-checkbox, .psychologist-method-checkbox, .psychologist-specialisation-checkbox",
-          )
-        ) {
-          syncModalChoiceCards();
-        }
-      });
     });
 
     document.addEventListener("keydown", (event) => {
@@ -738,15 +853,17 @@ document.addEventListener("DOMContentLoaded", () => {
    * "войти в редактирование" и "выйти без сохранения".
    */
   function initProfileActionButtons() {
-    toggleButtons.forEach((button) => {
+    Array.from(form.querySelectorAll("[data-edit-toggle]")).forEach((button) => {
       button.addEventListener("click", () => {
-        setProfileEditMode(true);
+        startSectionEditing(button.dataset.editScope);
       });
     });
 
-    cancelButtons.forEach((button) => {
+    Array.from(form.querySelectorAll("[data-edit-cancel]")).forEach((button) => {
       button.addEventListener("click", () => {
-        reloadCurrentPage({ replaceHistory: hasErrors });
+        if (activeEditScope === button.dataset.editScope) {
+          cancelActiveEditing({ reloadOnError: hasErrors });
+        }
       });
     });
   }
@@ -760,11 +877,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!photoUploadTrigger || !photoFileInput) return;
 
     photoUploadTrigger.addEventListener("click", () => {
-      if (form.dataset.editMode !== "1") {
-        setProfileEditMode(true);
+      if (activeEditScope && activeEditScope !== "photo") {
+        cancelActiveEditing();
       }
 
+      activeEditScope = "photo";
+      setPhotoEditMode(true);
       photoFileInput.click();
+    });
+
+    photoCancelButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        if (activeEditScope === "photo") {
+          cancelActiveEditing({ reloadOnError: hasErrors && photoHasErrors });
+        }
+      });
     });
 
     photoFileInput.addEventListener("change", () => {
@@ -789,7 +916,22 @@ document.addEventListener("DOMContentLoaded", () => {
   initPhotoUploadTrigger();
 
   applySkipIntroAnimationsIfNeeded();
-  setProfileEditMode(shouldStartInProfileEditMode);
+  setSectionEditMode("profile", false);
+  setSectionEditMode("personal", false);
+  setPhotoEditMode(false);
+
+  if (hasErrors) {
+    if (initialTab === "personal") {
+      startSectionEditing("personal");
+    } else if (initialTab === "profile") {
+      if (photoHasErrors) {
+        activeEditScope = "photo";
+        setPhotoEditMode(true);
+      } else {
+        startSectionEditing("profile");
+      }
+    }
+  }
 
   form.addEventListener("submit", () => {
     enableDisabledFieldsForSubmit();

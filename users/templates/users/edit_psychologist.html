@@ -200,110 +200,6 @@
         color: rgb(162 28 175);
     }
 
-    /* ========================================================= */
-    /* Элементы выбора внутри модальных окон тем / методов / специализаций */
-    /* ========================================================= */
-    .psychologist-modal-choice {
-        cursor: pointer;
-    }
-
-    .psychologist-modal-choice input {
-        position: absolute;
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    .psychologist-modal-choice__card {
-        display: flex;
-        align-items: center;
-        gap: 0.9rem;
-        border-radius: 1rem;
-        border: 1px solid rgba(224, 231, 255, 0.95);
-        background: white;
-        padding: 0.9rem 1rem;
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: rgb(24 24 27);
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
-        transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-    }
-
-    .psychologist-modal-choice:hover .psychologist-modal-choice__card {
-        transform: translateY(-1px);
-    }
-
-    .psychologist-modal-choice__indicator {
-        position: relative;
-        flex-shrink: 0;
-        width: 1.35rem;
-        height: 1.35rem;
-        border-radius: 0.45rem;
-        border: 2px solid rgba(165, 180, 252, 1);
-        background: white;
-        transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .psychologist-modal-choice__indicator::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 12' fill='none'%3E%3Cpath d='M1.5 6.1 5.3 10 14.5 1.8' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: 0.78rem 0.78rem;
-        opacity: 0;
-        transition: opacity 0.2s ease;
-    }
-
-    .psychologist-modal-choice__indicator--topic {
-        border-color: rgb(129 140 248);
-    }
-
-    .psychologist-modal-choice__indicator--method {
-        border-color: rgb(52 211 153);
-    }
-
-    .psychologist-modal-choice__indicator--specialisation {
-        border-color: rgb(232 121 249);
-    }
-
-    .psychologist-modal-choice__label {
-        flex: 1;
-        line-height: 1.4;
-    }
-
-    .psychologist-modal-choice.is-selected .psychologist-modal-choice__card,
-    .psychologist-modal-choice input:checked + .psychologist-modal-choice__card {
-        border-color: rgba(99, 102, 241, 0.32);
-        background: linear-gradient(135deg, rgba(79, 70, 229, 0.10), rgba(99, 102, 241, 0.12));
-        box-shadow: 0 12px 30px -20px rgba(79, 70, 229, 0.45);
-    }
-
-    .psychologist-modal-choice.is-selected .psychologist-modal-choice__indicator::after,
-    .psychologist-modal-choice input:checked + .psychologist-modal-choice__card .psychologist-modal-choice__indicator::after {
-        opacity: 1;
-    }
-
-    .psychologist-modal-choice.is-selected .psychologist-modal-choice__indicator--topic,
-    .psychologist-modal-choice input:checked + .psychologist-modal-choice__card .psychologist-modal-choice__indicator--topic {
-        background-color: rgb(79 70 229);
-        border-color: rgb(79 70 229);
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.08);
-    }
-
-    .psychologist-modal-choice.is-selected .psychologist-modal-choice__indicator--method,
-    .psychologist-modal-choice input:checked + .psychologist-modal-choice__card .psychologist-modal-choice__indicator--method {
-        background-color: rgb(5 150 105);
-        border-color: rgb(5 150 105);
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.08);
-    }
-
-    .psychologist-modal-choice.is-selected .psychologist-modal-choice__indicator--specialisation,
-    .psychologist-modal-choice input:checked + .psychologist-modal-choice__card .psychologist-modal-choice__indicator--specialisation {
-        background-color: rgb(192 38 211);
-        border-color: rgb(192 38 211);
-        box-shadow: 0 0 0 4px rgba(217, 70, 239, 0.08);
-    }
 </style>
 {% endblock %}
 
@@ -350,6 +246,7 @@
               id="psychologist-profile-form"
               data-edit-mode="0"
               data-has-errors="{% if has_form_errors %}1{% else %}0{% endif %}"
+              data-photo-has-errors="{% if profile_form.photo.errors %}1{% else %}0{% endif %}"
               data-active-tab="{{ active_profile_tab }}"
               class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
             {% csrf_token %}
@@ -413,21 +310,23 @@
                                     </p>
                                 </div>
                                 <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center lg:justify-end">
-                                    <div data-profile-display-actions>
+                                    <div data-edit-display-actions data-edit-scope="profile">
                                         <button type="button"
-                                                data-profile-edit-toggle
+                                                data-edit-toggle
+                                                data-edit-scope="profile"
                                                 class="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
                                             <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
                                             Редактировать профиль
                                         </button>
                                     </div>
-                                    <div data-profile-edit-actions class="hidden w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                                    <div data-edit-actions data-edit-scope="profile" class="hidden w-full flex-col gap-3 sm:w-auto sm:flex-row">
                                         <button type="submit"
                                                 class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-emerald-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-emerald-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
                                             Сохранить изменения
                                         </button>
                                         <button type="button"
-                                                data-profile-edit-cancel
+                                                data-edit-cancel
+                                                data-edit-scope="profile"
                                                 class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-white px-6 py-3 text-base font-medium text-zinc-500 shadow-md transition-all duration-200 hover:bg-gray-100 hover:shadow-lg">
                                             Отмена
                                         </button>
@@ -522,10 +421,14 @@
                             <div class="mt-8 space-y-6">
                                 <div class="space-y-3">
                                     <p class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">{{ profile_form.languages.label }}</p>
-                                    {{ profile_form.languages }}
-                                    <p id="profile-languages-help" class="text-sm leading-6 text-zinc-500">
-                                        Можно выбрать несколько языков. На macOS используйте Cmd, на Windows Ctrl.
-                                    </p>
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        {% for checkbox in profile_form.languages %}
+                                        <label class="flex items-center gap-3 rounded-2xl border border-indigo-100 bg-white px-4 py-3 text-sm font-medium text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] transition hover:border-indigo-200 hover:bg-indigo-50/60">
+                                            {{ checkbox.tag }}
+                                            <span>{{ checkbox.choice_label }}</span>
+                                        </label>
+                                        {% endfor %}
+                                    </div>
                                     {% if profile_form.languages.errors %}<p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.languages.errors.0 }}</p>{% endif %}
                                 </div>
 
@@ -533,11 +436,26 @@
                                     <div class="space-y-5">
                                         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                             <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Фото профиля</p>
-                                            <button type="button"
-                                                    data-photo-upload-trigger
-                                                    class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-transparent bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                                Загрузить новое фото
-                                            </button>
+                                            <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+                                                <div data-photo-display-actions>
+                                                    <button type="button"
+                                                            data-photo-upload-trigger
+                                                            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-transparent bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                        Загрузить новое фото
+                                                    </button>
+                                                </div>
+                                                <div data-photo-edit-actions class="hidden flex-col gap-3 sm:flex-row">
+                                                    <button type="submit"
+                                                            class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-emerald-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                                        Сохранить фото
+                                                    </button>
+                                                    <button type="button"
+                                                            data-photo-cancel
+                                                            class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-white px-5 py-3 text-sm font-semibold text-zinc-500 shadow-md transition-all duration-200 hover:bg-gray-100 hover:shadow-lg">
+                                                        Отмена
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <div class="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start">
@@ -590,21 +508,23 @@
                                     </p>
                                 </div>
                                 <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center lg:justify-end">
-                                    <div data-profile-display-actions>
+                                    <div data-edit-display-actions data-edit-scope="personal">
                                         <button type="button"
-                                                data-profile-edit-toggle
+                                                data-edit-toggle
+                                                data-edit-scope="personal"
                                                 class="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
                                             <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
                                             Редактировать данные
                                         </button>
                                     </div>
-                                    <div data-profile-edit-actions class="hidden w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                                    <div data-edit-actions data-edit-scope="personal" class="hidden w-full flex-col gap-3 sm:w-auto sm:flex-row">
                                         <button type="submit"
                                                 class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-emerald-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-emerald-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
                                             Сохранить изменения
                                         </button>
                                         <button type="button"
-                                                data-profile-edit-cancel
+                                                data-edit-cancel
+                                                data-edit-scope="personal"
                                                 class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-white px-6 py-3 text-base font-medium text-zinc-500 shadow-md transition-all duration-200 hover:bg-gray-100 hover:shadow-lg">
                                             Отмена
                                         </button>

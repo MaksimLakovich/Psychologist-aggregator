@@ -38,20 +38,15 @@
                                         <h3 class="mb-2 text-lg font-semibold text-indigo-950/75">{{ group_name }}</h3>
                                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                             {% for topic in items %}
-                                                <label class="psychologist-modal-choice{% if topic.pk|stringformat:"s" in selected_topics %} is-selected{% endif %} block rounded-2xl">
+                                                <label class="flex items-center gap-3 rounded-2xl border border-indigo-100 bg-white px-4 py-3 text-sm font-medium text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] transition hover:border-indigo-200 hover:bg-indigo-50/60">
                                                     <input type="checkbox"
                                                            name="topics"
                                                            form="psychologist-profile-form"
                                                            value="{{ topic.pk }}"
                                                            data-label="{{ topic.name }}"
-                                                           class="psychologist-topic-checkbox"
+                                                           class="psychologist-topic-checkbox h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500"
                                                            {% if topic.pk|stringformat:"s" in selected_topics %}checked{% endif %}>
-                                                    <span class="psychologist-modal-choice__card">
-                                                        <span class="psychologist-modal-choice__indicator psychologist-modal-choice__indicator--topic" aria-hidden="true"></span>
-                                                        <span class="psychologist-modal-choice__label">
-                                                            {{ topic.name }}
-                                                        </span>
-                                                    </span>
+                                                    <span>{{ topic.name }}</span>
                                                 </label>
                                             {% empty %}
                                                 <p class="text-sm text-zinc-500">Темы не найдены.</p>

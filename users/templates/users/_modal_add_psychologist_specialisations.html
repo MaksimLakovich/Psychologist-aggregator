@@ -25,21 +25,16 @@
 
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {% for specialisation in all_specialisations %}
-                        <label class="psychologist-modal-choice{% if specialisation.pk|stringformat:"s" in selected_specialisations %} is-selected{% endif %} block rounded-2xl">
+                        <label class="flex items-center gap-3 rounded-2xl border border-indigo-100 bg-white px-4 py-3 text-sm font-medium text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] transition hover:border-fuchsia-200 hover:bg-fuchsia-50/60">
                             <input id="account-specialisation-{{ specialisation.pk }}"
                                    type="checkbox"
                                    name="specialisations"
                                    form="psychologist-profile-form"
                                    value="{{ specialisation.pk }}"
                                    data-label="{{ specialisation.name }}"
-                                   class="psychologist-specialisation-checkbox"
+                                   class="psychologist-specialisation-checkbox h-4 w-4 rounded border-zinc-300 text-fuchsia-600 focus:ring-fuchsia-500"
                                    {% if specialisation.pk|stringformat:"s" in selected_specialisations %}checked{% endif %}>
-                            <span class="psychologist-modal-choice__card">
-                                <span class="psychologist-modal-choice__indicator psychologist-modal-choice__indicator--specialisation" aria-hidden="true"></span>
-                                <span class="psychologist-modal-choice__label">
-                                    {{ specialisation.name }}
-                                </span>
-                            </span>
+                            <span>{{ specialisation.name }}</span>
                         </label>
                     {% empty %}
                         <p class="text-sm text-zinc-500">Специализации не найдены.</p>

@@ -22,15 +22,6 @@ READONLY_SELECT_CLASS = (
     "text-zinc-500 shadow-sm cursor-not-allowed opacity-100 disabled:opacity-100 "
     "disabled:text-zinc-500 disabled:bg-gray-100 disabled:border-gray-100"
 )
-MULTISELECT_CLASS = (
-    "block min-h-[9rem] w-full rounded-2xl border border-gray-100 bg-white px-4 py-3 text-base "
-    "text-zinc-800 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm transition-all duration-200"
-)
-READONLY_MULTISELECT_CLASS = (
-    "block min-h-[9rem] w-full rounded-2xl border border-gray-100 bg-gray-100 px-4 py-3 text-base "
-    "text-zinc-500 shadow-sm cursor-not-allowed opacity-100 disabled:opacity-100 "
-    "disabled:text-zinc-500 disabled:bg-gray-100 disabled:border-gray-100"
-)
 TEXTAREA_CLASS = (
     "block min-h-[9rem] w-full rounded-2xl border border-gray-100 bg-white px-4 py-3 text-lg "
     "text-zinc-800 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm transition-all duration-200"
@@ -174,16 +165,12 @@ class EditPsychologistProfileForm(forms.ModelForm):
         label="Владение языками",
         choices=LANGUAGE_CHOICES,
         required=False,
-        widget=forms.SelectMultiple(
+        widget=forms.CheckboxSelectMultiple(
             attrs={
-                "class": READONLY_MULTISELECT_CLASS,
-                "data-view-class": READONLY_MULTISELECT_CLASS,
-                "data-edit-class": MULTISELECT_CLASS,
+                "class": "h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500",
                 "data-editable-field": "1",
-                "size": 4,
-                "aria-describedby": "profile-languages-help",
             }
-        ),
+        )
     )
     specialisations = forms.ModelMultipleChoiceField(
         label="Специализации",
@@ -245,7 +232,7 @@ class EditPsychologistProfileForm(forms.ModelForm):
                     "class": READONLY_FILE_INPUT_CLASS,
                     "data-view-class": READONLY_FILE_INPUT_CLASS,
                     "data-edit-class": FILE_INPUT_CLASS,
-                    "data-editable-field": "1",
+                    "data-photo-upload-field": "1",
                     "accept": ".jpg,.jpeg,.png",
                 }
             ),

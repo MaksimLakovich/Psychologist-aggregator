@@ -25,20 +25,15 @@
 
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {% for method in all_methods %}
-                        <label class="psychologist-modal-choice{% if method.pk|stringformat:"s" in selected_methods %} is-selected{% endif %} block rounded-2xl">
+                        <label class="flex items-center gap-3 rounded-2xl border border-indigo-100 bg-white px-4 py-3 text-sm font-medium text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] transition hover:border-emerald-200 hover:bg-emerald-50/60">
                             <input type="checkbox"
                                    name="methods"
                                    form="psychologist-profile-form"
                                    value="{{ method.pk }}"
                                    data-label="{{ method.name }}"
-                                   class="psychologist-method-checkbox"
+                                   class="psychologist-method-checkbox h-4 w-4 rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
                                    {% if method.pk|stringformat:"s" in selected_methods %}checked{% endif %}>
-                            <span class="psychologist-modal-choice__card">
-                                <span class="psychologist-modal-choice__indicator psychologist-modal-choice__indicator--method" aria-hidden="true"></span>
-                                <span class="psychologist-modal-choice__label">
-                                    {{ method.name }}
-                                </span>
-                            </span>
+                            <span>{{ method.name }}</span>
                         </label>
                     {% empty %}
                         <p class="text-sm text-zinc-500">Методы не найдены.</p>
