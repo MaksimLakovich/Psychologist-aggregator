@@ -4,7 +4,7 @@
 
 {% if can_manage_session_actions %}
 
-    <article class="rounded-[2rem] border border-white/60 bg-white/50 p-6 sm:p-8 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
+    <article class="rounded-[2rem] bg-slate-100/50 p-6 sm:p-8 shadow-lg shadow-slate-100 backdrop-blur-md animate-fade-in-up delay-200">
         <div class="flex flex-col gap-6">
             <div>
                 <h2 class="text-2xl font-extrabold text-indigo-950 mb-2">
@@ -40,7 +40,7 @@
 
 {% elif session_change_reason_label and slot.cancel_reason %}
 
-    <article class="rounded-[2rem] border border-white/60 bg-white/50 p-6 sm:p-8 shadow-sm backdrop-blur-md animate-fade-in-up delay-200">
+    <article class="rounded-[2rem] bg-slate-100/50 p-6 sm:p-8 shadow-lg shadow-slate-100 backdrop-blur-md animate-fade-in-up delay-200">
         <h2 class="text-2xl font-extrabold text-indigo-950 mb-6">
             {{ session_change_reason_label }}
         </h2>
