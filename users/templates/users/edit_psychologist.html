@@ -81,7 +81,7 @@
     /* Карточки образования: отдельные состояния просмотра и редактирования */
     /* ========================================================= */
     .education-card {
-        border-width: 2px;
+        border-width: 3px;
         border-radius: 1.75rem;
         padding: 1.5rem;
         transition:
@@ -92,8 +92,7 @@
     }
 
     .education-card--view {
-        border-color: rgb(248 250 252);
-        background: rgba(248, 250, 252, 0.75);
+        border-color: oklch(96.8% 0.007 247.896);
         box-shadow: 0 16px 32px rgba(148, 163, 184, 0.08);
     }
 
@@ -289,10 +288,10 @@
                     </div>
 
                     <!-- Данные для каждой вкладки -->
-                    <div class="px-6 py-5">
+                    <div class="px-8 py-5">
 
                         <!-- ДАННЫЕ ПРОФИЛЯ -->
-                        <div data-tab-panel="profile" class="space-y-8">
+                        <div data-tab-panel="profile" class="space-y-8 pb-12">
                             {% if account_form.non_field_errors or profile_form.non_field_errors %}
                             <div class="p-4 rounded-2xl text-sm font-semibold bg-rose-50 text-rose-700 border border-rose-100 shadow-sm">
                                 {% for err in account_form.non_field_errors %}{{ err }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
@@ -300,7 +299,7 @@
                             </div>
                             {% endif %}
 
-                            <div class="mt-0 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                            <div class="mt-0 flex flex-col gap-4 lg:items-end lg:justify-between">
                                 <div>
                                     <h2 class="text-2xl md:text-3xl text-indigo-700/90 font-semibold tracking-wide">
                                         Данные профиля
@@ -314,20 +313,26 @@
                                         <button type="button"
                                                 data-edit-toggle
                                                 data-edit-scope="profile"
-                                                class="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
+                                                class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
+                                                border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
+                                                hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                             <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
                                             Редактировать профиль
                                         </button>
                                     </div>
                                     <div data-edit-actions data-edit-scope="profile" class="hidden w-full flex-col gap-3 sm:w-auto sm:flex-row">
                                         <button type="submit"
-                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-emerald-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-emerald-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
-                                            Сохранить изменения
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-all duration-200
+                                                hover:bg-emerald-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                            Сохранить
                                         </button>
                                         <button type="button"
                                                 data-edit-cancel
                                                 data-edit-scope="profile"
-                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-white px-6 py-3 text-base font-medium text-zinc-500 shadow-md transition-all duration-200 hover:bg-gray-100 hover:shadow-lg">
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-slate-100/85 px-5 py-2.5 text-sm font-medium text-zinc-500 shadow-xs transition-all duration-200
+                                                hover:bg-slate-200/75 hover:shadow-sm">
                                             Отмена
                                         </button>
                                     </div>
@@ -415,10 +420,10 @@
                                     <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.price_couples.errors.0 }}</p>
                                     {% endif %}
                                 </div>
-
                             </div>
 
                             <div class="mt-8 space-y-6">
+
                                 <div class="space-y-3">
                                     <p class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">{{ profile_form.languages.label }}</p>
                                     <div class="grid gap-3 sm:grid-cols-2">
@@ -432,58 +437,6 @@
                                     {% if profile_form.languages.errors %}<p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.languages.errors.0 }}</p>{% endif %}
                                 </div>
 
-                                <div class="rounded-[1.5rem] border border-white bg-white p-5 shadow-sm shadow-zinc-200/60">
-                                    <div class="space-y-5">
-                                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                            <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Фото профиля</p>
-                                            <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-                                                <div data-photo-display-actions>
-                                                    <button type="button"
-                                                            data-photo-upload-trigger
-                                                            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-transparent bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                                        Загрузить новое фото
-                                                    </button>
-                                                </div>
-                                                <div data-photo-edit-actions class="hidden flex-col gap-3 sm:flex-row">
-                                                    <button type="submit"
-                                                            class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-emerald-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
-                                                        Сохранить фото
-                                                    </button>
-                                                    <button type="button"
-                                                            data-photo-cancel
-                                                            class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-white px-5 py-3 text-sm font-semibold text-zinc-500 shadow-md transition-all duration-200 hover:bg-gray-100 hover:shadow-lg">
-                                                        Отмена
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start">
-                                            <div class="rounded-[1.5rem] border border-indigo-100 bg-indigo-50/70 p-4">
-                                                <div class="flex h-[20rem] items-center justify-center overflow-hidden rounded-[1.25rem] bg-white">
-                                                    <img src="{{ request.user.avatar_url }}"
-                                                         alt="avatar"
-                                                         class="max-h-full max-w-full object-contain">
-                                                </div>
-                                            </div>
-
-                                            <div class="space-y-3">
-                                                <p class="text-sm leading-6 text-zinc-500">
-                                                    Текущее фото уже отображается в карточке специалиста. Для замены нажмите кнопку «Загрузить новое фото».
-                                                </p>
-                                                <div class="hidden" data-photo-upload-input-container>
-                                                    {{ profile_form.photo }}
-                                                </div>
-                                                <p data-photo-selected-file class="hidden text-sm font-medium text-indigo-600"></p>
-                                                {% if profile_form.photo.errors %}
-                                                <p class="text-sm tracking-wide text-pink-700">{{ profile_form.photo.errors.0 }}</p>
-                                                {% endif %}
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div class="space-y-2">
                                     <label for="{{ profile_form.biography.id_for_label }}"
                                            class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
@@ -494,13 +447,67 @@
                                     <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.biography.errors.0 }}</p>
                                     {% endif %}
                                 </div>
+
+                                <div class="pt-2 space-y-3">
+                                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                        <p class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">Фото профиля</p>
+                                    </div>
+
+                                    <div class="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start">
+                                        <div class="rounded-[1.5rem] border border-indigo-100 bg-indigo-50/70 p-4">
+                                            <div class="flex h-[20rem] items-center justify-center overflow-hidden rounded-[1.25rem] bg-white">
+                                                <img src="{{ request.user.avatar_url }}"
+                                                     alt="avatar"
+                                                     class="max-h-full max-w-full object-contain">
+                                            </div>
+                                        </div>
+                                        <div class="space-y-3">
+                                            <div class="hidden" data-photo-upload-input-container>
+                                                {{ profile_form.photo }}
+                                            </div>
+                                            <p data-photo-selected-file class="hidden text-sm font-medium text-indigo-600"></p>
+                                            {% if profile_form.photo.errors %}
+                                            <p class="text-sm tracking-wide text-pink-700">{{ profile_form.photo.errors.0 }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+                                            <div data-photo-display-actions>
+                                                <button type="button"
+                                                        data-photo-upload-trigger
+                                                        class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
+                                                        border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
+                                                        hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                    <img src="{% static 'images/menu/edit-photo-icon.svg' %}" alt="edit" class="h-5 w-5">
+                                                    Загрузить новое фото
+                                                </button>
+                                            </div>
+                                            <div data-photo-edit-actions class="hidden flex-col gap-3 sm:flex-row">
+                                                <button type="submit"
+                                                        class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                        border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-all duration-200
+                                                        hover:bg-emerald-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                                    Сохранить фото
+                                                </button>
+                                                <button type="button"
+                                                        data-photo-cancel
+                                                        class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                        border border-transparent bg-slate-100/85 px-5 py-2.5 text-sm font-medium text-zinc-500 shadow-xs transition-all duration-200
+                                                        hover:bg-slate-200/75 hover:shadow-sm">
+                                                    Отмена
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
 
                         <!-- ПЕРСОНАЛЬНЫЕ ДАННЫЕ -->
-                        <div data-tab-panel="personal" class="hidden space-y-8">
+                        <div data-tab-panel="personal" class="hidden space-y-8 pb-12">
 
-                            <div class="mt-0 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                            <div class="mt-0 flex flex-col gap-4 lg:items-end lg:justify-between">
                                 <div>
                                     <h2 class="text-2xl md:text-3xl text-indigo-700/90 font-semibold tracking-wide">Персональные данные</h2>
                                     <p class="mt-2 text-base leading-6 text-zinc-500">
@@ -512,20 +519,26 @@
                                         <button type="button"
                                                 data-edit-toggle
                                                 data-edit-scope="personal"
-                                                class="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
+                                                class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
+                                                border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
+                                                hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                             <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
                                             Редактировать данные
                                         </button>
                                     </div>
                                     <div data-edit-actions data-edit-scope="personal" class="hidden w-full flex-col gap-3 sm:w-auto sm:flex-row">
                                         <button type="submit"
-                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-emerald-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-emerald-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
-                                            Сохранить изменения
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-all duration-200
+                                                hover:bg-emerald-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                            Сохранить
                                         </button>
                                         <button type="button"
                                                 data-edit-cancel
                                                 data-edit-scope="personal"
-                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-transparent bg-white px-6 py-3 text-base font-medium text-zinc-500 shadow-md transition-all duration-200 hover:bg-gray-100 hover:shadow-lg">
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-slate-100/85 px-5 py-2.5 text-sm font-medium text-zinc-500 shadow-xs transition-all duration-200
+                                                hover:bg-slate-200/75 hover:shadow-sm">
                                             Отмена
                                         </button>
                                     </div>
@@ -555,9 +568,9 @@
                         </div>
 
                         <!-- ОБРАЗОВАНИЕ -->
-                        <div data-tab-panel="education" class="hidden space-y-8">
+                        <div data-tab-panel="education" class="hidden space-y-8 pb-6">
 
-                            <div class="mt-0 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                            <div class="mt-0 flex flex-col gap-4 lg:items-end lg:justify-between">
                                 <div>
                                     <h2 class="text-2xl md:text-3xl text-indigo-700/90 font-semibold tracking-wide">
                                         Образование и документы
@@ -566,12 +579,17 @@
                                         Добавляйте каждую ступень обучения отдельной записью.
                                     </p>
                                 </div>
-                                <button type="button"
-                                        id="education-add-button"
-                                        data-add-education-form
-                                        class="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
-                                    Добавить еще
-                                </button>
+                                <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center lg:justify-end">
+                                    <button type="button"
+                                            id="education-add-button"
+                                            data-add-education-form
+                                            class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
+                                            border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
+                                            hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                        <img src="{% static 'images/menu/edit-education-icon.svg' %}" alt="edit" class="h-5 w-5">
+                                        Добавить еще
+                                    </button>
+                                </div>
                             </div>
 
                             {{ education_formset.management_form }}
@@ -588,6 +606,7 @@
                                      data-education-editing="{% if form.errors or form.non_field_errors %}1{% else %}0{% endif %}"
                                      class="education-card {% if form.errors or form.non_field_errors %}education-card--editing{% else %}education-card--view{% endif %}">
                                     {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
+
                                     <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
                                             <p class="mt-2 xl:text-2xl text-xl font-bold tracking-tight text-indigo-950/50">Запись об образовании {{ forloop.counter }}</p>
@@ -739,7 +758,7 @@
                         </div>
 
                         <!-- ТЕМЫ / МЕТОДЫ -->
-                        <div data-tab-panel="expertise" class="hidden space-y-8">
+                        <div data-tab-panel="expertise" class="hidden space-y-8 pb-12">
 
                             <div class="mt-0 flex items-center gap-3">
                                 <div>
