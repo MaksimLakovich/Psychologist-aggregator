@@ -4,8 +4,7 @@ from django.forms import modelformset_factory
 from timezone_field import TimeZoneFormField
 
 from users.constants import (CURRENCY_CHOICES, GENDER_CHOICES,
-                             LANGUAGE_CHOICES, THERAPY_FORMAT_CHOICES,
-                             WORK_STATUS_CHOICES)
+                             LANGUAGE_CHOICES, THERAPY_FORMAT_CHOICES)
 from users.models import (AppUser, Education, Method, PsychologistProfile,
                           Specialisation, Topic)
 
@@ -18,13 +17,18 @@ READONLY_INPUT_CLASS = (
     "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
     "text-zinc-500 shadow-sm cursor-not-allowed"
 )
+READONLY_SELECT_CLASS = (
+    "block w-full rounded-xl border border-gray-100 bg-gray-100 px-4 py-3 text-lg "
+    "text-zinc-500 shadow-sm cursor-not-allowed opacity-100 disabled:opacity-100 "
+    "disabled:text-zinc-500 disabled:bg-gray-100 disabled:border-gray-100"
+)
 TEXTAREA_CLASS = (
     "block min-h-[9rem] w-full rounded-2xl border border-gray-100 bg-white px-4 py-3 text-lg "
     "text-zinc-800 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm transition-all duration-200"
 )
 FILE_INPUT_CLASS = (
-    "block w-full rounded-xl border border-dashed border-indigo-200 bg-indigo-50/60 px-4 py-3 text-sm "
-    "text-zinc-600 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-4 file:py-2 "
+    "block w-full rounded-xl border border-indigo-100 bg-white px-4 py-3 text-sm "
+    "text-zinc-600 shadow-sm file:mr-4 file:rounded-xl file:border-0 file:bg-indigo-600 file:px-4 file:py-2 "
     "file:text-sm file:font-semibold file:text-white hover:file:bg-indigo-700"
 )
 READONLY_TEXTAREA_CLASS = (
@@ -32,8 +36,8 @@ READONLY_TEXTAREA_CLASS = (
     "text-zinc-500 shadow-sm"
 )
 READONLY_FILE_INPUT_CLASS = (
-    "block w-full rounded-xl border border-dashed border-gray-200 bg-gray-100 px-4 py-3 text-sm "
-    "text-zinc-500 file:mr-4 file:rounded-lg file:border-0 file:bg-zinc-300 file:px-4 file:py-2 "
+    "block w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm "
+    "text-zinc-500 shadow-sm file:mr-4 file:rounded-xl file:border-0 file:bg-zinc-300 file:px-4 file:py-2 "
     "file:text-sm file:font-semibold file:text-zinc-700"
 )
 
@@ -104,10 +108,11 @@ class EditPsychologistAccountForm(forms.ModelForm):
             ),
             "timezone": forms.Select(
                 attrs={
-                    "class": READONLY_INPUT_CLASS,
-                    "data-view-class": READONLY_INPUT_CLASS,
+                    "class": READONLY_SELECT_CLASS,
+                    "data-view-class": READONLY_SELECT_CLASS,
                     "data-edit-class": BASE_INPUT_CLASS,
                     "data-editable-field": "1",
+                    "style": "-webkit-text-fill-color: rgb(113 113 122);",
                 }
             ),
         }
@@ -124,6 +129,7 @@ class EditPsychologistAccountForm(forms.ModelForm):
             timezone_choices = list(timezone_field.choices)
             if not timezone_choices or timezone_choices[0][0] != "":
                 timezone_field.choices = [("", "Выберите часовой пояс"), *timezone_choices]
+        self.fields["timezone"].label = "Часовой пояс в котором работаю"
 
         # Дополнительная валидация возраста на уровне формы
         self.fields["age"].validators = [MinValueValidator(18), MaxValueValidator(120)]
@@ -159,7 +165,14 @@ class EditPsychologistProfileForm(forms.ModelForm):
         label="Владение языками",
         choices=LANGUAGE_CHOICES,
         required=False,
-        widget=forms.CheckboxSelectMultiple,
+        widget=forms.CheckboxSelectMultiple(
+            attrs={
+                "class": "h-4 w-4 rounded border-zinc-300 text-zinc-400 focus:ring-zinc-400",
+                "data-view-class": "h-4 w-4 rounded border-zinc-300 text-zinc-400 focus:ring-zinc-400",
+                "data-edit-class": "h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500",
+                "data-editable-field": "1",
+            }
+        )
     )
     specialisations = forms.ModelMultipleChoiceField(
         label="Специализации",
@@ -192,7 +205,6 @@ class EditPsychologistProfileForm(forms.ModelForm):
             "price_individual",
             "price_couples",
             "price_currency",
-            "work_status",
             "specialisations",
             "methods",
             "topics",
@@ -200,10 +212,11 @@ class EditPsychologistProfileForm(forms.ModelForm):
         widgets = {
             "gender": forms.Select(
                 attrs={
-                    "class": READONLY_INPUT_CLASS,
-                    "data-view-class": READONLY_INPUT_CLASS,
+                    "class": READONLY_SELECT_CLASS,
+                    "data-view-class": READONLY_SELECT_CLASS,
                     "data-edit-class": BASE_INPUT_CLASS,
                     "data-editable-field": "1",
+                    "style": "-webkit-text-fill-color: rgb(113 113 122);",
                 }
             ),
             "biography": forms.Textarea(
@@ -221,7 +234,7 @@ class EditPsychologistProfileForm(forms.ModelForm):
                     "class": READONLY_FILE_INPUT_CLASS,
                     "data-view-class": READONLY_FILE_INPUT_CLASS,
                     "data-edit-class": FILE_INPUT_CLASS,
-                    "data-editable-field": "1",
+                    "data-photo-upload-field": "1",
                     "accept": ".jpg,.jpeg,.png",
                 }
             ),
@@ -238,10 +251,11 @@ class EditPsychologistProfileForm(forms.ModelForm):
             ),
             "therapy_format": forms.Select(
                 attrs={
-                    "class": READONLY_INPUT_CLASS,
-                    "data-view-class": READONLY_INPUT_CLASS,
+                    "class": READONLY_SELECT_CLASS,
+                    "data-view-class": READONLY_SELECT_CLASS,
                     "data-edit-class": BASE_INPUT_CLASS,
                     "data-editable-field": "1",
+                    "style": "-webkit-text-fill-color: rgb(113 113 122);",
                 }
             ),
             "price_individual": forms.NumberInput(
@@ -268,18 +282,11 @@ class EditPsychologistProfileForm(forms.ModelForm):
             ),
             "price_currency": forms.Select(
                 attrs={
-                    "class": READONLY_INPUT_CLASS,
-                    "data-view-class": READONLY_INPUT_CLASS,
+                    "class": READONLY_SELECT_CLASS,
+                    "data-view-class": READONLY_SELECT_CLASS,
                     "data-edit-class": BASE_INPUT_CLASS,
                     "data-editable-field": "1",
-                }
-            ),
-            "work_status": forms.Select(
-                attrs={
-                    "class": READONLY_INPUT_CLASS,
-                    "data-view-class": READONLY_INPUT_CLASS,
-                    "data-edit-class": BASE_INPUT_CLASS,
-                    "data-editable-field": "1",
+                    "style": "-webkit-text-fill-color: rgb(113 113 122);",
                 }
             ),
         }
@@ -294,13 +301,15 @@ class EditPsychologistProfileForm(forms.ModelForm):
         self.fields["gender"].choices = [("", "Выберите пол"), *GENDER_CHOICES]
         self.fields["therapy_format"].choices = [("", "Выберите формат"), *THERAPY_FORMAT_CHOICES]
         self.fields["price_currency"].choices = [("", "Выберите валюту"), *list(CURRENCY_CHOICES)]
-        self.fields["work_status"].choices = [("", "Выберите рабочий статус"), *WORK_STATUS_CHOICES]
         self.fields["specialisations"].queryset = Specialisation.objects.order_by("name")
         self.fields["methods"].queryset = Method.objects.order_by("name")
         self.fields["topics"].queryset = Topic.objects.order_by("group_name", "name")
         # Для checkbox-групп используем отдельную отрисовку в шаблоне,
         # поэтому класс назначаем контейнеру каждого input через renderer уже в HTML
-        self.fields["languages"].initial = self.instance.languages if self.instance.pk else ["russian"]
+        if self.instance.pk:
+            self.fields["languages"].initial = list(self.instance.languages or [])
+        else:
+            self.fields["languages"].initial = ["russian"]
 
     def clean_languages(self):
         """Возвращаем список языков в том формате, который ожидает ArrayField модели.
@@ -348,11 +357,12 @@ class PsychologistEducationForm(forms.ModelForm):
         widgets = {
             "country": forms.Select(
                 attrs={
-                    "class": READONLY_INPUT_CLASS,
-                    "data-view-class": READONLY_INPUT_CLASS,
+                    "class": READONLY_SELECT_CLASS,
+                    "data-view-class": READONLY_SELECT_CLASS,
                     "data-edit-class": BASE_INPUT_CLASS,
                     "data-editable-field": "1",
                     "placeholder": "Страна учебного учреждения",
+                    "style": "-webkit-text-fill-color: rgb(113 113 122);",
                 }
             ),
             "institution": forms.TextInput(
@@ -404,7 +414,7 @@ class PsychologistEducationForm(forms.ModelForm):
                     "placeholder": "Год окончания обучения",
                 }
             ),
-            "document": forms.ClearableFileInput(
+            "document": forms.FileInput(
                 attrs={
                     "class": READONLY_FILE_INPUT_CLASS,
                     "data-view-class": READONLY_FILE_INPUT_CLASS,

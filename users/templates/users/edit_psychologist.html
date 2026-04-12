@@ -6,6 +6,9 @@
 
 {% block extra_style %}
 <style>
+    /* ========================================================= */
+    /* Анимации с предотвращением скачков (opacity: 0 в начале) */
+    /* ========================================================= */
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
@@ -25,6 +28,9 @@
         animation: fadeInLeft 0.9s ease-out forwards;
     }
 
+    /* ========================================================= */
+    /* Через несколько секунд автоматически скрываем системное уведомление об успешной операции */
+    /* ========================================================= */
     .auto-dismiss-message {
         overflow: hidden;
         max-height: 12rem;
@@ -54,27 +60,13 @@
             border-width 0.65s ease;
     }
 
+    /* ========================================================= */
+    /* Активная вкладка: подсвечиваем текущий раздел формы */
+    /* ========================================================= */
     .tab-button-active {
         background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(99, 102, 241, 0.18));
         color: rgb(67 56 202);
         box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.22);
-    }
-
-    .choice-card input:checked + span {
-        background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(99, 102, 241, 0.18));
-        border-color: rgba(79, 70, 229, 0.35);
-        color: rgb(55 48 163);
-        box-shadow: 0 10px 25px -16px rgba(79, 70, 229, 0.65);
-    }
-
-    .choice-card input {
-        position: absolute;
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    #psychologist-profile-form[data-edit-mode="0"] .choice-card {
-        pointer-events: none;
     }
 
     #psychologist-profile-form[data-edit-mode="1"] input:not([type="hidden"]):not([readonly]):not(:disabled):focus,
@@ -85,26 +77,9 @@
         box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1) !important;
     }
 
-    .selection-card {
-        position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(224, 231, 255, 0.95);
-        background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(246, 248, 255, 0.8)),
-            radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%);
-        box-shadow: 0 18px 40px rgba(99, 102, 241, 0.09);
-    }
-
-    .selection-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 8px;
-        background: linear-gradient(90deg, rgba(99, 102, 241, 0.82), rgba(129, 140, 248, 0.35));
-    }
-
+    /* ========================================================= */
+    /* Бейджи выбранных тем, методов и специализаций на основной странице */
+    /* ========================================================= */
     .selection-badge {
         border-radius: 9999px;
         padding: 0.6rem 0.95rem;
@@ -131,6 +106,7 @@
         background: linear-gradient(180deg, rgba(250, 232, 255, 0.95), rgba(253, 244, 255, 0.82));
         color: rgb(162 28 175);
     }
+
 </style>
 {% endblock %}
 
@@ -149,12 +125,12 @@
     <div class="max-w-7xl mx-auto relative z-10">
 
         <!-- ШАПКА -->
-        <div class="mb-12 max-w-3xl animate-fade-in-left">
+        <div class="mb-12 max-w-4xl animate-fade-in-left">
             <h1 class="text-4xl md:text-5xl font-black text-indigo-900 tracking-tight leading-tight">
                 Профиль <span class="text-indigo-600">специалиста</span>
             </h1>
             <p class="mt-4 text-lg md:text-xl text-zinc-600 font-medium leading-relaxed">
-                Управляйте своей публичной карточкой, контактными данными и профессиональными настройками
+                Управляйте своей публичной карточкой, контактными данными и настройками профиля
             </p>
         </div>
 
@@ -177,67 +153,41 @@
               id="psychologist-profile-form"
               data-edit-mode="0"
               data-has-errors="{% if has_form_errors %}1{% else %}0{% endif %}"
+              data-photo-has-errors="{% if profile_form.photo.errors %}1{% else %}0{% endif %}"
               data-active-tab="{{ active_profile_tab }}"
               class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
             {% csrf_token %}
+            <input type="hidden" name="active_tab" id="active-profile-tab-input" value="{{ active_profile_tab }}">
 
             <!-- ОСНОВНОЙ БЛОК С ПОЛЬЗОВАТЕЛЬСКИМИ ДАННЫМИ -->
             <div class="space-y-8 animate-fade-in-up" style="animation-delay: 0.05s;">
-                <div class="rounded-[2rem] border border-indigo-100 bg-white shadow-xl shadow-indigo-100/50 overflow-hidden">
+                <div class="rounded-[2rem] border border-indigo-100 bg-white shadow-xl shadow-slate-50/60 overflow-hidden">
 
                     <!-- Перечень вкладок / кнопки для работы со страницей -->
-                    <div class="border-b border-indigo-100 bg-gradient-to-r from-indigo-50 via-white to-indigo-50 px-6 py-6 sm:px-8">
+                    <div class="border-b border-indigo-100 bg-gradient-to-r from-indigo-50 via-white to-indigo-50 px-6 py-5 sm:px-8">
                         <div class="space-y-6">
 
                             <div class="flex justify-center">
-                                <div class="grid w-full max-w-4xl gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                                <div class="grid w-full max-w-4xl gap-1 sm:grid-cols-2 xl:grid-cols-4">
                                     <button type="button"
                                             data-tab-button="profile"
-                                            class="rounded-2xl px-4 py-3 text-sm font-bold uppercase tracking-[0.18em] text-center text-zinc-500 transition-all duration-200 hover:bg-zinc-100">
+                                            class="rounded-2xl px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-center text-zinc-500 transition-all duration-200 hover:bg-indigo-50">
                                         Данные профиля
                                     </button>
                                     <button type="button"
                                             data-tab-button="personal"
-                                            class="rounded-2xl px-4 py-3 text-sm font-bold uppercase tracking-[0.18em] text-center text-zinc-500 transition-all duration-200 hover:bg-zinc-100">
+                                            class="rounded-2xl px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-center text-zinc-500 transition-all duration-200 hover:bg-indigo-50">
                                         Персональные данные
                                     </button>
                                     <button type="button"
                                             data-tab-button="education"
-                                            class="rounded-2xl px-4 py-3 text-sm font-bold uppercase tracking-[0.18em] text-center text-zinc-500 transition-all duration-200 hover:bg-zinc-100">
+                                            class="rounded-2xl px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-center text-zinc-500 transition-all duration-200 hover:bg-indigo-50">
                                         Образование
                                     </button>
                                     <button type="button"
                                             data-tab-button="expertise"
-                                            class="rounded-2xl px-4 py-3 text-sm font-bold uppercase tracking-[0.18em] text-center text-zinc-500 transition-all duration-200 hover:bg-zinc-100">
+                                            class="rounded-2xl px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-center text-zinc-500 transition-all duration-200 hover:bg-indigo-50">
                                         Темы и методы
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="flex flex-col gap-4 border-t border-indigo-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                                <div id="display-actions">
-                                    <button type="button" id="profile-edit-toggle"
-                                            class="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 gap-2
-                                            border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
-                                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                                            transition-all duration-200 shadow-md hover:shadow-lg">
-                                        <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="w-5 h-5">
-                                        Редактировать профиль
-                                    </button>
-                                </div>
-                                <div id="profile-edit-actions" class="hidden flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                                    <button type="submit"
-                                            class="inline-flex items-center justify-center px-6 py-3
-                                            border border-transparent text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-700
-                                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500
-                                            transition-all duration-200 shadow-md hover:shadow-lg">
-                                        Сохранить изменения
-                                    </button>
-                                    <button type="button" id="profile-edit-cancel"
-                                            class="inline-flex items-center justify-center px-6 py-3
-                                            border border-transparent text-base font-medium rounded-xl text-zinc-500 bg-white hover:bg-gray-100
-                                            transition-all duration-200 shadow-md hover:shadow-lg">
-                                        Отмена
                                     </button>
                                 </div>
                             </div>
@@ -246,8 +196,10 @@
                     </div>
 
                     <!-- Данные для каждой вкладки -->
-                    <div class="px-6 py-6 sm:px-8 sm:py-8">
-                        <div data-tab-panel="profile" class="space-y-8">
+                    <div class="px-8 py-5">
+
+                        <!-- ДАННЫЕ ПРОФИЛЯ -->
+                        <div data-tab-panel="profile" class="space-y-8 pb-12">
                             {% if account_form.non_field_errors or profile_form.non_field_errors %}
                             <div class="p-4 rounded-2xl text-sm font-semibold bg-rose-50 text-rose-700 border border-rose-100 shadow-sm">
                                 {% for err in account_form.non_field_errors %}{{ err }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
@@ -255,454 +207,602 @@
                             </div>
                             {% endif %}
 
-                            <div class="rounded-[1.75rem] border border-zinc-100 bg-zinc-50/70 px-5 py-6 sm:px-6">
-                                <div class="mb-6 flex items-center gap-3">
-                                    <img src="{% static 'images/menu/my-profile.svg' %}" alt="profile" class="w-8 h-8">
-                                    <div>
-                                        <h2 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">
-                                            Данные профиля
-                                        </h2>
-                                        <p class="mt-1 text-sm leading-6 text-zinc-500">
-                                            Здесь находятся данные, которые помогают сформировать вашу публичную карточку в каталоге и дают клиенту первое понятное впечатление о вас как о специалисте.
-                                        </p>
-                                    </div>
+                            <div class="mt-0 flex flex-col gap-4 lg:items-end lg:justify-between">
+                                <div>
+                                    <h2 class="text-2xl md:text-3xl text-indigo-700/90 font-semibold tracking-wide">
+                                        Данные профиля
+                                    </h2>
+                                    <p class="mt-2 text-base leading-6 text-zinc-500">
+                                        Здесь находятся данные, которые помогают сформировать вашу публичную карточку в каталоге и дают клиенту первое понятное впечатление о вас как о специалисте.
+                                    </p>
                                 </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                    {% for field in account_form %}
-                                        {% if field.name != 'email' and field.name != 'phone_number' %}
-                                        <div class="space-y-2">
-                                            <label for="{{ field.id_for_label }}"
-                                                   class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
-                                                {{ field.label }}
-                                            </label>
-                                            {{ field }}
-                                            {% if field.errors %}
-                                            <p class="mt-2 text-sm tracking-wide text-pink-700">{{ field.errors.0 }}</p>
-                                            {% endif %}
-                                        </div>
-                                        {% endif %}
-                                    {% endfor %}
-
-                                    <div class="space-y-2">
-                                        <label for="{{ profile_form.gender.id_for_label }}"
-                                               class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
-                                            {{ profile_form.gender.label }}
-                                        </label>
-                                        {{ profile_form.gender }}
-                                        {% if profile_form.gender.errors %}
-                                        <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.gender.errors.0 }}</p>
-                                        {% endif %}
+                                <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center lg:justify-end">
+                                    <div data-edit-display-actions data-edit-scope="profile">
+                                        <button type="button"
+                                                data-edit-toggle
+                                                data-edit-scope="profile"
+                                                class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
+                                                border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
+                                                hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
+                                            Редактировать профиль
+                                        </button>
                                     </div>
-
-                                    <div class="space-y-2">
-                                        <label for="{{ profile_form.practice_start_year.id_for_label }}"
-                                               class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
-                                            {{ profile_form.practice_start_year.label }}
-                                        </label>
-                                        {{ profile_form.practice_start_year }}
-                                        {% if profile_form.practice_start_year.errors %}
-                                        <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.practice_start_year.errors.0 }}</p>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="space-y-2">
-                                        <label for="{{ profile_form.therapy_format.id_for_label }}"
-                                               class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
-                                            {{ profile_form.therapy_format.label }}
-                                        </label>
-                                        {{ profile_form.therapy_format }}
-                                        {% if profile_form.therapy_format.errors %}
-                                        <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.therapy_format.errors.0 }}</p>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="space-y-2">
-                                        <label for="{{ profile_form.work_status.id_for_label }}"
-                                               class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
-                                            {{ profile_form.work_status.label }}
-                                        </label>
-                                        {{ profile_form.work_status }}
-                                        {% if profile_form.work_status.errors %}
-                                        <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.work_status.errors.0 }}</p>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="space-y-2">
-                                        <label for="{{ profile_form.price_individual.id_for_label }}"
-                                               class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
-                                            {{ profile_form.price_individual.label }}
-                                        </label>
-                                        {{ profile_form.price_individual }}
-                                        {% if profile_form.price_individual.errors %}
-                                        <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.price_individual.errors.0 }}</p>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="space-y-2">
-                                        <label for="{{ profile_form.price_couples.id_for_label }}"
-                                               class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
-                                            {{ profile_form.price_couples.label }}
-                                        </label>
-                                        {{ profile_form.price_couples }}
-                                        {% if profile_form.price_couples.errors %}
-                                        <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.price_couples.errors.0 }}</p>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="space-y-2 md:col-span-2">
-                                        <label for="{{ profile_form.price_currency.id_for_label }}"
-                                               class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
-                                            {{ profile_form.price_currency.label }}
-                                        </label>
-                                        {{ profile_form.price_currency }}
-                                        {% if profile_form.price_currency.errors %}
-                                        <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.price_currency.errors.0 }}</p>
-                                        {% endif %}
-                                    </div>
-                                </div>
-
-                                <div class="mt-8 space-y-6">
-                                    <div class="space-y-3">
-                                        <p class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">{{ profile_form.languages.label }}</p>
-                                        <div class="grid gap-3 sm:grid-cols-2">
-                                            {% for checkbox in profile_form.languages %}
-                                            <label class="choice-card cursor-pointer">
-                                                {{ checkbox.tag }}
-                                                <span class="block rounded-2xl border border-zinc-200 bg-white px-4 py-4 text-base font-semibold text-zinc-700 transition-all duration-200 hover:border-indigo-200 hover:bg-indigo-50/60">
-                                                    {{ checkbox.choice_label }}
-                                                </span>
-                                            </label>
-                                            {% endfor %}
-                                        </div>
-                                        {% if profile_form.languages.errors %}<p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.languages.errors.0 }}</p>{% endif %}
-                                    </div>
-
-                                    <div class="rounded-[1.5rem] border border-white bg-white p-5 shadow-sm shadow-zinc-200/60">
-                                        <div class="space-y-5">
-                                            <div>
-                                                <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Фото профиля</p>
-                                                <p class="mt-2 text-sm leading-6 text-zinc-500">
-                                                    Фото помогает клиенту быстрее узнать вас в каталоге и почувствовать, что за карточкой стоит живой специалист.
-                                                </p>
-                                            </div>
-
-                                            <div class="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start">
-                                                <div class="rounded-[1.5rem] border border-indigo-100 bg-indigo-50/70 p-4">
-                                                    <div class="flex h-[20rem] items-center justify-center overflow-hidden rounded-[1.25rem] bg-white">
-                                                        <img src="{{ request.user.avatar_url }}"
-                                                             alt="avatar"
-                                                             class="max-h-full max-w-full object-contain">
-                                                    </div>
-                                                </div>
-
-                                                <div class="space-y-3">
-                                                    {{ profile_form.photo }}
-                                                    {% if profile_form.photo.errors %}
-                                                    <p class="text-sm tracking-wide text-pink-700">{{ profile_form.photo.errors.0 }}</p>
-                                                    {% endif %}
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="space-y-2">
-                                        <label for="{{ profile_form.biography.id_for_label }}"
-                                               class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
-                                            {{ profile_form.biography.label }}
-                                        </label>
-                                        {{ profile_form.biography }}
-                                        {% if profile_form.biography.errors %}
-                                        <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.biography.errors.0 }}</p>
-                                        {% endif %}
+                                    <div data-edit-actions data-edit-scope="profile" class="hidden w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-all duration-200
+                                                hover:bg-emerald-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                            Сохранить
+                                        </button>
+                                        <button type="button"
+                                                data-edit-cancel
+                                                data-edit-scope="profile"
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-slate-100/85 px-5 py-2.5 text-sm font-medium text-zinc-500 shadow-xs transition-all duration-200
+                                                hover:bg-slate-200/75 hover:shadow-sm">
+                                            Отмена
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div data-tab-panel="personal" class="hidden space-y-8">
-                            <div class="rounded-[1.75rem] border border-zinc-100 bg-zinc-50/70 px-5 py-6 sm:px-6">
-                                <div class="mb-6 flex items-center gap-3">
-                                    <img src="{% static 'images/menu/contact-data.svg' %}" alt="contact-data" class="w-8 h-8">
-                                    <div>
-                                        <h2 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">Персональные данные</h2>
-                                        <p class="mt-1 text-sm leading-6 text-zinc-500">
-                                            Эти данные не показываются другим пользователям. Они нужны для входа в систему, связи с вами и безопасной работы аккаунта.
-                                        </p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                {% for field in account_form %}
+                                    {% if field.name != 'email' and field.name != 'phone_number' %}
+                                    <div class="space-y-2">
+                                        <label for="{{ field.id_for_label }}"
+                                               class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                            {{ field.label }}
+                                        </label>
+                                        {{ field }}
+                                        {% if field.errors %}
+                                        <p class="mt-2 text-sm tracking-wide text-pink-700">{{ field.errors.0 }}</p>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+
+                                <div class="space-y-2">
+                                    <label for="{{ profile_form.gender.id_for_label }}"
+                                           class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                        {{ profile_form.gender.label }}
+                                    </label>
+                                    {{ profile_form.gender }}
+                                    {% if profile_form.gender.errors %}
+                                    <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.gender.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label for="{{ profile_form.practice_start_year.id_for_label }}"
+                                           class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                        {{ profile_form.practice_start_year.label }}
+                                    </label>
+                                    {{ profile_form.practice_start_year }}
+                                    {% if profile_form.practice_start_year.errors %}
+                                    <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.practice_start_year.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label for="{{ profile_form.therapy_format.id_for_label }}"
+                                           class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                        {{ profile_form.therapy_format.label }}
+                                    </label>
+                                    {{ profile_form.therapy_format }}
+                                    {% if profile_form.therapy_format.errors %}
+                                    <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.therapy_format.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label for="{{ profile_form.price_currency.id_for_label }}"
+                                           class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                        {{ profile_form.price_currency.label }}
+                                    </label>
+                                    {{ profile_form.price_currency }}
+                                    {% if profile_form.price_currency.errors %}
+                                    <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.price_currency.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label for="{{ profile_form.price_individual.id_for_label }}"
+                                           class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                        {{ profile_form.price_individual.label }}
+                                    </label>
+                                    {{ profile_form.price_individual }}
+                                    {% if profile_form.price_individual.errors %}
+                                    <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.price_individual.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label for="{{ profile_form.price_couples.id_for_label }}"
+                                           class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                        {{ profile_form.price_couples.label }}
+                                    </label>
+                                    {{ profile_form.price_couples }}
+                                    {% if profile_form.price_couples.errors %}
+                                    <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.price_couples.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="mt-8 space-y-6">
+
+                                <div class="space-y-3">
+                                    <p class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">{{ profile_form.languages.label }}</p>
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        {% for checkbox in profile_form.languages %}
+                                        <label data-language-option
+                                               class="flex items-center gap-3 rounded-2xl border border-zinc-200 bg-gray-100 px-4 py-3 text-sm font-medium text-zinc-500 shadow-sm transition-all duration-200">
+                                            {{ checkbox.tag }}
+                                            <span>{{ checkbox.choice_label }}</span>
+                                        </label>
+                                        {% endfor %}
+                                    </div>
+                                    {% if profile_form.languages.errors %}<p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.languages.errors.0 }}</p>{% endif %}
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label for="{{ profile_form.biography.id_for_label }}"
+                                           class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                        {{ profile_form.biography.label }}
+                                    </label>
+                                    {{ profile_form.biography }}
+                                    {% if profile_form.biography.errors %}
+                                    <p class="mt-2 text-sm tracking-wide text-pink-700">{{ profile_form.biography.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="pt-2 space-y-3">
+                                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                        <p class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">Фото профиля</p>
+                                    </div>
+
+                                    <div class="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start">
+                                        <div class="rounded-[1.5rem] border border-indigo-100 bg-indigo-50/70 p-4">
+                                            <div class="flex h-[20rem] items-center justify-center overflow-hidden rounded-[1.25rem] bg-white">
+                                                <img src="{{ request.user.avatar_url }}"
+                                                     alt="avatar"
+                                                     class="max-h-full max-w-full object-contain">
+                                            </div>
+                                        </div>
+                                        <div class="space-y-3">
+                                                <div class="hidden" data-photo-upload-input-container>
+                                                    <input type="file"
+                                                           name="{{ profile_form.photo.html_name }}"
+                                                           id="{{ profile_form.photo.id_for_label }}"
+                                                           accept=".jpg,.jpeg,.png"
+                                                           class="block w-full rounded-xl border border-dashed border-indigo-200
+                                                           bg-transparent px-4 py-3 text-sm text-zinc-600
+                                                           file:mr-4 file:rounded-xl file:border-0 file:bg-indigo-600 file:px-4 file:py-2
+                                                           file:text-sm file:font-semibold file:text-white hover:file:bg-indigo-700">
+                                                </div>
+                                                <p data-photo-selected-file class="hidden text-sm font-medium text-indigo-600"></p>
+                                                {% if profile_form.photo.errors %}
+                                                <p class="text-sm tracking-wide text-pink-700">{{ profile_form.photo.errors.0 }}</p>
+                                                {% endif %}
+                                        </div>
+                                        <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+                                            <div data-photo-display-actions>
+                                                <button type="button"
+                                                        data-photo-upload-trigger
+                                                        class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
+                                                        border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
+                                                        hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                    <img src="{% static 'images/menu/edit-photo-icon.svg' %}" alt="edit" class="h-5 w-5">
+                                                    Загрузить новое фото
+                                                </button>
+                                            </div>
+                                            <div data-photo-edit-actions class="hidden flex-col gap-3 sm:flex-row">
+                                                <button type="submit"
+                                                        class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                        border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-all duration-200
+                                                        hover:bg-emerald-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                                    Сохранить фото
+                                                </button>
+                                                <button type="button"
+                                                        data-photo-cancel
+                                                        class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                        border border-transparent bg-slate-100/85 px-5 py-2.5 text-sm font-medium text-zinc-500 shadow-xs transition-all duration-200
+                                                        hover:bg-slate-200/75 hover:shadow-sm">
+                                                    Отмена
+                                                </button>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                    {% for field in account_form %}
-                                        {% if field.name == 'email' or field.name == 'phone_number' %}
-                                        <div class="space-y-2">
-                                            <div class="flex justify-between items-center min-h-[20px]">
+                            </div>
+                        </div>
+
+                        <!-- ПЕРСОНАЛЬНЫЕ ДАННЫЕ -->
+                        <div data-tab-panel="personal" class="hidden space-y-8 pb-12">
+
+                            <div class="mt-0 flex flex-col gap-4 lg:items-end lg:justify-between">
+                                <div>
+                                    <h2 class="text-2xl md:text-3xl text-indigo-700/90 font-semibold tracking-wide">Персональные данные</h2>
+                                    <p class="mt-2 text-base leading-6 text-zinc-500">
+                                        Эти данные <strong>не показываются</strong> другим пользователям. Они нужны для входа в систему, связи с вами и безопасной работы аккаунта.
+                                    </p>
+                                </div>
+                                <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center lg:justify-end">
+                                    <div data-edit-display-actions data-edit-scope="personal">
+                                        <button type="button"
+                                                data-edit-toggle
+                                                data-edit-scope="personal"
+                                                class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
+                                                border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
+                                                hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
+                                            Редактировать данные
+                                        </button>
+                                    </div>
+                                    <div data-edit-actions data-edit-scope="personal" class="hidden w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-all duration-200
+                                                hover:bg-emerald-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                            Сохранить
+                                        </button>
+                                        <button type="button"
+                                                data-edit-cancel
+                                                data-edit-scope="personal"
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-slate-100/85 px-5 py-2.5 text-sm font-medium text-zinc-500 shadow-xs transition-all duration-200
+                                                hover:bg-slate-200/75 hover:shadow-sm">
+                                            Отмена
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                {% for field in account_form %}
+                                    {% if field.name == 'email' or field.name == 'phone_number' %}
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between items-center min-h-[20px]">
+                                            <label for="{{ field.id_for_label }}" class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
+                                                {{ field.label }}
+                                            </label>
+                                            {% if field.name == 'email' %}
+                                            <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400">Только чтение</span>
+                                            {% else %}
+                                            <span class="invisible text-[10px] uppercase tracking-wider font-bold">Только чтение</span>
+                                            {% endif %}
+                                        </div>
+                                        {{ field }}
+                                        {% if field.errors %}<p class="mt-2 text-sm tracking-wide text-pink-700">{{ field.errors.0 }}</p>{% endif %}
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- ОБРАЗОВАНИЕ -->
+                        <div data-tab-panel="education" class="hidden space-y-8 pb-6">
+
+                            <div class="mt-0 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                                <div>
+                                    <h2 class="text-2xl md:text-3xl text-indigo-700/90 font-semibold tracking-wide">
+                                        Образование и документы
+                                    </h2>
+                                    <p class="mt-2 text-base leading-6 text-zinc-500">
+                                        Добавляйте каждую ступень обучения отдельной записью.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center lg:justify-end">
+                                <button type="button"
+                                        id="education-add-button"
+                                        class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
+                                        border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
+                                        hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                    <img src="{% static 'images/menu/edit-education-icon.svg' %}" alt="edit" class="h-5 w-5">
+                                    Добавить еще
+                                </button>
+                            </div>
+
+                            {{ education_formset.management_form }}
+                            {% if education_formset.non_form_errors %}
+                            <div class="mb-6 rounded-2xl border border-rose-100 bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-700 shadow-sm">
+                                {% for err in education_formset.non_form_errors %}<div>{{ err }}</div>{% endfor %}
+                            </div>
+                            {% endif %}
+
+                            <div data-education-formset-list class="space-y-10">
+                                {% for form in education_formset %}
+                                <div data-education-card
+                                     data-education-existing="{% if form.instance.pk %}1{% else %}0{% endif %}"
+                                     data-education-editing="{% if form.errors or form.non_field_errors %}1{% else %}0{% endif %}"
+                                     class="relative rounded-3xl border-2 px-6 py-6 transition-all duration-200 {% if form.errors or form.non_field_errors %}border-violet-50 bg-violet-300/10 shadow-lg{% else %}border-slate-100 bg-slate-50 shadow-md{% endif %}">
+                                    {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
+
+                                    <div data-education-card-display-actions
+                                         class="absolute right-5 top-5 z-10 {% if form.errors or form.non_field_errors %}hidden{% else %}flex{% endif %}">
+                                        <button type="button"
+                                                data-education-edit-button
+                                                title="Редактировать"
+                                                aria-label="Редактировать"
+                                                class="group flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-indigo-50 text-indigo-500 shadow-sm transition-colors hover:bg-indigo-100/85 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="h-5 w-5">
+                                            <span class="pointer-events-none absolute right-0 top-full mt-2 whitespace-nowrap rounded-lg bg-indigo-950 px-3 py-1 text-xs font-medium text-white opacity-0 shadow-md transition-opacity duration-200 group-hover:opacity-100">
+                                                Редактировать
+                                            </span>
+                                        </button>
+                                    </div>
+
+                                    <div class="mb-5 flex flex-col gap-3 pr-16 sm:flex-row sm:items-center sm:justify-between">
+                                        <div>
+                                            <p class="mt-2 xl:text-2xl text-xl font-bold tracking-tight text-indigo-950/50">Запись об образовании {{ forloop.counter }}</p>
+                                            {% if form.instance.pk %}
+                                            <div class="mt-2 inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold
+                                                 {% if form.instance.is_verified %}border-emerald-200 bg-emerald-50 text-emerald-700{% else %}border-amber-200 bg-amber-50 text-amber-700{% endif %}">
+                                                {{ form.instance.is_verified|yesno:"Образование подтверждено,Ожидает проверки" }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div data-education-card-edit-actions
+                                         class="{% if form.errors or form.non_field_errors %}flex{% else %}hidden{% endif %} mb-5 flex-wrap items-center gap-3">
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-indigo-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            Сохранить
+                                        </button>
+                                        <button type="button"
+                                                data-education-cancel-button
+                                                class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-slate-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            Отмена
+                                        </button>
+                                        <button type="button"
+                                                data-remove-education-form
+                                                class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-rose-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2">
+                                            Удалить запись
+                                        </button>
+                                    </div>
+
+                                    {% if form.non_field_errors %}
+                                    <div class="mb-4 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+                                        {% for err in form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                                        {% for field in form.visible_fields %}
+                                            {% if field.name != 'DELETE' %}
+                                            <div class="space-y-2 {% if field.name == 'document' %}md:col-span-2{% endif %}">
                                                 <label for="{{ field.id_for_label }}" class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
                                                     {{ field.label }}
                                                 </label>
-                                                {% if field.name == 'email' %}
-                                                <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400">Только чтение</span>
+                                                {% if field.name == 'document' %}
+                                                <div data-education-file-controls class="{% if form.errors or form.non_field_errors %}{% else %}hidden{% endif %}">
+                                                    {{ field }}
+                                                </div>
+                                                {% if field.errors %}
+                                                <p class="mt-2 text-sm tracking-wide text-pink-700">{{ field.errors.0 }}</p>
+                                                {% endif %}
+                                                {% if form.instance.document %}
+                                                <a href="{{ form.instance.document.url }}" target="_blank" rel="noopener"
+                                                   class="inline-flex items-center text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+                                                    Открыть загруженный документ
+                                                </a>
                                                 {% else %}
-                                                <span class="invisible text-[10px] uppercase tracking-wider font-bold">Только чтение</span>
+                                                <p class="text-sm text-zinc-500">Документы еще не загружены.</p>
+                                                {% endif %}
+                                                {% else %}
+                                                {{ field }}
+                                                {% if field.errors %}
+                                                <p class="mt-2 text-sm tracking-wide text-pink-700">{{ field.errors.0 }}</p>
+                                                {% endif %}
                                                 {% endif %}
                                             </div>
-                                            {{ field }}
-                                            {% if field.errors %}<p class="mt-2 text-sm tracking-wide text-pink-700">{{ field.errors.0 }}</p>{% endif %}
-                                        </div>
-                                        {% endif %}
-                                    {% endfor %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+
+                                    {% if form.DELETE %}
+                                    <div class="hidden">{{ form.DELETE }}</div>
+                                    {% endif %}
                                 </div>
+                                {% endfor %}
                             </div>
+
+                            <div data-education-empty-state
+                                 class="{% if education_formset.forms %}hidden {% endif %}rounded-3xl border border-dashed border-indigo-200 bg-indigo-50/60 px-5 py-6 text-sm leading-6 text-zinc-500">
+                                Пока записи об образовании не добавлены. Нажмите <span class="font-semibold text-indigo-700">«Добавить еще»</span>, чтобы создать запись.
+                            </div>
+
+                            <template id="education-empty-form-template">
+                                {% with form=education_formset.empty_form %}
+                                <div data-education-card
+                                     data-education-existing="0"
+                                     data-education-editing="0"
+                                     class="relative rounded-3xl border-2 border-violet-50 bg-violet-300/10 px-6 py-6 shadow-lg transition-all duration-200">
+                                    {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
+                                    <div data-education-card-display-actions class="absolute right-5 top-5 z-10 hidden">
+                                        <button type="button"
+                                                data-education-edit-button
+                                                title="Редактировать"
+                                                aria-label="Редактировать"
+                                                class="group flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-indigo-50 text-indigo-500 shadow-sm transition-colors hover:bg-indigo-100/85 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="h-5 w-5">
+                                            <span class="pointer-events-none absolute right-0 top-full mt-2 whitespace-nowrap rounded-lg bg-indigo-950 px-3 py-1 text-xs font-medium text-white opacity-0 shadow-md transition-opacity duration-200 group-hover:opacity-100">
+                                                Редактировать
+                                            </span>
+                                        </button>
+                                    </div>
+
+                                    <div class="mb-5 flex flex-col gap-3 pr-16 sm:flex-row sm:items-center sm:justify-between">
+                                        <div>
+                                            <p class="mt-2 xl:text-2xl text-xl font-bold tracking-tight text-indigo-950/50">Новая запись об образовании</p>
+                                        </div>
+                                    </div>
+
+                                    <div data-education-card-edit-actions class="mb-5 flex flex-wrap items-center gap-3">
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-indigo-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            Сохранить
+                                        </button>
+                                        <button type="button"
+                                                data-education-cancel-button
+                                                class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-slate-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            Отмена
+                                        </button>
+                                        <button type="button"
+                                                data-remove-education-form
+                                                class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-rose-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2">
+                                            Удалить запись
+                                        </button>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                                        {% for field in form.visible_fields %}
+                                            {% if field.name != 'DELETE' %}
+                                            <div class="space-y-2 {% if field.name == 'document' %}md:col-span-2{% endif %}">
+                                                <label class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">{{ field.label }}</label>
+                                                {% if field.name == 'document' %}
+                                                <div data-education-file-controls>
+                                                    {{ field }}
+                                                </div>
+                                                <p class="text-sm text-zinc-500">Документы еще не загружены.</p>
+                                                {% else %}
+                                                {{ field }}
+                                                {% endif %}
+                                            </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+
+                                    {% if form.DELETE %}
+                                    <div class="hidden">{{ form.DELETE }}</div>
+                                    {% endif %}
+                                </div>
+                                {% endwith %}
+                            </template>
                         </div>
 
-                        <div data-tab-panel="education" class="hidden space-y-8">
-                            <div class="rounded-[1.75rem] border border-zinc-100 bg-zinc-50/70 px-5 py-6 sm:px-6">
-                                <div class="mb-6 flex items-center gap-3">
-                                    <img src="{% static 'images/menu/test.svg' %}" alt="education" class="w-8 h-8">
-                                    <div>
-                                        <h2 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">
-                                            Образование и документы
-                                        </h2>
-                                        <p class="mt-1 text-sm leading-6 text-zinc-500">
-                                            Добавляйте каждую ступень обучения отдельной записью.
-                                        </p>
-                                    </div>
+                        <!-- ТЕМЫ / МЕТОДЫ -->
+                        <div data-tab-panel="expertise" class="hidden space-y-8 pb-12">
+
+                            <div class="mt-0 flex items-center gap-3">
+                                <div>
+                                    <h2 class="text-2xl md:text-3xl text-indigo-700/90 font-semibold tracking-wide">
+                                        Темы, методы и специализации
+                                    </h2>
+                                    <p class="mt-2 text-base leading-6 text-zinc-500">
+                                        Здесь вы настраиваете свой профессиональный профиль для клиентов. Эти параметры помогают клиенту понять ваш фокус, а сервису точнее показывать вашу карточку в каталоге.
+                                    </p>
                                 </div>
+                            </div>
 
-                                {{ education_formset.management_form }}
-                                {% if education_formset.non_form_errors %}
-                                <div class="mb-6 rounded-2xl border border-rose-100 bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-700 shadow-sm">
-                                    {% for err in education_formset.non_form_errors %}<div>{{ err }}</div>{% endfor %}
-                                </div>
-                                {% endif %}
+                            <div class="grid grid-cols-1 gap-6">
 
-                                <div data-education-formset-list class="space-y-5">
-                                    {% for form in education_formset %}
-                                    <div data-education-card class="rounded-[1.5rem] border border-white bg-white p-5 shadow-sm shadow-zinc-200/60">
-                                        {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
-                                        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                            <div>
-                                                <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Запись об образовании {{ forloop.counter }}</p>
-                                                {% if form.instance.pk %}
-                                                <div class="mt-2 inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold
-                                                     {% if form.instance.is_verified %}border-emerald-200 bg-emerald-50 text-emerald-700{% else %}border-amber-200 bg-amber-50 text-amber-700{% endif %}">
-                                                    {{ form.instance.is_verified|yesno:"Документ подтвержден,Ожидает проверки" }}
-                                                </div>
-                                                {% endif %}
-                                            </div>
-
-                                            <button type="button"
-                                                    data-remove-education-form
-                                                    class="hidden inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-500 shadow-sm ring-1 ring-zinc-200 transition-all duration-200 hover:bg-zinc-100">
-                                                Удалить запись
-                                            </button>
-                                        </div>
-
-                                        {% if form.non_field_errors %}
-                                        <div class="mb-4 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
-                                            {% for err in form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
-                                        </div>
-                                        {% endif %}
-
-                                        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-                                            {% for field in form.visible_fields %}
-                                                {% if field.name != 'DELETE' %}
-                                                <div class="space-y-2 {% if field.name == 'document' %}md:col-span-2{% endif %}">
-                                                    <label for="{{ field.id_for_label }}" class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">
-                                                        {{ field.label }}
-                                                    </label>
-                                                    {{ field }}
-                                                    {% if field.errors %}
-                                                    <p class="mt-2 text-sm tracking-wide text-pink-700">{{ field.errors.0 }}</p>
-                                                    {% endif %}
-                                                    {% if field.name == 'document' and form.instance.document %}
-                                                    <a href="{{ form.instance.document.url }}" target="_blank" rel="noopener"
-                                                       class="inline-flex items-center text-sm font-semibold text-indigo-600 hover:text-indigo-700">
-                                                        Открыть загруженный документ
-                                                    </a>
-                                                    {% endif %}
-                                                </div>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </div>
-
-                                        {% if form.DELETE %}
-                                        <div class="hidden">{{ form.DELETE }}</div>
-                                        {% endif %}
-                                    </div>
-                                    {% empty %}
-                                    <div class="rounded-[1.5rem] border border-dashed border-indigo-200 bg-indigo-50/60 px-5 py-6 text-sm leading-6 text-zinc-500">
-                                        Пока записи об образовании не добавлены. Нажмите <span class="font-semibold text-indigo-700">«Добавить еще»</span>, чтобы создать запись.
-                                    </div>
-                                    {% endfor %}
-                                </div>
-
-                                <div class="mt-6 flex justify-end">
+                                <!-- Темы -->
+                                <div class="rounded-3xl border-2 border-slate-100/50 bg-slate-50/75 px-6 py-6 relative min-w-0 border-slate-100 bg-slate-50 shadow-md">
                                     <button type="button"
-                                            id="education-add-button"
-                                            data-add-education-form
-                                            class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg">
-                                        Добавить еще
+                                            data-modal-open="psychologist-topics-modal"
+                                            data-expertise-edit-button
+                                            class="absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center
+                                            rounded-full border border-indigo-100 bg-indigo-50 shadow-sm hover:bg-indigo-100/85 text-indigo-500 transition-colors">
+                                        <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
                                     </button>
-                                </div>
 
-                                <template id="education-empty-form-template">
-                                    {% with form=education_formset.empty_form %}
-                                    <div data-education-card class="rounded-[1.5rem] border border-white bg-white p-5 shadow-sm shadow-zinc-200/60">
-                                        {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
-                                        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                            <div>
-                                                <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Новая запись об образовании</p>
+                                    <div class="relative z-[1]">
+                                        <div class="flex items-start gap-3 mb-5">
+                                            <div class="min-w-0 pr-12">
+                                                <p class="mt-2 xl:text-2xl text-xl font-black tracking-tight text-indigo-950/75">Темы</p>
+                                                <h3 class="mt-3 xl:text-xl text-lg font-semibold tracking-tight text-indigo-950/60">С чем вы работаете?</h3>
+                                                <p class="mt-0 mb-5 text-base leading-relaxed text-slate-500">
+                                                    Темы помогают клиенту быстрее понять, на какие запросы вы откликаетесь увереннее всего.
+                                                </p>
                                             </div>
-
-                                            <button type="button"
-                                                    data-remove-education-form
-                                                    class="hidden inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-500 shadow-sm ring-1 ring-zinc-200 transition-all duration-200 hover:bg-zinc-100">
-                                                Удалить запись
-                                            </button>
                                         </div>
 
-                                        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-                                            {% for field in form.visible_fields %}
-                                                {% if field.name != 'DELETE' %}
-                                                <div class="space-y-2 {% if field.name == 'document' %}md:col-span-2{% endif %}">
-                                                    <label class="text-sm font-bold text-zinc-400 ml-1 uppercase tracking-widest">{{ field.label }}</label>
-                                                    {{ field }}
-                                                </div>
-                                                {% endif %}
+                                        <div id="selected-topics-container" class="flex flex-wrap gap-2.5">
+                                            {% for topic in psychologist_topics %}
+                                            <span class="selection-badge topic-badge">{{ topic.name }}</span>
+                                            {% empty %}
+                                            <span class="text-sm text-zinc-500">Темы пока не выбраны</span>
                                             {% endfor %}
                                         </div>
-
-                                        {% if form.DELETE %}
-                                        <div class="hidden">{{ form.DELETE }}</div>
-                                        {% endif %}
                                     </div>
-                                    {% endwith %}
-                                </template>
+                                </div>
+
+                                <!-- Методы -->
+                                <div class="rounded-3xl border-2 border-slate-100/50 bg-slate-50/75 px-6 py-6 relative min-w-0 border-slate-100 bg-slate-50 shadow-md">
+                                    <button type="button"
+                                            data-modal-open="psychologist-methods-modal"
+                                            data-expertise-edit-button
+                                            class="absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center
+                                            rounded-full border border-indigo-100 bg-indigo-50 shadow-sm hover:bg-indigo-100/85 text-indigo-500 transition-colors">
+                                        <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
+                                    </button>
+
+                                    <div class="relative z-[1]">
+                                        <div class="flex items-start gap-3 mb-5">
+                                            <div class="min-w-0 pr-12">
+                                                <p class="mt-2 xl:text-2xl text-xl font-black tracking-tight text-indigo-950/75">Методы</p>
+                                                <h3 class="mt-3 xl:text-xl text-lg font-semibold tracking-tight text-indigo-950/60">Как вы работаете?</h3>
+                                                <p class="mt-0 mb-5 text-base leading-relaxed text-slate-500">
+                                                    Методы показывают клиенту ваш рабочий стиль и помогают понять, какой подход он встретит на сессии.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div id="selected-methods-container" class="flex flex-wrap gap-2.5">
+                                            {% for method in psychologist_methods %}
+                                            <span class="selection-badge method-badge">{{ method.name }}</span>
+                                            {% empty %}
+                                            <span class="text-sm text-zinc-500">Методы пока не выбраны</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Специализации -->
+                                <div class="rounded-3xl border-2 border-slate-100/50 bg-slate-50/75 px-6 py-6 relative min-w-0 border-slate-100 bg-slate-50 shadow-md">
+                                    <button type="button"
+                                            data-modal-open="psychologist-specialisations-modal"
+                                            data-expertise-edit-button
+                                            class="absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center
+                                            rounded-full border border-indigo-100 bg-indigo-50 shadow-sm hover:bg-indigo-100/85 text-indigo-500 transition-colors">
+                                        <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
+                                    </button>
+
+                                    <div class="relative z-[1]">
+                                        <div class="flex items-start gap-3 mb-5">
+                                            <div class="min-w-0 pr-12">
+                                                <p class="mt-2 xl:text-2xl text-xl font-black tracking-tight text-indigo-950/75">Специализации</p>
+                                                <h3 class="mt-3 xl:text-xl text-lg font-semibold tracking-tight text-indigo-950/60">Ваша профессиональная школа?</h3>
+                                                <p class="mt-0 mb-5 text-base leading-relaxed text-slate-500">
+                                                    Специализации помогают точнее описать вашу практику и то, в какой парадигме вы ведете работу.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div id="selected-specialisations-container" class="flex flex-wrap gap-2.5">
+                                            {% for specialisation in psychologist_specialisations %}
+                                            <span class="selection-badge specialisation-badge">{{ specialisation.name }}</span>
+                                            {% empty %}
+                                            <span class="text-sm text-zinc-500">Специализации пока не выбраны</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div data-tab-panel="expertise" class="hidden space-y-8">
-                            <div class="rounded-[1.75rem] border border-zinc-100 bg-zinc-50/70 px-5 py-6 sm:px-6">
-                                <div class="mb-6 flex items-center gap-3">
-                                    <img src="{% static 'images/menu/search-user.svg' %}" alt="expertise" class="w-8 h-8">
-                                    <div>
-                                        <h2 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">
-                                            Темы, методы и специализации
-                                        </h2>
-                                        <p class="mt-1 text-sm leading-6 text-zinc-500">
-                                            Здесь вы настраиваете свой профессиональный профиль для клиентов. Эти параметры помогают клиенту понять ваш фокус, а сервису точнее показывать вашу карточку в каталоге.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
-                                    <div class="selection-card rounded-[2rem] p-6 relative min-w-0">
-                                        <button type="button"
-                                                data-modal-open="topics-modal"
-                                                data-expertise-edit-button
-                                                class="hidden absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
-                                            <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
-                                        </button>
-
-                                        <div class="relative z-[1]">
-                                            <div class="flex items-start gap-3 mb-5">
-                                                <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100/80 text-indigo-600 shadow-sm flex-shrink-0">
-                                                    <img src="{% static 'images/menu/topic-icon.svg' %}" alt="topic" class="w-7 h-7">
-                                                </span>
-                                                <div class="min-w-0 pr-12">
-                                                    <p class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 mb-4 block">Темы</p>
-                                                    <h3 class="mt-2 text-xl font-black tracking-tight text-indigo-950/75">С чем вы работаете</h3>
-                                                    <p class="mt-2 text-sm leading-relaxed text-slate-500">
-                                                        Темы помогают клиенту быстрее понять, на какие запросы вы откликаетесь увереннее всего.
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div id="selected-topics-container" class="flex flex-wrap gap-2.5">
-                                                {% for topic in psychologist_topics %}
-                                                <span class="selection-badge topic-badge">{{ topic.name }}</span>
-                                                {% empty %}
-                                                <span class="text-sm text-zinc-500">Темы пока не выбраны</span>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="selection-card rounded-[2rem] p-6 relative min-w-0">
-                                        <button type="button"
-                                                data-modal-open="methods-modal"
-                                                data-expertise-edit-button
-                                                class="hidden absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
-                                            <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
-                                        </button>
-
-                                        <div class="relative z-[1]">
-                                            <div class="flex items-start gap-3 mb-5">
-                                                <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100/80 text-emerald-600 shadow-sm flex-shrink-0">
-                                                    <img src="{% static 'images/menu/method-icon.svg' %}" alt="method" class="w-7 h-7">
-                                                </span>
-                                                <div class="min-w-0 pr-12">
-                                                    <p class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 mb-4 block">Методы</p>
-                                                    <h3 class="mt-2 text-xl font-black tracking-tight text-indigo-950/75">Как вы работаете</h3>
-                                                    <p class="mt-2 text-sm leading-relaxed text-slate-500">
-                                                        Методы показывают клиенту ваш рабочий стиль и помогают понять, какой подход он встретит на сессии.
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div id="selected-methods-container" class="flex flex-wrap gap-2.5">
-                                                {% for method in psychologist_methods %}
-                                                <span class="selection-badge method-badge">{{ method.name }}</span>
-                                                {% empty %}
-                                                <span class="text-sm text-zinc-500">Методы пока не выбраны</span>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="selection-card rounded-[2rem] p-6 relative min-w-0">
-                                        <button type="button"
-                                                data-modal-open="specialisations-modal"
-                                                data-expertise-edit-button
-                                                class="hidden absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white/80 shadow-sm hover:bg-indigo-50 text-indigo-500 transition-colors">
-                                            <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="w-5 h-5">
-                                        </button>
-
-                                        <div class="relative z-[1]">
-                                            <div class="flex items-start gap-3 mb-5">
-                                                <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100/80 text-fuchsia-600 shadow-sm flex-shrink-0">
-                                                    <img src="{% static 'images/menu/my-profile.svg' %}" alt="specialisation" class="w-7 h-7">
-                                                </span>
-                                                <div class="min-w-0 pr-12">
-                                                    <p class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 mb-4 block">Специализации</p>
-                                                    <h3 class="mt-2 text-xl font-black tracking-tight text-indigo-950/75">Ваша профессиональная школа</h3>
-                                                    <p class="mt-2 text-sm leading-relaxed text-slate-500">
-                                                        Специализации помогают точнее описать вашу практику и то, в какой парадигме вы ведете работу.
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div id="selected-specialisations-container" class="flex flex-wrap gap-2.5">
-                                                {% for specialisation in psychologist_specialisations %}
-                                                <span class="selection-badge specialisation-badge">{{ specialisation.name }}</span>
-                                                {% empty %}
-                                                <span class="text-sm text-zinc-500">Специализации пока не выбраны</span>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {% if profile_form.topics.errors or profile_form.methods.errors or profile_form.specialisations.errors %}
-                                <div class="mt-6 rounded-2xl border border-rose-100 bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-700 shadow-sm">
-                                    {% if profile_form.topics.errors %}<div>{{ profile_form.topics.errors.0 }}</div>{% endif %}
-                                    {% if profile_form.methods.errors %}<div>{{ profile_form.methods.errors.0 }}</div>{% endif %}
-                                    {% if profile_form.specialisations.errors %}<div>{{ profile_form.specialisations.errors.0 }}</div>{% endif %}
-                                </div>
-                                {% endif %}
+                            {% if profile_form.topics.errors or profile_form.methods.errors or profile_form.specialisations.errors %}
+                            <div class="mt-6 rounded-2xl border border-rose-100 bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-700 shadow-sm">
+                                {% if profile_form.topics.errors %}<div>{{ profile_form.topics.errors.0 }}</div>{% endif %}
+                                {% if profile_form.methods.errors %}<div>{{ profile_form.methods.errors.0 }}</div>{% endif %}
+                                {% if profile_form.specialisations.errors %}<div>{{ profile_form.specialisations.errors.0 }}</div>{% endif %}
                             </div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -725,7 +825,19 @@
                     </div>
                     <div class="mt-6 space-y-3 text-sm">
                         <div class="rounded-2xl bg-white/10 px-4 py-3">
-                            <span class="font-semibold">Опыт практики:</span>
+                            <span class="text-indigo-50/50 font-semibold">Верификация профиля:</span>
+                            {{ db_profile.is_verified|yesno:"Пройдена,Ожидает проверки" }}
+                        </div>
+                        <div class="rounded-2xl bg-white/10 px-4 py-3">
+                            <span class="text-indigo-50/50 font-semibold">Рабочий статус:</span>
+                            {{ db_profile.get_work_status_display }}
+                        </div>
+                        <div class="rounded-2xl bg-white/10 px-4 py-3">
+                            <span class="text-indigo-50/50 font-semibold">Рабочий график:</span>
+                            {{ has_active_working_schedule|yesno:"Установлено,Необходимо установить" }}
+                        </div>
+                        <div class="rounded-2xl bg-white/10 px-4 py-3">
+                            <span class="text-indigo-50/50 font-semibold">Опыт практики:</span>
                             {% if db_profile.work_experience_years is not None %}
                                 {{ db_profile.work_experience_years }} лет
                             {% else %}
@@ -733,51 +845,38 @@
                             {% endif %}
                         </div>
                         <div class="rounded-2xl bg-white/10 px-4 py-3">
-                            <span class="font-semibold">Записей об образовании:</span> {{ education_records_count }}
+                            <span class="text-indigo-50/50 font-semibold">Записей об образовании:</span>
+                            {{ education_records_count }}
                         </div>
                         <div class="rounded-2xl bg-white/10 px-4 py-3">
-                            <span class="font-semibold">Статус работы:</span> {{ db_profile.get_work_status_display }}
-                        </div>
-                        <div class="rounded-2xl bg-white/10 px-4 py-3">
-                            <span class="font-semibold">Верификация профиля:</span>
-                            {{ db_profile.is_verified|yesno:"Пройдена,Ожидает проверки" }}
-                        </div>
-                        <div class="rounded-2xl bg-white/10 px-4 py-3">
-                            <span class="font-semibold">Образование:</span>
+                            <span class="text-indigo-50/50 font-semibold">Образование:</span>
                             {{ db_profile.is_all_education_verified|yesno:"Подтверждено,Ожидает проверки" }}
-                        </div>
-                        <div class="rounded-2xl bg-white/10 px-4 py-3">
-                            <span class="font-semibold">Рабочий график:</span>
-                            {{ has_active_working_schedule|yesno:"Создан,Пока не создан" }}
                         </div>
                     </div>
                 </div>
 
-                <div class="rounded-[2rem] border border-zinc-100 bg-white p-6 shadow-lg shadow-zinc-200/40">
+                <div class="rounded-[2rem] border border-indigo-100 bg-white p-6 shadow-2xl shadow-indigo-200/60">
                     <p class="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Что важно не забыть</p>
                     <ul class="mt-4 space-y-3 text-sm leading-6 text-zinc-600">
                         <li>Фото и биография помогают клиенту быстрее понять, насколько комфортно ему будет с вами работать.</li>
-                        <li>Образование лучше вносить отдельными карточками, чтобы профиль выглядел аккуратно и прозрачно.</li>
+                        <li>Образование вносится отдельными карточками в любом порядке (система автоматически отсортирует по дате).</li>
                         <li>Если рабочий график еще не создан, обязательно настройте его в соседнем разделе кабинета.</li>
                     </ul>
                 </div>
 
             </aside>
 
-            <input type="hidden" name="topics_submitted" value="1">
-            {% include 'users/_modal_add_topics.html' %}
-
-            <input type="hidden" name="methods_submitted" value="1">
-            {% include 'users/_modal_add_methods.html' %}
-
-            <input type="hidden" name="specialisations_submitted" value="1">
-            {% include 'users/_modal_add_specialisations.html' %}
-
         </form>
 
     </div>
 
 </section>
+
+{% include 'users/_modal_add_psychologist_topics.html' %}
+
+{% include 'users/_modal_add_psychologist_methods.html' %}
+
+{% include 'users/_modal_add_psychologist_specialisations.html' %}
 
 <script src="{% static 'js/modules/edit_profile/edit_psychologist_profile.js' %}"></script>
 <script type="module" src="{% static 'js/modules/auto_hide_message.js' %}"></script>
