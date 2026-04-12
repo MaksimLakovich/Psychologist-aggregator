@@ -27,8 +27,8 @@ TEXTAREA_CLASS = (
     "text-zinc-800 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm transition-all duration-200"
 )
 FILE_INPUT_CLASS = (
-    "block w-full rounded-xl border border-dashed border-indigo-200 bg-indigo-50/60 px-4 py-3 text-sm "
-    "text-zinc-600 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-4 file:py-2 "
+    "block w-full rounded-xl border border-indigo-100 bg-white px-4 py-3 text-sm "
+    "text-zinc-600 shadow-sm file:mr-4 file:rounded-xl file:border-0 file:bg-indigo-600 file:px-4 file:py-2 "
     "file:text-sm file:font-semibold file:text-white hover:file:bg-indigo-700"
 )
 READONLY_TEXTAREA_CLASS = (
@@ -36,8 +36,8 @@ READONLY_TEXTAREA_CLASS = (
     "text-zinc-500 shadow-sm"
 )
 READONLY_FILE_INPUT_CLASS = (
-    "block w-full rounded-xl border border-dashed border-gray-200 bg-gray-100 px-4 py-3 text-sm "
-    "text-zinc-500 file:mr-4 file:rounded-lg file:border-0 file:bg-zinc-300 file:px-4 file:py-2 "
+    "block w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm "
+    "text-zinc-500 shadow-sm file:mr-4 file:rounded-xl file:border-0 file:bg-zinc-300 file:px-4 file:py-2 "
     "file:text-sm file:font-semibold file:text-zinc-700"
 )
 
@@ -414,7 +414,7 @@ class PsychologistEducationForm(forms.ModelForm):
                     "placeholder": "Год окончания обучения",
                 }
             ),
-            "document": forms.ClearableFileInput(
+            "document": forms.FileInput(
                 attrs={
                     "class": READONLY_FILE_INPUT_CLASS,
                     "data-view-class": READONLY_FILE_INPUT_CLASS,

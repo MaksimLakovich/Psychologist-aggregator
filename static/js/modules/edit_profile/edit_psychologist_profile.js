@@ -604,7 +604,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalFormsInput = document.getElementById("id_education-TOTAL_FORMS");
     const emptyState = form.querySelector("[data-education-empty-state]");
     const savedCardState = new WeakMap();
-    const educationEditingClasses = ["border-violet-100", "bg-violet-50", "shadow-lg"];
+    const educationEditingClasses = ["border-violet-50", "bg-violet-300/10", "shadow-lg"];
     const educationViewClasses = ["border-slate-100", "bg-slate-50", "shadow-md"];
 
     if (!list || !template || !totalFormsInput || !addEducationButton) return;
@@ -623,14 +623,6 @@ document.addEventListener("DOMContentLoaded", () => {
      */
     function getEditableFields(card) {
       return Array.from(card.querySelectorAll("[data-editable-field='1']"));
-    }
-
-    /**
-     * Эта вложенная функция находит чекбоксы "clear" у файлов.
-     * Их тоже надо включать только во время редактирования карточки.
-     */
-    function getClearCheckboxes(card) {
-      return Array.from(card.querySelectorAll('input[type="checkbox"][name$="-clear"]'));
     }
 
     /**
@@ -739,9 +731,6 @@ document.addEventListener("DOMContentLoaded", () => {
       card.dataset.educationEditing = isEditing ? "1" : "0";
 
       getEditableFields(card).forEach((field) => setFieldState(field, isEditing));
-      getClearCheckboxes(card).forEach((checkbox) => {
-        checkbox.disabled = !isEditing;
-      });
       toggleElementGroups(getDisplayActionGroups(card), !isEditing, "flex");
       toggleElementGroups(getEditActionGroups(card), isEditing, "flex");
       toggleElementGroups(getFileControlGroups(card), isEditing);

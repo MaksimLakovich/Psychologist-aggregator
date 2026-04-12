@@ -519,10 +519,24 @@
                                 <div data-education-card
                                      data-education-existing="{% if form.instance.pk %}1{% else %}0{% endif %}"
                                      data-education-editing="{% if form.errors or form.non_field_errors %}1{% else %}0{% endif %}"
-                                     class="rounded-3xl border-2 px-6 py-6 transition-all duration-200 {% if form.errors or form.non_field_errors %}border-violet-50 bg-violet-300/10 shadow-lg{% else %}border-slate-100 bg-slate-50 shadow-md{% endif %}">
+                                     class="relative rounded-3xl border-2 px-6 py-6 transition-all duration-200 {% if form.errors or form.non_field_errors %}border-violet-50 bg-violet-300/10 shadow-lg{% else %}border-slate-100 bg-slate-50 shadow-md{% endif %}">
                                     {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
 
-                                    <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <div data-education-card-display-actions
+                                         class="absolute right-5 top-5 z-10 {% if form.errors or form.non_field_errors %}hidden{% else %}flex{% endif %}">
+                                        <button type="button"
+                                                data-education-edit-button
+                                                title="Редактировать"
+                                                aria-label="Редактировать"
+                                                class="group flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-indigo-50 text-indigo-500 shadow-sm transition-colors hover:bg-indigo-100/85 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="h-5 w-5">
+                                            <span class="pointer-events-none absolute right-0 top-full mt-2 whitespace-nowrap rounded-lg bg-indigo-950 px-3 py-1 text-xs font-medium text-white opacity-0 shadow-md transition-opacity duration-200 group-hover:opacity-100">
+                                                Редактировать
+                                            </span>
+                                        </button>
+                                    </div>
+
+                                    <div class="mb-5 flex flex-col gap-3 pr-16 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
                                             <p class="mt-2 xl:text-2xl text-xl font-bold tracking-tight text-indigo-950/50">Запись об образовании {{ forloop.counter }}</p>
                                             {% if form.instance.pk %}
@@ -532,33 +546,24 @@
                                             </div>
                                             {% endif %}
                                         </div>
+                                    </div>
 
-                                        <div class="flex flex-wrap items-center gap-3">
-                                            <div data-education-card-display-actions
-                                                 class="{% if form.errors or form.non_field_errors %}hidden{% else %}flex{% endif %}">
-                                                <button type="button"
-                                                        data-education-edit-button
-                                                        class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
-                                                        border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
-                                                        hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                                        <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
-                                                    Редактировать
-                                                </button>
-                                            </div>
-                                            <div data-education-card-edit-actions
-                                                 class="{% if form.errors or form.non_field_errors %}flex{% else %}hidden{% endif %} flex-wrap items-center gap-3">
-                                                <button type="button"
-                                                        data-education-cancel-button
-                                                        class="inline-flex items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                                    Отмена
-                                                </button>
-                                                <button type="button"
-                                                        data-remove-education-form
-                                                        class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-rose-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-600 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2">
-                                                    Удалить запись
-                                                </button>
-                                            </div>
-                                        </div>
+                                    <div data-education-card-edit-actions
+                                         class="{% if form.errors or form.non_field_errors %}flex{% else %}hidden{% endif %} mb-5 flex-wrap items-center gap-3">
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-indigo-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            Сохранить
+                                        </button>
+                                        <button type="button"
+                                                data-education-cancel-button
+                                                class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-slate-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            Отмена
+                                        </button>
+                                        <button type="button"
+                                                data-remove-education-form
+                                                class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-rose-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2">
+                                            Удалить запись
+                                        </button>
                                     </div>
 
                                     {% if form.non_field_errors %}
@@ -617,37 +622,42 @@
                                 <div data-education-card
                                      data-education-existing="0"
                                      data-education-editing="0"
-                                     class="rounded-3xl border-2 border-violet-100 bg-violet-50 px-6 py-6 shadow-lg transition-all duration-200">
+                                     class="relative rounded-3xl border-2 border-violet-50 bg-violet-300/10 px-6 py-6 shadow-lg transition-all duration-200">
                                     {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
-                                    <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <div data-education-card-display-actions class="absolute right-5 top-5 z-10 hidden">
+                                        <button type="button"
+                                                data-education-edit-button
+                                                title="Редактировать"
+                                                aria-label="Редактировать"
+                                                class="group flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-indigo-50 text-indigo-500 shadow-sm transition-colors hover:bg-indigo-100/85 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            <img src="{% static 'images/menu/edit_indigo.svg' %}" alt="edit" class="h-5 w-5">
+                                            <span class="pointer-events-none absolute right-0 top-full mt-2 whitespace-nowrap rounded-lg bg-indigo-950 px-3 py-1 text-xs font-medium text-white opacity-0 shadow-md transition-opacity duration-200 group-hover:opacity-100">
+                                                Редактировать
+                                            </span>
+                                        </button>
+                                    </div>
+
+                                    <div class="mb-5 flex flex-col gap-3 pr-16 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
                                             <p class="mt-2 xl:text-2xl text-xl font-bold tracking-tight text-indigo-950/50">Новая запись об образовании</p>
                                         </div>
+                                    </div>
 
-                                        <div class="flex flex-wrap items-center gap-3">
-                                            <div data-education-card-display-actions class="hidden">
-                                                <button type="button"
-                                                        data-education-edit-button
-                                                        class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
-                                                        border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
-                                                        hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                                    <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
-                                                    Редактировать
-                                                </button>
-                                            </div>
-                                            <div data-education-card-edit-actions class="flex flex-wrap items-center gap-3">
-                                                <button type="button"
-                                                        data-education-cancel-button
-                                                        class="inline-flex items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                                    Отмена
-                                                </button>
-                                                <button type="button"
-                                                        data-remove-education-form
-                                                        class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-rose-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-600 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2">
-                                                    Удалить запись
-                                                </button>
-                                            </div>
-                                        </div>
+                                    <div data-education-card-edit-actions class="mb-5 flex flex-wrap items-center gap-3">
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-indigo-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            Сохранить
+                                        </button>
+                                        <button type="button"
+                                                data-education-cancel-button
+                                                class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-slate-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            Отмена
+                                        </button>
+                                        <button type="button"
+                                                data-remove-education-form
+                                                class="inline-flex items-center justify-center gap-3 rounded-2xl border border-transparent bg-rose-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2">
+                                            Удалить запись
+                                        </button>
                                     </div>
 
                                     <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
