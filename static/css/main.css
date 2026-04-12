@@ -3226,6 +3226,14 @@ input:checked + .toggle-bg {
   border-width: 4px;
 }
 
+.border-\[3px\] {
+  border-width: 3px;
+}
+
+.border-\[12px\] {
+  border-width: 12px;
+}
+
 .border-b {
   border-bottom-width: 1px;
 }
@@ -3494,6 +3502,11 @@ input:checked + .toggle-bg {
 
 .border-slate-100\/50 {
   border-color: rgb(241 245 249 / 0.5);
+}
+
+.border-violet-50 {
+  --tw-border-opacity: 1;
+  border-color: rgb(245 243 255 / var(--tw-border-opacity, 1));
 }
 
 .\!bg-gray-50 {
@@ -3982,6 +3995,15 @@ input:checked + .toggle-bg {
 
 .bg-slate-100\/85 {
   background-color: rgb(241 245 249 / 0.85);
+}
+
+.bg-rose-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(244 63 94 / var(--tw-bg-opacity, 1));
+}
+
+.bg-white\/95 {
+  background-color: rgb(255 255 255 / 0.95);
 }
 
 .bg-\[linear-gradient\(180deg\2c rgba\(255\2c 255\2c 255\2c 0\.98\)\2c rgba\(248\2c 250\2c 255\2c 0\.95\)\)\] {
@@ -4474,6 +4496,10 @@ input:checked + .toggle-bg {
   line-height: 1rem;
 }
 
+.text-\[0\.95rem\] {
+  font-size: 0.95rem;
+}
+
 .font-black {
   font-weight: 900;
 }
@@ -4544,6 +4570,10 @@ input:checked + .toggle-bg {
 
 .leading-tight {
   line-height: 1.25;
+}
+
+.leading-\[1\.2\] {
+  line-height: 1.2;
 }
 
 .tracking-\[0\.15em\] {
@@ -5148,6 +5178,36 @@ input:checked + .toggle-bg {
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
+.shadow-\[0_10px_24px_rgba\(148\2c 163\2c 184\2c 0\.10\)\] {
+  --tw-shadow: 0 10px 24px rgba(148,163,184,0.10);
+  --tw-shadow-colored: 0 10px 24px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.shadow-\[0_14px_30px_rgba\(244\2c 63\2c 94\2c 0\.18\)\] {
+  --tw-shadow: 0 14px 30px rgba(244,63,94,0.18);
+  --tw-shadow-colored: 0 14px 30px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.shadow-\[0_14px_30px_rgba\(79\2c 70\2c 229\2c 0\.22\)\] {
+  --tw-shadow: 0 14px 30px rgba(79,70,229,0.22);
+  --tw-shadow-colored: 0 14px 30px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.shadow-\[0_16px_32px_rgba\(148\2c 163\2c 184\2c 0\.08\)\] {
+  --tw-shadow: 0 16px 32px rgba(148,163,184,0.08);
+  --tw-shadow-colored: 0 16px 32px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.shadow-\[0_20px_38px_rgba\(124\2c 58\2c 237\2c 0\.10\)\] {
+  --tw-shadow: 0 20px 38px rgba(124,58,237,0.10);
+  --tw-shadow-colored: 0 20px 38px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
 .shadow-gray-500\/60 {
   --tw-shadow-color: rgb(107 114 128 / 0.6);
   --tw-shadow: var(--tw-shadow-colored);
@@ -5387,6 +5447,47 @@ input:checked + .toggle-bg {
 
 /* Form Styles */
 
+.file\:mr-4::file-selector-button {
+  margin-right: 1rem;
+}
+
+.file\:rounded-xl::file-selector-button {
+  border-radius: 0.75rem;
+}
+
+.file\:border-0::file-selector-button {
+  border-width: 0px;
+}
+
+.file\:bg-indigo-600::file-selector-button {
+  --tw-bg-opacity: 1;
+  background-color: rgb(88 80 236 / var(--tw-bg-opacity, 1));
+}
+
+.file\:px-4::file-selector-button {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.file\:py-2::file-selector-button {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.file\:text-sm::file-selector-button {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.file\:font-semibold::file-selector-button {
+  font-weight: 600;
+}
+
+.file\:text-white::file-selector-button {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+
 .before\:absolute::before {
   content: var(--tw-content);
   position: absolute;
@@ -5479,6 +5580,11 @@ input:checked + .toggle-bg {
 
 .hover\:-translate-y-2:hover {
   --tw-translate-y: -0.5rem;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.hover\:-translate-y-\[1px\]:hover {
+  --tw-translate-y: -1px;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
@@ -5749,6 +5855,11 @@ input:checked + .toggle-bg {
   background-color: rgb(226 232 240 / 0.75);
 }
 
+.hover\:bg-rose-600:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(225 29 72 / var(--tw-bg-opacity, 1));
+}
+
 .hover\:text-blue-600:hover {
   --tw-text-opacity: 1;
   color: rgb(28 100 242 / var(--tw-text-opacity, 1));
@@ -5846,6 +5957,18 @@ input:checked + .toggle-bg {
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
+.hover\:shadow-\[0_18px_34px_rgba\(244\2c 63\2c 94\2c 0\.22\)\]:hover {
+  --tw-shadow: 0 18px 34px rgba(244,63,94,0.22);
+  --tw-shadow-colored: 0 18px 34px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.hover\:shadow-\[0_18px_34px_rgba\(79\2c 70\2c 229\2c 0\.26\)\]:hover {
+  --tw-shadow: 0 18px 34px rgba(79,70,229,0.26);
+  --tw-shadow-colored: 0 18px 34px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
 .hover\:shadow-indigo-100:hover {
   --tw-shadow-color: #E5EDFF;
   --tw-shadow: var(--tw-shadow-colored);
@@ -5864,6 +5987,11 @@ input:checked + .toggle-bg {
 .hover\:grayscale-0:hover {
   --tw-grayscale: grayscale(0);
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+
+.hover\:file\:bg-indigo-700::file-selector-button:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(81 69 205 / var(--tw-bg-opacity, 1));
 }
 
 .focus\:z-10:focus {
@@ -5957,6 +6085,11 @@ input:checked + .toggle-bg {
 .focus\:ring-zinc-50:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(250 250 250 / var(--tw-ring-opacity, 1));
+}
+
+.focus\:ring-rose-400:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(251 113 133 / var(--tw-ring-opacity, 1));
 }
 
 .focus\:ring-offset-1:focus {

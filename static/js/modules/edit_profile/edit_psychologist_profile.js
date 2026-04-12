@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const photoInputContainer = form.querySelector("[data-photo-upload-input-container]");
   const photoFileInput = form.querySelector("[data-photo-upload-input-container] input[type='file']");
   const photoSelectedFileLabel = form.querySelector("[data-photo-selected-file]");
+  const languageOptionCards = Array.from(form.querySelectorAll("[data-language-option]"));
 
   const hasErrors = form.dataset.hasErrors === "1";
   const photoHasErrors = form.dataset.photoHasErrors === "1";
@@ -229,6 +230,30 @@ document.addEventListener("DOMContentLoaded", () => {
     getScopeFields(scope).forEach((field) => setFieldState(field, isEditing));
     toggleElementGroups(getEditActionGroups(scope), isEditing, "flex");
     toggleElementGroups(getDisplayActionGroups(scope), !isEditing);
+
+    if (scope === "profile") {
+      syncLanguageOptionCards(isEditing);
+    }
+  }
+
+  /**
+   * Эта функция меняет внешний вид карточек выбора языков.
+   * В просмотре они серые и спокойные, а в режиме редактирования становятся белыми и интерактивными.
+   */
+  function syncLanguageOptionCards(isEditing) {
+    languageOptionCards.forEach((card) => {
+      card.classList.toggle("border-zinc-200", !isEditing);
+      card.classList.toggle("bg-gray-100", !isEditing);
+      card.classList.toggle("text-zinc-500", !isEditing);
+      card.classList.toggle("shadow-sm", !isEditing);
+
+      card.classList.toggle("border-indigo-100", isEditing);
+      card.classList.toggle("bg-white", isEditing);
+      card.classList.toggle("text-zinc-900", isEditing);
+      card.classList.toggle("shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]", isEditing);
+      card.classList.toggle("hover:border-indigo-200", isEditing);
+      card.classList.toggle("hover:bg-indigo-50/60", isEditing);
+    });
   }
 
   /**
@@ -636,8 +661,13 @@ document.addEventListener("DOMContentLoaded", () => {
      * спокойный просмотр записи или активное редактирование.
      */
     function syncCardAppearance(card, isEditing) {
-      card.classList.toggle("education-card--editing", isEditing);
-      card.classList.toggle("education-card--view", !isEditing);
+      card.classList.toggle("border-violet-50", isEditing);
+      card.classList.toggle("bg-violet-300/10", isEditing);
+      card.classList.toggle("shadow-[0_20px_38px_rgba(124,58,237,0.10)]", isEditing);
+
+      card.classList.toggle("border-slate-50", !isEditing);
+      card.classList.toggle("bg-transparent", !isEditing);
+      card.classList.toggle("shadow-[0_16px_32px_rgba(148,163,184,0.08)]", !isEditing);
     }
 
     /**

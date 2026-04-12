@@ -167,7 +167,9 @@ class EditPsychologistProfileForm(forms.ModelForm):
         required=False,
         widget=forms.CheckboxSelectMultiple(
             attrs={
-                "class": "h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500",
+                "class": "h-4 w-4 rounded border-zinc-300 text-zinc-400 focus:ring-zinc-400",
+                "data-view-class": "h-4 w-4 rounded border-zinc-300 text-zinc-400 focus:ring-zinc-400",
+                "data-edit-class": "h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500",
                 "data-editable-field": "1",
             }
         )
