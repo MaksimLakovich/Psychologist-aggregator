@@ -20,6 +20,8 @@ from core.views.client.specialist_matching.view_personal_questions import \
     ClientPersonalQuestionsPageView
 from core.views.psychologist.my_account.main_account_page import \
     PsychologistAccountView
+from core.views.psychologist.my_account.working_schedule_page import \
+    PsychologistWorkingSchedulePageView
 from core.views.start_view import StartPageView
 
 app_name = CoreConfig.name
@@ -46,6 +48,11 @@ urlpatterns = [
     # === СПЕЦИАЛИСТ ===
     # 1) Личный кабинет
     path("psychologist-account/", PsychologistAccountView.as_view(), name="psychologist-account"),
+    path(
+        "psychologist-account/working-schedule/",
+        PsychologistWorkingSchedulePageView.as_view(),
+        name="psychologist-working-schedule",
+    ),
 
     # === ОБЩИЕ СТРАНИЦЫ ===
     # 1) Работа с каталогом специалстов
