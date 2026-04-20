@@ -45,7 +45,7 @@ class AvailabilityRuleWebForm(forms.Form):
         widget=forms.DateInput(attrs={"class": BASE_INPUT_CLASS, "type": "date"}),
     )
     weekdays = forms.MultipleChoiceField(
-        label="Рабочие дни недели",
+        label="Укажите рабочие дни недели",
         choices=[(str(value), WEEKDAY_LABELS.get(value, label)) for value, label in WEEKDAYS_CHOICES],
         widget=forms.CheckboxSelectMultiple,
     )

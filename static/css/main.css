@@ -3304,6 +3304,14 @@ input:checked + .toggle-bg {
   border-top-width: 1px;
 }
 
+.border-b-2 {
+  border-bottom-width: 2px;
+}
+
+.border-t-2 {
+  border-top-width: 2px;
+}
+
 .border-dashed {
   border-style: dashed;
 }
@@ -3586,6 +3594,18 @@ input:checked + .toggle-bg {
 
 .border-slate-200\/60 {
   border-color: rgb(226 232 240 / 0.6);
+}
+
+.border-indigo-700\/30 {
+  border-color: rgb(81 69 205 / 0.3);
+}
+
+.border-slate-200\/30 {
+  border-color: rgb(226 232 240 / 0.3);
+}
+
+.border-slate-700\/30 {
+  border-color: rgb(51 65 85 / 0.3);
 }
 
 .\!bg-gray-50 {
@@ -4164,6 +4184,10 @@ input:checked + .toggle-bg {
 
 .bg-indigo-950\/90 {
   background-color: rgb(30 27 75 / 0.9);
+}
+
+.bg-indigo-50\/25 {
+  background-color: rgb(240 245 255 / 0.25);
 }
 
 .bg-\[linear-gradient\(180deg\2c rgba\(255\2c 255\2c 255\2c 0\.98\)\2c rgba\(248\2c 250\2c 255\2c 0\.95\)\)\] {
