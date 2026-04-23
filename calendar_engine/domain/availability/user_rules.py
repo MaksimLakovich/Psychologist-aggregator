@@ -35,8 +35,10 @@ class WeeklyAvailabilityRule(AbsAvailabilityRule):
                 raise ValueError(
                     "Некорректное временное окно: равные start/end допускаются только для 24/7 (00:00–00:00)"
                 )
-            elif start > end:
+
+            if start > end and end != time(0, 0):
                 raise ValueError(f"Некорректное временное окно: {start} > {end}")
+
             validated_windows.append((start, end))
 
         if not validated_windows:
