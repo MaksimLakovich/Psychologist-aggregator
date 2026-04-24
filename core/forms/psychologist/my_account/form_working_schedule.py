@@ -1,9 +1,13 @@
+from datetime import time
+
 from django import forms
 from django.forms import BaseFormSet, formset_factory
 
 from calendar_engine.constants import (AVAILABILITY_EXCEPTION_CHOICES,
                                        EXCEPTION_TYPE_CHOICES,
                                        WEEKDAYS_CHOICES)
+from calendar_engine.services import (get_local_date_for_user,
+                                      time_windows_have_overlap)
 
 
 BASE_INPUT_CLASS = (
@@ -74,9 +78,35 @@ class AvailabilityRuleWebForm(forms.Form):
         widget=forms.NumberInput(attrs={"class": BASE_INPUT_CLASS, "min": 0}),
     )
 
+    def __init__(self, *args, user=None, **kwargs):
+        """Сохраняем пользователя в форме, чтобы при ее создании дата в "today" считалась в его часовом поясе."""
+        self.user = user
+        super().__init__(*args, **kwargs)
+
     def clean_weekdays(self):
         """Сохраняем weekdays как список целых чисел, который ожидает модель/сериализатор."""
         return [int(value) for value in self.cleaned_data["weekdays"]]
+
+    def clean(self):
+        """Проверяем период действия правила до отправки данных в календарный движок."""
+        cleaned_data = super().clean()
+        rule_start = cleaned_data.get("rule_start")
+        rule_end = cleaned_data.get("rule_end")
+        today = get_local_date_for_user(self.user)
+
+        # Тут использую "self.add_error(...)" вместо "raise forms.ValidationError(...)" потому что:
+        # self.add_error(...) - когда хотим привязать ошибку к конкретному полю формы;
+        # raise forms.ValidationError(...) - когда ошибка относится ко всей форме целиком, а не к одному полю
+        if rule_start and rule_start < today:
+            self.add_error("rule_start", "Дата начала рабочего расписания не может быть в прошлом")
+
+        if rule_end and rule_end < today:
+            self.add_error("rule_end", "Дата окончания рабочего расписания не может быть в прошлом")
+
+        if rule_start and rule_end and rule_start > rule_end:
+            self.add_error("rule_end", "Дата окончания не может быть раньше даты начала")
+
+        return cleaned_data
 
 
 class AvailabilityRuleTimeWindowWebForm(forms.Form):
@@ -94,6 +124,7 @@ class AvailabilityRuleTimeWindowWebForm(forms.Form):
     )
 
     def clean(self):
+        """Проверяем временные окна до отправки данных в календарный движок."""
         cleaned_data = super().clean()
         start_time = cleaned_data.get("start_time")
         end_time = cleaned_data.get("end_time")
@@ -102,7 +133,18 @@ class AvailabilityRuleTimeWindowWebForm(forms.Form):
             return cleaned_data
 
         if not start_time or not end_time:
-            raise forms.ValidationError("Для рабочего окна нужно заполнить и начало, и окончание.")
+            raise forms.ValidationError("Для рабочего окна нужно заполнить и начало, и окончание")
+
+        if start_time == end_time and start_time != time(0, 0):
+            raise forms.ValidationError(
+                "Начало и окончание окна могут совпадать только для круглосуточного режима 00:00-00:00"
+            )
+
+        if start_time > end_time and end_time != time(0, 0):
+            raise forms.ValidationError(
+                "Время начала должно быть меньше времени окончания. Если рабочее время переходит через полночь, "
+                "создайте два окна: до 00:00 и после 00:00"
+            )
 
         return cleaned_data
 
@@ -158,6 +200,32 @@ class AvailabilityExceptionWebForm(forms.Form):
         widget=forms.NumberInput(attrs={"class": BASE_INPUT_CLASS, "min": 0}),
     )
 
+    def __init__(self, *args, user=None, **kwargs):
+        """Сохраняем пользователя, чтобы дата "сегодня" считалась в его часовом поясе."""
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        """Проверяем период действия исключения до отправки данных в календарный движок."""
+        cleaned_data = super().clean()
+        exception_start = cleaned_data.get("exception_start")
+        exception_end = cleaned_data.get("exception_end")
+        today = get_local_date_for_user(self.user)
+
+        # Тут использую "self.add_error(...)" вместо "raise forms.ValidationError(...)" потому что:
+        # self.add_error(...) - когда хотим привязать ошибку к конкретному полю формы;
+        # raise forms.ValidationError(...) - когда ошибка относится ко всей форме целиком, а не к одному полю
+        if exception_start and exception_start < today:
+            self.add_error("exception_start", "Дата начала исключения не может быть в прошлом")
+
+        if exception_end and exception_end < today:
+            self.add_error("exception_end", "Дата окончания исключения не может быть в прошлом")
+
+        if exception_start and exception_end and exception_start > exception_end:
+            self.add_error("exception_end", "Дата окончания исключения не может быть раньше даты начала")
+
+        return cleaned_data
+
 
 class AvailabilityExceptionTimeWindowWebForm(forms.Form):
     """Одно переопределенное рабочее окно на период исключения."""
@@ -174,6 +242,7 @@ class AvailabilityExceptionTimeWindowWebForm(forms.Form):
     )
 
     def clean(self):
+        """Проверяем временные окна до отправки данных в календарный движок."""
         cleaned_data = super().clean()
         start_time = cleaned_data.get("override_start_time")
         end_time = cleaned_data.get("override_end_time")
@@ -182,7 +251,18 @@ class AvailabilityExceptionTimeWindowWebForm(forms.Form):
             return cleaned_data
 
         if not start_time or not end_time:
-            raise forms.ValidationError("Для переопределенного окна нужно заполнить и начало, и окончание.")
+            raise forms.ValidationError("Для переопределенного окна нужно заполнить и начало, и окончание")
+
+        if start_time == end_time and start_time != time(0, 0):
+            raise forms.ValidationError(
+                "Начало и окончание окна могут совпадать только для круглосуточного режима 00:00-00:00"
+            )
+
+        if start_time > end_time and end_time != time(0, 0):
+            raise forms.ValidationError(
+                "Время начала должно быть меньше времени окончания. Если переопределенное время переходит через "
+                "полночь, создайте два окна: до 00:00 и после 00:00"
+            )
 
         return cleaned_data
 
@@ -195,6 +275,7 @@ class BaseRequiredWindowFormSet(BaseFormSet):
     """
 
     def clean(self):
+        """Проверяем минимум одно временное корректное окно создано."""
         super().clean()
         has_window = False
 
@@ -207,7 +288,24 @@ class BaseRequiredWindowFormSet(BaseFormSet):
                 has_window = True
 
         if not has_window:
-            raise forms.ValidationError("Добавьте хотя бы одно рабочее окно.")
+            raise forms.ValidationError("Добавьте хотя бы одно рабочее окно")
+
+        windows = [
+            {
+                "start_time": form.cleaned_data.get("start_time"),
+                "end_time": form.cleaned_data.get("end_time"),
+            }
+            for form in self.forms
+            if hasattr(form, "cleaned_data")
+            and not (self.can_delete and form.cleaned_data.get("DELETE"))
+            and form.cleaned_data.get("start_time")
+            and form.cleaned_data.get("end_time")
+        ]
+
+        if time_windows_have_overlap(windows, start_key="start_time", end_key="end_time"):
+            raise forms.ValidationError(
+                "Нельзя создавать рабочие окна, которые занимают одинаковое время или пересекаются между собой"
+            )
 
 
 class BaseOptionalWindowFormSet(BaseFormSet):
@@ -215,6 +313,30 @@ class BaseOptionalWindowFormSet(BaseFormSet):
 
     Например, когда специалист ставит отпуск или больничный и день просто закрывается полностью.
     """
+
+    def clean(self):
+        super().clean()
+
+        windows = [
+            {
+                "override_start_time": form.cleaned_data.get("override_start_time"),
+                "override_end_time": form.cleaned_data.get("override_end_time"),
+            }
+            for form in self.forms
+            if hasattr(form, "cleaned_data")
+            and not (self.can_delete and form.cleaned_data.get("DELETE"))
+            and form.cleaned_data.get("override_start_time")
+            and form.cleaned_data.get("override_end_time")
+        ]
+
+        if time_windows_have_overlap(
+            windows,
+            start_key="override_start_time",
+            end_key="override_end_time",
+        ):
+            raise forms.ValidationError(
+                "Нельзя переопределять окна так, чтоб они занимали одинаковое время или пересекались между собой"
+            )
 
 
 AvailabilityRuleTimeWindowFormSet = formset_factory(
