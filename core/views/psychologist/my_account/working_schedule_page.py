@@ -10,8 +10,9 @@ from calendar_engine._api.serializers.availability import (
     AvailabilityExceptionSerializer, AvailabilityRuleSerializer)
 from calendar_engine.models import AvailabilityException, AvailabilityRule
 from core.forms.psychologist.my_account.form_working_schedule import (
-    AvailabilityExceptionTimeWindowFormSet, AvailabilityExceptionWebForm,
-    AvailabilityRuleTimeWindowFormSet, AvailabilityRuleWebForm, WEEKDAY_LABELS)
+    WEEKDAY_LABELS, AvailabilityExceptionTimeWindowFormSet,
+    AvailabilityExceptionWebForm, AvailabilityRuleTimeWindowFormSet,
+    AvailabilityRuleWebForm)
 from users.mixins.role_required_mixin import PsychologistRequiredMixin
 
 

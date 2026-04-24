@@ -9,7 +9,6 @@ from calendar_engine.constants import (AVAILABILITY_EXCEPTION_CHOICES,
 from calendar_engine.services import (get_local_date_for_user,
                                       time_windows_have_overlap)
 
-
 BASE_INPUT_CLASS = (
     "block w-full rounded-xl border border-gray-100 bg-white px-4 py-3 text-lg "
     "text-zinc-800 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm transition-all duration-200"

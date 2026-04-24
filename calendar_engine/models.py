@@ -9,7 +9,6 @@ from django.db import models
 from django.db.models import Q
 from timezone_field import TimeZoneField
 
-from calendar_engine.services import get_local_date_for_user
 from calendar_engine.constants import (AVAILABILITY_EXCEPTION_CHOICES,
                                        EVENT_CANCEL_REASON_TYPE_CHOICES,
                                        EVENT_SOURCE_CHOICES,
@@ -23,6 +22,7 @@ from calendar_engine.constants import (AVAILABILITY_EXCEPTION_CHOICES,
                                        PARTICIPANT_SLOT_ROLE_CHOICES,
                                        PARTICIPANT_SLOT_STATUS_CHOICES,
                                        SLOT_STATUS_CHOICES, WEEKDAYS_CHOICES)
+from calendar_engine.services import get_local_date_for_user
 
 # =====
 # СОБЫТИЕ / СЛОТЫ

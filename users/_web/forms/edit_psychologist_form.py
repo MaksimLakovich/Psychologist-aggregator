@@ -8,7 +8,6 @@ from users.constants import (CURRENCY_CHOICES, GENDER_CHOICES,
 from users.models import (AppUser, Education, Method, PsychologistProfile,
                           Specialisation, Topic)
 
-
 BASE_INPUT_CLASS = (
     "block w-full rounded-xl border border-gray-100 bg-white px-4 py-3 text-lg "
     "text-zinc-800 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm transition-all duration-200"
@@ -331,7 +330,9 @@ class EditPsychologistProfileForm(forms.ModelForm):
         existing_photo = getattr(self.instance, "photo", None)
 
         if not uploaded_photo and not existing_photo:
-            self.add_error("photo", "Добавьте фотографию профиля. Для специалиста фото является обязательной частью публичной карточки.")
+            self.add_error(
+                "photo",
+                "Добавьте фотографию профиля. Фото является обязательной частью для публичной карточки")
 
         return cleaned_data
 
