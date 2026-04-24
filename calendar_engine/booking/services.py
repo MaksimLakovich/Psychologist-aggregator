@@ -120,6 +120,11 @@ def build_specialist_live_indicator(*, specialist_profile: PsychologistProfile |
 
     current_datetime = timezone.now()
 
+    # Перед live-проверкой закрываем устаревшие правила и исключения,
+    # чтобы индикатор не опирался на расписание с прошедшей датой окончания
+    AvailabilityRule.close_expired_for_user(specialist_profile.user)
+    AvailabilityException.close_expired_for_user(specialist_profile.user)
+
     # 2) Берем активное рабочее расписание специалиста
     active_rule = (
         AvailabilityRule.objects.filter(
