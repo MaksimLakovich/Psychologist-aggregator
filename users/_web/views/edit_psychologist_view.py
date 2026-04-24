@@ -6,7 +6,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from django_ratelimit.decorators import ratelimit
 
-from calendar_engine.models import AvailabilityRule
+from calendar_engine.models import AvailabilityException, AvailabilityRule
 from core.services.topic_groups import build_topics_grouped_by_type
 from users._web.forms.edit_psychologist_form import (
     EditPsychologistAccountForm, EditPsychologistProfileForm,
@@ -180,6 +180,10 @@ class EditPsychologistProfilePageView(PsychologistRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.get_user_instance()
         profile = self.get_profile_instance()
+
+        # Сначала архивируем правила и исключения пользователя, срок действия которых уже истек
+        AvailabilityRule.close_expired_for_user(self.request.user)
+        AvailabilityException.close_expired_for_user(self.request.user)
 
         context.setdefault("account_form", self.get_account_form())
         context.setdefault("profile_form", self.get_profile_form())

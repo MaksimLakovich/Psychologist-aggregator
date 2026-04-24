@@ -64,12 +64,27 @@ def time_windows_have_overlap(windows, *, start_key: str, end_key: str) -> bool:
             - 09:00-00:00 означает работу до конца текущих суток;
             - 22:00-02:00 здесь не поддерживаем, такое расписание нужно оформить двумя окнами;
             - окна не должны занимать одно и то же время или пересекаться между собой.
+
+    Пояснение (!)
+    Это универсальная функция и используется:
+    1) как для рабочего правила (AvailabilityRuleTimeWindow), где у временного окна в модели данных
+       параметры называются "start_time" и "end_time";
+    2) так и для исключения (AvailabilityExceptionTimeWindow), где у временного окна в модели данных
+       параметры называются "override_start_time" и "override_end_time".
+
+    :param windows: Словарь с набором временных окон для AvailabilityRule или AvailabilityException
+                    в зависимости от места вызова функции;
+    :param start_key: Название (ключ) параметра в зависимости от места вызова (для правила: "start_time" /
+                    для исключения: "override_start_time");
+    :param end_key: Название (ключ) параметра в зависимости от места вызова (для правила: "end_time" /
+                    для исключения: "override_end_time");
+    :return: Булево значения для - "Пересекается" / "Не пересекается".
     """
     ranges = []
 
-    for window in windows:  # ???
-        start = window.get(start_key)  # ???
-        end = window.get(end_key)  # ???
+    for window in windows:
+        start = window.get(start_key)  # "start_time" или "override_start_time"
+        end = window.get(end_key)  # "end_time" или "override_end_time"
 
         if start is None or end is None:
             continue
@@ -91,12 +106,27 @@ def time_windows_have_overlap(windows, *, start_key: str, end_key: str) -> bool:
 
         ranges.append((start_minutes, end_minutes))
 
-    ranges.sort(key=lambda item: item[0])  # ???
+    # Мы берем все наши временные отрезки (которые уже переведены в минуты) и выстраиваем их строго по порядку:
+    # от самого раннего к самому позднему (по значению start_minutes, в lambda это и есть item[0]).
+    # Без сортировки интервалы могут идти вразнобой: например, сначала "18:00–20:00", а потом "08:00–10:00" и
+    # если они не отсортированы, то нам пришлось бы сравнивать каждое окно с каждым (это долго), а после
+    # сортировки нам достаточно просто идти по списку один раз и сравнивать соседа с соседом
+    ranges.sort(key=lambda item: item[0])
 
-    for index in range(1, len(ranges)):  # ???
-        previous_start, previous_end = ranges[index - 1]  # ???
-        current_start, current_end = ranges[index]  # ???
+    # Далее запускаем цикл, который начинает обход не с самого первого окна (индекс 0), а со второго (индекс 1).
+    # Важно со второго потому что проверка на пересечение всегда требует пары. Внутри цикла мы будем сравнивать
+    # текущее окно с тем, которое идет прямо перед ним (index - 1).
+    # Если мы начнем с нуля, то "предыдущего" элемента просто не существует, и код упадет с ошибкой
+    for index in range(1, len(ranges)):
+        previous_start, previous_end = ranges[index - 1]
+        current_start, current_end = ranges[index]
 
+        # Мы берем "предыдущее" (уже прошедшее по времени) окно и "текущее". Так как мы отсортировали список, то
+        # мы точно знаем, что current_start (начало текущего окна) должно быть либо равно, либо позже,
+        # чем previous_end (конец предыдущего окна).
+        # Пример:
+        # Предыдущее окно: 09:00 - 12:00 (previous_end = 720 минут).
+        # Текущее окно: 11:30 - 14:00 (current_start = 690 минут)
         if current_start < previous_end:
             return True
 

@@ -47,6 +47,10 @@ def build_generate_and_match_use_case(
         - FilterAndMatchSlotsUseCase - если у специалиста есть активное правило доступности;
         - None - если правило отсутствует (специалист недоступен)."""
 
+    # Перед проверкой выбранных слотов закрываем устаревшие правила и исключения
+    AvailabilityRule.close_expired_for_user(psychologist)
+    AvailabilityException.close_expired_for_user(psychologist)
+
     # 1) Получаем активное правило доступности специалиста
     rule = (
         AvailabilityRule.objects
@@ -93,12 +97,30 @@ def build_generate_and_match_use_case(
     normalized_selected_slots: set[SlotKey] = set()
 
     for dt in selected_slots:
-        # dt - timezone-aware datetime (из mapper-а)
+        # dt - это слот, который ранее выбрал клиент. Он уже содержит дату/время вместе с часовым поясом.
+        # Переводим слот в tz специалиста, потому что рабочее расписание проверяется именно в его локальном времени
         localized_dt = dt.astimezone(psychologist_tz)
 
+        # Отдельно забираем только календарный день специалиста, чтобы дальше сравнить его с периодом действия правила
+        localized_day = localized_dt.date()
+
+        # Выбранный клиентом слот должен попадать в период действия рабочего правила
+        if localized_day < rule.rule_start:
+            # Если день слота раньше, чем дата старта правила, такой слот нельзя считать допустимым
+            continue
+        if rule.rule_end and localized_day > rule.rule_end:
+            # Если у правила есть дата окончания и слот позже нее, такой слот тоже нужно пропустить
+            continue
+
+        # Сохраняем только те слоты, которые реально попадают в период действия правила.
+        # В matcher дальше пойдет упрощенный ключ: (дата специалиста, время старта специалиста)
         normalized_selected_slots.add(
-            (localized_dt.date(), localized_dt.time())
+            (localized_day, localized_dt.time())
         )
+
+    # Если после проверки периода не осталось ни одного подходящего слота, дальше matching делать уже бессмысленно
+    if not normalized_selected_slots:
+        return None
 
     # 6) Matcher по выбранным пользователем доменным слотам (чистый, без TZ-логики)
     matcher = SelectedSlotsMatcher(
