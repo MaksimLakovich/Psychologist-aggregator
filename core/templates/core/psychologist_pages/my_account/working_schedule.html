@@ -150,10 +150,21 @@
 
                                 <!-- 1. Дата начала и действия рабочего расписания -->
                                 <div>
-                                    <h3 class="text-sm font-bold uppercase tracking-wider text-indigo-700/75">Шаг 1. Период действия</h3>
+                                    <h3 class="text-sm font-bold uppercase tracking-wider text-indigo-700/75">Шаг 1. Период действия рабочего расписания</h3>
                                     <p class="text-sm text-slate-500 mt-2">Если рабочее расписание бессрочное, то <strong>не заполняйте</strong> параметр "Дата окончания"</p>
-                                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-
+                                    <div class="mt-4 p-4 rounded-xl border border-slate-200 bg-slate-200/25 hover:border-indigo-200 transition-colors">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div class="space-y-1.5">
+                                                <label for="{{ rule_form.rule_start.id_for_label }}" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">{{ rule_form.rule_start.label }}</label>
+                                                {{ rule_form.rule_start }}
+                                                {% if rule_form.rule_start.errors %}<p class="text-xs text-rose-500 mt-1">{{ rule_form.rule_start.errors.0 }}</p>{% endif %}
+                                            </div>
+                                            <div class="space-y-1.5">
+                                                <label for="{{ rule_form.rule_end.id_for_label }}" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">{{ rule_form.rule_end.label }}</label>
+                                                {{ rule_form.rule_end }}
+                                                {% if rule_form.rule_end.errors %}<p class="text-xs text-rose-500 mt-1">{{ rule_form.rule_end.errors.0 }}</p>{% endif %}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -267,7 +278,7 @@
                                     <div class="p-4 rounded-xl border border-slate-200 bg-slate-200/25 hover:border-indigo-200 transition-colors">
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             {% for field in rule_form %}
-                                                {% if field.name != 'weekdays' %}
+                                                {% if field.name != 'weekdays' and field.name != 'rule_start' and field.name != 'rule_end' %}
                                                 <div class="space-y-1.5">
                                                     <label for="{{ field.id_for_label }}" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">{{ field.label }}</label>
                                                     {{ field }}
@@ -306,6 +317,15 @@
                             </div>
                             {% endif %}
 
+                            {% if not active_rule %}
+                            <div class="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-6 text-center">
+                                <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-indigo-600 shadow-sm">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <p class="text-base font-semibold text-indigo-900">Активного рабочего расписания пока нет</p>
+                                <p class="mt-2 text-sm leading-6 text-slate-500">Сначала сохраните базовый рабочий график, после этого здесь можно будет добавлять временные исключения.</p>
+                            </div>
+                            {% else %}
                             <form method="post" class="space-y-8" data-exception-form-root>
                                 {% csrf_token %}
                                 <input type="hidden" name="schedule_action" value="create-exception">
@@ -314,8 +334,19 @@
                                 <div>
                                     <h3 class="text-sm font-bold uppercase tracking-wider text-indigo-700/75">Шаг 1. Период действия исключения</h3>
                                     <p class="text-sm text-slate-500 mt-2">Если исключение создается только на один день, то заполните параметр "Дата окончания" тем же значением, что и в "Дата начала"</p>
-                                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-
+                                    <div class="mt-4 p-4 rounded-xl border border-slate-200 bg-slate-200/25 hover:border-indigo-200 transition-colors">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div class="space-y-1.5">
+                                                <label for="{{ exception_form.exception_start.id_for_label }}" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">{{ exception_form.exception_start.label }}</label>
+                                                {{ exception_form.exception_start }}
+                                                {% if exception_form.exception_start.errors %}<p class="text-xs text-rose-500 mt-1">{{ exception_form.exception_start.errors.0 }}</p>{% endif %}
+                                            </div>
+                                            <div class="space-y-1.5">
+                                                <label for="{{ exception_form.exception_end.id_for_label }}" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">{{ exception_form.exception_end.label }}</label>
+                                                {{ exception_form.exception_end }}
+                                                {% if exception_form.exception_end.errors %}<p class="text-xs text-rose-500 mt-1">{{ exception_form.exception_end.errors.0 }}</p>{% endif %}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -326,12 +357,13 @@
                                     </div>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-xl border border-slate-200 bg-slate-200/25 hover:border-indigo-200 transition-colors">
                                         {% for field in exception_form %}
-                                        <div class="space-y-1.5 {% if field.name == 'override_session_duration_individual' or field.name == 'override_session_duration_couple' or field.name == 'override_break_between_sessions' or field.name == 'override_minimum_booking_notice_hours' %}hidden{% endif %}"
-                                             {% if field.name == 'override_session_duration_individual' or field.name == 'override_session_duration_couple' or field.name == 'override_break_between_sessions' or field.name == 'override_minimum_booking_notice_hours' %}data-override-config-field{% endif %}>
+                                        {% if field.name != 'exception_start' and field.name != 'exception_end' and field.name != 'override_session_duration_individual' and field.name != 'override_session_duration_couple' and field.name != 'override_break_between_sessions' and field.name != 'override_minimum_booking_notice_hours' %}
+                                        <div class="space-y-1.5">
                                             <label for="{{ field.id_for_label }}" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">{{ field.label }}</label>
                                             {{ field }}
                                             {% if field.errors %}<p class="text-xs text-rose-500 mt-1">{{ field.errors.0 }}</p>{% endif %}
                                         </div>
+                                        {% endif %}
                                         {% endfor %}
                                     </div>
                                 </div>
@@ -341,8 +373,8 @@
                                     <div class="border-t-2 border-slate-300/30 pt-8">
                                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                                             <div>
-                                                <h3 class="text-sm font-bold uppercase tracking-wider text-indigo-700/75">Шаг 3. Переопределенное рабочее время</h3>
-                                                <p class="text-sm text-slate-500 mt-2">Добавьте новые окна, которые будут действовать только в рамках текущего исключения</p>
+                                                <h3 class="text-sm font-bold uppercase tracking-wider text-indigo-700/75">Шаг 3. Новое рабочее время</h3>
+                                                <p class="text-sm text-slate-500 mt-2">Укажите новые рабочие окна, которые будут действовать только в рамках текущего исключения</p>
                                             </div>
                                             <button type="button" data-add-window-form="exception" class="inline-flex items-center gap-2 rounded-xl bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition-colors hover:bg-indigo-100">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -416,12 +448,23 @@
                                     </div>
                                     <!-- 4. Переопределенные параметры сессий -->
                                     <div class="border-t-2 border-slate-300/30 pt-8">
-                                        <div>
-                                            <h3 class="text-sm font-bold uppercase tracking-wider text-indigo-700/75 mb-4">Шаг 4. Переопределенные параметры сессий</h3>
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                                            <div>
+                                                <h3 class="text-sm font-bold uppercase tracking-wider text-indigo-700/75">Шаг 4. Новые параметры сессий</h3>
+                                                <p class="text-sm text-slate-500 mt-2">При необходимости, на период действия данного исключения, вы можете переопределить параметры сессий</p>
+                                            </div>
                                         </div>
                                         <div class="p-4 rounded-xl border border-slate-200 bg-slate-200/25 hover:border-indigo-200 transition-colors">
                                             <div class="grid grid-cols-1 gap-6">
-
+                                                {% for field in exception_form %}
+                                                    {% if field.name == 'override_session_duration_individual' or field.name == 'override_session_duration_couple' or field.name == 'override_break_between_sessions' or field.name == 'override_minimum_booking_notice_hours' %}
+                                                    <div class="space-y-1.5" data-override-config-field>
+                                                        <label for="{{ field.id_for_label }}" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">{{ field.label }}</label>
+                                                        {{ field }}
+                                                        {% if field.errors %}<p class="text-xs text-rose-500 mt-1">{{ field.errors.0 }}</p>{% endif %}
+                                                    </div>
+                                                    {% endif %}
+                                                {% endfor %}
                                             </div>
                                         </div>
                                     </div>
@@ -438,6 +481,7 @@
                                     </button>
                                 </div>
                             </form>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

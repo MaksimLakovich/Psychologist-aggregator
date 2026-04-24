@@ -4,7 +4,6 @@ from timezone_field import TimeZoneFormField
 
 from users.models import AppUser
 
-
 BASE_INPUT_CLASS = (
     "block w-full rounded-xl border border-gray-100 bg-white px-4 py-3 text-lg "
     "text-zinc-800 focus:border-indigo-600 focus:ring-indigo-600 shadow-sm"

@@ -9,7 +9,6 @@ from django.db import models
 from django.db.models import Q
 from timezone_field import TimeZoneField
 
-from calendar_engine.services import get_local_date_for_user
 from calendar_engine.constants import (AVAILABILITY_EXCEPTION_CHOICES,
                                        EVENT_CANCEL_REASON_TYPE_CHOICES,
                                        EVENT_SOURCE_CHOICES,
@@ -23,6 +22,7 @@ from calendar_engine.constants import (AVAILABILITY_EXCEPTION_CHOICES,
                                        PARTICIPANT_SLOT_ROLE_CHOICES,
                                        PARTICIPANT_SLOT_STATUS_CHOICES,
                                        SLOT_STATUS_CHOICES, WEEKDAYS_CHOICES)
+from calendar_engine.services import get_local_date_for_user
 
 # =====
 # СОБЫТИЕ / СЛОТЫ
@@ -759,7 +759,22 @@ class AvailabilityRule(TimeStampedModel):
         if self.rule_start and self.rule_end and self.rule_start > self.rule_end:
             errors["rule_end"] = "Дата окончания рабочего расписания не может быть раньше даты его начала."
 
-        if self._state.adding and self.is_active:  # ???
+        # Пояснение по "_state.adding":
+        # 1) у каждого объекта модели Django есть служебное поле _state;
+        # 2) внутри него Django хранит техническую информацию о состоянии объекта;
+        # 3) self._state.adding == True означает, что это новый объект, он еще не сохранен в базе;
+        # 4) self._state.adding == False означает, что этот объект уже существует в базе, сейчас его редактируют.
+        # Т.е., это можно понимать так:
+        #   - self.is_active отвечает за бизнес-смысл: активно правило или нет;
+        #   - self._state.adding отвечает за технический смысл: создаем новый объект или обновляем уже существующий
+
+        # Пояснение: текущая логика с "self._state.adding and self.is_active" означает более узкое правило:
+        # - запрещаем даты в прошлом только в момент создания нового активного правила;
+        # - но не валим ошибкой старое уже существующее активное правило, если его открыли на редактирование позже,
+        # когда его rule_start уже стал "в прошлом", но пользователь в этом правиле решил например изменить
+        # продолжительность сессии или перерыв.
+        # Именно поэтому self._state.adding здесь отделяет "создание нового правила" от "редактирования существующего"
+        if self._state.adding and self.is_active:
             if self.rule_start and self.rule_start < today:
                 errors["rule_start"] = "Дата начала рабочего расписания не может быть в прошлом."
 
@@ -772,11 +787,20 @@ class AvailabilityRule(TimeStampedModel):
     def save(self, *args, **kwargs):
         """Сохраняет правило и закрывает его активные исключения, если само правило стало закрытым."""
         was_active = None
+
+        # Если объект уже есть в БД, то достаем из БД его старое значение is_active и кладем в was_active:
+        # 1) "type(self).objects" это почти то же самое, что "AvailabilityRule.objects". Потому что этот код
+        # находится внутри метода модели, то type(self) позволяет обратиться к менеджеру именно текущего класса;
+        # 2) Пояснение по values_list():
+        # - это Django QuerySet-метод, который возвращает не объекты модели целиком, а только выбранные поля.
+        # - если написать БЕЗ "flat=True", то результат будет например такой: [(True,)]
+        # - а если написать ".values_list("is_active", flat=True)", то результат будет уже: [True]
+        # - по сути "flat=True" убирает лишнюю обертку tuple и возвращает плоский список значений
         if self.pk:
-            was_active = (  # ???
-                type(self).objects  # ???
-                .filter(pk=self.pk)  # ???
-                .values_list("is_active", flat=True)  # ???
+            was_active = (
+                type(self).objects
+                .filter(pk=self.pk)
+                .values_list("is_active", flat=True)
                 .first()
             )
 
@@ -785,27 +809,39 @@ class AvailabilityRule(TimeStampedModel):
         if self.rule_end and self.rule_end < today:
             self.is_active = False
             update_fields = kwargs.get("update_fields")
-            if update_fields is not None:  # ???
-                kwargs["update_fields"] = set(update_fields) | {"is_active"}  # ???
+            # Так как у нас произошло изменения is_active, то необходимо автоматическое обязательное
+            # добавление "is_active" к любому набору, который будет передаваться в kwargs["update_fields"]
+            if update_fields is not None:
+                kwargs["update_fields"] = set(update_fields) | {"is_active"}
 
         super().save(*args, **kwargs)
 
-        # Закрытое правило не должно оставлять после себя активные исключения, поэтому нужно закрыть и их
+        # Закрытое правило не должно оставлять после себя активные исключения, поэтому нужно закрыть и их.
+        # Пояснение:
+        # - availabilityexception_set это автоматическая обратная связь от ForeignKey по аналогии с related_name;
+        # - если у ForeignKey не указан related_name, а у нас в AvailabilityException.rule он не указан сейчас, то
+        #   Django сам придумывает имя для доступа "назад" по умолчанию: имя_модели_в_нижнем_регистре + "_set"
         if self.is_active is False and was_active is not False:
             self.availabilityexception_set.filter(is_active=True).update(is_active=False)
 
-    def deactivate(self):  # ??? а разве в save это уже не произошло и как понимает тут где правило а где исключение
-        """Мягко закрывает рабочее правило вместе с действующими исключениями внутри него."""
+    def deactivate(self):
+        """Метод для деактивации рабочего правила и закрытия связанных активных исключений."""
         self.is_active = False
         self.save(update_fields=["is_active"])
 
     @classmethod
     def deactivate_active_for_user(cls, user):
-        """Закрывает все активные правила пользователя и их действующие исключения."""
+        """Закрывает все активные правила пользователя и их действующие исключения.
+
+        Пояснение:
+        1) По бизнес-логике у пользователя должно быть максимум одно активное правило;
+        2) Но мы делаем защитный код - т.е., исходим не из идеального мира, а из реального где в базе иногда
+           могут появиться кривые данные из-за: старой версии кода; ручных правок в админке; миграции; бага и т.д.
+        """
         active_rule_ids = list(
-            cls.objects  # ???
+            cls.objects
             .filter(creator=user, is_active=True)
-            .values_list("pk", flat=True)  # ???
+            .values_list("pk", flat=True)
         )
 
         if not active_rule_ids:
@@ -816,16 +852,22 @@ class AvailabilityRule(TimeStampedModel):
             is_active=True,
         ).update(is_active=False)
 
-        return cls.objects.filter(pk__in=active_rule_ids).update(is_active=False)  # ???
+        return cls.objects.filter(pk__in=active_rule_ids).update(is_active=False)
 
     @classmethod
     def close_expired_for_user(cls, user):
-        """Автоматически архивирует правила пользователя, у которых уже прошла дата окончания."""
-        today = get_local_date_for_user(user)  # ??? а почему не get_local_date_for_user(self.creator if self.creator_id else None)
+        """Автоматически архивирует правила пользователя, у которых уже прошла дата окончания.
+
+        Пояснение:
+        1) По бизнес-логике у пользователя должно быть максимум одно активное правило;
+        2) Но мы делаем защитный код - т.е., исходим не из идеального мира, а из реального где в базе иногда
+           могут появиться кривые данные из-за: старой версии кода; ручных правок в админке; миграции; бага и т.д.
+        """
+        today = get_local_date_for_user(user)
         expired_rule_ids = list(
             cls.objects
             .filter(creator=user, is_active=True, rule_end__lt=today)
-            .values_list("pk", flat=True)  # ???
+            .values_list("pk", flat=True)
         )
 
         if not expired_rule_ids:
@@ -836,7 +878,7 @@ class AvailabilityRule(TimeStampedModel):
             is_active=True,
         ).update(is_active=False)
 
-        return cls.objects.filter(pk__in=expired_rule_ids).update(is_active=False)  # ???
+        return cls.objects.filter(pk__in=expired_rule_ids).update(is_active=False)
 
     class Meta:
         verbose_name = "Правило доступности"
@@ -995,7 +1037,15 @@ class AvailabilityException(TimeStampedModel):
         if self.exception_start and self.exception_end and self.exception_end < self.exception_start:
             errors["exception_end"] = "Дата окончания исключения не может быть раньше даты начала исключения."
 
-        if self._state.adding and self.is_active:  # ???
+        # Пояснение по "_state.adding":
+        # 1) у каждого объекта модели Django есть служебное поле _state;
+        # 2) внутри него Django хранит техническую информацию о состоянии объекта;
+        # 3) self._state.adding == True означает, что это новый объект, он еще не сохранен в базе;
+        # 4) self._state.adding == False означает, что этот объект уже существует в базе, сейчас его редактируют.
+        # Т.е., это можно понимать так:
+        #   - self.is_active отвечает за бизнес-смысл: активно правило или нет;
+        #   - self._state.adding отвечает за технический смысл: создаем новый объект или обновляем уже существующий
+        if self._state.adding and self.is_active:
             if self.exception_start and self.exception_start < today:
                 errors["exception_start"] = "Дата начала исключения не может быть в прошлом."
 
@@ -1040,8 +1090,10 @@ class AvailabilityException(TimeStampedModel):
         if self.exception_end and self.exception_end < today:
             self.is_active = False
             update_fields = kwargs.get("update_fields")
-            if update_fields is not None:  # ???
-                kwargs["update_fields"] = set(update_fields) | {"is_active"}  # ???
+            # Так как у нас произошло изменения is_active, то необходимо автоматическое обязательное
+            # добавление "is_active" к любому набору, который будет передаваться в kwargs["update_fields"]
+            if update_fields is not None:
+                kwargs["update_fields"] = set(update_fields) | {"is_active"}
 
         super().save(*args, **kwargs)
 
@@ -1054,14 +1106,17 @@ class AvailabilityException(TimeStampedModel):
             - исключения от уже закрытого рабочего правила;
             - исключения без рабочего правила.
         """
-        today = get_local_date_for_user(user)  # ??? а почему не get_local_date_for_user(self.creator if self.creator_id else None)
+        today = get_local_date_for_user(user)
+        # Q - это специальный Django-объект для сложных условий запроса.
+        # 1) Он нужен, когда необходимо задать условия: "ИЛИ" / "НЕ" / "сложную комбинацию условий".
+        # 2) Без Q обычный .filter(...) внутри одного вызова сработает как простой оператор "И".
         return (
-            cls.objects  # ???
+            cls.objects
             .filter(creator=user, is_active=True)
             .filter(
-                Q(exception_end__lt=today)  # ???
-                | Q(rule__is_active=False)  # ???
-                | Q(rule__isnull=True)  # ???
+                Q(exception_end__lt=today)  # lt = меньше чем, а символ "|" означает "ИЛИ"
+                | Q(rule__is_active=False)  # смотрим поле is_active у связанного объекта rule
+                | Q(rule__isnull=True)
             )
             .update(is_active=False)
         )
@@ -1114,7 +1169,8 @@ class AvailabilityExceptionTimeWindow(TimeStampedModel):
                 )
 
             # 00:00 в окончании окна считаем концом текущих суток, поэтому например "09:00-00:00" допустимо
-            elif self.override_start_time > self.override_end_time and self.override_end_time != time(0, 0):
+            elif (self.override_start_time > self.override_end_time
+                  and self.override_end_time != time(0, 0)):
                 raise ValidationError("override_start_time должен быть меньше override_end_time")
 
     def __str__(self):

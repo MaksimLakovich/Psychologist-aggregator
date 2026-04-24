@@ -10,8 +10,9 @@ from calendar_engine._api.serializers.availability import (
     AvailabilityExceptionSerializer, AvailabilityRuleSerializer)
 from calendar_engine.models import AvailabilityException, AvailabilityRule
 from core.forms.psychologist.my_account.form_working_schedule import (
-    AvailabilityExceptionTimeWindowFormSet, AvailabilityExceptionWebForm,
-    AvailabilityRuleTimeWindowFormSet, AvailabilityRuleWebForm, WEEKDAY_LABELS)
+    WEEKDAY_LABELS, AvailabilityExceptionTimeWindowFormSet,
+    AvailabilityExceptionWebForm, AvailabilityRuleTimeWindowFormSet,
+    AvailabilityRuleWebForm)
 from users.mixins.role_required_mixin import PsychologistRequiredMixin
 
 
@@ -29,6 +30,14 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
     template_name = "core/psychologist_pages/my_account/working_schedule.html"
     success_url = reverse_lazy("core:psychologist-working-schedule")
 
+    def dispatch(self, request, *args, **kwargs):
+        """Перед показом страницы закрываем расписания и исключения, срок действия которых уже прошел."""
+        if request.user.is_authenticated:
+            AvailabilityRule.close_expired_for_user(request.user)
+            AvailabilityException.close_expired_for_user(request.user)
+
+        return super().dispatch(request, *args, **kwargs)
+
     def get_active_rule(self):
         return (
             AvailabilityRule.objects
@@ -40,7 +49,7 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
     def get_active_exceptions(self):
         return (
             AvailabilityException.objects
-            .filter(creator=self.request.user, is_active=True)
+            .filter(creator=self.request.user, rule__is_active=True, is_active=True)
             .select_related("rule")
             .prefetch_related("time_windows")
             .order_by("exception_start", "created_at")
@@ -63,13 +72,25 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
         )
 
     def get_rule_form(self, *, data=None):
-        return AvailabilityRuleWebForm(data=data)
+        return AvailabilityRuleWebForm(data=data, user=self.request.user)
 
     def get_rule_windows_formset(self, *, data=None):
         return AvailabilityRuleTimeWindowFormSet(data=data, prefix="rule_windows")
 
-    def get_exception_form(self, *, data=None):
-        return AvailabilityExceptionWebForm(data=data)
+    def get_exception_form(self, *, data=None, active_rule=None):
+        initial = {}
+
+        if active_rule and data is None:
+            # В исключении показываем текущие параметры правила как стартовые значения,
+            # чтобы специалист сразу видел, что именно он меняет на период исключения
+            initial = {
+                "override_session_duration_individual": active_rule.session_duration_individual,
+                "override_session_duration_couple": active_rule.session_duration_couple,
+                "override_break_between_sessions": active_rule.break_between_sessions,
+                "override_minimum_booking_notice_hours": active_rule.minimum_booking_notice_hours,
+            }
+
+        return AvailabilityExceptionWebForm(data=data, initial=initial, user=self.request.user)
 
     def get_exception_windows_formset(self, *, data=None):
         return AvailabilityExceptionTimeWindowFormSet(data=data, prefix="exception_windows")
@@ -110,6 +131,26 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
     def _weekday_label(day_number):
         return WEEKDAY_LABELS.get(day_number, str(day_number))
 
+    @staticmethod
+    def _serializer_error_to_text(field_name, field_errors):
+        """Переводит технические ошибки сериализатора в понятный текст для страницы."""
+        if field_name == "available_windows":
+            return (
+                "Проверьте рабочие окна: нельзя создавать окна, которые занимают одинаковое время "
+                "или пересекаются между собой. Окно 00:00-00:00 означает круглосуточно"
+            )
+
+        if field_name == "override_available_windows":
+            return (
+                "Проверьте переопределенные окна: нельзя создавать окна, которые занимают одинаковое время "
+                "или пересекаются между собой. Окно 00:00-00:00 означает круглосуточно"
+            )
+
+        if isinstance(field_errors, (list, tuple)):
+            return "; ".join(map(str, field_errors))
+
+        return str(field_errors)
+
     def _decorate_rule(self, rule):
         """Добавляем объекту удобные UI-поля без изменения модели.
 
@@ -124,17 +165,18 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
     def get_context_data(self, **kwargs):
         """Передаем в HTML как сами формы, так и текущую картину расписания специалиста."""
         context = super().get_context_data(**kwargs)
+        active_rule = self._decorate_rule(self.get_active_rule())
 
         context.setdefault("rule_form", self.get_rule_form())
         context.setdefault("rule_windows_formset", self.get_rule_windows_formset())
-        context.setdefault("exception_form", self.get_exception_form())
+        context.setdefault("exception_form", self.get_exception_form(active_rule=active_rule))
         context.setdefault("exception_windows_formset", self.get_exception_windows_formset())
         context.setdefault("active_schedule_tab", "rule")
 
         context["title_psychologist_working_schedule_view"] = "Рабочее расписание специалиста в сервисе ОПОРА"
         context["show_sidebar"] = "sidebar"
         context["current_sidebar_key"] = "available-rule"
-        context["active_rule"] = self._decorate_rule(self.get_active_rule())
+        context["active_rule"] = active_rule
         context["active_exceptions"] = self.get_active_exceptions()
         context["archived_rules"] = [self._decorate_rule(rule) for rule in self.get_archived_rules()]
         context["archived_exceptions"] = self.get_archived_exceptions()
@@ -159,7 +201,7 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
 
         messages.error(
             request,
-            "Не удалось определить действие на странице расписания. Повторите попытку из нужного блока формы."
+            "Не удалось определить действие на странице расписания. Повторите попытку из нужного блока формы"
         )
         return redirect(self.success_url)
 
@@ -191,10 +233,7 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
             )
 
             if serializer.is_valid():
-                AvailabilityRule.objects.filter(
-                    creator=request.user,
-                    is_active=True,
-                ).update(is_active=False)
+                AvailabilityRule.deactivate_active_for_user(request.user)
 
                 serializer.save(
                     timezone=getattr(request.user, "timezone", None),
@@ -202,16 +241,17 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
                 )
                 messages.success(
                     request,
-                    "Рабочее расписание сохранено. Именно по этому правилу сервис будет показывать доступные слоты клиентам."
+                    "Рабочее расписание сохранено. Именно по этому правилу сервис "
+                    "будет показывать доступные слоты клиентам"
                 )
                 return redirect(self.success_url)
 
             for field_name, field_errors in serializer.errors.items():
-                rule_form.add_error(None, f"{field_name}: {'; '.join(map(str, field_errors))}")
+                rule_form.add_error(None, self._serializer_error_to_text(field_name, field_errors))
 
         messages.error(
             request,
-            "Рабочее расписание не сохранено. Исправьте ошибки в датах, днях недели или временных окнах."
+            "Рабочее расписание не сохранено. Исправьте ошибки в датах, днях недели или временных окнах"
         )
         return self.render_to_response(
             self.get_context_data(
@@ -224,15 +264,15 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
     def handle_deactivate_rule(self, request):
         active_rule = self.get_active_rule()
         if not active_rule:
-            messages.error(request, "Активное рабочее расписание не найдено.")
+            messages.error(request, "Активное рабочее расписание не найдено")
             return redirect(self.success_url)
 
-        active_rule.is_active = False
-        active_rule.save(update_fields=["is_active"])
+        active_rule.deactivate()
 
         messages.success(
             request,
-            "Активное рабочее расписание закрыто. Пока вы не создадите новое правило, новые слоты для записи показываться не будут."
+            "Активное рабочее расписание закрыто. Пока вы не создадите новое правило, "
+            "новые слоты для записи показываться не будут"
         )
         return redirect(self.success_url)
 
@@ -246,7 +286,7 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
         if not active_rule:
             messages.error(
                 request,
-                "Сначала сохраните базовое рабочее расписание, а потом добавляйте исключения."
+                "Сначала сохраните базовое рабочее расписание, а потом добавляйте исключения"
             )
             return self.render_to_response(
                 self.get_context_data(
@@ -264,7 +304,7 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
                 and not override_windows
             ):
                 exception_windows_formset._non_form_errors = exception_windows_formset.error_class(
-                    ["Для частичного переопределения добавьте хотя бы одно временное окно."]
+                    ["Для частичного переопределения добавьте хотя бы одно временное окно"]
                 )
             else:
                 if exception_type != "override":
@@ -277,10 +317,11 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
                     override_break_between_sessions = None
                     override_minimum_booking_notice_hours = None
                 else:
-                    override_session_duration_individual = exception_form.cleaned_data["override_session_duration_individual"]
-                    override_session_duration_couple = exception_form.cleaned_data["override_session_duration_couple"]
-                    override_break_between_sessions = exception_form.cleaned_data["override_break_between_sessions"]
-                    override_minimum_booking_notice_hours = exception_form.cleaned_data["override_minimum_booking_notice_hours"]
+                    cleaned_data = exception_form.cleaned_data
+                    override_session_duration_individual = cleaned_data["override_session_duration_individual"]
+                    override_session_duration_couple = cleaned_data["override_session_duration_couple"]
+                    override_break_between_sessions = cleaned_data["override_break_between_sessions"]
+                    override_minimum_booking_notice_hours = cleaned_data["override_minimum_booking_notice_hours"]
 
                 payload = {
                     "rule": active_rule.pk,
@@ -307,16 +348,16 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
                     )
                     messages.success(
                         request,
-                        "Исключение сохранено. Сервис учтет его поверх базового рабочего расписания."
+                        "Исключение сохранено. Сервис учтет его поверх базового рабочего расписания"
                     )
                     return redirect(self.success_url)
 
                 for field_name, field_errors in serializer.errors.items():
-                    exception_form.add_error(None, f"{field_name}: {'; '.join(map(str, field_errors))}")
+                    exception_form.add_error(None, self._serializer_error_to_text(field_name, field_errors))
 
         messages.error(
             request,
-            "Исключение не сохранено. Проверьте даты, тип исключения и временные окна."
+            "Исключение не сохранено. Проверьте даты, тип исключения и временные окна"
         )
         return self.render_to_response(
             self.get_context_data(
@@ -338,6 +379,6 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
 
         messages.success(
             request,
-            "Исключение закрыто. Базовое рабочее расписание снова действует без этого временного отклонения."
+            "Исключение закрыто. Базовое рабочее расписание снова действует без этого временного отклонения"
         )
         return redirect(self.success_url)

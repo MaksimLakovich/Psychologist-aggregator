@@ -49,6 +49,11 @@ class AvailabilityRuleListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         """Возвращает правила доступности текущего пользователя. По умолчанию - только активное правило."""
         user = self.request.user
+
+        # Сначала архивируем правила и исключения пользователя, срок действия которых уже истек
+        AvailabilityRule.close_expired_for_user(user)
+        AvailabilityException.close_expired_for_user(user)
+
         include_archived = self.request.query_params.get("include_archived")
 
         queryset = (
@@ -73,10 +78,8 @@ class AvailabilityRuleListCreateView(generics.ListCreateAPIView):
 
         # Ищем существующее активное правило и деактивируем его перед сохранением нового правила
         # (у специалиста может быть только 1 активное правило)
-        AvailabilityRule.objects.filter(
-            creator=user,
-            is_active=True,
-        ).update(is_active=False)
+        # При закрытии правила связанные активные исключения тоже уходят в архив.
+        AvailabilityRule.deactivate_active_for_user(user)
 
         serializer.save(
             timezone=getattr(user, "timezone", None),
@@ -99,6 +102,10 @@ class AvailabilityRuleDeactivateView(APIView):
         """Soft-delete для явного "закрытия" рабочего расписания специалиста: помечаем is_active=False."""
         user = request.user
 
+        # Сначала архивируем правила и исключения пользователя, срок действия которых уже истек
+        AvailabilityRule.close_expired_for_user(user)
+        AvailabilityException.close_expired_for_user(user)
+
         rule = AvailabilityRule.objects.filter(
             creator=user,
             is_active=True,
@@ -110,8 +117,7 @@ class AvailabilityRuleDeactivateView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        rule.is_active = False
-        rule.save(update_fields=["is_active"])
+        rule.deactivate()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -135,6 +141,11 @@ class AvailabilityExceptionListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         """Возвращает исключения из рабочего расписания. По умолчанию - только активные исключения."""
         user = self.request.user
+
+        # Сначала архивируем правила и исключения пользователя, срок действия которых уже истек
+        AvailabilityRule.close_expired_for_user(user)
+        AvailabilityException.close_expired_for_user(user)
+
         include_archived = self.request.query_params.get("include_archived")
 
         queryset = (
@@ -145,7 +156,7 @@ class AvailabilityExceptionListCreateView(generics.ListCreateAPIView):
         )
 
         if include_archived not in ("true", "1", "yes"):
-            queryset = queryset.filter(is_active=True)
+            queryset = queryset.filter(rule__is_active=True, is_active=True)
 
         return queryset.order_by("-created_at")
 
@@ -157,6 +168,10 @@ class AvailabilityExceptionListCreateView(generics.ListCreateAPIView):
             2) автоматическая привязка исключения к действующему AvailabilityRule(is_active=True)
             3) автоматически проставляет creator"""
         user = self.request.user
+
+        # Сначала архивируем правила и исключения пользователя, срок действия которых уже истек
+        AvailabilityRule.close_expired_for_user(user)
+        AvailabilityException.close_expired_for_user(user)
 
         # Ищем существующее активное правило
         rule = AvailabilityRule.objects.filter(
@@ -192,6 +207,10 @@ class AvailabilityExceptionDeactivateView(APIView):
     def patch(self, request, *args, **kwargs):
         """Soft-delete для явного "закрытия" исключения из рабочего расписания специалиста: is_active=False."""
         user = request.user
+
+        # Сначала архивируем правила и исключения пользователя, срок действия которых уже истек
+        AvailabilityRule.close_expired_for_user(user)
+        AvailabilityException.close_expired_for_user(user)
 
         exception = get_object_or_404(
             AvailabilityException,

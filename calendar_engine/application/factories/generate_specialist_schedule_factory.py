@@ -245,6 +245,10 @@ def build_specialist_schedule_runtime_context(
     if consultation_type not in ("individual", "couple"):
         raise ValueError("consultation_type должен быть либо 'individual', либо 'couple'")
 
+    # Перед генерацией убираем из активных записей все правила/исключения, срок которых уже прошел
+    AvailabilityRule.close_expired_for_user(specialist_profile.user)
+    AvailabilityException.close_expired_for_user(specialist_profile.user)
+
     # 1) Получаем активное правило доступности специалиста
     rule = (
         AvailabilityRule.objects
@@ -283,7 +287,32 @@ def build_specialist_schedule_runtime_context(
         current_specialist_time = now().astimezone(specialist_tz)
     else:
         current_specialist_time = now()
-    date_from = current_specialist_time.date()
+
+    # Старт показа расписания зависит сразу от двух факторов:
+    # 1) "сегодня" в timezone специалиста;
+    # 2) дата начала самого рабочего правила.
+    # Поэтому берем более позднюю дату из этих двух, чтобы не показывать клиенту слоты
+    # раньше фактического старта рабочего расписания.
+    date_from = max(current_specialist_time.date(), rule.rule_start)
+
+    # По умолчанию показываем стандартный горизонт расписания на несколько дней вперед
+    days_ahead = DAYS_AHEAD_FOR_SHOW_SCHEDULE
+
+    if rule.rule_end:
+        # Если у рабочего правила есть дата окончания, то UI не должен показывать слоты
+        # дальше этой даты, даже если стандартный горизонт расписания больше
+        schedule_last_day = min(
+            date_from + timedelta(days=DAYS_AHEAD_FOR_SHOW_SCHEDULE - 1),
+            rule.rule_end,
+        )
+
+        # Считаем сколько календарных дней реально можно показать пользователю, включая сам date_from
+        days_ahead = (schedule_last_day - date_from).days + 1
+
+        # Если рабочих дней впереди уже не осталось, значит специалист сейчас недоступен
+        # и use-case для генерации слотов собирать не нужно
+        if days_ahead <= 0:
+            return None
 
     # 6) Собираем словари override-параметров из AvailabilityException по конкретным дням
     # и base-параметры из AvailabilityRule.
@@ -309,7 +338,7 @@ def build_specialist_schedule_runtime_context(
         "slot_generator": slot_generator,
         "slot_filter": slot_filter,
         "date_from": date_from,
-        "days_ahead": DAYS_AHEAD_FOR_SHOW_SCHEDULE,
+        "days_ahead": days_ahead,
         "current_datetime": current_specialist_time,
         "busy_intervals": busy_intervals,
         **override_maps,
