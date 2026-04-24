@@ -36,39 +36,39 @@ class AvailabilityRuleWebForm(forms.Form):
     """
 
     rule_start = forms.DateField(
-        label="Дата начала действия правила",
+        label="Дата начала",
         widget=forms.DateInput(attrs={"class": BASE_INPUT_CLASS, "type": "date"}),
     )
     rule_end = forms.DateField(
-        label="Дата окончания действия правила",
+        label="Дата окончания",
         required=False,
         widget=forms.DateInput(attrs={"class": BASE_INPUT_CLASS, "type": "date"}),
     )
     weekdays = forms.MultipleChoiceField(
-        label="Укажите рабочие дни недели",
+        label="Рабочие дни",
         choices=[(str(value), WEEKDAY_LABELS.get(value, label)) for value, label in WEEKDAYS_CHOICES],
         widget=forms.CheckboxSelectMultiple,
     )
     session_duration_individual = forms.IntegerField(
-        label="Продолжительность индивидуальной сессии, минут",
+        label="Длительность индивидуальной сессии (мин.)",
         min_value=1,
         initial=50,
         widget=forms.NumberInput(attrs={"class": BASE_INPUT_CLASS, "min": 1}),
     )
     session_duration_couple = forms.IntegerField(
-        label="Продолжительность парной сессии, минут",
+        label="Длительность парной сессии (мин.)",
         min_value=1,
         initial=90,
         widget=forms.NumberInput(attrs={"class": BASE_INPUT_CLASS, "min": 1}),
     )
     break_between_sessions = forms.IntegerField(
-        label="Перерыв между сессиями, минут",
+        label="Перерыв между сессиями (мин.)",
         min_value=0,
         initial=10,
         widget=forms.NumberInput(attrs={"class": BASE_INPUT_CLASS, "min": 0}),
     )
     minimum_booking_notice_hours = forms.IntegerField(
-        label="Минимальный запас времени до записи, часов",
+        label="Минимальное время до записи (часы)",
         min_value=0,
         initial=1,
         widget=forms.NumberInput(attrs={"class": BASE_INPUT_CLASS, "min": 0}),
@@ -116,11 +116,11 @@ class AvailabilityExceptionWebForm(forms.Form):
     """
 
     exception_start = forms.DateField(
-        label="Дата начала исключения",
+        label="Дата начала",
         widget=forms.DateInput(attrs={"class": BASE_INPUT_CLASS, "type": "date"}),
     )
     exception_end = forms.DateField(
-        label="Дата окончания исключения",
+        label="Дата окончания",
         widget=forms.DateInput(attrs={"class": BASE_INPUT_CLASS, "type": "date"}),
     )
     reason = forms.ChoiceField(
