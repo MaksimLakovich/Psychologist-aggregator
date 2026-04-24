@@ -91,13 +91,6 @@ function initExceptionTypeToggle() {
     const isOverride = select.value === "override";
     overrideSection.classList.toggle("hidden", !isOverride);
     overrideFields.forEach((field) => field.classList.toggle("hidden", !isOverride));
-
-    if (!isOverride) {
-      overrideFields.forEach((field) => {
-        const input = field.querySelector("input, select, textarea");
-        if (input) input.value = "";
-      });
-    }
   }
 
   select.addEventListener("change", syncVisibility);

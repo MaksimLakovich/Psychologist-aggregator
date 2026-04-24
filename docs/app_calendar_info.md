@@ -178,7 +178,7 @@ calendar_engine/
     ├── constants.py                  # Параметры доменной политики (базовые размеры слотов) + значения справочников
     ├── models.py
     ├── admin.py
-    ├── services.py                   # Вспомогательные сервисные функции (например, normalize_range(), ...)
+    ├── services.py                   # Вспомогательные сервисные функции (например, normalize_range(), get_local_date_for_user(), time_windows_have_overlap()...)
     ├── urls.py
     │
     ├── _api/                         # ⭐API-сценарии для календаря

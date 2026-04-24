@@ -7,6 +7,8 @@ from calendar_engine.models import (AvailabilityException,
                                     AvailabilityExceptionTimeWindow,
                                     AvailabilityRule,
                                     AvailabilityRuleTimeWindow)
+from calendar_engine.services import (get_local_date_for_user,
+                                      time_windows_have_overlap)
 
 # =====
 # РАБОЧИЙ ГРАФИК ПСИХОЛОГА
@@ -47,8 +49,11 @@ class AvailabilityRuleTimeWindowSerializer(serializers.ModelSerializer):
                     "Параметры start_time и end_time могут совпадать только для 24/7 (00:00–00:00)"
                 )
 
-            elif start_time > end_time:
-                raise ValidationError("Параметр start_time должен быть меньше end_time")
+            elif start_time > end_time and end_time != time(0, 0):
+                raise ValidationError(
+                    "Параметр start_time должен быть меньше end_time. Если рабочее время переходит через полночь, "
+                    "cоздайте два окна: до 00:00 и после 00:00"
+                )
 
         return attrs
 
@@ -64,7 +69,7 @@ class AvailabilityRuleSerializer(serializers.ModelSerializer):
     creator = serializers.StringRelatedField(read_only=True)
     available_windows = AvailabilityRuleTimeWindowSerializer(
         many=True,
-        source="time_windows",
+        source="time_windows",  # указывает откуда брать данные (через related_name в AvailabilityRuleTimeWindow)
         required=True,  # нельзя создать правило без временного окна
     )
     # TimeZoneField в Python это объект "zoneinfo.ZoneInfo", а ZoneInfo не JSON-serializable, поэтому сериализатор
@@ -102,17 +107,37 @@ class AvailabilityRuleSerializer(serializers.ModelSerializer):
         """Метод для кастомной валидации ДАТЫ начала/окончания правила."""
         rule_start = attrs.get("rule_start")
         rule_end = attrs.get("rule_end")
-        windows_data = self.initial_data.get("available_windows")
-        # Используя initial_data мы получаем сырые данные (еще до сериализации), а можно было бы
-        # реализовать validated_data - очищенные и типизированные данные.
-        # Но в нашем случае initial_data - это ОК, потому что: мы проверяем лишь факт наличия / отсутствия,
-        # а не структуру данных.
+        # 1) Для клиента (Frontend): поле называется available_windows;
+        # 2) Для Backend: благодаря source, DRF автоматом переименовывает ключ в time_windows, чтобы он совпадал
+        # с названием связи в наших моделях.
+        # (!) Поэтому, когда выполнение доходит до метода validate, в словаре attrs ключа available_windows
+        # уже не существует, потому что он был переименован "на лету"
+        windows_data = attrs.get("time_windows") or []
+        # используем .get("request") что безопасно и вернет None в случае чего
+        request = self.context.get("request")
+        # Возвращает текущую дату в часовом поясе пользователя
+        today = get_local_date_for_user(request.user if request else None)
 
         if rule_start and rule_end and rule_start > rule_end:
             raise ValidationError("Дата в rule_start должна быть раньше даты в rule_end")
 
+        if rule_start and rule_start < today:
+            raise ValidationError({"rule_start": "Дата начала рабочего расписания не может быть в прошлом"})
+
+        if rule_end and rule_end < today:
+            raise ValidationError({"rule_end": "Дата окончания рабочего расписания не может быть в прошлом"})
+
         if not windows_data:
             raise ValidationError("Параметры start_time и end_time обязательны при создании рабочего правила")
+
+        # Проверяет, пересекаются ли временные окна внутри одного набора
+        if time_windows_have_overlap(windows_data, start_key="start_time", end_key="end_time"):
+            raise ValidationError({
+                "available_windows": (
+                    "Нельзя создавать рабочие окна, которые занимают одинаковое время "
+                    "или пересекаются между собой."
+                )
+            })
 
         return attrs
 
@@ -186,8 +211,11 @@ class AvailabilityExceptionTimeWindowSerializer(serializers.ModelSerializer):
                     "Параметры override_start_time и override_end_time могут совпадать только для 24/7 (00:00–00:00)"
                 )
 
-            elif override_start_time > override_end_time:
-                raise ValidationError("Параметр override_start_time должен быть меньше override_end_time")
+            elif override_start_time > override_end_time and override_end_time != time(0, 0):
+                raise ValidationError(
+                    "Параметр override_start_time должен быть меньше override_end_time. Если переопределенное время "
+                    "переходит через полночь, создайте два окна: до 00:00 и после 00:00"
+                )
 
         return attrs
 
@@ -203,7 +231,7 @@ class AvailabilityExceptionSerializer(serializers.ModelSerializer):
     creator = serializers.StringRelatedField(read_only=True)
     override_available_windows = AvailabilityExceptionTimeWindowSerializer(
         many=True,
-        source="time_windows",
+        source="time_windows",  # указывает откуда брать данные (через related_name в AvailabilityExceptionTimeWindow)
         required=False,  # можно создать исключение без временного окна (например, полностью недоступный день)
     )
 
@@ -243,20 +271,34 @@ class AvailabilityExceptionSerializer(serializers.ModelSerializer):
         exception_type = attrs.get("exception_type")
         start = attrs.get("exception_start")
         end = attrs.get("exception_end")
-        windows_data = self.initial_data.get("override_available_windows")
-        # Используя initial_data мы получаем сырые данные (еще до сериализации), а можно было бы
-        # реализовать validated_data - очищенные и типизированные данные.
-        # Но в нашем случае initial_data - это ОК, потому что: мы проверяем лишь факт наличия / отсутствия,
-        # а не структуру данных.
+        windows_data = attrs.get("time_windows") or []  # Пояснение аналогично как в AvailabilityRuleSerializer
+        request = self.context.get("request")  # Пояснение аналогично как в AvailabilityRuleSerializer
+        # Возвращает текущую дату в часовом поясе пользователя
+        today = get_local_date_for_user(request.user if request else None)
 
         if start and end and start > end:
             raise ValidationError("Параметр exception_date_start не может быть позже exception_date_end")
+
+        if start and start < today:
+            raise ValidationError({"exception_start": "Дата начала исключения не может быть в прошлом"})
+
+        if end and end < today:
+            raise ValidationError({"exception_end": "Дата окончания исключения не может быть в прошлом"})
 
         if exception_type == "override":  # Частичное переопределение
             if not windows_data:
                 raise ValidationError(
                     "Для exception_type='override' необходимо указать добавить переопределенное временное окно."
                 )
+
+            # Проверяет, пересекаются ли временные окна внутри одного набора
+            if time_windows_have_overlap(windows_data, start_key="override_start_time", end_key="override_end_time"):
+                raise ValidationError({
+                    "override_available_windows": (
+                        "Нельзя создавать переопределенные окна, которые занимают одинаковое время "
+                        "или пересекаются между собой"
+                    )
+                })
 
         if exception_type == "unavailable":  # Полностью недоступен
             if windows_data:

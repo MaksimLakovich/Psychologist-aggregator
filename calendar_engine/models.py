@@ -6,8 +6,10 @@ from django.contrib.postgres.constraints import ExclusionConstraint
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 from timezone_field import TimeZoneField
 
+from calendar_engine.services import get_local_date_for_user
 from calendar_engine.constants import (AVAILABILITY_EXCEPTION_CHOICES,
                                        EVENT_CANCEL_REASON_TYPE_CHOICES,
                                        EVENT_SOURCE_CHOICES,
@@ -739,6 +741,103 @@ class AvailabilityRule(TimeStampedModel):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
         return f"{self.creator} / {self.weekdays}"
 
+    def clean(self):
+        """Модельная валидация периода действия рабочего расписания.
+
+        Бизнес-смысл:
+            - новое активное правило нельзя создавать задним числом;
+            - дата окончания не может быть раньше даты начала;
+            - если срок действия уже истек, правило должно быть закрытым (is_active=False), а не активным.
+        """
+        super().clean()
+
+        errors = {}
+
+        # Возвращает текущую дату в часовом поясе пользователя
+        today = get_local_date_for_user(self.creator if self.creator_id else None)
+
+        if self.rule_start and self.rule_end and self.rule_start > self.rule_end:
+            errors["rule_end"] = "Дата окончания рабочего расписания не может быть раньше даты его начала."
+
+        if self._state.adding and self.is_active:  # ???
+            if self.rule_start and self.rule_start < today:
+                errors["rule_start"] = "Дата начала рабочего расписания не может быть в прошлом."
+
+            if self.rule_end and self.rule_end < today:
+                errors["rule_end"] = "Дата окончания рабочего расписания не может быть в прошлом."
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        """Сохраняет правило и закрывает его активные исключения, если само правило стало закрытым."""
+        was_active = None
+        if self.pk:
+            was_active = (  # ???
+                type(self).objects  # ???
+                .filter(pk=self.pk)  # ???
+                .values_list("is_active", flat=True)  # ???
+                .first()
+            )
+
+        # Если дата окончания уже прошла, правило автоматически должно уйти в архив "is_active=False"
+        today = get_local_date_for_user(self.creator if self.creator_id else None)
+        if self.rule_end and self.rule_end < today:
+            self.is_active = False
+            update_fields = kwargs.get("update_fields")
+            if update_fields is not None:  # ???
+                kwargs["update_fields"] = set(update_fields) | {"is_active"}  # ???
+
+        super().save(*args, **kwargs)
+
+        # Закрытое правило не должно оставлять после себя активные исключения, поэтому нужно закрыть и их
+        if self.is_active is False and was_active is not False:
+            self.availabilityexception_set.filter(is_active=True).update(is_active=False)
+
+    def deactivate(self):  # ??? а разве в save это уже не произошло и как понимает тут где правило а где исключение
+        """Мягко закрывает рабочее правило вместе с действующими исключениями внутри него."""
+        self.is_active = False
+        self.save(update_fields=["is_active"])
+
+    @classmethod
+    def deactivate_active_for_user(cls, user):
+        """Закрывает все активные правила пользователя и их действующие исключения."""
+        active_rule_ids = list(
+            cls.objects  # ???
+            .filter(creator=user, is_active=True)
+            .values_list("pk", flat=True)  # ???
+        )
+
+        if not active_rule_ids:
+            return 0
+
+        AvailabilityException.objects.filter(
+            rule_id__in=active_rule_ids,
+            is_active=True,
+        ).update(is_active=False)
+
+        return cls.objects.filter(pk__in=active_rule_ids).update(is_active=False)  # ???
+
+    @classmethod
+    def close_expired_for_user(cls, user):
+        """Автоматически архивирует правила пользователя, у которых уже прошла дата окончания."""
+        today = get_local_date_for_user(user)  # ??? а почему не get_local_date_for_user(self.creator if self.creator_id else None)
+        expired_rule_ids = list(
+            cls.objects
+            .filter(creator=user, is_active=True, rule_end__lt=today)
+            .values_list("pk", flat=True)  # ???
+        )
+
+        if not expired_rule_ids:
+            return 0
+
+        AvailabilityException.objects.filter(
+            rule_id__in=expired_rule_ids,
+            is_active=True,
+        ).update(is_active=False)
+
+        return cls.objects.filter(pk__in=expired_rule_ids).update(is_active=False)  # ???
+
     class Meta:
         verbose_name = "Правило доступности"
         verbose_name_plural = "Правила доступности"
@@ -781,7 +880,8 @@ class AvailabilityRuleTimeWindow(TimeStampedModel):
                 "start_time и end_time могут совпадать только для 24/7 (00:00–00:00)"
             )
 
-        elif self.start_time > self.end_time:
+        # 00:00 в окончании окна считаем концом текущих суток, поэтому например "09:00-00:00" допустимо
+        elif self.start_time > self.end_time and self.end_time != time(0, 0):
             raise ValidationError(
                 "start_time должен быть меньше end_time"
             )
@@ -889,8 +989,18 @@ class AvailabilityException(TimeStampedModel):
 
         errors = {}
 
-        if self.exception_end < self.exception_start:
+        # Возвращает текущую дату в часовом поясе пользователя
+        today = get_local_date_for_user(self.creator if self.creator_id else None)
+
+        if self.exception_start and self.exception_end and self.exception_end < self.exception_start:
             errors["exception_end"] = "Дата окончания исключения не может быть раньше даты начала исключения."
+
+        if self._state.adding and self.is_active:  # ???
+            if self.exception_start and self.exception_start < today:
+                errors["exception_start"] = "Дата начала исключения не может быть в прошлом."
+
+            if self.exception_end and self.exception_end < today:
+                errors["exception_end"] = "Дата окончания исключения не может быть в прошлом."
 
         if self.exception_type == "unavailable":
             if self.override_session_duration_individual is not None:
@@ -923,6 +1033,38 @@ class AvailabilityException(TimeStampedModel):
     def __str__(self):
         """Метод определяет строковое представление объекта. Полезно для отображения объектов в админке/консоли."""
         return f"{self.creator} / {self.exception_start}–{self.exception_end} ({self.exception_type})"
+
+    def save(self, *args, **kwargs):
+        """Сохраняет исключение и закрывает его, если дата окончания уже прошла."""
+        today = get_local_date_for_user(self.creator if self.creator_id else None)
+        if self.exception_end and self.exception_end < today:
+            self.is_active = False
+            update_fields = kwargs.get("update_fields")
+            if update_fields is not None:  # ???
+                kwargs["update_fields"] = set(update_fields) | {"is_active"}  # ???
+
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def close_expired_for_user(cls, user):
+        """Автоматически архивирует исключения, которые больше не могут действовать.
+
+        Сюда попадают:
+            - исключения с прошедшей датой окончания;
+            - исключения от уже закрытого рабочего правила;
+            - исключения без рабочего правила.
+        """
+        today = get_local_date_for_user(user)  # ??? а почему не get_local_date_for_user(self.creator if self.creator_id else None)
+        return (
+            cls.objects  # ???
+            .filter(creator=user, is_active=True)
+            .filter(
+                Q(exception_end__lt=today)  # ???
+                | Q(rule__is_active=False)  # ???
+                | Q(rule__isnull=True)  # ???
+            )
+            .update(is_active=False)
+        )
 
     class Meta:
         verbose_name = "Исключение из правил доступности"
@@ -971,7 +1113,8 @@ class AvailabilityExceptionTimeWindow(TimeStampedModel):
                     "override_start_time и override_end_time могут совпадать только для 24/7 (00:00-00:00)"
                 )
 
-            elif self.override_start_time > self.override_end_time:
+            # 00:00 в окончании окна считаем концом текущих суток, поэтому например "09:00-00:00" допустимо
+            elif self.override_start_time > self.override_end_time and self.override_end_time != time(0, 0):
                 raise ValidationError("override_start_time должен быть меньше override_end_time")
 
     def __str__(self):
