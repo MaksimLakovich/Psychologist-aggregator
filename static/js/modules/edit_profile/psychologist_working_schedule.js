@@ -9,6 +9,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   initTabs();
+  initRuleEditMode();
   initWindowFormset({
     addButtonSelector: '[data-add-window-form="rule"]',
     listSelector: '[data-window-formset-list="rule"]',
@@ -23,6 +24,54 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   initExceptionTypeToggle();
 });
+
+function initRuleEditMode() {
+  const form = document.querySelector("[data-rule-form-root]");
+  const editButton = document.querySelector("[data-edit-rule-button]");
+  const cancelButton = document.querySelector("[data-cancel-rule-edit]");
+  const editOnlyElements = Array.from(document.querySelectorAll("[data-rule-edit-visible]"));
+  const readonlyOnlyElements = Array.from(document.querySelectorAll("[data-rule-readonly-visible]"));
+
+  if (!form) return;
+
+  const startsReadonly = form.dataset.ruleReadonlyInitial === "true";
+  const editableFields = Array.from(form.querySelectorAll("input, select, textarea, button")).filter((field) => {
+    return field.type !== "hidden";
+  });
+
+  function setEditingMode(isEditing) {
+    // Пока специалист не нажал "Редактировать", форма показывает текущие значения как справочную карточку.
+    form.classList.toggle("working-schedule-readonly", startsReadonly && !isEditing);
+
+    if (editButton) {
+      editButton.classList.toggle("hidden", isEditing);
+    }
+
+    editOnlyElements.forEach((element) => {
+      element.classList.toggle("hidden", !isEditing);
+    });
+
+    readonlyOnlyElements.forEach((element) => {
+      element.classList.toggle("hidden", isEditing);
+    });
+
+    editableFields.forEach((field) => {
+      field.disabled = startsReadonly && !isEditing;
+    });
+  }
+
+  if (editButton) {
+    editButton.addEventListener("click", () => setEditingMode(true));
+  }
+
+  if (cancelButton) {
+    cancelButton.addEventListener("click", () => {
+      window.location.href = `${window.location.pathname}${window.location.search}`;
+    });
+  }
+
+  setEditingMode(!startsReadonly);
+}
 
 function initTabs() {
   const buttons = Array.from(document.querySelectorAll("[data-tab-button]"));

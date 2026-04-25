@@ -71,11 +71,39 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
             .order_by("-created_at")[:5]
         )
 
-    def get_rule_form(self, *, data=None):
-        return AvailabilityRuleWebForm(data=data, user=self.request.user)
+    def get_rule_form(self, *, data=None, active_rule=None):
+        initial = {}
 
-    def get_rule_windows_formset(self, *, data=None):
-        return AvailabilityRuleTimeWindowFormSet(data=data, prefix="rule_windows")
+        if active_rule and data is None:
+            # При открытии страницы показываем специалисту именно то правило,
+            # которое сейчас активно в базе, а редактирование включаем уже кнопкой в интерфейсе
+            initial = {
+                "rule_start": active_rule.rule_start,
+                "rule_end": active_rule.rule_end,
+                "weekdays": [str(day_number) for day_number in (active_rule.weekdays or [])],
+                "session_duration_individual": active_rule.session_duration_individual,
+                "session_duration_couple": active_rule.session_duration_couple,
+                "break_between_sessions": active_rule.break_between_sessions,
+                "minimum_booking_notice_hours": active_rule.minimum_booking_notice_hours,
+            }
+
+        return AvailabilityRuleWebForm(data=data, initial=initial, user=self.request.user)
+
+    def get_rule_windows_formset(self, *, data=None, active_rule=None):
+        initial = []
+
+        if active_rule and data is None:
+            # Рабочие окна тоже показываем из текущего активного правила,
+            # чтобы форма была полной картиной расписания специалиста
+            initial = [
+                {
+                    "start_time": window.start_time,
+                    "end_time": window.end_time,
+                }
+                for window in active_rule.time_windows.all()
+            ]
+
+        return AvailabilityRuleTimeWindowFormSet(data=data, initial=initial, prefix="rule_windows")
 
     def get_exception_form(self, *, data=None, active_rule=None):
         initial = {}
@@ -167,8 +195,8 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
         context = super().get_context_data(**kwargs)
         active_rule = self._decorate_rule(self.get_active_rule())
 
-        context.setdefault("rule_form", self.get_rule_form())
-        context.setdefault("rule_windows_formset", self.get_rule_windows_formset())
+        context.setdefault("rule_form", self.get_rule_form(active_rule=active_rule))
+        context.setdefault("rule_windows_formset", self.get_rule_windows_formset(active_rule=active_rule))
         context.setdefault("exception_form", self.get_exception_form(active_rule=active_rule))
         context.setdefault("exception_windows_formset", self.get_exception_windows_formset())
         context.setdefault("active_schedule_tab", "rule")
@@ -177,6 +205,7 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
         context["show_sidebar"] = "sidebar"
         context["current_sidebar_key"] = "available-rule"
         context["active_rule"] = active_rule
+        context["rule_readonly_initial"] = bool(active_rule and not context["rule_form"].is_bound)
         context["active_exceptions"] = self.get_active_exceptions()
         context["archived_rules"] = [self._decorate_rule(rule) for rule in self.get_archived_rules()]
         context["archived_exceptions"] = self.get_archived_exceptions()
