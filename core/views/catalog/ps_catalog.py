@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -11,10 +12,12 @@ from django_ratelimit.decorators import ratelimit
 
 from aggregator._web.services.basic_filter_catalog import \
     CONSULTATION_TYPE_CHOICES
+from calendar_engine.models import AvailabilityRule
 from core.services.experience_label import build_experience_label
 from core.services.mixins_ps_catalog import (CatalogBackLinkMixin,
                                              CatalogLayoutModeMixin,
                                              CatalogPageDataMixin)
+from core.services.session_duration_label import attach_session_duration_labels
 from core.services.topic_groups import (build_topics_grouped_by_type,
                                         serialize_topics_grouped_by_type)
 from users.constants import GENDER_CHOICES
@@ -246,7 +249,16 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, CatalogLayoutModeMixin,
         profile = get_object_or_404(
             PsychologistProfile.objects
             .select_related("user")
-            .prefetch_related("methods", "topics", "specialisations"),
+            .prefetch_related(
+                "methods",
+                "topics",
+                "specialisations",
+                Prefetch(
+                    "user__availability_rules",
+                    queryset=AvailabilityRule.objects.filter(is_active=True).order_by("-created_at"),
+                    to_attr="prefetched_active_availability_rules",
+                ),
+            ),
             is_verified=True,
             user__is_active=True,
             slug=profile_slug,
@@ -257,6 +269,7 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, CatalogLayoutModeMixin,
         )
 
         profile.experience_label = build_experience_label(profile.work_experience_years)
+        attach_session_duration_labels(profile)
         context["profile"] = profile
 
         # JSON-контракт одного психолога для JS-рендера detail-карточки
@@ -295,6 +308,10 @@ class PsychologistCardDetailPageView(LoginRequiredMixin, CatalogLayoutModeMixin,
             "price_individual": str(profile.price_individual),
             "price_couples": str(profile.price_couples),
             "price_currency": profile.price_currency,
+            "session_duration_individual": profile.session_duration_individual_minutes,
+            "session_duration_couple": profile.session_duration_couple_minutes,
+            "session_duration_individual_label": profile.session_duration_individual_label,
+            "session_duration_couple_label": profile.session_duration_couple_label,
         }
 
         # Логика управления отображением сайдбара

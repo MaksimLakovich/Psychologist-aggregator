@@ -25,13 +25,14 @@ from calendar_engine.booking.use_cases.therapy_session_create import \
     CreateTherapySessionUseCase
 from calendar_engine.lifecycle.use_cases.apply_time_based_status_transitions import \
     apply_time_based_status_transitions_for_user
-from calendar_engine.models import CalendarEvent
+from calendar_engine.models import AvailabilityRule, CalendarEvent
 from core.services.anonymous_client_flow_for_search_and_booking import (
     apply_guest_state_to_user, build_choice_psychologist_url,
     build_signed_booking_token, clear_guest_matching_state,
     get_guest_data_for_login, get_guest_data_for_registration,
     get_guest_matching_state, get_guest_pending_booking,
     load_signed_booking_token, update_guest_general_state)
+from core.services.session_duration_label import build_session_duration_labels
 from users._web.forms.auth_form import (AppUserLoginForm,
                                         AppUserRegistrationForm)
 from users.mixins.anonymous_only_mixin import AnonymousOnlyMixin
@@ -133,10 +134,15 @@ def _build_paused_booking_summary(session) -> dict | None:
         else specialist_profile.price_individual
     )
     price_label = format(price_value, "f").rstrip("0").rstrip(".")
-    session_label = (
-        "Парная сессия · 1,5 часа"
-        if consultation_type == "couple"
-        else "Индивидуальная сессия · 50 минут"
+    active_rule = (
+        AvailabilityRule.objects
+        .filter(creator=specialist_profile.user, is_active=True)
+        .order_by("-created_at")
+        .first()
+    )
+    session_label = build_session_duration_labels(active_rule).get(
+        consultation_type,
+        "Индивидуальная сессия · длительность не указана",
     )
     slot_start_datetime = datetime.fromisoformat(pending_booking["slot_start_iso"])
     guest_timezone_value = get_guest_matching_state(session)["general"].get("timezone")

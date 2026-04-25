@@ -3,7 +3,7 @@ from datetime import date
 from urllib.parse import urlencode
 
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Case, IntegerField, Max, Min, Value, When
+from django.db.models import Case, IntegerField, Max, Min, Prefetch, Value, When
 from django.template.loader import render_to_string
 from django.urls import reverse
 
@@ -14,8 +14,10 @@ from aggregator._web.services.basic_filter_catalog import (
     extract_experience_range, extract_gender, extract_method_ids,
     extract_price_values, extract_selected_session_slots,
     extract_session_time_mode, extract_topic_ids)
+from calendar_engine.models import AvailabilityRule
 from core.constants import CARDS_PER_PAGE
 from core.services.experience_label import build_experience_label
+from core.services.session_duration_label import attach_session_duration_labels
 from users.models import PsychologistProfile
 from users.services.slug import generate_unique_slug
 
@@ -87,7 +89,16 @@ class CatalogPsychologistQuerysetMixin:
             PsychologistProfile.objects
             .filter(is_verified=True, user__is_active=True)
             .select_related("user")
-            .prefetch_related("methods", "topics", "specialisations")
+            .prefetch_related(
+                "methods",
+                "topics",
+                "specialisations",
+                Prefetch(
+                    "user__availability_rules",
+                    queryset=AvailabilityRule.objects.filter(is_active=True).order_by("-created_at"),
+                    to_attr="prefetched_active_availability_rules",
+                ),
+            )
             .order_by("id")
         )
 
@@ -478,6 +489,7 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
         for profile in profiles:
             self._profile_slug(profile)
             profile.experience_label = build_experience_label(profile.work_experience_years)
+            attach_session_duration_labels(profile)
 
         return {
             "profiles": profiles,
