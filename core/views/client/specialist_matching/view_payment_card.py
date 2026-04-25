@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.db.models import Prefetch
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import FormView
@@ -6,6 +7,7 @@ from django.views.generic import FormView
 from calendar_engine.booking.exceptions import CreateBookingValidationError
 from calendar_engine.booking.use_cases.therapy_session_create import \
     CreateTherapySessionUseCase
+from calendar_engine.models import AvailabilityRule
 from core.forms.client.specialist_matching.form_payment_card import \
     ClientAddPaymentCardForm
 from core.services.anonymous_client_flow_for_search_and_booking import (
@@ -13,7 +15,9 @@ from core.services.anonymous_client_flow_for_search_and_booking import (
 from core.services.get_client_timezone_value import \
     get_client_timezone_value_for_request
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
+from core.services.session_duration_label import attach_session_duration_labels
 from users.mixins.role_required_mixin import ClientRequiredMixin
+from users.models import PsychologistProfile
 
 
 class ClientAddPaymentCardPageView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, FormView):
@@ -123,6 +127,58 @@ class ClientAddPaymentCardPageView(ClientRequiredMixin, SpecialistMatchingLayout
 
         return super().form_valid(form)
 
+    def _build_selected_specialist_payload(self):
+        """Готовит данные выбранного специалиста для блока подтверждения записи на payment-card."""
+        initial = self.get_initial()
+        specialist_profile_id = initial.get("specialist_profile_id")
+        if not specialist_profile_id:
+            return None
+
+        specialist_profile = (
+            PsychologistProfile.objects
+            .select_related("user")
+            .prefetch_related(
+                Prefetch(
+                    "user__availability_rules",
+                    queryset=AvailabilityRule.objects.filter(is_active=True).order_by("-created_at"),
+                    to_attr="prefetched_active_availability_rules",
+                )
+            )
+            .filter(pk=specialist_profile_id, is_verified=True, user__is_active=True)
+            .first()
+        )
+
+        if not specialist_profile:
+            return None
+
+        attach_session_duration_labels(specialist_profile)
+
+        return {
+            "id": specialist_profile.id,
+            "full_name": f"{specialist_profile.user.first_name} {specialist_profile.user.last_name}".strip(),
+            "photo": (
+                specialist_profile.photo.url
+                if specialist_profile.photo
+                else "/static/images/menu/user-circle.svg"
+            ),
+            "price": {
+                "value": str(
+                    specialist_profile.price_couples
+                    if initial.get("consultation_type") == "couple"
+                    else specialist_profile.price_individual
+                ),
+                "currency": specialist_profile.price_currency,
+            },
+            "price_individual": str(specialist_profile.price_individual),
+            "price_couples": str(specialist_profile.price_couples),
+            "price_currency": specialist_profile.price_currency,
+            "session_type": initial.get("consultation_type") or "individual",
+            "session_duration_individual": specialist_profile.session_duration_individual_minutes,
+            "session_duration_couple": specialist_profile.session_duration_couple_minutes,
+            "session_duration_individual_label": specialist_profile.session_duration_individual_label,
+            "session_duration_couple_label": specialist_profile.session_duration_couple_label,
+        }
+
     def get_context_data(self, **kwargs):
         """Формирование контекста для передачи данных в HTML-шаблон.
         1) Метод вызывается автоматически при рендеринге HTML-страницы и дополняет базовый контекст
@@ -138,6 +194,7 @@ class ClientAddPaymentCardPageView(ClientRequiredMixin, SpecialistMatchingLayout
         # - для авторизованного клиента timezone берется из аккаунта;
         # - для гостя из временного guest-anonymous-состояния в session, собранного на первом шаге подбора
         context["client_timezone_value"] = get_client_timezone_value_for_request(self.request)
+        context["payment_specialist_payload"] = self._build_selected_specialist_payload()
 
         # Проверяем, все ли обязательные выборы из предыдущего шага действительно доехали до страницы подтверждения.
         # Если хотя бы одного значения нет, значит клиент пришел на payment-card "в обход" нормального сценария

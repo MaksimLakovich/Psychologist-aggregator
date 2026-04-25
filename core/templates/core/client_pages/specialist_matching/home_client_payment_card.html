@@ -19,6 +19,7 @@
                 {{ form.specialist_profile_id }}
                 {{ form.slot_start_iso }}
                 {{ form.consultation_type }}
+                {{ payment_specialist_payload|json_script:"payment-specialist-payload-data" }}
 
                 <!-- ========== ВАЖНО для открытия либо САЙДБАРА либо МЕНЮ ========== -->
                 <input type="hidden" name="layout" value="{{ layout_mode }}">
