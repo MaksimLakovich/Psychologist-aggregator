@@ -175,17 +175,6 @@
                                         <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
                                         Редактировать
                                     </button>
-                                    <form method="post" class="{% if rule_readonly_initial %}hidden{% endif %}shrink-0" data-rule-edit-visible>
-                                        {% csrf_token %}
-                                        <input type="hidden" name="schedule_action" value="deactivate-rule">
-                                        <button type="submit"
-                                                class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
-                                                border border-rose-100 bg-rose-50 px-5 py-2.5 text-sm font-medium text-rose-600 transition-all duration-200
-                                                hover:bg-rose-100 hover:border-rose-200 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:ring-offset-2">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                            Удалить
-                                        </button>
-                                    </form>
                                 </div>
                                 {% endif %}
                             </div>
@@ -196,20 +185,37 @@
                             </div>
                             {% endif %}
 
+                            {% if active_rule %}
+                            <form method="post" id="deactivate-rule-form" class="hidden">
+                                {% csrf_token %}
+                                <input type="hidden" name="schedule_action" value="deactivate-rule">
+                            </form>
+                            {% endif %}
+
                             <!-- Если еще нет правила -->
                             {% if not active_rule %}
-                            <div class="rounded-2xl bg-slate-200/30 p-6 text-center">
+                            <div class="{% if rule_form.is_bound %}hidden {% endif %}rounded-2xl bg-slate-200/30 p-6 text-center" data-rule-empty-state>
                                 <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center">
                                     <img src="{% static 'images/psychologist_profile/no-work-schedule.svg' %}" alt="no-work-schedule" class="w-10 h-10">
                                 </div>
                                 <p class="text-lg font-semibold text-zinc-700/70">Активного рабочего расписания пока нет</p>
                                 <p class="mt-3 text-base leading-6 text-zinc-500/70">Создайте свой персональный рабочий график, который позволит клиентам бронировать встречи на свободные временные слоты в вашем расписании.</p>
+                                <div class="mt-12 mb-3 flex justify-center">
+                                    <button type="button"
+                                            data-create-rule-button
+                                            class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
+                                            border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
+                                            hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                        <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
+                                        Создать рабочий график
+                                    </button>
+                                </div>
                             </div>
+                            {% endif %}
 
                             <!-- Есть правило / Создание правила -->
-                            {% else %}
                             <form method="post"
-                                  class="space-y-8 {% if rule_readonly_initial %}working-schedule-readonly{% endif %}"
+                                  class="{% if not active_rule and not rule_form.is_bound %}hidden {% endif %}space-y-8 {% if rule_readonly_initial %}working-schedule-readonly{% endif %}"
                                   data-rule-form-root
                                   data-rule-readonly-initial="{% if rule_readonly_initial %}true{% else %}false{% endif %}">
                                 {% csrf_token %}
@@ -375,24 +381,35 @@
                                 </div>
 
                                 <!-- КНОПКИ -->
-                                <div class="{% if rule_readonly_initial %}hidden {% endif %}border-t-2 border-slate-300/30 pt-8 flex flex-col sm:flex-row sm:justify-end gap-3" data-rule-edit-visible>
+                                <div class="{% if rule_readonly_initial %}hidden {% endif %}border-t-2 border-slate-300/30 pt-8 flex flex-col sm:flex-row sm:items-center {% if active_rule %}sm:justify-between{% else %}sm:justify-end{% endif %} gap-3" data-rule-edit-visible>
                                     {% if active_rule %}
-                                    <button type="button"
-                                            data-cancel-rule-edit
-                                            class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
-                                            border border-transparent bg-slate-100/85 px-5 py-2.5 text-sm font-medium text-zinc-500 shadow-xs transition-all duration-200
-                                            hover:bg-slate-200/75 hover:shadow-sm">
-                                        Отмена
+                                    <button type="submit"
+                                            form="deactivate-rule-form"
+                                            class="inline-flex w-full sm:w-auto items-center justify-center gap-2 whitespace-nowrap rounded-xl
+                                            border border-rose-100 bg-rose-50 px-5 py-2.5 text-sm font-medium text-rose-600 transition-all duration-200
+                                            hover:bg-rose-100 hover:border-rose-200 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:ring-offset-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        Удалить
                                     </button>
                                     {% endif %}
-                                    <button type="submit"
-                                            class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
-                                            border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-all duration-200
-                                            hover:bg-emerald-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
-                                        Сохранить расписание
-                                    </button>
+                                    <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:justify-end">
+                                        {% if active_rule %}
+                                        <button type="button"
+                                                data-cancel-rule-edit
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-slate-100/85 px-5 py-2.5 text-sm font-medium text-zinc-500 shadow-xs transition-all duration-200
+                                                hover:bg-slate-200/75 hover:shadow-sm">
+                                            Отмена
+                                        </button>
+                                        {% endif %}
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-all duration-200
+                                                hover:bg-emerald-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                            Сохранить расписание
+                                        </button>
+                                    </div>
                                 </div>
-                            {% endif %}
                             </form>
                         </div>
 

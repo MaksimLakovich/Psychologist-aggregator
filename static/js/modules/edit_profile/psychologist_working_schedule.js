@@ -8,6 +8,8 @@
  */
 
 document.addEventListener("DOMContentLoaded", () => {
+  // После загрузки страницы включаем все интерактивные элементы расписания:
+  // вкладки, режим редактирования, добавление рабочих окон и показ полей для исключений.
   initTabs();
   initRuleEditMode();
   initWindowFormset({
@@ -25,6 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initExceptionTypeToggle();
 });
 
+// Управляет режимом "Просмотр / Редактирование" для базового рабочего графика.
+// В режиме просмотра специалист видит текущее расписание из базы, но не может случайно изменить поля.
 function initRuleEditMode() {
   const form = document.querySelector("[data-rule-form-root]");
   const editButton = document.querySelector("[data-edit-rule-button]");
@@ -41,6 +45,8 @@ function initRuleEditMode() {
     return field.type !== "hidden";
   });
 
+  // Переключает форму между безопасным просмотром и полноценным редактированием.
+  // Заодно показывает или скрывает кнопки, которые нужны только во время редактирования.
   function setEditingMode(isEditing) {
     // Пока специалист не нажал "Редактировать", форма показывает текущие значения как справочную карточку.
     form.classList.toggle("working-schedule-readonly", startsReadonly && !isEditing);
@@ -83,11 +89,14 @@ function initRuleEditMode() {
   setEditingMode(!startsReadonly);
 }
 
+// Переключает две вкладки страницы: базовый график и временные исключения.
+// Это помогает держать обычное расписание и разовые изменения отдельно друг от друга.
 function initTabs() {
   const buttons = Array.from(document.querySelectorAll("[data-tab-button]"));
   const panels = Array.from(document.querySelectorAll("[data-tab-panel]"));
   if (!buttons.length || !panels.length) return;
 
+  // Показывает выбранную вкладку и визуально подсвечивает активную кнопку вкладки.
   function activateTab(tabName) {
     buttons.forEach((button) => {
       const isActive = button.dataset.tabButton === tabName;
@@ -108,6 +117,8 @@ function initTabs() {
   activateTab(initiallyVisiblePanel?.dataset.tabPanel || buttons[0].dataset.tabButton);
 }
 
+// Настраивает добавление и удаление строк с рабочими окнами времени.
+// Одна и та же логика используется и для базового графика, и для временных исключений.
 function initWindowFormset({ addButtonSelector, listSelector, totalFormsInputId, templateId }) {
   const addButton = document.querySelector(addButtonSelector);
   const list = document.querySelector(listSelector);
@@ -139,6 +150,8 @@ function initWindowFormset({ addButtonSelector, listSelector, totalFormsInputId,
   });
 }
 
+// Показывает дополнительные поля исключения только для варианта "переопределить график".
+// Если специалист выбирает полную недоступность, новые рабочие окна и параметры сессий не нужны.
 function initExceptionTypeToggle() {
   const select = document.querySelector('[data-exception-type-select="1"]');
   const overrideSection = document.querySelector("[data-override-window-section]");
@@ -146,6 +159,7 @@ function initExceptionTypeToggle() {
 
   if (!select || !overrideSection) return;
 
+  // Синхронизирует видимость блока переопределения с выбранным типом исключения.
   function syncVisibility() {
     const isOverride = select.value === "override";
     overrideSection.classList.toggle("hidden", !isOverride);
