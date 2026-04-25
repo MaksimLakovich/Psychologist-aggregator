@@ -339,8 +339,8 @@
         3,
         4
       ],
-      "session_duration_individual": 50,
-      "session_duration_couple": 90,
+      "session_duration_individual": 55,
+      "session_duration_couple": 110,
       "break_between_sessions": 10,
       "is_active": true,
       "created_at": "2026-01-20T12:00:00.000Z",
