@@ -28,7 +28,9 @@ document.addEventListener("DOMContentLoaded", () => {
 function initRuleEditMode() {
   const form = document.querySelector("[data-rule-form-root]");
   const editButton = document.querySelector("[data-edit-rule-button]");
+  const createButton = document.querySelector("[data-create-rule-button]");
   const cancelButton = document.querySelector("[data-cancel-rule-edit]");
+  const emptyState = document.querySelector("[data-rule-empty-state]");
   const editOnlyElements = Array.from(document.querySelectorAll("[data-rule-edit-visible]"));
   const readonlyOnlyElements = Array.from(document.querySelectorAll("[data-rule-readonly-visible]"));
 
@@ -62,6 +64,14 @@ function initRuleEditMode() {
 
   if (editButton) {
     editButton.addEventListener("click", () => setEditingMode(true));
+  }
+
+  if (createButton) {
+    createButton.addEventListener("click", () => {
+      // Когда графика еще нет, сначала показываем объясняющий блок, а форму открываем по явному действию
+      emptyState?.classList.add("hidden");
+      form.classList.remove("hidden");
+    });
   }
 
   if (cancelButton) {
