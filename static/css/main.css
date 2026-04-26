@@ -3007,6 +3007,10 @@ input:checked + .toggle-bg {
   grid-template-columns: auto 1fr auto;
 }
 
+.grid-cols-\[minmax\(0\2c 1fr\)_auto\] {
+  grid-template-columns: minmax(0,1fr) auto;
+}
+
 .flex-row {
   flex-direction: row;
 }
@@ -3134,6 +3138,10 @@ input:checked + .toggle-bg {
   row-gap: 1.5rem;
 }
 
+.gap-y-2 {
+  row-gap: 0.5rem;
+}
+
 .-space-x-2 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
   margin-right: calc(-0.5rem * var(--tw-space-x-reverse));
@@ -3240,6 +3248,10 @@ input:checked + .toggle-bg {
 
 .self-center {
   align-self: center;
+}
+
+.justify-self-start {
+  justify-self: start;
 }
 
 .justify-self-center {

@@ -775,28 +775,20 @@
                         <!-- 4 -->
                         <div class="pt-4 border-t border-white/10">
                             <span class="block text-indigo-50/50 font-semibold mb-3">Параметры сессий</span>
-                            <div class="flex flex-wrap gap-1.5">
-                                <div class="space-y-2">
-                                    <div>
-                                        <span class="text-xs text-white/85">Индивидуальная</span>
-                                        <span class="rounded-lg bg-white/10 px-2 py-1 text-xs font-medium">{{ active_rule.session_duration_individual }} мин</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-xs text-white/85">Парная</span>
-                                        <span class="rounded-lg bg-white/10 px-2 py-1 text-xs font-medium">{{ active_rule.session_duration_couple }} мин</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-xs text-white/85">Перерыв</span>
-                                        <span class="rounded-lg bg-white/10 px-2 py-1 text-xs font-medium">{{ active_rule.break_between_sessions|default:0 }} мин</span>
-                                    </div>
-                                </div>
+                            <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2">
+                                <span class="text-xs text-white/85">Индивидуальная</span>
+                                <span class="justify-self-start rounded-lg bg-white/10 px-2 py-1 text-xs font-medium">{{ active_rule.session_duration_individual }} мин</span>
+                                <span class="text-xs text-white/85">Парная</span>
+                                <span class="justify-self-start rounded-lg bg-white/10 px-2 py-1 text-xs font-medium">{{ active_rule.session_duration_couple }} мин</span>
+                                <span class="text-xs text-white/85">Перерыв</span>
+                                <span class="justify-self-start rounded-lg bg-white/10 px-2 py-1 text-xs font-medium">{{ active_rule.break_between_sessions|default:0 }} мин</span>
                             </div>
                         </div>
 
                         <!-- 5 -->
                         <div class="pt-4 border-t border-white/10">
                             <div class="flex items-center gap-4">
-                                <p class="block text-indigo-50/50 font-semibold mb-3">Исключения</p>
+                                <p class="block text-indigo-50/50 font-semibold">Исключения</p>
                                 <!-- Бейдж открывает вкладку с подробным списком исключений -->
                                 <button type="button"
                                         data-open-exception-tab
