@@ -125,6 +125,20 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
     def get_exception_windows_formset(self, *, data=None):
         return AvailabilityExceptionTimeWindowFormSet(data=data, prefix="exception_windows")
 
+    def has_active_exception_overlap(self, *, active_rule, exception_start, exception_end):
+        """Проверяет, заняты ли выбранные даты другим действующим исключением.
+
+        Пересечение есть даже тогда, когда совпал один день: например,
+        новое исключение 01.05-10.05 конфликтует с уже созданным 28.04-01.05.
+        """
+        return AvailabilityException.objects.filter(
+            creator=self.request.user,
+            rule=active_rule,
+            is_active=True,
+            exception_start__lte=exception_end,
+            exception_end__gte=exception_start,
+        ).exists()
+
     def get_success_url_for_tab(self, tab_name):
         """Возвращает пользователя на нужную вкладку после сохранения или удаления.
 
@@ -344,6 +358,21 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
             )
 
         if exception_form.is_valid() and exception_windows_formset.is_valid():
+            if self.has_active_exception_overlap(
+                active_rule=active_rule,
+                exception_start=exception_form.cleaned_data["exception_start"],
+                exception_end=exception_form.cleaned_data["exception_end"],
+            ):
+                exception_form.add_error(None, "На указанные даты уже есть действующее исключение")
+                messages.error(request, "На указанные даты уже есть действующее исключение")
+                return self.render_to_response(
+                    self.get_context_data(
+                        exception_form=exception_form,
+                        exception_windows_formset=exception_windows_formset,
+                        active_schedule_tab="exception",
+                    )
+                )
+
             exception_type = exception_form.cleaned_data["exception_type"]
             override_windows = self._collect_exception_windows(exception_windows_formset)
             if (
