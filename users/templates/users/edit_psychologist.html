@@ -115,11 +115,13 @@
 
 <section class="relative overflow-hidden min-h-screen bg-white backdrop-blur-[2px] w-full px-6 sm:px-8 lg:px-24 py-10">
 
-    <!-- Фоновое ЛОГО в нижний правый угол -->
-    <div class="hidden lg:block absolute bottom-10 right-10 p-8 pointer-events-none z-0 select-none opacity-10 blur-[2px]">
-        <img src="{% static 'images/menu/opora-base.png' %}"
-             alt=""
-             class="w-80 h-auto">
+    <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <!-- Легкий градиентный фон по диагонали в правый верхний угол -->
+        <div class="absolute -top-[20%] -right-[10%] w-[70%] h-[70%] rounded-full bg-indigo-50/50 blur-3xl"></div>
+        <!-- Фоновое ЛОГО в нижний правый угол -->
+        <div class="hidden lg:block absolute bottom-10 right-10 p-8 pointer-events-none z-0 select-none opacity-10 blur-[2px]">
+            <img src="{% static 'images/menu/opora-base.png' %}" alt="" class="w-80 h-auto">
+        </div>
     </div>
 
     <div class="max-w-7xl mx-auto relative z-10">
