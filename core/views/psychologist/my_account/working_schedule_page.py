@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect
@@ -123,6 +125,18 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
     def get_exception_windows_formset(self, *, data=None):
         return AvailabilityExceptionTimeWindowFormSet(data=data, prefix="exception_windows")
 
+    def get_success_url_for_tab(self, tab_name):
+        """Возвращает пользователя на нужную вкладку после сохранения или удаления.
+
+        Для специалиста это важно: после работы с исключениями страница не должна сама
+        перескакивать обратно на базовый график.
+        """
+        query = {"active_schedule_tab": tab_name}
+        if self.request.GET.get("layout"):
+            query["layout"] = self.request.GET["layout"]
+
+        return f"{self.success_url}?{urlencode(query)}"
+
     @staticmethod
     def _collect_rule_windows(formset):
         """Забираем из formset только реально заполненные рабочие окна.
@@ -199,7 +213,11 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
         context.setdefault("rule_windows_formset", self.get_rule_windows_formset(active_rule=active_rule))
         context.setdefault("exception_form", self.get_exception_form(active_rule=active_rule))
         context.setdefault("exception_windows_formset", self.get_exception_windows_formset())
-        context.setdefault("active_schedule_tab", "rule")
+        requested_tab = self.request.GET.get("active_schedule_tab")
+        if requested_tab not in {"rule", "exception"}:
+            requested_tab = "rule"
+
+        context.setdefault("active_schedule_tab", requested_tab)
 
         context["title_psychologist_working_schedule_view"] = "Рабочее расписание специалиста в сервисе ОПОРА"
         context["show_sidebar"] = "sidebar"
@@ -379,7 +397,7 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
                         request,
                         "Исключение сохранено. Сервис учтет его поверх базового рабочего расписания"
                     )
-                    return redirect(self.success_url)
+                    return redirect(self.get_success_url_for_tab("exception"))
 
                 for field_name, field_errors in serializer.errors.items():
                     exception_form.add_error(None, self._serializer_error_to_text(field_name, field_errors))
@@ -410,4 +428,4 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
             request,
             "Исключение закрыто. Базовое рабочее расписание снова действует без этого временного отклонения"
         )
-        return redirect(self.success_url)
+        return redirect(self.get_success_url_for_tab("exception"))

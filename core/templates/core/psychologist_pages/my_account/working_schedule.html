@@ -448,6 +448,7 @@
                                             <form method="post" class="shrink-0">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="schedule_action" value="deactivate-exception">
+                                                <input type="hidden" name="active_schedule_tab" value="exception">
                                                 <input type="hidden" name="exception_id" value="{{ exception.pk }}">
                                                 <button type="submit"
                                                         class="shrink-0 self-start md:self-end p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50
@@ -479,7 +480,7 @@
                                 </div>
                                 {% endif %}
 
-                                <div class="mt-12 mb-3 flex justify-center">
+                                <div class="{% if exception_form.is_bound %}hidden {% endif %}mt-12 mb-3 flex justify-center" data-exception-create-actions>
                                     <button type="button"
                                             data-create-exception-button
                                             class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
@@ -510,9 +511,13 @@
 
                             <!-- Есть исключения / Создание исключения -->
                             {% else %}
-                            <form method="post" class="{% if not exception_form.is_bound %}hidden {% endif %}space-y-8" data-exception-form-root>
+                            <form method="post"
+                                  class="{% if not exception_form.is_bound %}hidden {% endif %}space-y-8"
+                                  data-exception-form-root
+                                  data-exception-form-bound="{% if exception_form.is_bound %}true{% else %}false{% endif %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="schedule_action" value="create-exception">
+                                <input type="hidden" name="active_schedule_tab" value="exception">
 
                                 <!-- 1. Дата начала и действия исключения в расписании -->
                                 <div>
@@ -658,15 +663,23 @@
                                     </div>
                                 </div>
 
-                                <!-- КНОПКА -->
+                                <!-- КНОПКИ -->
                                 <div class="border-t-2 border-slate-300/30 pt-8 flex justify-end">
-                                    <button type="submit"
-                                            class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
-                                            border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
-                                            hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                        <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
-                                        Сохранить исключение
-                                    </button>
+                                    <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:justify-end">
+                                        <button type="button"
+                                                data-cancel-exception-create
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-slate-100/85 px-5 py-2.5 text-sm font-medium text-zinc-500 shadow-xs transition-all duration-200
+                                                hover:bg-slate-200/75 hover:shadow-sm">
+                                            Отмена
+                                        </button>
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-all duration-200
+                                                hover:bg-emerald-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                            Сохранить исключение
+                                        </button>
+                                    </div>
                                 </div>
                             </form>
                             {% endif %}

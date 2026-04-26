@@ -127,14 +127,48 @@ function initTabs() {
 // Так специалист сначала видит текущие исключения, а потом решает, нужно ли добавлять новое.
 function initExceptionCreateMode() {
   const createButton = document.querySelector("[data-create-exception-button]");
+  const createActions = document.querySelector("[data-exception-create-actions]");
+  const cancelButton = document.querySelector("[data-cancel-exception-create]");
   const form = document.querySelector("[data-exception-form-root]");
 
   if (!createButton || !form) return;
 
+  const windowList = form.querySelector('[data-window-formset-list="exception"]');
+  const totalFormsInput = document.getElementById("id_exception_windows-TOTAL_FORMS");
+  const initialWindowHtml = windowList?.innerHTML || "";
+  const initialTotalForms = totalFormsInput?.value || "";
+
+  // Если форма открыта из-за ошибки валидации, кнопку добавления сразу прячем.
+  createActions?.classList.toggle("hidden", !form.classList.contains("hidden"));
+
   createButton.addEventListener("click", () => {
     form.classList.remove("hidden");
+    createActions?.classList.add("hidden");
     form.scrollIntoView({ behavior: "smooth", block: "start" });
   });
+
+  if (cancelButton) {
+    cancelButton.addEventListener("click", () => {
+      // Отмена закрывает форму и возвращает ее к начальному состоянию без отправки данных на сервер.
+      if (form.dataset.exceptionFormBound === "true") {
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.set("active_schedule_tab", "exception");
+        window.location.href = cleanUrl.toString();
+        return;
+      }
+
+      form.reset();
+      if (windowList) {
+        windowList.innerHTML = initialWindowHtml;
+      }
+      if (totalFormsInput) {
+        totalFormsInput.value = initialTotalForms;
+      }
+      form.querySelector('[data-exception-type-select="1"]')?.dispatchEvent(new Event("change", { bubbles: true }));
+      form.classList.add("hidden");
+      createActions?.classList.remove("hidden");
+    });
+  }
 }
 
 // Настраивает добавление и удаление строк с рабочими окнами времени.
