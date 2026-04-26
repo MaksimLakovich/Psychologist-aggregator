@@ -4025,6 +4025,10 @@ input:checked + .toggle-bg {
   background-color: rgb(203 213 225 / var(--tw-bg-opacity, 1));
 }
 
+.bg-indigo-500\/50 {
+  background-color: rgb(104 117 245 / 0.5);
+}
+
 .bg-\[linear-gradient\(180deg\2c rgba\(255\2c 255\2c 255\2c 0\.98\)\2c rgba\(248\2c 250\2c 255\2c 0\.95\)\)\] {
   background-image: linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,255,0.95));
 }
@@ -6378,6 +6382,10 @@ input:checked + .toggle-bg {
 
   .sm\:block {
     display: block;
+  }
+
+  .sm\:inline-grid {
+    display: inline-grid;
   }
 
   .sm\:w-24 {
