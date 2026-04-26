@@ -5028,6 +5028,19 @@ input:checked + .toggle-bg {
   color: rgb(113 113 122 / 0.7);
 }
 
+.text-purple-500 {
+  --tw-text-opacity: 1;
+  color: rgb(144 97 249 / var(--tw-text-opacity, 1));
+}
+
+.text-indigo-500\/75 {
+  color: rgb(104 117 245 / 0.75);
+}
+
+.text-indigo-600\/75 {
+  color: rgb(88 80 236 / 0.75);
+}
+
 .line-through {
   text-decoration-line: line-through;
 }
