@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // вкладки, режим редактирования, добавление рабочих окон и показ полей для исключений.
   initTabs();
   initRuleEditMode();
+  initExceptionCreateMode();
   initWindowFormset({
     addButtonSelector: '[data-add-window-form="rule"]',
     listSelector: '[data-window-formset-list="rule"]',
@@ -113,8 +114,27 @@ function initTabs() {
     button.addEventListener("click", () => activateTab(button.dataset.tabButton));
   });
 
+  // Счетчик исключений в правой сводке ведет специалиста сразу на вкладку с подробностями.
+  document.querySelectorAll("[data-open-exception-tab]").forEach((button) => {
+    button.addEventListener("click", () => activateTab("exception"));
+  });
+
   const initiallyVisiblePanel = panels.find((panel) => !panel.classList.contains("hidden"));
   activateTab(initiallyVisiblePanel?.dataset.tabPanel || buttons[0].dataset.tabButton);
+}
+
+// Открывает форму создания временного исключения только после явного нажатия кнопки.
+// Так специалист сначала видит текущие исключения, а потом решает, нужно ли добавлять новое.
+function initExceptionCreateMode() {
+  const createButton = document.querySelector("[data-create-exception-button]");
+  const form = document.querySelector("[data-exception-form-root]");
+
+  if (!createButton || !form) return;
+
+  createButton.addEventListener("click", () => {
+    form.classList.remove("hidden");
+    form.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
 }
 
 // Настраивает добавление и удаление строк с рабочими окнами времени.
