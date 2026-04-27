@@ -14,9 +14,11 @@ from aggregator._web.services.topic_type_mapping import \
 from aggregator.paginators import PsychologistCatalogPagination
 from calendar_engine.application.mappers.match_result_mapper import \
     map_match_result_to_dict
+from calendar_engine.models import AvailabilityRule
 from core.services.experience_label import build_experience_label
 from core.services.get_client_profile_for_request import \
     get_client_profile_for_request
+from core.services.session_duration_label import attach_session_duration_labels
 from users.models import Education, PsychologistProfile
 
 
@@ -50,6 +52,11 @@ class PublicPsychologistListView(generics.ListAPIView):
             .select_related("user")
             .prefetch_related(
                 "methods", "topics",
+                Prefetch(
+                    lookup="user__availability_rules",
+                    queryset=AvailabilityRule.objects.filter(is_active=True).order_by("-created_at"),
+                    to_attr="prefetched_active_availability_rules",
+                ),
                 Prefetch(
                     lookup="user__created_educations",
                     queryset=Education.objects.order_by("-year_start"),
@@ -100,6 +107,7 @@ class MatchPsychologistsAjaxView(View):
 
         for item in aggregated_results.values():
             ps = item["profile"]
+            attach_session_duration_labels(ps)
             availability = item["availability"]  # MatchResultDTO | None
 
             # Цена
@@ -171,6 +179,13 @@ class MatchPsychologistsAjaxView(View):
                     "value": str(price_value),
                     "currency": ps.price_currency,
                 },
+                "price_individual": str(ps.price_individual),
+                "price_couples": str(ps.price_couples),
+                "price_currency": ps.price_currency,
+                "session_duration_individual": ps.session_duration_individual_minutes,
+                "session_duration_couple": ps.session_duration_couple_minutes,
+                "session_duration_individual_label": ps.session_duration_individual_label,
+                "session_duration_couple_label": ps.session_duration_couple_label,
                 "work_experience": ps.work_experience_years,
                 "experience_label": build_experience_label(ps.work_experience_years),
                 "rating": ps.rating,

@@ -40,12 +40,12 @@ class AvailabilityRuleWebForm(forms.Form):
 
     rule_start = forms.DateField(
         label="Дата начала",
-        widget=forms.DateInput(attrs={"class": BASE_INPUT_CLASS, "type": "date"}),
+        widget=forms.DateInput(format="%Y-%m-%d", attrs={"class": BASE_INPUT_CLASS, "type": "date"}),
     )
     rule_end = forms.DateField(
         label="Дата окончания",
         required=False,
-        widget=forms.DateInput(attrs={"class": BASE_INPUT_CLASS, "type": "date"}),
+        widget=forms.DateInput(format="%Y-%m-%d", attrs={"class": BASE_INPUT_CLASS, "type": "date"}),
     )
     weekdays = forms.MultipleChoiceField(
         label="Рабочие дни",
@@ -158,11 +158,11 @@ class AvailabilityExceptionWebForm(forms.Form):
 
     exception_start = forms.DateField(
         label="Дата начала",
-        widget=forms.DateInput(attrs={"class": BASE_INPUT_CLASS, "type": "date"}),
+        widget=forms.DateInput(format="%Y-%m-%d", attrs={"class": BASE_INPUT_CLASS, "type": "date"}),
     )
     exception_end = forms.DateField(
         label="Дата окончания",
-        widget=forms.DateInput(attrs={"class": BASE_INPUT_CLASS, "type": "date"}),
+        widget=forms.DateInput(format="%Y-%m-%d", attrs={"class": BASE_INPUT_CLASS, "type": "date"}),
     )
     reason = forms.ChoiceField(
         label="Причина исключения",

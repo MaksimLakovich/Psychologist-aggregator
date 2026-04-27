@@ -1,21 +1,35 @@
-import { pluralizeRu } from "../utils/pluralize_ru.js";
-
-
 /* ============================================================================
  * ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
  * ========================================================================== */
 
+// 1) Формируем подпись типа сессии по типу (индивидуальная/парная): тут берем готовую подпись, которую backend сформировал из активного рабочего расписания
+function formatSessionLabel(sessionType, psychologist = {}) {
+    if (sessionType === "couple") {
+        return psychologist.session_duration_couple_label
+            || "Парная сессия · длительность не указана";
+    }
 
-// 1) Формируем подпись типа сессии по типу (индивидуальная/парная)
-export function formatSessionLabel(sessionType) {
-    return sessionType === "couple"
-        ? "Парная сессия · 1,5 часа"
-        : "Индивидуальная сессия · 50 минут";
+    return psychologist.session_duration_individual_label
+        || "Индивидуальная сессия · длительность не указана";
 }
 
 // 2) Убираем копейки и формируем цену с валютой
-export function formatPrice(price) {
+function formatPrice(price) {
     return `${Number(price.value).toFixed(0)} ${price.currency}`;
+}
+
+// 3) Цена должна соответствовать формату сессии из скрытого поля payment-card.
+// Это важно при прямом открытии страницы по URL, когда выбранный формат уже есть в query,
+// а старый matching-state в sessionStorage/API может относиться к другому формату
+function formatPriceForSession(ps, sessionType) {
+    const rawValue = sessionType === "couple" ? ps.price_couples : ps.price_individual;
+    const currency = ps.price_currency || ps.price?.currency || "₽";
+
+    if (rawValue !== undefined && rawValue !== null && rawValue !== "") {
+        return `${Number(rawValue).toFixed(0)} ${currency}`;
+    }
+
+    return formatPrice(ps.price);
 }
 
 
@@ -57,9 +71,25 @@ function getInitialBookingPayload() {
     };
 }
 
+// Основные данные специалиста для payment-card backend уже положил в html через json_script.
+// Так страница подтверждения не зависит от старого состояния подбора и показывает актуальные данные из БД
+function getPaymentSpecialistPayload() {
+    const payloadElement = document.getElementById("payment-specialist-payload-data");
+    if (!payloadElement?.textContent) return null;
+
+    try {
+        const payload = JSON.parse(payloadElement.textContent);
+        return payload && typeof payload === "object" ? payload : null;
+    } catch (error) {
+        console.warn("Не удалось прочитать данные специалиста для payment-card:", error);
+        return null;
+    }
+}
+
 // Главная точка входа: получает выбранного специалиста и выбранный слот
 export async function initAddAppointmentAndPaymentCard() {
     const initialBookingPayload = getInitialBookingPayload();
+    const serverSpecialistPayload = getPaymentSpecialistPayload();
     const selectedId = initialBookingPayload.specialistProfileId || sessionStorage.getItem(STORAGE_KEY);
     let selectedSlot = null;
 
@@ -89,6 +119,23 @@ export async function initAddAppointmentAndPaymentCard() {
         return;
     }
 
+    if (serverSpecialistPayload && String(serverSpecialistPayload.id) === String(selectedId)) {
+        // Если backend уже передал выбранного специалиста, рендерим карточку сразу из этих данных.
+        // Запрос к matching API ниже оставляем только как запасной путь для старых/неполных сценариев.
+        if (!selectedSlot && initialBookingPayload.slotStartIso) {
+            selectedSlot = {
+                start_iso: initialBookingPayload.slotStartIso,
+            };
+        }
+
+        renderAddAppointmentAndPaymentCard(
+            serverSpecialistPayload,
+            selectedSlot,
+            initialBookingPayload.consultationType,
+        );
+        return;
+    }
+
     // Загружаем список специалиста и находим выбранного по id
     try {
         const response = await fetch(API_URL);
@@ -109,7 +156,7 @@ export async function initAddAppointmentAndPaymentCard() {
             };
         }
 
-        renderAddAppointmentAndPaymentCard(psychologist, selectedSlot);
+        renderAddAppointmentAndPaymentCard(psychologist, selectedSlot, initialBookingPayload.consultationType);
 
     } catch (error) {
         console.error("Ошибка при загрузке данных психолога:", error);
@@ -162,14 +209,15 @@ function formatAppointmentSlot(slot, timeZone) {
 }
 
 // 5) Рендерим HTML блока подтверждения записи и оплаты
-function renderAddAppointmentAndPaymentCard(ps, selectedSlot) {
+function renderAddAppointmentAndPaymentCard(ps, selectedSlot, consultationType) {
     const container = document.getElementById("payment-psychologist-summary");
     if (!container) return;
 
     // Часовой пояс клиента из data-атрибута шаблона
     const clientTimezone = container.dataset.clientTimezone || undefined;
-    const sessionLabel = formatSessionLabel(ps.session_type);
-    const priceLabel = formatPrice(ps.price);
+    const selectedConsultationType = consultationType || ps.session_type || "individual";
+    const sessionLabel = formatSessionLabel(selectedConsultationType, ps);
+    const priceLabel = formatPriceForSession(ps, selectedConsultationType);
 
     const slotLabel = formatAppointmentSlot(selectedSlot, clientTimezone);
 
