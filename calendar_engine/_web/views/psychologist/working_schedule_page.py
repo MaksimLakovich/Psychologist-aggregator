@@ -11,7 +11,7 @@ from django_ratelimit.decorators import ratelimit
 from calendar_engine._api.serializers.availability import (
     AvailabilityExceptionSerializer, AvailabilityRuleSerializer)
 from calendar_engine.models import AvailabilityException, AvailabilityRule
-from core.forms.psychologist.my_account.form_working_schedule import (
+from calendar_engine._web.forms.psychologist.form_working_schedule import (
     WEEKDAY_LABELS, AvailabilityExceptionTimeWindowFormSet,
     AvailabilityExceptionWebForm, AvailabilityRuleTimeWindowFormSet,
     AvailabilityRuleWebForm)
@@ -29,8 +29,8 @@ class PsychologistWorkingSchedulePageView(PsychologistRequiredMixin, TemplateVie
     Такое разделение помогает не путать "как специалист работает обычно" и "что изменилось на конкретные даты".
     """
 
-    template_name = "core/psychologist_pages/my_account/working_schedule.html"
-    success_url = reverse_lazy("core:psychologist-working-schedule")
+    template_name = "calendar_engine/psychologist_pages/working_schedule.html"
+    success_url = reverse_lazy("calendar_engine:web:psychologist-working-schedule")
 
     def dispatch(self, request, *args, **kwargs):
         """Перед показом страницы закрываем расписания и исключения, срок действия которых уже прошел."""
