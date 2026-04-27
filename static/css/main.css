@@ -4919,6 +4919,14 @@ input:checked + .toggle-bg {
   color: rgb(24 24 27 / var(--tw-text-opacity, 1));
 }
 
+.text-rose-500\/10 {
+  color: rgb(244 63 94 / 0.1);
+}
+
+.text-rose-500\/50 {
+  color: rgb(244 63 94 / 0.5);
+}
+
 .line-through {
   text-decoration-line: line-through;
 }

@@ -440,7 +440,7 @@
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex flex-wrap items-center gap-2">
                                                     <span class="rounded-full px-3 py-1 text-sm font-bold uppercase tracking-wider text-rose-500">{{ exception.get_reason_display }}</span>
-                                                    <span class="rounded-full px-3 py-1 text-sm lowercase text-rose-500/25">({{ exception.get_exception_type_display }})</span>
+                                                    <span class="rounded-full px-3 py-1 text-sm lowercase text-rose-500/50">({{ exception.get_exception_type_display }})</span>
                                                 </div>
                                                 <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
                                                     <div class="rounded-xl px-4">
@@ -462,7 +462,9 @@
                                                             {% endfor %}
                                                         </div>
                                                         {% else %}
-                                                        <p class="mt-2 text-sm font-medium text-slate-400">Полностью недоступен</p>
+                                                        <div class="mt-2 flex flex-wrap gap-2">
+                                                            <p class="rounded-lg bg-rose-50 px-3 py-2 text-xs font-semibold text-slate-600">—</p>
+                                                        </div>
                                                         {% endif %}
                                                     </div>
                                                 </div>
