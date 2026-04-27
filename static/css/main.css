@@ -3082,6 +3082,12 @@ input:checked + .toggle-bg {
   margin-bottom: calc(2rem * var(--tw-space-y-reverse));
 }
 
+.space-y-7 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1.75rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1.75rem * var(--tw-space-y-reverse));
+}
+
 .divide-y > :not([hidden]) ~ :not([hidden]) {
   --tw-divide-y-reverse: 0;
   border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
@@ -3965,6 +3971,22 @@ input:checked + .toggle-bg {
 .bg-zinc-900 {
   --tw-bg-opacity: 1;
   background-color: rgb(24 24 27 / var(--tw-bg-opacity, 1));
+}
+
+.bg-rose-50\/50 {
+  background-color: rgb(255 241 242 / 0.5);
+}
+
+.bg-rose-50\/25 {
+  background-color: rgb(255 241 242 / 0.25);
+}
+
+.bg-rose-50\/10 {
+  background-color: rgb(255 241 242 / 0.1);
+}
+
+.bg-rose-50\/20 {
+  background-color: rgb(255 241 242 / 0.2);
 }
 
 .bg-\[linear-gradient\(180deg\2c rgba\(255\2c 255\2c 255\2c 0\.98\)\2c rgba\(248\2c 250\2c 255\2c 0\.95\)\)\] {
@@ -4925,6 +4947,19 @@ input:checked + .toggle-bg {
 
 .text-rose-500\/50 {
   color: rgb(244 63 94 / 0.5);
+}
+
+.text-rose-500\/75 {
+  color: rgb(244 63 94 / 0.75);
+}
+
+.text-rose-500\/65 {
+  color: rgb(244 63 94 / 0.65);
+}
+
+.text-emerald-300 {
+  --tw-text-opacity: 1;
+  color: rgb(110 231 183 / var(--tw-text-opacity, 1));
 }
 
 .line-through {
