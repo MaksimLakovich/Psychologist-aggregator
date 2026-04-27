@@ -55,6 +55,44 @@
         opacity: 0;
         pointer-events: none;
     }
+
+    /* ========================================================= */
+    /* Режим просмотра текущего расписания до нажатия "Редактировать" */
+    /* ========================================================= */
+    .working-schedule-readonly input:not([type="hidden"]),
+    .working-schedule-readonly select,
+    .working-schedule-readonly textarea {
+        background: rgb(241 245 249); /* slate-100 */
+        border-color: rgb(226 232 240); /* slate-200 */
+        color: rgb(100 116 139); /* slate-500 */
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+    .working-schedule-readonly .choice-card {
+        cursor: default;
+    }
+    .working-schedule-readonly .choice-card input:checked + span {
+        background: rgb(241 245 249); /* slate-100 */
+        border-color: rgb(203 213 225); /* slate-300 */
+        color: rgb(100 116 139); /* slate-500 */
+        box-shadow: 0 0 0 1px rgb(203 213 225);
+    }
+    .working-schedule-readonly .choice-card span {
+        background: rgb(248 250 252); /* slate-50 */
+        border-color: rgb(248 250 252); /* slate-50 */
+        color: oklch(92.9% 0.013 255.508); /* slate-200 */
+    }
+    .working-schedule-readonly .choice-card:hover span {
+        background: rgb(248 250 252); /* slate-50 */
+        border-color: rgb(248 250 252); /* slate-50 */
+        color: oklch(92.9% 0.013 255.508); /* slate-200 */
+    }
+    .working-schedule-readonly .choice-card:hover input:checked + span {
+        background: rgb(241 245 249); /* slate-100 */
+        border-color: rgb(203 213 225); /* slate-300 */
+        color: rgb(100 116 139); /* slate-500 */
+        box-shadow: 0 0 0 1px rgb(203 213 225);
+    }
 </style>
 {% endblock %}
 
@@ -101,7 +139,7 @@
 
             <div class="space-y-8 animate-fade-in-up" style="animation-delay: 0.05s;">
 
-                <!-- Перечень вкладок / кнопки для работы со страницей -->
+                <!-- ПЕРЕЧЕНЬ ВКЛАДОК СТРАНИЦЫ -->
                 <div class="p-1.5 bg-slate-200/50 rounded-2xl inline-flex w-full sm:w-auto">
                     <button type="button" data-tab-button="rule" class="{% if active_schedule_tab == 'rule' %}tab-button-active{% endif %} flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-500 transition-all duration-200">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -118,7 +156,7 @@
                 <div class="rounded-[2rem] border border-indigo-100 bg-white shadow-xl shadow-slate-50/60 overflow-hidden">
                     <div class="px-8 py-5">
 
-                        <!-- БАЗОВЫЙ РАБОЧИЙ ГРАФИК -->
+                        <!-- 1) ВКЛАДКА "БАЗОВЫЙ РАБОЧИЙ ГРАФИК" -->
                         <div data-tab-panel="rule" class="{% if active_schedule_tab != 'rule' %}hidden{% endif %} space-y-8 pb-12">
 
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b-2 border-slate-300/30 pb-8">
@@ -127,14 +165,17 @@
                                     <p class="mt-2 text-base leading-6 text-zinc-500">Устанавливайте и управляйте своим персональным рабочим графиком.</p>
                                 </div>
                                 {% if active_rule %}
-                                <form method="post" class="shrink-0">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="schedule_action" value="deactivate-rule">
-                                    <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-rose-600 shadow-sm transition-all hover:bg-rose-50 hover:border-rose-200 focus:ring-2 focus:ring-rose-500/20">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        Удалить текущее
+                                <div class="shrink-0">
+                                    <button type="button"
+                                            data-edit-rule-button
+                                            class="{% if not rule_readonly_initial %}hidden{% endif %}
+                                            sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
+                                            border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
+                                            hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                        <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
+                                        Редактировать
                                     </button>
-                                </form>
+                                </div>
                                 {% endif %}
                             </div>
 
@@ -144,7 +185,39 @@
                             </div>
                             {% endif %}
 
-                            <form method="post" class="space-y-8">
+                            {% if active_rule %}
+                            <form method="post" id="deactivate-rule-form" class="hidden">
+                                {% csrf_token %}
+                                <input type="hidden" name="schedule_action" value="deactivate-rule">
+                            </form>
+                            {% endif %}
+
+                            <!-- Если еще нет правила -->
+                            {% if not active_rule %}
+                            <div class="{% if rule_form.is_bound %}hidden {% endif %}rounded-2xl bg-slate-200/30 p-6 text-center" data-rule-empty-state>
+                                <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center">
+                                    <img src="{% static 'images/psychologist_profile/no-work-schedule.svg' %}" alt="no-work-schedule" class="w-10 h-10">
+                                </div>
+                                <p class="text-lg font-semibold text-zinc-700/70">Активного рабочего расписания пока нет</p>
+                                <p class="mt-3 text-base leading-6 text-zinc-500/70">Создайте свой персональный рабочий график, который позволит клиентам бронировать встречи на свободные временные слоты в вашем расписании.</p>
+                                <div class="mt-12 mb-3 flex justify-center">
+                                    <button type="button"
+                                            data-create-rule-button
+                                            class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
+                                            border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
+                                            hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                        <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
+                                        Создать рабочий график
+                                    </button>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Есть правило / Создание правила -->
+                            <form method="post"
+                                  class="{% if not active_rule and not rule_form.is_bound %}hidden {% endif %}space-y-8 {% if rule_readonly_initial %}working-schedule-readonly{% endif %}"
+                                  data-rule-form-root
+                                  data-rule-readonly-initial="{% if rule_readonly_initial %}true{% else %}false{% endif %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="schedule_action" value="create-rule">
 
@@ -161,7 +234,17 @@
                                             </div>
                                             <div class="space-y-1.5">
                                                 <label for="{{ rule_form.rule_end.id_for_label }}" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">{{ rule_form.rule_end.label }}</label>
+                                                <!-- Для бессрочного правила в режиме просмотра показываем понятный статус вместо пустой даты -->
+                                                {% if rule_readonly_initial and not active_rule.rule_end %}
+                                                <div data-rule-readonly-visible class="block w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-lg text-slate-500 shadow-none">
+                                                    Бессрочное
+                                                </div>
+                                                <div data-rule-edit-visible class="hidden">
+                                                    {{ rule_form.rule_end }}
+                                                </div>
+                                                {% else %}
                                                 {{ rule_form.rule_end }}
+                                                {% endif %}
                                                 {% if rule_form.rule_end.errors %}<p class="text-xs text-rose-500 mt-1">{{ rule_form.rule_end.errors.0 }}</p>{% endif %}
                                             </div>
                                         </div>
@@ -191,12 +274,12 @@
 
                                 <!-- 3. Рабочие окна -->
                                 <div class="border-t-2 border-slate-300/30 pt-8">
-                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                                        <div>
+                                    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
+                                        <div class="min-w-0 flex-1">
                                             <h3 class="text-sm font-bold uppercase tracking-wider text-indigo-700/75">Шаг 3. Рабочее время</h3>
                                             <p class="text-sm text-slate-500 mt-2">Добавьте рабочие промежутки времени для выбранных рабочих дней</p>
                                         </div>
-                                        <button type="button" data-add-window-form="rule" class="inline-flex items-center gap-2 rounded-xl bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition-colors hover:bg-indigo-100">
+                                        <button type="button" data-add-window-form="rule" data-rule-edit-visible class="{% if rule_readonly_initial %}hidden {% endif %}shrink-0 self-start inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition-colors hover:bg-indigo-100">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                             Добавить ещё
                                         </button>
@@ -213,27 +296,31 @@
                                     <!-- окно -->
                                     <div data-window-formset-list="rule" class="space-y-3">
                                         {% for form in rule_windows_formset %}
+                                        {% if not rule_readonly_initial or form.initial %}
                                         <div data-window-card
-                                             class="group flex flex-col md:flex-row md:items-end gap-4 p-4 rounded-xl
+                                             class="group flex flex-col gap-3 p-4 rounded-xl
                                              border border-slate-200 bg-slate-200/25 hover:border-indigo-200 transition-colors">
                                             {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
-                                            <div class="grid grid-cols-2 gap-4 flex-1">
-                                                {% for field in form.visible_fields %}
-                                                    {% if field.name != 'DELETE' %}
-                                                    <div class="space-y-1.5">
-                                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">{{ field.label }}</label>
-                                                        {{ field }}
-                                                        {% if field.errors %}<p class="text-xs text-rose-500 mt-1">{{ field.errors.0 }}</p>{% endif %}
-                                                    </div>
-                                                    {% endif %}
-                                                {% endfor %}
+                                            <div class="flex flex-col md:flex-row md:items-end gap-4">
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+                                                    {% for field in form.visible_fields %}
+                                                        {% if field.name != 'DELETE' %}
+                                                        <div class="space-y-1.5">
+                                                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide">{{ field.label }}</label>
+                                                            {{ field }}
+                                                            {% if field.errors %}<p class="text-xs text-rose-500 mt-1">{{ field.errors.0 }}</p>{% endif %}
+                                                        </div>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                                <button type="button"
+                                                        data-remove-window-form
+                                                        data-rule-edit-visible
+                                                        class="{% if rule_readonly_initial %}hidden {% endif %}shrink-0 self-start md:self-end p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors focus:outline-none"
+                                                        title="Удалить окно">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </button>
                                             </div>
-                                            <button type="button"
-                                                    data-remove-window-form
-                                                    class="shrink-0 p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors focus:outline-none"
-                                                    title="Удалить окно">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
                                             {% if form.non_field_errors %}
                                             <div class="w-full text-xs text-rose-600 mt-2">
                                                 {% for err in form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
@@ -241,6 +328,7 @@
                                             {% endif %}
                                             {% if form.DELETE %}<div class="hidden">{{ form.DELETE }}</div>{% endif %}
                                         </div>
+                                        {% endif %}
                                         {% endfor %}
                                     </div>
 
@@ -248,22 +336,24 @@
                                     <template id="rule-window-empty-form-template">
                                         {% with form=rule_windows_formset.empty_form %}
                                         <div data-window-card
-                                             class="group flex flex-col md:flex-row md:items-end gap-4 p-4 rounded-xl
+                                             class="group flex flex-col gap-3 p-4 rounded-xl
                                              border border-slate-200 bg-slate-200/25 hover:border-indigo-200 transition-colors animate-fade-in-up">
                                             {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
-                                            <div class="grid grid-cols-2 gap-4 flex-1">
-                                                {% for field in form.visible_fields %}
-                                                    {% if field.name != 'DELETE' %}
-                                                    <div class="space-y-1.5">
-                                                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide">{{ field.label }}</label>
-                                                        {{ field }}
-                                                    </div>
-                                                    {% endif %}
-                                                {% endfor %}
+                                            <div class="flex flex-col md:flex-row md:items-end gap-4">
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+                                                    {% for field in form.visible_fields %}
+                                                        {% if field.name != 'DELETE' %}
+                                                        <div class="space-y-1.5">
+                                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide">{{ field.label }}</label>
+                                                            {{ field }}
+                                                        </div>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                                <button type="button" data-remove-window-form class="shrink-0 self-start md:self-end p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors focus:outline-none" title="Удалить окно">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </button>
                                             </div>
-                                            <button type="button" data-remove-window-form class="shrink-0 p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors focus:outline-none" title="Удалить окно">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
                                             {% if form.DELETE %}<div class="hidden">{{ form.DELETE }}</div>{% endif %}
                                         </div>
                                         {% endwith %}
@@ -290,26 +380,153 @@
                                     </div>
                                 </div>
 
-                                <!-- КНОПКА -->
-                                <div class="border-t-2 border-slate-300/30 pt-8 flex justify-end">
+                                <!-- КНОПКИ -->
+                                <div class="{% if rule_readonly_initial %}hidden {% endif %}border-t-2 border-slate-300/30 pt-8 flex flex-col sm:flex-row sm:items-center {% if active_rule %}sm:justify-between{% else %}sm:justify-end{% endif %} gap-3" data-rule-edit-visible>
+                                    {% if active_rule %}
                                     <button type="submit"
-                                            class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
-                                            border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
-                                            hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                        <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
-                                        Сохранить расписание
+                                            form="deactivate-rule-form"
+                                            class="inline-flex w-full sm:w-auto items-center justify-center gap-2 whitespace-nowrap rounded-xl
+                                            border border-rose-100 bg-rose-50 px-5 py-2.5 text-sm font-medium text-rose-600 transition-all duration-200
+                                            hover:bg-rose-100 hover:border-rose-200 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:ring-offset-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        Удалить
                                     </button>
+                                    {% endif %}
+                                    <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:justify-end">
+                                        {% if active_rule %}
+                                        <button type="button"
+                                                data-cancel-rule-edit
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-slate-100/85 px-5 py-2.5 text-sm font-medium text-zinc-500 shadow-xs transition-all duration-200
+                                                hover:bg-slate-200/75 hover:shadow-sm">
+                                            Отмена
+                                        </button>
+                                        {% endif %}
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-all duration-200
+                                                hover:bg-emerald-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                            Сохранить расписание
+                                        </button>
+                                    </div>
                                 </div>
-
                             </form>
                         </div>
 
-                        <!-- СОЗДАНИЕ ИСКЛЮЧЕНИЯ -->
+                        <!-- 2) ВКЛАДКА "СОЗДАНИЕ ИСКЛЮЧЕНИЯ" -->
                         <div data-tab-panel="exception" class="{% if active_schedule_tab != 'exception' %}hidden{% endif %} space-y-8 pb-12">
+
                             <div class="border-b-2 border-slate-300/30 pb-8">
                                 <h2 class="text-2xl md:text-3xl text-indigo-700/90 font-semibold tracking-wide">Исключение в рабочем расписании</h2>
                                 <p class="mt-2 text-base leading-6 text-zinc-500">Исключение в рабочем расписании - это ваш отпуск, больничный, временное изменение рабочих окон или длительности сессий.</p>
                             </div>
+
+                            <!-- Сначала показываем специалисту текущие исключения, а форму создания открываем по кнопке -->
+                            {% if active_rule %}
+                            <div class="rounded-2xl bg-slate-200/30 p-6">
+
+                                {% if active_exceptions %}
+                                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                                    <div>
+                                        <p class="text-lg font-semibold text-zinc-700/70">Активные исключения</p>
+                                        <p class="mt-3 text-base leading-6 text-zinc-500/70">Здесь отображаются временные изменения, которые сейчас учитываются при построении свободных окон для записи.</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6 space-y-5">
+                                    {% for exception in active_exceptions %}
+                                    <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+                                        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex flex-wrap items-center gap-2">
+                                                    <span class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider text-rose-500">{{ exception.get_reason_display }}</span>
+                                                    <span class="rounded-full px-3 py-1 text-sm lowercase text-rose-500/25">({{ exception.get_exception_type_display }})</span>
+                                                </div>
+                                                <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+                                                    <div class="rounded-xl px-4">
+                                                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Действие исключения</p>
+                                                        <div class="mt-2 inline-flex w-auto max-w-full flex-wrap items-center gap-2 rounded-lg bg-slate-200/45 px-3 py-2 text-xs font-semibold text-slate-600">
+                                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                            {{ exception.exception_start|date:"d.m.Y" }} {% if exception.exception_start != exception.exception_end %}— {{ exception.exception_end|date:"d.m.Y" }}{% endif %}
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="rounded-xl px-4">
+                                                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Временные окна</p>
+                                                        {% if exception.time_windows.all %}
+                                                        <div class="mt-2 flex flex-wrap gap-2">
+                                                            {% for window in exception.time_windows.all %}
+                                                            <span class="rounded-lg bg-slate-200/45 px-3 py-2 text-xs font-semibold text-slate-600">
+                                                                {{ window.override_start_time|time:"H:i" }} — {{ window.override_end_time|time:"H:i" }}
+                                                            </span>
+                                                            {% endfor %}
+                                                        </div>
+                                                        {% else %}
+                                                        <p class="mt-2 text-sm font-medium text-slate-400">Полностью недоступен</p>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                {% if exception.exception_type == "override" %}
+                                                <div class="rounded-xl px-4 py-3 mt-3">
+                                                    <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                                        <div class="rounded-xl">
+                                                            <p class="text-xs font-medium text-slate-400">Длительность индивидуальной сессии (мин)</p>
+                                                            <p class="mt-1 text-sm font-bold text-slate-700">{{ exception.override_session_duration_individual|default_if_none:"Не задано" }}</p>
+                                                        </div>
+                                                        <div class="rounded-xl">
+                                                            <p class="text-xs font-medium text-slate-400">Длительность парной сессии (мин)</p>
+                                                            <p class="mt-1 text-sm font-bold text-slate-700">{{ exception.override_session_duration_couple|default_if_none:"Не задано" }}</p>
+                                                        </div>
+                                                        <div class="rounded-xl">
+                                                            <p class="text-xs font-medium text-slate-400">Перерыв между сессиями (мин)</p>
+                                                            <p class="mt-1 text-sm font-bold text-slate-700">{{ exception.override_break_between_sessions|default_if_none:"Не задано" }}</p>
+                                                        </div>
+                                                        <div class="rounded-xl">
+                                                            <p class="text-xs font-medium text-slate-400">Минимальный запас времени до записи (ч)</p>
+                                                            <p class="mt-1 text-sm font-bold text-slate-700">{{ exception.override_minimum_booking_notice_hours|default_if_none:"Не задано" }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <form method="post" class="shrink-0">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="schedule_action" value="deactivate-exception">
+                                                <input type="hidden" name="active_schedule_tab" value="exception">
+                                                <input type="hidden" name="exception_id" value="{{ exception.pk }}">
+                                                <button type="submit"
+                                                        class="shrink-0 self-start md:self-end p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50
+                                                        rounded-lg transition-colors focus:outline-none">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                                {% else %}
+                                <div class="text-center">
+                                    <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center">
+                                        <img src="{% static 'images/psychologist_profile/no-work-schedule.svg' %}" alt="no-work-schedule" class="w-10 h-10">
+                                    </div>
+                                    <p class="text-lg font-semibold text-zinc-700/70">Активных исключений нет</p>
+                                    <p class="mt-3 text-base leading-6 text-zinc-500/70">Сейчас базовый рабочий график действует без временных изменений.</p>
+                                </div>
+                                {% endif %}
+
+                                <div class="{% if exception_form.is_bound %}hidden {% endif %}mt-12 mb-3 flex justify-center" data-exception-create-actions>
+                                    <button type="button"
+                                            data-create-exception-button
+                                            class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
+                                            border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
+                                            hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                        <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
+                                        Добавить исключение
+                                    </button>
+                                </div>
+                            </div>
+                            {% endif %}
 
                             {% if exception_form.non_field_errors %}
                             <div class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
@@ -317,18 +534,25 @@
                             </div>
                             {% endif %}
 
+                            <!-- Если еще нет исключения -->
                             {% if not active_rule %}
-                            <div class="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-6 text-center">
-                                <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-indigo-600 shadow-sm">
-                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <div class="rounded-2xl bg-slate-200/30 p-6 text-center">
+                                <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center">
+                                    <img src="{% static 'images/psychologist_profile/no-work-schedule.svg' %}" alt="no-work-schedule" class="w-10 h-10">
                                 </div>
-                                <p class="text-base font-semibold text-indigo-900">Активного рабочего расписания пока нет</p>
-                                <p class="mt-2 text-sm leading-6 text-slate-500">Сначала сохраните базовый рабочий график, после этого здесь можно будет добавлять временные исключения.</p>
+                                <p class="text-lg font-semibold text-zinc-700/70">Активного рабочего расписания пока нет</p>
+                                <p class="mt-3 text-base leading-6 text-zinc-500/70">Сначала сохраните базовый рабочий график, после этого здесь можно будет добавлять временные исключения.</p>
                             </div>
+
+                            <!-- Есть исключения / Создание исключения -->
                             {% else %}
-                            <form method="post" class="space-y-8" data-exception-form-root>
+                            <form method="post"
+                                  class="{% if not exception_form.is_bound %}hidden {% endif %}space-y-8"
+                                  data-exception-form-root
+                                  data-exception-form-bound="{% if exception_form.is_bound %}true{% else %}false{% endif %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="schedule_action" value="create-exception">
+                                <input type="hidden" name="active_schedule_tab" value="exception">
 
                                 <!-- 1. Дата начала и действия исключения в расписании -->
                                 <div>
@@ -371,12 +595,12 @@
                                 <!-- 3. Переопределенные рабочие окна -->
                                 <div data-override-window-section>
                                     <div class="border-t-2 border-slate-300/30 pt-8">
-                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                                            <div>
+                                        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
+                                            <div class="min-w-0 flex-1">
                                                 <h3 class="text-sm font-bold uppercase tracking-wider text-indigo-700/75">Шаг 3. Новое рабочее время</h3>
                                                 <p class="text-sm text-slate-500 mt-2">Укажите новые рабочие окна, которые будут действовать только в рамках текущего исключения</p>
                                             </div>
-                                            <button type="button" data-add-window-form="exception" class="inline-flex items-center gap-2 rounded-xl bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition-colors hover:bg-indigo-100">
+                                            <button type="button" data-add-window-form="exception" class="shrink-0 self-start inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition-colors hover:bg-indigo-100">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                                 Добавить ещё
                                             </button>
@@ -394,23 +618,25 @@
                                         <div data-window-formset-list="exception" class="space-y-3">
                                             {% for form in exception_windows_formset %}
                                             <div data-window-card
-                                                 class="group flex flex-col md:flex-row md:items-end gap-4 p-4 rounded-xl
+                                                 class="group flex flex-col gap-3 p-4 rounded-xl
                                                  border border-slate-200 bg-slate-200/25 hover:border-indigo-200 transition-colors">
                                                 {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
-                                                <div class="grid grid-cols-2 gap-4 flex-1">
-                                                    {% for field in form.visible_fields %}
-                                                        {% if field.name != 'DELETE' %}
-                                                        <div class="space-y-1.5">
-                                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide">{{ field.label }}</label>
-                                                            {{ field }}
-                                                            {% if field.errors %}<p class="text-xs text-rose-500 mt-1">{{ field.errors.0 }}</p>{% endif %}
-                                                        </div>
-                                                        {% endif %}
-                                                    {% endfor %}
+                                                <div class="flex flex-col md:flex-row md:items-end gap-4">
+                                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+                                                        {% for field in form.visible_fields %}
+                                                            {% if field.name != 'DELETE' %}
+                                                            <div class="space-y-1.5">
+                                                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide">{{ field.label }}</label>
+                                                                {{ field }}
+                                                                {% if field.errors %}<p class="text-xs text-rose-500 mt-1">{{ field.errors.0 }}</p>{% endif %}
+                                                            </div>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                    <button type="button" data-remove-window-form class="shrink-0 self-start md:self-end p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors focus:outline-none">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                    </button>
                                                 </div>
-                                                <button type="button" data-remove-window-form class="shrink-0 p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors focus:outline-none">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                </button>
                                                 {% if form.non_field_errors %}
                                                 <div class="w-full text-xs text-rose-600 mt-2">
                                                     {% for err in form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
@@ -425,22 +651,24 @@
                                         <template id="exception-window-empty-form-template">
                                             {% with form=exception_windows_formset.empty_form %}
                                             <div data-window-card
-                                                 class="group flex flex-col md:flex-row md:items-end gap-4 p-4 rounded-xl
+                                                 class="group flex flex-col gap-3 p-4 rounded-xl
                                                  border border-slate-200 bg-slate-200/25 hover:border-indigo-200 transition-colors animate-fade-in-up">
                                                 {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
-                                                <div class="grid grid-cols-2 gap-4 flex-1">
-                                                    {% for field in form.visible_fields %}
-                                                        {% if field.name != 'DELETE' %}
-                                                        <div class="space-y-1.5">
-                                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide">{{ field.label }}</label>
-                                                            {{ field }}
-                                                        </div>
-                                                        {% endif %}
-                                                    {% endfor %}
+                                                <div class="flex flex-col md:flex-row md:items-end gap-4">
+                                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+                                                        {% for field in form.visible_fields %}
+                                                            {% if field.name != 'DELETE' %}
+                                                            <div class="space-y-1.5">
+                                                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide">{{ field.label }}</label>
+                                                                {{ field }}
+                                                            </div>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                    <button type="button" data-remove-window-form class="shrink-0 self-start md:self-end p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors focus:outline-none">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                    </button>
                                                 </div>
-                                                <button type="button" data-remove-window-form class="shrink-0 p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors focus:outline-none">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                </button>
                                                 {% if form.DELETE %}<div class="hidden">{{ form.DELETE }}</div>{% endif %}
                                             </div>
                                             {% endwith %}
@@ -470,15 +698,23 @@
                                     </div>
                                 </div>
 
-                                <!-- КНОПКА -->
+                                <!-- КНОПКИ -->
                                 <div class="border-t-2 border-slate-300/30 pt-8 flex justify-end">
-                                    <button type="submit"
-                                            class="sm:w-auto inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl
-                                            border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200
-                                            hover:bg-indigo-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                        <img src="{% static 'images/menu/edit_icon.svg' %}" alt="edit" class="h-5 w-5">
-                                        Сохранить исключение
-                                    </button>
+                                    <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:justify-end">
+                                        <button type="button"
+                                                data-cancel-exception-create
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-slate-100/85 px-5 py-2.5 text-sm font-medium text-zinc-500 shadow-xs transition-all duration-200
+                                                hover:bg-slate-200/75 hover:shadow-sm">
+                                            Отмена
+                                        </button>
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl
+                                                border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-all duration-200
+                                                hover:bg-emerald-700 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                            Сохранить исключение
+                                        </button>
+                                    </div>
                                 </div>
                             </form>
                             {% endif %}
@@ -487,63 +723,46 @@
                 </div>
             </div>
 
-            <aside class="space-y-6 sticky top-8 animate-fade-in-up" style="animation-delay: 0.2s;">
+            <!-- БЛОК СО СВОДКОЙ РАСПИСАНИЯ / ИСКЛЮЧЕНИЙ -->
+            <aside class="animate-fade-in-up space-y-6" style="animation-delay: 0.1s;">
 
-                <div class="rounded-[2rem] bg-slate-900 p-6 text-white shadow-xl shadow-slate-900/20 overflow-hidden relative">
-                    <div class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none"></div>
-                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Сводка</p>
+                <div class="rounded-[2rem] border border-indigo-100 bg-gradient-to-br from-slate-950 to-indigo-900 p-6 text-white shadow-xl shadow-slate-300/20">
+
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-100">Сводка</p>
+                        {% if active_rule %}
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-400 border border-emerald-500/20">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Текущее расписание
+                        </span>
+                        {% endif %}
+                    </div>
 
                     {% if active_rule %}
-                    <div class="mt-5 space-y-4">
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-slate-300">Статус</span>
-                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-400 border border-emerald-500/20">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                Активно
-                            </span>
-                        </div>
+                    <div class="mt-5 space-y-4 text-sm">
+
+                        <!-- 1 -->
                         <div class="pt-4 border-t border-white/10">
-                            <span class="block text-xs text-slate-400 mb-1.5">Рабочие дни</span>
+                            <span class="block text-indigo-50/50 font-semibold mb-3">Период действия</span>
+                            <span class="rounded-lg bg-white/10 px-2 py-1 text-xs font-medium">с {{ active_rule.rule_start|date:"d.m.Y" }}{% if active_rule.rule_end %} по {{ active_rule.rule_end|date:"d.m.Y" }}{% else %} <span class="text-slate-400 font-normal">— бессрочно</span>{% endif %}</span>
+                        </div>
+
+                        <!-- 2 -->
+                        <div class="pt-4 border-t border-white/10">
+                            <span class="block text-indigo-50/50 font-semibold mb-3">Рабочие дни</span>
                             <div class="flex flex-wrap gap-1.5">
                                 {% for day in active_rule.weekday_labels %}
-                                <span class="rounded-lg bg-white/5 px-2 py-1 text-xs font-medium text-slate-200">{{ day }}</span>
+                                <span class="rounded-lg bg-white/10 px-2 py-1 text-xs font-medium">{{ day }}</span>
                                 {% endfor %}
                             </div>
                         </div>
-                        <div class="pt-4 border-t border-white/10">
-                            <span class="block text-xs text-slate-400 mb-1">Период действия</span>
-                            <span class="text-sm font-medium">с {{ active_rule.rule_start|date:"d.m.Y" }}{% if active_rule.rule_end %} по {{ active_rule.rule_end|date:"d.m.Y" }}{% else %} <span class="text-slate-400 font-normal">— бессрочно</span>{% endif %}</span>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div class="mt-6 flex flex-col items-center text-center p-4 bg-white/5 rounded-2xl border border-white/10">
-                        <svg class="w-8 h-8 text-slate-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <p class="text-sm leading-relaxed text-slate-300">Базовое правило не задано. Окна для записи недоступны.</p>
-                    </div>
-                    {% endif %}
-                </div>
 
-                <div class="rounded-3xl border border-slate-200/60 bg-white p-6 shadow-lg shadow-slate-200/30">
-                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Настройки сессий</p>
-                    {% if active_rule %}
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-                            <span class="text-sm text-slate-500">Индивидуальная</span>
-                            <span class="text-sm font-bold text-slate-700">{{ active_rule.session_duration_individual }} мин</span>
-                        </div>
-                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-                            <span class="text-sm text-slate-500">Парная</span>
-                            <span class="text-sm font-bold text-slate-700">{{ active_rule.session_duration_couple }} мин</span>
-                        </div>
-                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-                            <span class="text-sm text-slate-500">Перерыв</span>
-                            <span class="text-sm font-bold text-slate-700">{{ active_rule.break_between_sessions|default:0 }} мин</span>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-slate-100">
-                            <p class="text-xs font-bold uppercase text-slate-400 mb-3">Окна приема</p>
-                            <div class="space-y-2">
+                        <!-- 3 -->
+                        <div class="pt-4 border-t border-white/10">
+                            <span class="block text-indigo-50/50 font-semibold mb-3">Рабочее время</span>
+                            <div class="flex flex-wrap gap-1.5">
                                 {% for window in active_rule.time_windows.all %}
-                                <div class="flex items-center gap-2 text-sm font-medium text-slate-700">
+                                <div class="flex items-center gap-1.5 rounded-lg bg-white/10 px-2 py-1 text-xs font-medium">
                                     <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
                                     {{ window.start_time|time:"H:i" }} — {{ window.end_time|time:"H:i" }}
                                 </div>
@@ -552,85 +771,54 @@
                                 {% endfor %}
                             </div>
                         </div>
+
+                        <!-- 4 -->
+                        <div class="pt-4 border-t border-white/10">
+                            <span class="block text-indigo-50/50 font-semibold mb-3">Параметры сессий</span>
+                            <div class="flex flex-wrap gap-1.5">
+                                <div class="space-y-2">
+                                    <div>
+                                        <span class="text-xs text-white/85">Индивидуальная</span>
+                                        <span class="rounded-lg bg-white/10 px-2 py-1 text-xs font-medium">{{ active_rule.session_duration_individual }} мин</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs text-white/85">Парная</span>
+                                        <span class="rounded-lg bg-white/10 px-2 py-1 text-xs font-medium">{{ active_rule.session_duration_couple }} мин</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs text-white/85">Перерыв</span>
+                                        <span class="rounded-lg bg-white/10 px-2 py-1 text-xs font-medium">{{ active_rule.break_between_sessions|default:0 }} мин</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5 -->
+                        <div class="pt-4 border-t border-white/10">
+                            <div class="flex items-center gap-4">
+                                <p class="block text-indigo-50/50 font-semibold mb-3">Исключения</p>
+                                <!-- Бейдж открывает вкладку с подробным списком исключений -->
+                                <button type="button"
+                                        data-open-exception-tab
+                                        class="flex h-6 min-w-6 items-center justify-center rounded-full px-2 text-xs font-bold transition-all
+                                        {% if active_exceptions %}bg-rose-100 text-rose-600 hover:bg-rose-200{% else %}bg-slate-100 text-slate-400 hover:bg-slate-200{% endif %}"
+                                        title="Открыть временные исключения">
+                                    {{ active_exceptions|length }}
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
+
                     {% else %}
-                    <p class="text-sm text-slate-400 text-center py-4">Нет данных</p>
+                    <div class="mt-6 flex flex-col items-center text-center p-4 bg-white/5 rounded-2xl border border-white/10">
+                        <svg class="w-8 h-8 text-slate-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <p class="text-sm leading-relaxed text-slate-300">Базовое правило не задано. Окна для записи недоступны.</p>
+                    </div>
+
                     {% endif %}
                 </div>
 
-                <div class="rounded-3xl border border-slate-200/60 bg-white p-6 shadow-lg shadow-slate-200/30">
-                    <div class="flex items-center justify-between mb-4">
-                        <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Исключения</p>
-                        {% if active_exceptions %}
-                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-rose-100 text-xs font-bold text-rose-600">{{ active_exceptions|length }}</span>
-                        {% endif %}
-                    </div>
-
-                    <div class="space-y-3">
-                        {% for exception in active_exceptions %}
-                        <div class="group relative rounded-xl border border-slate-100 bg-white p-4 shadow-sm hover:border-indigo-200 transition-all">
-                            <div class="flex justify-between items-start gap-2">
-                                <div>
-                                    <p class="text-sm font-bold text-slate-800">{{ exception.get_reason_display }}</p>
-                                    <p class="mt-1 text-[10px] uppercase tracking-wider font-semibold text-indigo-500">{{ exception.get_exception_type_display }}</p>
-                                </div>
-                                <form method="post" class="shrink-0">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="schedule_action" value="deactivate-exception">
-                                    <input type="hidden" name="exception_id" value="{{ exception.pk }}">
-                                    <button type="submit" class="text-slate-400 hover:text-rose-500 transition-colors p-1" title="Отменить исключение">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                    </button>
-                                </form>
-                            </div>
-                            <div class="mt-3 flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                {{ exception.exception_start|date:"d.m.Y" }} {% if exception.exception_start != exception.exception_end %}- {{ exception.exception_end|date:"d.m.Y" }}{% endif %}
-                            </div>
-
-                            {% if exception.time_windows.all %}
-                            <div class="mt-3 flex flex-wrap gap-1.5">
-                                {% for window in exception.time_windows.all %}
-                                <span class="rounded-md bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-600">
-                                    {{ window.override_start_time|time:"H:i" }} - {{ window.override_end_time|time:"H:i" }}
-                                </span>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                        </div>
-                        {% empty %}
-                        <div class="flex flex-col items-center justify-center py-6 text-center">
-                            <div class="rounded-full bg-slate-50 p-3 mb-2">
-                                <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            </div>
-                            <p class="text-sm text-slate-400">Активных исключений нет</p>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                {% if archived_rules or archived_exceptions %}
-                <div class="pt-2">
-                    <details class="group">
-                        <summary class="flex cursor-pointer items-center justify-between text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-slate-600 list-none">
-                            <span>Недавний архив</span>
-                            <svg class="h-4 w-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="mt-4 space-y-2 text-xs text-slate-500">
-                            {% for rule in archived_rules %}
-                            <div class="rounded-xl border border-slate-100 bg-slate-50/50 p-3">
-                                Правило: {{ rule.rule_start|date:"d.m.Y" }}{% if rule.rule_end %} - {{ rule.rule_end|date:"d.m.Y" }}{% endif %}
-                            </div>
-                            {% endfor %}
-                            {% for exception in archived_exceptions %}
-                            <div class="rounded-xl border border-slate-100 bg-slate-50/50 p-3">
-                                {{ exception.get_reason_display }} ({{ exception.exception_start|date:"d.m.Y" }})
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </details>
-                </div>
-                {% endif %}
             </aside>
         </div>
 

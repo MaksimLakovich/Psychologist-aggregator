@@ -47,6 +47,17 @@ function formatPriceAmount(value) {
     return parsed.toFixed(0);
 }
 
+function buildSessionLabel(ps, sessionType) {
+    // Подпись длительности backend собирает из активного рабочего расписания специалиста.
+    if (sessionType === "couple") {
+        return ps.session_duration_couple_label
+            || "Парная сессия · длительность не указана";
+    }
+
+    return ps.session_duration_individual_label
+        || "Индивидуальная сессия · длительность не указана";
+}
+
 // Основной рендер карточки психолога (структура/стили)
 export function renderPsychologistCard(ps, options = {}) {
     // Точка монтирования карточки. Если контейнер не найден, дальше работать нельзя.
@@ -194,14 +205,14 @@ export function renderPsychologistCard(ps, options = {}) {
         if (consultationType === "individual") {
             sessionPriceHtml = `
                 <div class="rounded-xl bg-transparent p-0">
-                    <p class="text-lg font-medium text-gray-700 ">Индивидуальная сессия · 50 минут</p>
+                    <p class="text-lg font-medium text-gray-700 ">${buildSessionLabel(ps, "individual")}</p>
                     <p class="mt-0 text-xl font-semibold text-gray-700">${individualPriceValue} ${currency}</p>
                 </div>
             `;
         } else if (consultationType === "couple") {
             sessionPriceHtml = `
                 <div class="rounded-xl bg-transparent p-0">
-                    <p class="text-lg font-medium text-gray-700 ">Парная сессия · 1,5 часа</p>
+                    <p class="text-lg font-medium text-gray-700 ">${buildSessionLabel(ps, "couple")}</p>
                     <p class="mt-0 text-xl font-semibold text-gray-700">${couplePriceValue} ${currency}</p>
                 </div>
             `;
@@ -209,11 +220,11 @@ export function renderPsychologistCard(ps, options = {}) {
             sessionPriceHtml = `
                 <div class="rounded-xl bg-transparent p-0 space-y-2">
                     <div>
-                        <p class="text-lg font-medium text-gray-700 ">Индивидуальная сессия · 50 минут</p>
+                        <p class="text-lg font-medium text-gray-700 ">${buildSessionLabel(ps, "individual")}</p>
                         <p class="mt-0 text-xl font-semibold text-gray-700">${individualPriceValue} ${currency}</p>
                     </div>
                     <div>
-                        <p class="text-lg font-medium text-gray-700 ">Парная сессия · 1,5 часа</p>
+                        <p class="text-lg font-medium text-gray-700 ">${buildSessionLabel(ps, "couple")}</p>
                         <p class="mt-0 text-xl font-semibold text-gray-700">${couplePriceValue} ${currency}</p>
                     </div>
                 </div>
@@ -222,9 +233,7 @@ export function renderPsychologistCard(ps, options = {}) {
     } else {
         // Для matching-сценария оставляем прежнее поведение "один выбранный формат сессии".
         const isCoupleSession = ps.session_type === "couple";
-        const sessionLabel = isCoupleSession
-            ? "Парная сессия · 1,5 часа"
-            : "Индивидуальная сессия · 50 минут";
+        const sessionLabel = buildSessionLabel(ps, isCoupleSession ? "couple" : "individual");
         const priceValue = Number(ps.price.value).toFixed(0);
         sessionPriceHtml = `
             <div class="rounded-xl bg-transparent p-0">

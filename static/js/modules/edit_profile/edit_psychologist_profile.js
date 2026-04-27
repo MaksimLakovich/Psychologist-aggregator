@@ -41,25 +41,16 @@ document.addEventListener("DOMContentLoaded", () => {
       checkboxSelector: ".psychologist-topic-checkbox",
       saveButtonId: "save-psychologist-topics-button",
       errorId: "psychologist-topics-modal-error",
-      containerId: "selected-topics-container",
-      badgeClassName: "selection-badge topic-badge",
-      emptyText: "Темы пока не выбраны",
     },
     "psychologist-methods-modal": {
       checkboxSelector: ".psychologist-method-checkbox",
       saveButtonId: "save-psychologist-methods-button",
       errorId: "psychologist-methods-modal-error",
-      containerId: "selected-methods-container",
-      badgeClassName: "selection-badge method-badge",
-      emptyText: "Методы пока не выбраны",
     },
     "psychologist-specialisations-modal": {
       checkboxSelector: ".psychologist-specialisation-checkbox",
       saveButtonId: "save-psychologist-specialisations-button",
       errorId: "psychologist-specialisations-modal-error",
-      containerId: "selected-specialisations-container",
-      badgeClassName: "selection-badge specialisation-badge",
-      emptyText: "Специализации пока не выбраны",
     },
   };
 
@@ -128,6 +119,19 @@ document.addEventListener("DOMContentLoaded", () => {
         field.disabled = false;
       }
     });
+  }
+
+  /**
+   * Эта функция отправляет основную форму и заранее фиксирует нужную вкладку.
+   * Так действия с отдельными блоками честно сохраняются в БД и после перезагрузки
+   * пользователь остается в том же разделе страницы.
+   */
+  function submitProfileFormFromTab(tabName) {
+    if (activeTabInput) {
+      activeTabInput.value = tabName;
+    }
+
+    form.requestSubmit();
   }
 
   /**
@@ -392,8 +396,8 @@ document.addEventListener("DOMContentLoaded", () => {
   /**
    * Эта функция настраивает блоки "Темы / Методы / Специализации".
    * Для пользователя это единый сценарий:
-   * открыть модалку, увидеть текущий выбор, изменить его и применить на странице.
-   * Этот сценарий работает независимо от общего режима редактирования профиля.
+   * открыть модалку, увидеть текущий выбор, изменить его и сохранить через основную форму.
+   * Важно: JS не перерисовывает бейджи сам, чтобы стили и разметка оставались под контролем HTML-шаблона.
    */
   function initExpertiseModals() {
     const modalSelections = new Map();
@@ -422,16 +426,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /**
-     * Эта вложенная функция собирает человекочитаемые названия выбранных пунктов.
-     * Именно эти подписи потом выводятся в виде бейджей на карточке вкладки.
-     */
-    function readCheckedLabels(checkboxSelector) {
-      return Array.from(document.querySelectorAll(`${checkboxSelector}:checked`))
-        .map((checkbox) => checkbox.dataset.label || "")
-        .filter(Boolean);
-    }
-
-    /**
      * Эта вложенная функция массово выставляет галочки внутри модалки.
      * Она используется при открытии окна и при откате несохраненного выбора.
      */
@@ -450,33 +444,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!errorElement) return;
       errorElement.textContent = "";
       errorElement.classList.add("hidden");
-    }
-
-    /**
-     * Эта вложенная функция перерисовывает бейджи на карточке блока.
-     * База здесь еще не сохраняется:
-     * пользователь просто получает понятную визуальную обратную связь на самой странице.
-     */
-    function renderBadges(containerId, labels, badgeClassName, emptyText) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-
-      container.innerHTML = "";
-
-      if (!labels.length) {
-        const emptyState = document.createElement("span");
-        emptyState.className = "text-sm text-zinc-500";
-        emptyState.textContent = emptyText;
-        container.appendChild(emptyState);
-        return;
-      }
-
-      labels.forEach((label) => {
-        const badge = document.createElement("span");
-        badge.className = badgeClassName;
-        badge.textContent = label;
-        container.appendChild(badge);
-      });
     }
 
     /**
@@ -533,25 +500,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /**
-     * Эта вложенная функция применяет изменения из модалки к текущему экрану.
-     * Смысл для пользователя такой:
-     * выбор уже виден на странице, а в БД он уйдет после общего сохранения профиля.
+     * Эта вложенная функция сохраняет выбранные значения из модалки.
+     * Нажатие "Сохранить" сразу отправляет форму, поэтому экран после перезагрузки
+     * показывает именно данные из БД, а не временную картинку в браузере.
      */
-    function applyModalSelection(modalId) {
+    function saveModalSelection(modalId) {
       const modalConfig = getModalConfig(modalId);
       if (!modalConfig) return;
 
-      const selectedValues = readCheckedValues(modalConfig.checkboxSelector);
-      const selectedLabels = readCheckedLabels(modalConfig.checkboxSelector);
-
-      modalSelections.set(modalId, selectedValues);
-      renderBadges(
-        modalConfig.containerId,
-        selectedLabels,
-        modalConfig.badgeClassName,
-        modalConfig.emptyText,
-      );
-      closeModal(modalId, { restoreSavedState: false });
+      modalSelections.set(modalId, readCheckedValues(modalConfig.checkboxSelector));
+      submitProfileFormFromTab("expertise");
     }
 
     Object.entries(modalConfigs).forEach(([modalId, modalConfig]) => {
@@ -586,7 +544,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     Object.entries(modalConfigs).forEach(([modalId, modalConfig]) => {
       document.getElementById(modalConfig.saveButtonId)?.addEventListener("click", () => {
-        applyModalSelection(modalId);
+        saveModalSelection(modalId);
       });
     });
 
@@ -762,7 +720,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /**
      * Эта вложенная функция скрывает карточку и отмечает ее на удаление.
-     * Для существующей записи это означает удаление при следующем сохранении формы.
+     * Для существующей записи это означает удаление при следующей отправке формы.
      * Для новой пустой карточки это означает просто убрать черновик с экрана.
      */
     function hideCard(card) {
@@ -774,6 +732,20 @@ document.addEventListener("DOMContentLoaded", () => {
       setCardEditMode(card, false);
       card.classList.add("hidden");
       syncEmptyState();
+    }
+
+    /**
+     * Эта вложенная функция удаляет карточку образования по кнопке пользователя.
+     * Старую запись сразу сохраняем через POST, чтобы после обновления страницы она не возвращалась обратно.
+     */
+    function removeCard(card) {
+      if (!card) return;
+
+      hideCard(card);
+
+      if (card.dataset.educationExisting === "1") {
+        submitProfileFormFromTab("education");
+      }
     }
 
     /**
@@ -856,7 +828,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const removeButton = event.target.closest("[data-remove-education-form]");
       if (removeButton) {
-        hideCard(removeButton.closest("[data-education-card]"));
+        removeCard(removeButton.closest("[data-education-card]"));
       }
     });
 
