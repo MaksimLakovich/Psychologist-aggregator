@@ -4,6 +4,7 @@ module.exports = {
     // Django app templates
     "./users/templates/**/*.html",
     "./aggregator/templates/**/*.html",
+    "./calendar_engine/templates/**/*.html",
     "./core/templates/**/*.html",
 
     // в Tailwind по умолчанию включена оптимизация и поэтому если:

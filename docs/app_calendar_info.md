@@ -14,6 +14,7 @@
 [10. Booking-процессы](#title10)  
 [11. Жизненный цикл](#title11)  
 [12. API-интерфейс](#title12)
+[13. WEB-интерфейс](#title13)
 
 ---
 
@@ -181,7 +182,7 @@ calendar_engine/
     ├── services.py                   # Вспомогательные сервисные функции (например, normalize_range(), get_local_date_for_user(), time_windows_have_overlap()...)
     ├── urls.py
     │
-    ├── _api/                         # ⭐API-сценарии для календаря
+    ├── _api/                         # ⭐ API-сценарии для календаря
     │    ├── serializers/
     │    │    ├── availability.py       # Сериализаторы для рабочего расписания специалиста (правило доступности и исключения)
     │    │    ├── events.py             # Сериализаторы для создания встречи
@@ -192,11 +193,22 @@ calendar_engine/
     │    │    └── ...
     │    └── urls.py                    # Маршруты
     │
-    ├── _web/                         # ⭐ 
-    │    ├── views/                     # 
-    │    │    ├──                       # 
-    │    │    └── ...
+    ├── _web/                         # ⭐ WEB-сценарии для календаря
+    │    ├── forms/
+    │    │    └── psychologist/
+    │    │         ├── form_working_schedule.py    # Форма для рабочего расписания специалиста
+    │    │         └── ...
+    │    ├── views/
+    │    │    └── psychologist/
+    │    │         ├── working_schedule_page.py    # Настройка рабочего расписания специалиста
+    │    │         └── ...
     │    └── urls.py                    # Маршруты
+    │
+    ├── templates/                         # ⭐ html-шаблоны для календаря (работа с рабочим расписанием)
+    │    └── calendar_engine/
+    │         └── psychologist_pages/
+    │              ├── working_schedule.html
+    │              └── ...
     │
     ├── domain/                       # ⭐ Бизнес-логика (НЕ Django)
     │    ├── time_policy/               # ДОМЕННЫЕ правила временной сетки календаря
@@ -1354,6 +1366,48 @@ calendar_engine/lifecycle/
 | 2 | `/calendar/api/psychologists/<int:profile_id>/schedule/` | `GET`      | Показать расписание специалиста (доступное время для записи)                               |
 
 ---
+
+## <a id="title13"> ⚙️ WEB-функционал </a>
+
+### 1. ФОРМЫ
+
+Для **WEB-эндпоинтов** созданы следующие формы:
+
+### calendar_engine/_web/forms/
+
+- Рабочее расписание специалиста (правило рабочего времени / исключения):
+  - **psychologist/form_working_schedule.py**`AvailabilityRuleWebForm` - форма верхнего уровня для базового рабочего расписания специалиста
+  - **psychologist/form_working_schedule.py**`AvailabilityRuleTimeWindowWebForm` - одно рабочее окно внутри дня, например с 09:00 до 13:00
+  - **psychologist/form_working_schedule.py**`AvailabilityExceptionWebForm` - форма исключения из рабочего расписания
+  - **psychologist/form_working_schedule.py**`AvailabilityExceptionTimeWindowWebForm` - одно переопределенное рабочее окно на период исключения
+  - **psychologist/form_working_schedule.py**`BaseRequiredWindowFormSet` - FormSet для рабочих окон, где минимум одно корректное окно обязательно
+  - **psychologist/form_working_schedule.py**`BaseOptionalWindowFormSet` - FormSet для исключений, где окна могут отсутствовать
+
+### 2. КОНТРОЛЛЕРЫ 
+
+### calendar_engine/_web/views/
+
+#### psychologist/working_schedule_page.py
+
+| № | Название контроллера                    | Тип (ViewSet / Generic)                   | Описание функционала (docstring)                                                                                                                                                                                                                    |
+|---|-----------------------------------------|-------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | **PsychologistWorkingSchedulePageView** | `PsychologistRequiredMixin, TemplateView` | Страница настройки рабочего расписания специалиста. <br/> В бизнес-терминах здесь есть два уровня управления: <br/> 1) Базовое рабочее правило - это стандартный ритм недели. <br/> 2) Исключения - это временные отклонения от стандартного ритма. |
+
+### 3. HTML-ШАБЛОНЫ
+
+### psychologist_pages/
+
+| № | Страница               | Описание страницы                                            |
+|---|------------------------|--------------------------------------------------------------|
+| 1 | `working_schedule.html` | Создать и управлять рабочим расписанием и исключениями в нем |
+
+### 4. МАРШРУТЫ (РОУТЫ)
+
+### calendar_engine/_web/urls.py
+
+| № | Эндпоинт                                 | HTTP-методы   | Описание функционала                                                         |
+|---|------------------------------------------|---------------|------------------------------------------------------------------------------|
+| 1 | `psychologist-account/working-schedule/` | `GET`, `POST` | Создать рабочее расписание / Получить список расписаний (текущее + архивные) |
 
 ---
 

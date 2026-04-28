@@ -20,8 +20,6 @@ from core.views.client.specialist_matching.view_personal_questions import \
     ClientPersonalQuestionsPageView
 from core.views.psychologist.my_account.main_account_page import \
     PsychologistAccountView
-from core.views.psychologist.my_account.working_schedule_page import \
-    PsychologistWorkingSchedulePageView
 from core.views.start_view import StartPageView
 
 app_name = CoreConfig.name
@@ -48,11 +46,6 @@ urlpatterns = [
     # === СПЕЦИАЛИСТ ===
     # 1) Личный кабинет
     path("psychologist-account/", PsychologistAccountView.as_view(), name="psychologist-account"),
-    path(
-        "psychologist-account/working-schedule/",
-        PsychologistWorkingSchedulePageView.as_view(),
-        name="psychologist-working-schedule",
-    ),
 
     # === ОБЩИЕ СТРАНИЦЫ ===
     # 1) Работа с каталогом специалстов
@@ -63,7 +56,6 @@ urlpatterns = [
         PsychologistCatalogFilterAjaxView.as_view(),
         name="psychologist-catalog-filter",
     ),
-
 
     # Детальная карточка психолога в КАТАЛОГЕ должна быть последней, потому что это catch-all slug route.
     # Если поставить ее выше конкретных URL, например "client-account/", Django начнет ошибочно

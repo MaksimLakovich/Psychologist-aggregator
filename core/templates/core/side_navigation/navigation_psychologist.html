@@ -72,7 +72,7 @@
                 </a>
             </li>
             <li>
-                <a href="{% url 'core:psychologist-working-schedule' %}?layout=sidebar"
+                <a href="{% url 'calendar_engine:web:psychologist-working-schedule' %}?layout=sidebar"
                    data-nav-item
                    data-nav-key="available-rule"
                    class="{{ nav_item_classes }} {% if current_sidebar_key == 'available-rule' %}bg-gray-300/25 !text-indigo-700{% endif %}"

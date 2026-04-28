@@ -3,7 +3,8 @@ from datetime import date
 from urllib.parse import urlencode
 
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Case, IntegerField, Max, Min, Prefetch, Value, When
+from django.db.models import (Case, IntegerField, Max, Min, Prefetch, Value,
+                              When)
 from django.template.loader import render_to_string
 from django.urls import reverse
 
