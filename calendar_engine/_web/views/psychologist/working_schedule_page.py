@@ -10,11 +10,11 @@ from django_ratelimit.decorators import ratelimit
 
 from calendar_engine._api.serializers.availability import (
     AvailabilityExceptionSerializer, AvailabilityRuleSerializer)
-from calendar_engine.models import AvailabilityException, AvailabilityRule
 from calendar_engine._web.forms.psychologist.form_working_schedule import (
     WEEKDAY_LABELS, AvailabilityExceptionTimeWindowFormSet,
     AvailabilityExceptionWebForm, AvailabilityRuleTimeWindowFormSet,
     AvailabilityRuleWebForm)
+from calendar_engine.models import AvailabilityException, AvailabilityRule
 from users.mixins.role_required_mixin import PsychologistRequiredMixin
 
 

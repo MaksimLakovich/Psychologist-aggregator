@@ -39,8 +39,10 @@ def build_session_duration_labels(active_rule):
         }
 
     return {
-        "individual": f"Индивидуальная сессия · {format_session_duration_minutes(active_rule.session_duration_individual)}",
-        "couple": f"Парная сессия · {format_session_duration_minutes(active_rule.session_duration_couple)}",
+        "individual": f"Индивидуальная сессия · "
+                      f"{format_session_duration_minutes(active_rule.session_duration_individual)}",
+        "couple": f"Парная сессия · "
+                  f"{format_session_duration_minutes(active_rule.session_duration_couple)}",
     }
 
 
