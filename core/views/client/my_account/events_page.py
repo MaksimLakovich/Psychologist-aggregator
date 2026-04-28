@@ -82,8 +82,8 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
         #   - формируется подходящая кнопка для возврата на все события
         #   - собирается query-строка с обязательным layout и опциональными параметрами
         if selected_calendar_day:
-            context["sessions_toggle_label"] = "Показать запланированные"
-            context["sessions_toggle_query"] = self._build_layout_query()
+            context["events_toggle_label"] = "Показать запланированные"
+            context["events_toggle_query"] = self._build_layout_query()
             context["page_heading_prefix"] = "События"
             context["page_heading_description"] = (
                 "Ниже отображаются все ваши встречи, назначенные на выбранный день календаря"
@@ -96,12 +96,12 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
         #   - формируется подходящая кнопка для переключения между архивными и активными событиями
         #   - собирается query-строка с обязательным layout и опциональными параметрами
         else:
-            context["sessions_toggle_label"] = (
+            context["events_toggle_label"] = (
                 "Показать запланированные"
                 if show_completed
                 else "Показать завершенные"
             )
-            context["sessions_toggle_query"] = self._build_layout_query(
+            context["events_toggle_query"] = self._build_layout_query(
                 sessions_scope=None if show_completed else "completed"
             )
             context["page_heading_prefix"] = "Прошедшие" if show_completed else "Запланированные"

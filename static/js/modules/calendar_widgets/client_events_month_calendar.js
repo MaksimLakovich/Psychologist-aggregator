@@ -11,7 +11,7 @@ function readPlannedSessionsCalendarData() {
     // Ищем JSON-данные, которые Django уже подготовил на сервере для month-widget.
     // Это нужно, чтобы виджет сразу понимал, в какие дни у клиента уже есть сессии,
     // без дополнительного AJAX-запроса после загрузки страницы.
-    const dataElement = document.getElementById("planned-sessions-calendar-data");
+    const dataElement = document.getElementById("planned-events-calendar-data");
     if (!dataElement?.textContent) {
         return [];
     }
@@ -120,7 +120,7 @@ function initPlannedSessionsCalendarWidget() {
     // Виджет нужен только на странице "Запланированные сессии".
     // Если контейнера на странице нет или библиотека FullCalendar еще не загрузилась,
     // ничего не делаем и не мешаем остальному интерфейсу клиента.
-    const calendarContainer = document.getElementById("planned-sessions-calendar-widget");
+    const calendarContainer = document.getElementById("planned-events-calendar-widget");
     if (!calendarContainer || typeof FullCalendar === "undefined") {
         return;
     }
