@@ -355,11 +355,11 @@
         </div>
 
         <!-- ===== СПИСОК ВСТРЕЧ ===== -->
-        {% if client_events %}
+        {% if event_cards %}
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
 
                 <div class="xl:col-span-8 space-y-5 pr-4 animate-fade-in-up">
-                    {% for item in client_events %}
+                    {% for item in event_cards %}
                         <article class="relative" {% if item.is_recently_created %}data-recently-created-session{% endif %}>
 
                             <!-- На новой встрече добавляем временный бейдж - НОВАЯ ЗАПИСЬ -->
@@ -428,7 +428,7 @@
                                             <div class="relative">
                                                 <img src="{{ item.specialist_photo_url }}" alt="Специалист"
                                                      class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
-                                                {% if not item.is_archived_card %}
+                                                {% if item.show_specialist_live_indicator and not item.is_archived_card %}
                                                     <!-- Live-indicator оставляем только у активной встречи.
                                                          В архивной карточке он больше не нужен и визуально конфликтует с белой "пленкой" поверх карточки. -->
                                                     <span class="group absolute -bottom-0.5 -right-0.5 z-20 flex items-center justify-center w-4 h-4 rounded-full bg-white border-2 border-white shadow-sm"
@@ -450,7 +450,7 @@
                                                     {{ item.counterpart_full_name }}
                                                 </p>
                                                 <p class="text-sm font-medium text-zinc-400">
-                                                    Психолог • {{ item.specialist_profile.get_therapy_format_display|default:"Онлайн" }}
+                                                    {{ item.counterpart_caption }}
                                                 </p>
                                             </div>
                                         </div>
@@ -469,7 +469,7 @@
                                         </div>
 
                                         <!-- КНОПКИ -->
-                                        {% if item.slot.meeting_url and not item.is_archived_card %}
+                                        {% if item.can_open_meeting_url %}
                                             <a href="{{ item.slot.meeting_url }}"
                                                 target="_blank"
                                                 class="cta-shine-button group inline-flex items-center justify-center w-full sm:w-auto mt-1 px-6 py-2 gap-3
@@ -479,21 +479,25 @@
                                                 <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="relative z-10 w-6 h-6 transition-transform duration-300 group-hover:-rotate-12">
                                                 <span class="relative z-10">Видеочат</span>
                                             </a>
-                                            <a href="{% url 'core:client-therapy-session-detail' item.event.id %}{{ layout_query }}"
-                                                class="cta-shine-button group inline-flex items-center justify-center w-full sm:w-auto mt-0 px-6 py-2 gap-3
+                                        {% endif %}
+
+                                        <!-- АДАПТЕР МАРШРУТИЗИРУЕТ НА КОРРЕКТНЫЙ URL ПО СООТВЕТСТВУЮЩЕМУ ТИПУ СОБЫТИЯ -->
+                                        {% if item.detail_is_available %}
+                                            <a href="{{ item.detail_url }}"
+                                                class="cta-shine-button group inline-flex items-center justify-center w-full sm:w-auto {% if item.can_open_meeting_url %}mt-0{% else %}mt-1{% endif %} px-6 py-2 gap-3
                                                 border border-transparent text-base font-medium rounded-xl text-white bg-indigo-700 hover:bg-indigo-800
                                                 transition-all duration-200">
                                                 <span class="cta-shine-button__glint"></span>
                                                 <span class="relative z-10">Посмотреть</span>
                                             </a>
                                         {% else %}
-                                            <a href="{% url 'core:client-therapy-session-detail' item.event.id %}{{ layout_query }}"
-                                                class="cta-shine-button group inline-flex items-center justify-center w-full sm:w-auto mt-1 px-6 py-2 gap-3
-                                                border border-transparent text-base font-medium rounded-xl text-white bg-indigo-700 hover:bg-indigo-800
-                                                transition-all duration-200">
-                                                <span class="cta-shine-button__glint"></span>
-                                                <span class="relative z-10">Посмотреть</span>
-                                            </a>
+                                            <button type="button"
+                                                disabled
+                                                class="inline-flex items-center justify-center w-full sm:w-auto mt-1 px-6 py-2 gap-3
+                                                border border-transparent text-base font-medium rounded-xl text-white bg-slate-400
+                                                cursor-not-allowed opacity-75">
+                                                <span>{{ item.detail_unavailable_label }}</span>
+                                            </button>
                                         {% endif %}
 
                                     </div>
