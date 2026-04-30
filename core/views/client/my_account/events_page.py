@@ -1,4 +1,5 @@
 from django.db.models import Max, Min, Prefetch, Q
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.formats import date_format
@@ -11,7 +12,7 @@ from core.services.calendar_event_slot_selector import (
     get_event_active_slot, get_event_completed_slot)
 from core.services.calendar_slot_time_display import \
     build_calendar_slot_time_display
-from core.services.client_events.event_card_adapters import build_client_event_card
+from core.services.calendar_adapters.cl_event_adapters import build_client_event_card
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 from users.mixins.role_required_mixin import ClientRequiredMixin
 
@@ -57,6 +58,12 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
         self._apply_layout_context(context)
 
         context["title_client_account_view"] = "Календарь событий на ОПОРА"
+        context["empty_events_title"] = "Нет предстоящих встреч"
+        context["empty_events_description"] = (
+            "Ваши встречи появятся после выполнения процесса подбора и записи к специалисту на сессию"
+        )
+        context["empty_events_cta_url"] = f"{reverse('core:general-questions')}{self._build_layout_query()}"
+        context["empty_events_cta_label"] = "Подобрать специалиста"
         context["current_sidebar_key"] = "all-events"
         context["show_completed"] = show_completed
         context["selected_calendar_day"] = selected_calendar_day
