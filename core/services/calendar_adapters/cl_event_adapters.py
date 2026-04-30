@@ -1,7 +1,7 @@
 from django.urls import reverse
 
 from calendar_engine.booking.services import build_specialist_live_indicator
-from core.services.calendar_events.event_card_adapters import \
+from core.services.calendar_adapters.base_event_adapters import \
     BaseCalendarEventCardAdapter
 
 
