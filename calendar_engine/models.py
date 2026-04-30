@@ -389,9 +389,9 @@ class TimeSlot(TimeStampedModel):
                     "Текстовую причину отмены можно указывать только для слота со статусом cancelled"
                 )
 
-        if self.status != "completed" and self.meeting_resume:
+        if self.status not in ["started", "completed"] and self.meeting_resume:
             errors["meeting_resume"] = (
-                "Итоги встречи можно сохранять только для слота со статусом completed"
+                "Итоги встречи можно сохранять только для слота со статусом started или completed"
             )
 
         if errors:
