@@ -86,6 +86,7 @@ class BaseCalendarEventCardAdapter:
         recurrence_rule = next(iter(self.event.recurrences.all()), None)
         # Для общей базы detail_url по умолчанию отсутствует.
         # Конкретные типы событий и роли сами решают, куда должна вести кнопка "Посмотреть".
+        # Если ссылки нет, шаблон покажет спокойное состояние "Детали скоро".
         detail_url = self._build_detail_url()
 
         return {
@@ -93,7 +94,6 @@ class BaseCalendarEventCardAdapter:
             "slot": self.slot,
             "title_display": self.event.title,
             "detail_url": detail_url,
-            "detail_is_available": detail_url is not None,
             "detail_unavailable_label": "Детали скоро",
             "event_kind": "event",
             "counterpart_user": None,
