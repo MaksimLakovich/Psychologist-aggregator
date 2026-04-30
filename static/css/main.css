@@ -6984,6 +6984,22 @@ input:checked + .toggle-bg {
     grid-template-columns: minmax(0,1fr) 22rem;
   }
 
+  .xl\:flex-row {
+    flex-direction: row;
+  }
+
+  .xl\:items-center {
+    align-items: center;
+  }
+
+  .xl\:justify-end {
+    justify-content: flex-end;
+  }
+
+  .xl\:justify-between {
+    justify-content: space-between;
+  }
+
   .xl\:p-0 {
     padding: 0px;
   }

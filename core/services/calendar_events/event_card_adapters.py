@@ -47,7 +47,7 @@ class BaseCalendarEventCardAdapter:
         """Запоминает входные данные, из которых будет собрана краткая карточка события.
 
         Бизнес-смысл:
-            - role-specific view уже нашла событие пользователя и выбрала слот, который нужно показать в списке;
+            - view для role-специфики уже нашла событие пользователя и выбрала слот, который нужно показать в списке;
             - adapter не ищет событие заново, а получает готовые данные и превращает их в удобный контракт
               для HTML-шаблона;
             - так общая календарная база остается одной, а особенности ролей живут в client/psychologist adapter-ах.
@@ -66,7 +66,7 @@ class BaseCalendarEventCardAdapter:
 
         Бизнес-смысл:
             - HTML-шаблон не должен сам вычислять, как красиво показать дату, статус, длительность или архивность;
-            - шаблон получает уже готовые поля и просто рисует карточку;
+            - шаблон получает уже готовые поля и просто формирует карточку;
             - если событие пока неизвестного будущего типа, базовая карточка все равно может безопасно показаться,
               но кнопка detail-страницы будет недоступна до появления отдельного adapter-а.
 
@@ -76,13 +76,13 @@ class BaseCalendarEventCardAdapter:
         """
         # Готовим дату и время по timezone пользователя, который открыл календарь.
         # Например, один и тот же слот должен отображаться клиенту или специалисту в их локальном времени,
-        # а не в техническом времени сервера.
+        # а не в техническом времени сервера
         slot_display_data = build_calendar_slot_time_display(
             slot=self.slot,
             client_timezone=self.viewer_timezone,
         )
         # Если событие повторяется, показываем человекочитаемую частоту.
-        # Если правил повторения нет, карточка считается разовой встречей.
+        # Если правил повторения нет, карточка считается разовой встречей
         recurrence_rule = next(iter(self.event.recurrences.all()), None)
         # Для общей базы detail_url по умолчанию отсутствует.
         # Конкретные типы событий и роли сами решают, куда должна вести кнопка "Посмотреть".
@@ -91,6 +91,7 @@ class BaseCalendarEventCardAdapter:
         return {
             "event": self.event,
             "slot": self.slot,
+            "title_display": self.event.title,
             "detail_url": detail_url,
             "detail_is_available": detail_url is not None,
             "detail_unavailable_label": "Детали скоро",
@@ -101,6 +102,7 @@ class BaseCalendarEventCardAdapter:
             "specialist_profile": None,
             "specialist_live_indicator": self._build_empty_live_indicator(),
             "show_specialist_live_indicator": False,
+            "show_counterpart_photo": True,
             "specialist_photo_url": "/static/images/menu/user-circle.svg",
             "visibility_display": self.event.get_visibility_display() or "Приватная",
             "event_type_display": self.event.get_event_type_display() or "Событие",
