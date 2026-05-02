@@ -12,38 +12,33 @@ from core.services.calendar_event_slot_selector import (
     get_event_active_slot, get_event_completed_slot)
 from core.services.calendar_slot_time_display import \
     build_calendar_slot_time_display
-from core.services.calendar_adapters.cl_event_adapters import build_client_event_card
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
-from users.mixins.role_required_mixin import ClientRequiredMixin
+from core.services.calendar_adapters.ps_event_adapters import \
+    build_psychologist_event_card
+from users.mixins.role_required_mixin import PsychologistRequiredMixin
 
 
-class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, TemplateView):
-    """Контроллер страницы *Мой кабинет / Мой календарь*.
+class PsychologistEventsView(PsychologistRequiredMixin, SpecialistMatchingLayoutMixin, TemplateView):
+    """Контроллер страницы специалиста *Мой кабинет / Мой календарь*.
 
     Бизнес-смысл страницы:
-        - после успешного создания встречи клиент должен сразу увидеть, что встреча действительно создана;
+        - специалист должен видеть в одном календаре все события, где он является участником;
         - экран по умолчанию показывает запланированные встречи со статусом planned, а также уже начавшиеся
-          встречи со статусом started, чтобы клиент не потерял к ним быстрый доступ;
-        - на том же экране клиент может переключиться на прошедшие события, не уходя в отдельный подпункт меню;
-        - layout страницы должен сохраняться в том же режиме (верхнее меню или сайдбар), из которого клиент прошел
-          шаги подбора и записи.
+          встречи со статусом started, чтобы пользователь не потерял к ним быстрый доступ;
+        - на том же экране пользователь может переключиться на прошедшие события, не уходя в отдельный подпункт меню;
+        - month-widget справа помогает быстро увидеть загрузку по дням.
     """
 
-    template_name = "core/client_pages/my_account/events.html"
+    template_name = "core/psychologist_pages/my_account/events.html"
 
     def get_context_data(self, **kwargs):
-        """Формирует контекст единой страницы календаря событий клиента.
+        """Формирует контекст единой страницы календаря событий специалиста.
 
         Бизнес-смысл:
-            - одна и та же страница решает 3 пользовательских сценария:
-                - показать ближайшие активные встречи;
-                - показать прошедшие встречи;
-                - показать встречи только за один выбранный день из month-widget календаря;
-            - поэтому здесь собираем все сигналы интерфейса:
-                - какой режим списка сейчас открыт;
-                - какой текст должен быть в шапке;
-                - какую кнопку показать для возврата в основной режим;
-                - какие данные передать в правый календарный виджет.
+            - специалист может быстро переключаться между будущими и прошедшими встречами;
+            - может кликнуть конкретный день в календарном виджете и увидеть события только этого дня;
+            - карточки событий строятся через role-specific adapter, чтобы специалист видел клиента,
+              а не данные самого себя как психолога.
         """
         context = super().get_context_data(**kwargs)
 
@@ -53,16 +48,18 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
         show_completed = self._should_show_completed_events()
         # 3) Вспомогательная функция, которая возвращает выбранный кликом день в month-widget календаря
         selected_calendar_day = self._get_selected_calendar_day()
-        # 4) Применяем тот же layout-режим, который сопровождал клиента на шагах подбора и записи: меню или сайдбар
+        # 4) Применяем тот же layout-режим, который сопровождал пользователя на прошлых шагах: меню или сайдбар
         self._apply_layout_context(context)
 
-        context["title_client_account_view"] = "Календарь событий на ОПОРА"
-        context["empty_events_title"] = "Нет предстоящих встреч"
+        context["title_psychologist_account_view"] = "Календарь событий на ОПОРА"
+        context["empty_events_title"] = "Нет предстоящих встреч с клиентами"
         context["empty_events_description"] = (
-            "Ваши встречи появятся после выполнения процесса подбора и записи к специалисту на сессию"
+            "Ваши встречи появятся после того, как клиенты запишутся к вам на терапевтическую сессию"
         )
-        context["empty_events_cta_url"] = f"{reverse('core:general-questions')}{self._build_layout_query()}"
-        context["empty_events_cta_label"] = "Подобрать специалиста"
+        context["empty_events_cta_url"] = (
+            f"{reverse('calendar_engine:web:psychologist-working-schedule')}{self._build_layout_query()}"
+        )
+        context["empty_events_cta_label"] = "Настроить расписание"
         context["current_sidebar_key"] = "all-events"
         context["show_completed"] = show_completed
         context["selected_calendar_day"] = selected_calendar_day
@@ -81,7 +78,7 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
         )
 
         # ВЕТКА 1:
-        # Если клиент кликнул конкретный день в month-виджете, страница переходит в режим "показать все по этой дате":
+        # Если пользователь кликнул конкретный день в month-виджете, то переход в режим "показать все по этой дате":
         #   - формируется подходящая шапка/описание страницы
         #   - формируется подходящая кнопка для возврата на все события
         #   - собирается query-строка с обязательным layout и опциональными параметрами
@@ -93,8 +90,8 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
                 "Ниже отображаются все ваши встречи, назначенные на выбранный день календаря"
             )
         # ВЕТКА 2:
-        # Если клиент в календаре не выбирал день, то оставляем обычное поведение страницы: либо все активные встречи,
-        # либо архив (в зависимости от переключателя режима)
+        # Если пользователь в календаре не выбирал день, то оставляем обычное поведение страницы:
+        # либо все активные встречи, либо архив (в зависимости от переключателя режима)
         else:
             context["events_toggle_label"] = (
                 "Показать запланированные"
@@ -119,10 +116,10 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
         context["event_cards"] = event_cards
 
         # С помощью вспомогательной функции, на month-виджете календаря показываем активные и завершенные события,
-        # чтобы клиент видел общую картину по дням календаря даже при переключении между режимами списка
+        # чтобы пользователь видел общую картину по дням календаря даже при переключении между режимами списка
         context["calendar_month_widget_events"] = self._build_calendar_month_widget_events()
-        # Начальный месяц виджета выставляем по timezone клиента, чтобы календарь открывался не "по серверу",
-        # а по фактическому текущему времени клиента
+        # Начальный месяц виджета выставляем по timezone пользователя, чтобы календарь открывался не "по серверу",
+        # а по фактическому текущему времени пользователя
         context["calendar_widget_initial_date"] = timezone.localtime(
             timezone.now(),
             getattr(self.request.user, "timezone", None) or timezone.get_default_timezone(),
@@ -138,51 +135,51 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
         return context
 
     def _should_show_completed_events(self) -> bool:
-        """Определяет, хочет ли клиент видеть архив вместо активных встреч.
+        """Определяет, открыт ли календарь специалиста в архивном режиме.
+
+        Определяет, хочет ли пользователь видеть архив вместо активных встреч.
 
         Бизнес-смысл:
             - по умолчанию страница открывается в режиме ближайших активных сессий;
-            - если клиент нажал кнопку "Показать завершенные", в query приходит sessions_scope=completed;
+            - если пользователь нажал кнопку "Показать завершенные", в query приходит sessions_scope=completed;
             - этот helper превращает query-параметр в понятный флаг для всей view-логики.
         """
         return self.request.GET.get("sessions_scope") == "completed"
 
     def _get_selected_calendar_day(self):
-        """Возвращает день, который клиент выбрал кликом в month-виджете календаря.
+        """Возвращает день, который пользователь выбрал кликом в month-виджете календаря.
 
         Бизнес-смысл:
             - month-виджет показывает не только загрузку по дням, но и позволяет отфильтровать список встреч слева;
-            - если клиент кликнул на день с badge, JS передает selected_day=YYYY-MM-DD;
-            - здесь превращаем эту строку в нормальный date-объект, с которым дальше уже удобно работать во view.
-        """
+            - если пользователь кликнул на день с badge, JS передает selected_day=YYYY-MM-DD;
+            - здесь превращаем эту строку в нормальный date-объект, с которым дальше уже удобно работать во view."""
         raw_day = (self.request.GET.get("selected_day") or "").strip()
         if not raw_day:
             return None
         return parse_date(raw_day)
 
     def _get_event_cards(self, *, show_completed: bool, selected_calendar_day):
-        """Собирает краткие карточки событий клиента.
+        """Собирает краткие карточки событий специалиста.
 
         Бизнес-смысл:
-            - шаблон страницы не должен сам решать, какие события считать активными, архивными
-              или подходящими под фильтр по выбранному дню;
+            - view отвечает за выборку событий и выбор подходящего display-slot;
             - эта функция заранее приводит все сценарии к одному HTML-контракту карточки события;
             - event-type adapter внутри build_client_event_card(...) решает, как конкретный тип события
               должен выглядеть в общем календаре и куда вести по кнопке "Посмотреть";
             - благодаря этому шаблон просто отображает готовые поля и не тащит на себя бизнес-логику фильтрации.
         """
-        # Берем текущий timezone именно из профиля клиента.
+        # Берем текущий timezone именно из профиля пользователя.
         # Это важно для сценария, когда встреча была создана раньше, а потом клиент сменил свой timezone в профиле:
-        # страница должна показывать дату/время уже по новому часовому поясу клиента
-        client_timezone = getattr(self.request.user, "timezone", None)
+        # страница должна показывать дату/время уже по новому часовому поясу пользователя
+        viewer_timezone = getattr(self.request.user, "timezone", None)
         current_datetime = timezone.now()
 
-        # ШАГ 1: Получаем только те события, которые действительно относятся к клиенту.
+        # ШАГ 1: Получаем только те события, которые действительно относятся к пользователю.
         # Пояснение Django ORM синтаксиса:
         #   - participants__user=self.request.user
         #       "__" здесь означает переход по связи между моделями. Т.е., у CalendarEvent есть связанные
         #       participants (EventParticipant) и оставляем те события, где среди участников есть текущий пользователь
-        events = (CalendarEvent.objects.filter(
+        events = CalendarEvent.objects.filter(
             participants__user=self.request.user,
         ).annotate(
             # annotate(...) добавляет к каждому событию вычисляемое поле прямо на уровне SQL-запроса.
@@ -197,11 +194,11 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
             #   - найти у них максимальное end_datetime;
             #   - записать это значение во временное поле latest_slot_end
             latest_slot_end=Max("slots__end_datetime"),
-        ))
+        )
 
         # ШАГ 2: Фильтруем события в зависимости от пользовательского запроса. Три сценария:
         # СЦЕНАРИЙ 1: Для фильтра по конкретному календарному дню берем весь набор сессий - активные и уже завершенные:
-        #   - клиент нажал день в calendar-widget;
+        #   - пользователь нажал день в calendar-widget;
         #   - значит ему нужно показать все события этого дня, а не только активные или только архив
         if selected_calendar_day:
             # Q(...) в Django ORM нужен, когда условие фильтра становится составным и его нужно комбинировать
@@ -210,19 +207,16 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
             #   - либо событие имеет "нормальный" статус planned / started / completed;
             #   - либо even если статусная модель не успела обновиться, но последнее окно latest_slot_end
             #     уже в прошлом, такое событие все равно нужно включить
-            selected_day_filter = (
+            events = events.filter(
                 Q(status__in=["planned", "started", "completed", "cancelled"])
                 | Q(latest_slot_end__lt=current_datetime)
-            )
-            events = events.filter(
-                selected_day_filter
             ).annotate(
                 # annotate(...) добавляет к каждому событию вычисляемое поле прямо на уровне SQL-запроса.
                 # Здесь first_slot_start = минимальное slots__start_datetime.
                 # Зачем это нужно:
                 #   - у события может быть несколько слотов;
                 #   - для списка "Запланированные" нужно уметь стабильно сортировать событие по самому раннему слоту
-                first_slot_start=Min("slots__start_datetime")
+                first_slot_start=Min("slots__start_datetime"),
             )
         # СЦЕНАРИЙ 2: Для фильтра и показа всех АРХИВНЫХ событий
         elif show_completed:
@@ -235,7 +229,7 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
             ).annotate(
                 # annotate(...) добавляет к каждому событию вычисляемое поле прямо на уровне SQL-запроса.
                 # Для архива нужен не самый ранний, а самый свежий завершенный слот, чтобы сверху были последние
-                # прошедшие встречи клиента
+                # прошедшие встречи пользователя
                 first_slot_start=Max(
                     "slots__start_datetime",
                     filter=archived_slot_filter,
@@ -256,7 +250,7 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
             ).annotate(
                 # annotate(...) добавляет к каждому событию вычисляемое поле прямо на уровне SQL-запроса.
                 # Сортируем список не по "самому первому слоту события в истории", а по ближайшему
-                # еще актуальному слоту, который реально должен быть показан клиенту на экране "Запланированные"
+                # еще актуальному слоту, который реально должен быть показан пользователю на экране "Запланированные"
                 first_slot_start=Min(
                     "slots__start_datetime",
                     filter=Q(slots__status__in=["planned", "started"]),
@@ -303,23 +297,7 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
 
         # ШАГ 4: Формируем итоговый контракт карточек для HTML
         event_cards = []
-
-        # Это локальный in-memory cache на время выполнения одного request.
-        # Например:
-        #   - у клиента 3 встречи;
-        #   - 2 из них с психологом Анной;
-        #   - 1 с психологом Олегом.
-        # Чтоб не считать для Анны индикатор 2 раза использую specialist_indicator_cache = {}
-        specialist_indicator_cache = {}
         layout_query = self._build_layout_query()
-
-        # Берем id только что созданной встречи из session и сразу удаляем его оттуда.
-        # Это нужно для одноразовой подсветки:
-        #   - после redirect клиент видит список своих сессий;
-        #   - одна из них только что была создана на предыдущем шаге;
-        #   - именно ее мы помечаем как "Только что создано", а при следующем открытии страницы или обновлении
-        #   эта подсветка исчезнет, т.е., разово показываем только при создании
-        last_created_booking_id = self.request.session.pop("last_created_booking_id", None)
 
         for event in events:
             # 1) Конкретный календарный день указанный в виджете календаря: активные и уже завершенные
@@ -333,7 +311,7 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
                     for event_slot in event.slots.all()
                     if build_calendar_slot_time_display(
                         slot=event_slot,
-                        client_timezone=client_timezone,
+                        client_timezone=viewer_timezone,
                     ).get("display_day_key") == selected_calendar_day.isoformat()
                 ]
                 slot = next(iter(selected_day_slots), None)
@@ -364,15 +342,13 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
                 continue
 
             event_cards.append(
-                build_client_event_card(
+                build_psychologist_event_card(
                     event=event,
                     slot=slot,
                     viewer_user=self.request.user,
-                    viewer_timezone=client_timezone,
+                    viewer_timezone=viewer_timezone,
                     current_datetime=current_datetime,
                     layout_query=layout_query,
-                    last_created_booking_id=last_created_booking_id,
-                    specialist_indicator_cache=specialist_indicator_cache,
                     force_archived_card=show_completed,
                 )
             )
@@ -380,7 +356,7 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
         # Для режима "события выбранного дня" порядок карточек должен быть смешанным:
         #   - сначала все еще активные встречи по возрастанию времени;
         #   - затем уже завершенные встречи по убыванию времени.
-        # Это помогает клиенту в одном списке сначала увидеть то, куда он еще может попасть сегодня,
+        # Это помогает пользователю в одном списке сначала увидеть то, куда он еще может попасть сегодня,
         # а ниже - уже прошедшие события за эту же дату
         if selected_calendar_day:
             active_events = [
@@ -393,10 +369,10 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
                 for item in event_cards
                 if item["is_archived_card"]
             ]
-            # В day-filter сортируем по уже подготовленному времени клиента, а не по "сырому" datetime БД.
+            # В day-filter сортируем по уже подготовленному времени пользователя, а не по "сырому" datetime БД.
             # Это важно для пользователей из другого TZ:
-            # выбранный день уже посчитан в timezone клиента, значит и порядок карточек внутри дня
-            # должен соответствовать тому же самому клиентскому времени
+            # выбранный день уже посчитан в timezone пользователя, значит и порядок карточек внутри дня
+            # должен соответствовать тому же самому времени
             active_events.sort(key=lambda item: item["display_start_iso"] or "")
             completed_events.sort(key=lambda item: item["display_start_iso"] or "", reverse=True)
             event_cards = active_events + completed_events
@@ -404,12 +380,12 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
         return event_cards
 
     def _build_calendar_month_widget_events(self) -> list[dict]:
-        """Готовит компактный набор событий для правого month-widget календаря клиента.
+        """Готовит компактный набор событий для правого month-widget календаря специалиста.
 
         Бизнес-смысл:
             - виджет справа не должен пересчитывать доменную логику;
-            - он получает уже готовые даты встреч клиента и только визуально показывает, в какие дни сколько
-              активных и сколько уже завершенных сессий есть у клиента;
+            - он получает уже готовые даты встреч пользователя и только визуально показывает, в какие дни сколько
+              активных и сколько уже завершенных сессий есть у пользователя;
             - дополнительно этот набор данных нужен JS не только для badge, но и для клика по дню, чтобы
               страница могла переключиться в режим "события выбранного дня".
         """
@@ -475,16 +451,14 @@ class ClientEventsView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, Templ
                 slot=slot,
                 client_timezone=getattr(self.request.user, "timezone", None),
             )
-
-            # 4) Формируем итоговый набор данных, который нужен именно для JS month-виджета календаря
             calendar_events.append(
                 {
                     "id": str(event.id),
                     "title": event.title,
-                    "start": slot_display_data.get("display_start_iso"),  # нужен для календарного виджета FullCalendar
-                    "end": slot_display_data.get("display_end_iso"),  # нужен для календарного виджета FullCalendar
+                    "start": slot_display_data.get("display_start_iso"),
+                    "end": slot_display_data.get("display_end_iso"),
                     "status": event.status,
-                    "day_key": slot_display_data.get("display_day_key"),  # нужен для счетчика встреч по дням
+                    "day_key": slot_display_data.get("display_day_key"),
                     "bucket": "completed" if is_completed_events else "active",
                 }
             )

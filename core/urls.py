@@ -20,6 +20,10 @@ from core.views.client.specialist_matching.view_personal_questions import \
     ClientPersonalQuestionsPageView
 from core.views.psychologist.my_account.main_account_page import \
     PsychologistAccountView
+from core.views.psychologist.my_account.events_page import \
+    PsychologistEventsView
+from core.views.psychologist.my_account.therapy_session_detail_page import \
+    PsychologistTherapySessionDetailView
 from core.views.start_view import StartPageView
 
 app_name = CoreConfig.name
@@ -44,8 +48,14 @@ urlpatterns = [
     path("payment-card/", ClientAddPaymentCardPageView.as_view(), name="payment-card"),
 
     # === СПЕЦИАЛИСТ ===
-    # 1) Личный кабинет
+    # 1) Личный кабинет + календарь событий + детали терапевтических сессий
     path("psychologist-account/", PsychologistAccountView.as_view(), name="psychologist-account"),
+    path("psychologist-account/events/", PsychologistEventsView.as_view(), name="psychologist-events"),
+    path(
+        "psychologist-account/sessions/<uuid:event_id>/",
+        PsychologistTherapySessionDetailView.as_view(),
+        name="psychologist-therapy-session-detail",
+    ),
 
     # === ОБЩИЕ СТРАНИЦЫ ===
     # 1) Работа с каталогом специалстов

@@ -8,7 +8,6 @@ from django.utils.text import Truncator
 from django.views.generic import FormView
 
 from calendar_engine.booking.exceptions import CreateBookingValidationError
-from calendar_engine.booking.services import build_specialist_live_indicator
 from calendar_engine.lifecycle.exceptions import LifecycleActionValidationError
 from calendar_engine.lifecycle.services.reschedule_chain_resolver import \
     get_latest_rescheduled_descendant
@@ -23,33 +22,33 @@ from core.constants import (
     MESSAGE_LENGTH_IN_THERAPY_SESSION_PAGE,
     VISIBLE_MESSAGE_LIMITS_IN_THERAPY_SESSION_PAGE)
 from core.forms.client.my_account.form_therapy_session_details import (
-    CancelTherapySessionForm, ClientTherapySessionDetailsForm,
-    RescheduleTherapySessionForm)
-from core.services.experience_label import build_experience_label
+    CancelTherapySessionForm, RescheduleTherapySessionForm)
+from core.forms.psychologist.my_account.form_therapy_session_details import \
+    PsychologistTherapySessionDetailsForm
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 from core.services.therapy_session.therapy_session_detail_loader import \
     load_therapy_session_detail_data
-from users.constants import LANGUAGE_CHOICES
-from users.mixins.role_required_mixin import ClientRequiredMixin
+from users.mixins.role_required_mixin import PsychologistRequiredMixin
 
 
-class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayoutMixin, FormView):
-    """Детальная страница терапевтической сессии со стороны клиента.
+class PsychologistTherapySessionDetailView(PsychologistRequiredMixin, SpecialistMatchingLayoutMixin, FormView):
+    """Детальная страница терапевтической сессии со стороны специалиста.
 
     Бизнес-смысл:
-        - клиент открывает встречу из своего календаря и видит специалиста, дату, время и статус;
-        - клиент управляет организационными данными встречи:
-            - заметки к событию;
-            - прочие параметры, которые могут заполняться/добавляться клиентом;
+        - специалист открывает встречу из своего календаря и видит клиента, дату, время и статус;
+        - специалист управляет организационными данными встречи:
+            - ссылкой на подключение;
+            - описанием события;
+            - итогами после начала/завершения встречи;
         - специалист, как и клиент, может отменять/переносить активную встречу;
         - forum-блок общий для обеих сторон, чтобы клиент и специалист могли обмениваться сообщениями
           внутри одной терапевтической сессии.
     """
 
-    template_name = "core/client_pages/my_account/therapy_session_detail.html"
+    template_name = "core/psychologist_pages/my_account/therapy_session_detail.html"
     # Форумная часть встречи теперь живет в нейтральной shared-форме,
     # потому что этот же input-contract позже понадобится и специалисту, и другим типам событий
-    form_class = ClientTherapySessionDetailsForm
+    form_class = PsychologistTherapySessionDetailsForm
     # Количество сообщение которые отображаются по умолчанию в детальной карточке *Терапевтическая сессия*
     visible_messages_limit = VISIBLE_MESSAGE_LIMITS_IN_THERAPY_SESSION_PAGE
     # Количество символов в сообщении по умолчанию в детальной карточке *Терапевтическая сессия*
@@ -61,8 +60,8 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
         """Подготавливает всю detail-страницу еще до перехода в GET/POST-логику.
 
         Бизнес-смысл:
-            - клиент открывает страницу конкретной терапевтической сессии по event_id;
-            - система должна сразу убедиться, что этот клиент действительно участвует в данной встрече
+            - пользователь открывает страницу конкретной терапевтической сессии по event_id;
+            - система должна сразу убедиться, что этот пользователь действительно участвует в данной встрече
               и не пытается открыть чужое событие по прямой ссылке;
             - после этого shared loader один раз загружает общую основу detail-screen:
                 - событие;
@@ -79,13 +78,13 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
         # ВАЖНО:
         # check_role_access(...) вызываем здесь вручную ДО загрузки detail_data из БД.
         # Это нужно:
-        # 1) Эта client-view теперь наследуется от ClientRequiredMixin.
+        # 1) Эта view теперь наследуется от PsychologistRequiredMixin.
         # 2) Но в этой конкретной странице мы сами переопределили dispatch(), а значит сначала выполняется
         #    код этого метода, и только потом super().dispatch(...).
-        # 3) Если не сделать раннюю проверку роли здесь, то psychologist сначала успеет зайти в
+        # 3) Если не сделать раннюю проверку роли здесь, то любая роль кроме psychologist сначала успеет зайти в
         #    load_therapy_session_detail_data(...), и только потом сработает общий dispatch mixin'а.
         # 4) Нам это не подходит: для чужой роли нужно остановиться как можно раньше и вообще не начинать
-        #    загрузку client-специфических данных detail-экрана.
+        #    загрузку специфических данных detail-экрана.
         # Итого:
         #   - если доступ разрешен, check_role_access(...) вернет None и мы продолжим;
         #   - если доступ запрещен, метод вернет готовый HttpResponse (redirect / 403), который сразу возвращаем
@@ -106,65 +105,37 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
 
     def get_initial(self):
         """Метод:
-        1) Предзаполняет форму текущими значениями из актуального слота сессии в БД.
-        2) По умолчанию открывает forum-форму в режиме добавления нового сообщения."""
+        1) Предзаполняет форму текущими и организационными полями текущими значениями встречи из БД.
+        2) По умолчанию открывает forum-форму в режиме добавления нового сообщения.
+        """
         initial = super().get_initial()
         initial.update(
             {
                 "action": "add_message",
+                "meeting_url": self.slot.meeting_url if self.slot else "",
+                "meeting_resume": self.slot.meeting_resume if self.slot else "",
+                "event_description": self.event.description or "",
             }
         )
-
         return initial
 
     def get_context_data(self, **kwargs):
         """Формирует контекст detail-страницу терапевтической сессии."""
         context = super().get_context_data(**kwargs)
-        language_label_map = dict(LANGUAGE_CHOICES)
+        self._apply_layout_context(context)
+
         specialist_profile = self._get_specialist_profile()
-        counterpart_user = self.detail_data.counterpart_user
-
-        specialist_languages_display = (
-            [
-                language_label_map.get(language_code, language_code)
-                for language_code in specialist_profile.languages
-            ]
-            if specialist_profile and specialist_profile.languages
-            else []
-        )
-        experience_label = build_experience_label(
-            specialist_profile.work_experience_years if specialist_profile else None
-        )
-
         if specialist_profile and self.event.event_type == "session_couple":
             session_price_value = specialist_profile.price_couples
         else:
             session_price_value = specialist_profile.price_individual if specialist_profile else None
 
-        context["title_client_account_view"] = "Детали сессии на ОПОРА"
-        self._apply_layout_context(context)
+        message_items = self._build_message_items()
+        context["title_psychologist_account_view"] = "Детали сессии на ОПОРА"
         context["current_sidebar_key"] = "all-events"
         context["event"] = self.event
         context["slot"] = self.slot
         context["slot_status_display"] = build_calendar_slot_status_display(slot=self.slot)
-        context["counterpart_full_name"] = (
-            self.detail_data.counterpart_full_name or "Специалист будет указан позже"
-        )
-        context["specialist_profile"] = specialist_profile
-        context["specialist_photo_url"] = (
-            counterpart_user.avatar_url
-            if counterpart_user
-            else "/static/images/menu/user-circle.svg"
-        )
-        context["specialist_profile_url"] = (
-            f"{reverse('core:psychologist-card-detail', kwargs={'profile_slug': specialist_profile.slug})}"
-            f"{self._build_layout_query()}"
-            if specialist_profile and specialist_profile.slug
-            else None
-        )
-        context["specialist_experience_label"] = experience_label
-        context["specialist_languages_display"] = specialist_languages_display
-        context["session_price_value"] = session_price_value
         # Время и дата уже заранее подготовлены shared loader по timezone текущего пользователя
         context["slot_display"] = self.detail_data.slot_display_data
         # Отдельный флаг нужен шаблону, чтобы в архивной встрече вместо подключения показывать meeting_resume
@@ -173,12 +144,21 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
         # Видеочат для клиента имеет смысл только пока встреча еще активна.
         # Если слот уже завершился по статусу или по времени, кнопку перехода в звонок скрываем
         context["can_open_meeting_url"] = self.detail_data.can_open_meeting_url
-        context["slot_participants_count"] = self.detail_data.slot_participants_count
-        context["event_participants_count"] = self.detail_data.event_participants_count
+        context["detail_title_display"] = "Терапевтическая сессия с клиентом"
+        context["counterpart_full_name"] = (
+            self.detail_data.counterpart_full_name or "Имя клиента не указано"
+        )
+        context["client_user"] = self.detail_data.counterpart_user
+        context["specialist_profile"] = specialist_profile
+        context["session_price_value"] = session_price_value
         context["matched_topics"] = self._build_matched_topics()
-        message_items = self._build_message_items()
-        context["message_items"] = message_items
+        context["can_manage_meeting_url"] = self._can_manage_meeting_url()
+        context["can_show_meeting_resume_block"] = self._can_show_meeting_resume_block()
+        context["can_manage_meeting_resume"] = self._can_manage_meeting_resume()
         context["can_manage_slot_messages"] = self._can_manage_slot_messages()
+        context["message_items"] = message_items
+        context["visible_messages_limit"] = self.visible_messages_limit
+        context["remaining_comments_count"] = max(len(message_items) - self.visible_messages_limit, 0)
         context["can_manage_session_actions"] = self._can_manage_session_actions()
         context["session_change_reason_label"] = self._get_session_change_reason_label()
         context["rescheduled_event_url"] = self._get_rescheduled_event_url()
@@ -205,31 +185,36 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
             if specialist_profile
             else None
         )
-        context["client_timezone_value"] = getattr(self.request.user, "timezone", "") or ""
+        context["client_timezone_value"] = getattr(self.detail_data.counterpart_user, "timezone", "") or ""
         context["current_slot_start_iso"] = (
             self.detail_data.slot_display_data.get("display_start_iso")
             if self.slot else ""
-        )
-        context["visible_messages_limit"] = self.visible_messages_limit
-        context["remaining_comments_count"] = max(len(message_items) - self.visible_messages_limit, 0)
-        context["specialist_live_indicator"] = build_specialist_live_indicator(
-            specialist_profile=specialist_profile,
         )
 
         return context
 
     def post(self, request, *args, **kwargs):
-        """Маршрутизирует POST-действия клиента на detail-странице:
+        """Маршрутизирует POST-действия специалиста на detail-странице:
             - cancel/reschedule встречи обрабатываются отдельными lifecycle-методами;
+            - работа с meeting_url для видеовстречи;
+            - работа с meeting_resume для фиксации итогов встречи;
+            - работа с event_description для добавления доп описания ко встрече;
             - остальные POST-запросы относятся к forum-форме: стандартная FormView через super().post(...).
         """
         action = request.POST.get("action")
 
         if action == "cancel_session":
             return self._handle_cancel_session()
-
         if action == "reschedule_session":
             return self._handle_reschedule_session()
+        if action == "save_meeting_url":
+            return self._handle_save_meeting_url()
+        if action == "delete_meeting_url":
+            return self._handle_delete_meeting_url()
+        if action == "save_meeting_resume":
+            return self._handle_save_meeting_resume()
+        if action == "save_event_description":
+            return self._handle_save_event_description()
 
         return super().post(request, *args, **kwargs)
 
@@ -239,7 +224,7 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
             form.add_error(None, "У сессии не найден актуальный слот. Отправка сообщения невозможна.")
             return self.form_invalid(form)
 
-        if not self._can_manage_slot_messages():  # Определяет, можно ли сейчас писать/редактировать сообщение
+        if not self._can_manage_slot_messages():
             form.add_error(None, "Оставлять и редактировать сообщения можно только в активной встрече.")
             return self.form_invalid(form)
 
@@ -282,12 +267,12 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
         """Возвращает URL детальной страницы для указанного события после таких действий, как редактирование или
         перенос события, чтоб оставаться внутри обновленного события."""
         return (
-            f"{reverse('core:client-therapy-session-detail', kwargs={'event_id': event_id})}"
+            f"{reverse('core:psychologist-therapy-session-detail', kwargs={'event_id': event_id})}"
             f"{self._build_layout_query()}"
         )
 
     def _can_manage_session_actions(self):
-        """Определяет, доступны ли клиенту cancel/reschedule для текущего слота (события)."""
+        """Определяет, доступны ли пользователю cancel/reschedule для текущего слота (события)."""
         return bool(
             self.slot
             and self.slot.status in ["planned", "started"]
@@ -306,6 +291,28 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
             self.slot
             and self.slot.status in ["planned", "started"]
             and not self.detail_data.is_finished_slot
+        )
+
+    def _can_manage_meeting_url(self):
+        """Определяет, может ли специалист сейчас добавлять/редактировать ссылку на видеовстречу."""
+        return bool(
+            self.slot
+            and self.slot.status in ["planned", "started"]
+            and not self.detail_data.is_finished_slot
+        )
+
+    def _can_show_meeting_resume_block(self):
+        """Показывает блок итогов после начала встречи и в архиве."""
+        return bool(
+            self.slot
+            and self.slot.status in ["started", "completed"]
+        )
+
+    def _can_manage_meeting_resume(self):
+        """Определяет, может ли специалист добавить или изменить итоги встречи."""
+        return bool(
+            self.slot
+            and self.slot.status in ["started", "completed"]
         )
 
     def _handle_action_form_error(self, form):
@@ -327,7 +334,7 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
         return redirect(self.get_success_url())
 
     def _handle_cancel_session(self):
-        """Отменяет текущую встречу по инициативе клиента."""
+        """Отменяет текущую встречу по инициативе специалиста."""
         form = CancelTherapySessionForm(self.request.POST)
 
         # 1) Определяем доступен ли клиенту cancel для текущего слота (события)
@@ -341,7 +348,7 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
         try:
             cancel_event_slot(
                 slot=self.slot,
-                cancel_reason=form.cleaned_data["cancel_reason"],
+                cancel_reason=form.cleaned_data["cancel_reason"]
             )
         # Это уже проверка бизнес-логики и текущего состояния встречи внутри use case. Т.е., форма может быть
         # заполнена идеально, но действие все равно нельзя выполнить:
@@ -357,7 +364,7 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
         return redirect(self.get_success_url())
 
     def _handle_reschedule_session(self):
-        """Создает новую встречу на другое время и помечает текущую как перенесенную."""
+        """Переносит встречу специалистом на новый слот в его рабочем расписании."""
         form = RescheduleTherapySessionForm(self.request.POST)
 
         # 1) Определяем доступен ли клиенту reschedule для текущего слота (события)
@@ -373,9 +380,10 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
             return redirect(self.get_success_url())
 
         # 4) Подтягиваем данные специалиста
+        client_user = self.detail_data.counterpart_user
         specialist_profile = self._get_specialist_profile()
-        if specialist_profile is None:
-            messages.error(self.request, "Не удалось определить специалиста для переноса встречи.")
+        if client_user is None or specialist_profile is None:
+            messages.error(self.request, "Не удалось определить участников встречи для переноса.")
             return redirect(self.get_success_url())
 
         # 5) Фиксируем тот же тип сессии, что и был
@@ -385,7 +393,7 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
         try:
             booking_result = reschedule_therapy_session_slot(
                 slot=self.slot,
-                client_user=self.request.user,
+                client_user=client_user,
                 specialist_profile_id=specialist_profile.pk,
                 slot_start_iso=form.cleaned_data["slot_start_iso"],
                 consultation_type=consultation_type,
@@ -403,6 +411,72 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
         messages.success(self.request, "Встреча перенесена!")
 
         return redirect(self._get_event_detail_url(event_id=booking_result["event"].id))
+
+    def _handle_save_meeting_url(self):
+        """Сохраняет ссылку на видеовстречу в блоке "Подключение"."""
+        if not self._can_manage_meeting_url():
+            messages.error(self.request, "Ссылку можно редактировать только до завершения встречи.")
+            return redirect(self.get_success_url())
+
+        form = PsychologistTherapySessionDetailsForm(self.request.POST)
+        meeting_url = (form.data.get("meeting_url") or "").strip()
+
+        if meeting_url:
+            url_field = PsychologistTherapySessionDetailsForm.base_fields["meeting_url"]
+            try:
+                meeting_url = url_field.clean(meeting_url)
+            except Exception as exc:
+                messages.error(self.request, str(exc))
+                return redirect(self.get_success_url())
+
+        self.slot.meeting_url = meeting_url
+        self.slot.full_clean()
+        self.slot.save(update_fields=["meeting_url", "updated_at"])
+
+        messages.success(self.request, "Ссылка на видеовстречу сохранена!")
+
+        return redirect(self.get_success_url())
+
+    def _handle_delete_meeting_url(self):
+        """Удаляет ссылку на видеовстречу из активной сессии."""
+        if not self._can_manage_meeting_url():
+            messages.error(self.request, "Удалить ссылку можно только до завершения встречи.")
+            return redirect(self.get_success_url())
+
+        self.slot.meeting_url = ""
+        self.slot.full_clean()
+        self.slot.save(update_fields=["meeting_url", "updated_at"])
+
+        messages.success(self.request, "Ссылка на видеовстречу удалена.")
+
+        return redirect(self.get_success_url())
+
+    def _handle_save_meeting_resume(self):
+        """Сохраняет итоги встречи после начала или завершения сессии."""
+        if not self._can_manage_meeting_resume():
+            messages.error(self.request, "Итоги можно добавить после начала встречи.")
+            return redirect(self.get_success_url())
+
+        meeting_resume = (self.request.POST.get("meeting_resume") or "").strip()
+
+        self.slot.meeting_resume = meeting_resume
+        self.slot.full_clean()
+        self.slot.save(update_fields=["meeting_resume", "updated_at"])
+
+        messages.success(self.request, "Итоги встречи сохранены!")
+
+        return redirect(self.get_success_url())
+
+    def _handle_save_event_description(self):
+        """Сохраняет описание события, которое увидят участники встречи."""
+        event_description = (self.request.POST.get("event_description") or "").strip()
+        self.event.description = event_description
+        self.event.full_clean()
+        self.event.save(update_fields=["description", "updated_at"])
+
+        messages.success(self.request, "Описание события обновлено!")
+
+        return redirect(self.get_success_url())
 
     def _get_session_change_reason_label(self):
         """Возвращает заголовок для блока с описанием причины "Отмены" или "Переноса" текущей встречи."""
@@ -422,7 +496,7 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
         # get_latest_rescheduled_descendant() - возвращает актуального потомка события по цепочке previous_event
         rescheduled_event = get_latest_rescheduled_descendant(
             event=self.event,
-            viewer_user=self.request.user,
+            viewer_user=self.request.user
         )
         if rescheduled_event is None:
             return None
@@ -430,7 +504,7 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
         return self._get_event_detail_url(event_id=rescheduled_event.id)
 
     def _get_specialist_profile(self):
-        """Возвращает профиль специалиста из shared detail loader для клиентской страницы.
+        """Возвращает профиль текущего специалиста из shared detail loader для клиентской страницы.
 
         Бизнес-смысл:
             - текущая страница всегда открывается клиентом;
@@ -438,31 +512,18 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
             - в клиентском сценарии counterpart = это специалист;
             - поэтому здесь просто безопасно достаем psychologist_profile без повторного поиска участника.
         """
-        counterpart_user = self.detail_data.counterpart_user
-
-        if counterpart_user is None:
-            return None
-
-        return getattr(counterpart_user, "psychologist_profile", None)
+        return getattr(self.request.user, "psychologist_profile", None)
 
     def _build_matched_topics(self):
-        """Собирает все совпадающие темы между анкетой клиента и темами специалиста для detail-screen сессии.
-
-        Бизнес-смысл:
-            - страница детали уже не участвует в процессе подбора специалиста;
-            - здесь клиенту важно увидеть полную картину пересечений по своей анкете,
-              а не только темы одного выбранного ранее типа консультации;
-            - поэтому на detail-screen показываем все совпадения:
-                - индивидуальные;
-                - парные.
-        """
-        try:
-            client_profile = self.request.user.client_profile
-        except Exception:
-            return []
-
+        """Собирает совпадающие темы между анкетой клиента и профилем специалиста для detail-screen сессии."""
+        client_user = self.detail_data.counterpart_user
         specialist_profile = self._get_specialist_profile()
-        if specialist_profile is None:
+
+        if client_user is None or specialist_profile is None:
+            return []
+        try:
+            client_profile = client_user.client_profile
+        except Exception:
             return []
 
         # На detail-странице берем все темы клиента из анкеты без ограничения по preferred_topic_type:
@@ -471,9 +532,7 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
         requested_topic_ids = client_profile.requested_topics.values_list("id", flat=True)
 
         return list(
-            specialist_profile.topics.filter(
-                id__in=requested_topic_ids,
-            ).order_by("group_name", "name")
+            specialist_profile.topics.filter(id__in=requested_topic_ids).order_by("group_name", "name")
         )
 
     def _create_slot_message(self, form):
@@ -481,7 +540,7 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
         slot_message = TimeSlotMessage(
             creator=self.request.user,
             slot=self.slot,
-            message=form.cleaned_data["message"],
+            message=form.cleaned_data["message"]
         )
         slot_message.full_clean()
         slot_message.save()
@@ -549,14 +608,13 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
         if self.slot is None:
             return []
 
-        client_timezone = getattr(self.request.user, "timezone", None)
+        viewer_timezone = getattr(self.request.user, "timezone", None)
         message_items = []
 
         for slot_message in self.slot.messages.all():
-            local_created_at = timezone.localtime(slot_message.created_at, client_timezone)
-            local_updated_at = timezone.localtime(slot_message.updated_at, client_timezone)
+            local_created_at = timezone.localtime(slot_message.created_at, viewer_timezone)
+            local_updated_at = timezone.localtime(slot_message.updated_at, viewer_timezone)
             creator_full_name = f"{slot_message.creator.first_name} {slot_message.creator.last_name}".strip()
-            is_own_message = slot_message.creator_id == self.request.user.pk
 
             message_items.append(
                 {
@@ -564,7 +622,7 @@ class ClientTherapySessionDetailView(ClientRequiredMixin, SpecialistMatchingLayo
                     "comment": slot_message,
                     "message_preview": Truncator(slot_message.message).chars(self.message_length, truncate="..."),
                     "is_long_message": len(slot_message.message) > self.message_length,
-                    "is_own_message": is_own_message,
+                    "is_own_message": slot_message.creator_id == self.request.user.pk,
                     "can_edit": self._can_edit_slot_message(slot_message),
                     "creator_full_name": creator_full_name or slot_message.creator.email,
                     "creator_avatar_url": slot_message.creator.avatar_url,

@@ -48,7 +48,7 @@
         </div>
 
         <h1 class="text-3xl sm:text-4xl font-black text-indigo-950 tracking-tight mb-8">
-            {{ event.title }}
+            {{ detail_title_display|default:event.title }}
         </h1>
 
         <!-- Горизонтальная разделяющая черта + данные встречи -->

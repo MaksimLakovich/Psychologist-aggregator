@@ -5,7 +5,8 @@ from core.services.calendar_adapters.base_event_adapters import \
     BaseCalendarEventCardAdapter
 
 
-# Типы событий, которые в текущей бизнес-модели считаются терапевтической сессией
+# Типы событий, которые в текущей бизнес-модели считаются терапевтической сессией.
+# Остальные типы событий получат свои adapter-ы позже, когда появится их бизнес-логика
 THERAPY_SESSION_EVENT_TYPES = {"session_individual", "session_couple"}
 
 
@@ -48,10 +49,10 @@ class TherapySessionClientEventCardAdapter(BaseCalendarEventCardAdapter):
                 - активную кнопку "Посмотреть" с маршрутом на detail-страницу сессии.
         """
         # Сначала получаем универсальную карточку: дата, время, статус, длительность, тип события.
-        # Это та общая основа, которая подойдет и будущему вебинару, и курсу, и супервизии.
+        # Это та общая основа, которая подойдет и будущему вебинару, и курсу, и супервизии
         card = super().build()
         # Для терапевтической сессии второй участник относительно клиента = психолог.
-        # Это правило относится только к therapy session, поэтому оно живет здесь, а не в общей view.
+        # Это правило относится только к therapy session, поэтому оно живет здесь, а не в общей view
         counterpart_user = self._get_counterpart_user()
         specialist_profile = (
             getattr(counterpart_user, "psychologist_profile", None)
@@ -61,14 +62,14 @@ class TherapySessionClientEventCardAdapter(BaseCalendarEventCardAdapter):
         specialist_profile_id = getattr(specialist_profile, "pk", None)
 
         # В одном списке у клиента может быть несколько сессий с одним и тем же психологом.
-        # Чтобы не пересчитывать live-индикатор специалиста повторно для каждой карточки, используем cache на request.
+        # Чтобы не пересчитывать live-индикатор специалиста повторно для каждой карточки, используем cache на request
         if specialist_profile_id not in self.specialist_indicator_cache:
             self.specialist_indicator_cache[specialist_profile_id] = build_specialist_live_indicator(
                 specialist_profile=specialist_profile,
             )
 
         # Готовим имя специалиста для краткой карточки.
-        # Если в профиле пользователя имя еще не заполнено, шаблон получит мягкий fallback "Имя не указано".
+        # Если в профиле пользователя имя еще не заполнено, шаблон получит мягкий fallback "Имя не указано"
         counterpart_full_name = (
             f"{counterpart_user.first_name} {counterpart_user.last_name}".strip()
             if counterpart_user
@@ -87,7 +88,6 @@ class TherapySessionClientEventCardAdapter(BaseCalendarEventCardAdapter):
         card.update(
             {
                 "detail_url": self._build_detail_url(),
-                "detail_is_available": True,
                 "event_kind": "therapy_session",
                 "counterpart_user": counterpart_user,
                 "counterpart_full_name": counterpart_full_name or "Имя не указано",
@@ -144,7 +144,8 @@ def get_client_event_card_adapter_class(event):
     Бизнес-смысл:
         - "Мой календарь" остается одной общей страницей для всех событий клиента;
         - но каждый тип события может иметь свою подачу в карточке и свой маршрут на detail-страницу;
-        - эта функция решает, какой именно "сборщик карточки" использовать.
+        - эта функция решает, какой именно "сборщик карточки" использовать;
+        - если тип события еще не поддержан отдельным adapter-ом, карточка останется безопасной базовой.
 
     Пример:
         - session_individual/session_couple -> TherapySessionClientEventCardAdapter;
@@ -179,7 +180,7 @@ def build_client_event_card(
     Пример:
         - если событие является терапевтической сессией, вернется карточка с психологом и ссылкой на session-detail;
         - если это будущий тип события без adapter-а, вернется базовая карточка без опасного перехода
-          на чужую detail-страницу.
+          на какую-либо неподходящую detail-страницу.
     """
     adapter_class = get_client_event_card_adapter_class(event)
     adapter_kwargs = {
