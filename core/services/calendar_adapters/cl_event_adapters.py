@@ -4,7 +4,6 @@ from calendar_engine.booking.services import build_specialist_live_indicator
 from core.services.calendar_adapters.base_event_adapters import \
     BaseCalendarEventCardAdapter
 
-
 # Типы событий, которые в текущей бизнес-модели считаются терапевтической сессией.
 # Остальные типы событий получат свои adapter-ы позже, когда появится их бизнес-логика
 THERAPY_SESSION_EVENT_TYPES = {"session_individual", "session_couple"}

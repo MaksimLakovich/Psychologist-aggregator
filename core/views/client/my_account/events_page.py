@@ -8,11 +8,12 @@ from django.views.generic import TemplateView
 from calendar_engine.lifecycle.use_cases.apply_time_based_status_transitions import \
     apply_time_based_status_transitions_for_user
 from calendar_engine.models import CalendarEvent, EventParticipant, TimeSlot
+from core.services.calendar_adapters.cl_event_adapters import \
+    build_client_event_card
 from core.services.calendar_event_slot_selector import (
     get_event_active_slot, get_event_completed_slot)
 from core.services.calendar_slot_time_display import \
     build_calendar_slot_time_display
-from core.services.calendar_adapters.cl_event_adapters import build_client_event_card
 from core.services.mixins_current_layout import SpecialistMatchingLayoutMixin
 from users.mixins.role_required_mixin import ClientRequiredMixin
 
