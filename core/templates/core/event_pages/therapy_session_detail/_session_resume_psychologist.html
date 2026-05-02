@@ -1,0 +1,29 @@
+<!-- БЛОК 3: Итоги встречи, которые специалист добавляет после начала/завершения сессии -->
+
+{% if can_show_meeting_resume_block %}
+    <article class="rounded-[2rem] bg-slate-100/50 p-6 sm:p-8 shadow-lg shadow-slate-100 backdrop-blur-md animate-fade-in-up delay-200">
+        <h2 class="text-2xl font-extrabold text-indigo-950 mb-6">
+            Итоги встречи
+        </h2>
+
+        {% if slot.meeting_resume %}
+            <div class="mb-6 pl-4">
+                <p class="whitespace-pre-line text-base leading-relaxed text-zinc-700">{{ slot.meeting_resume }}</p>
+            </div>
+        {% endif %}
+
+        {% if can_manage_meeting_resume %}
+            <form method="post" class="space-y-4 glass-input">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="save_meeting_resume">
+                {{ form.meeting_resume }}
+                <button type="submit"
+                        class="cta-shine-button group w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 gap-3 rounded-xl bg-indigo-700
+                        text-white font-bold transition-all duration-200 hover:bg-indigo-800 border border-transparent">
+                    <span class="cta-shine-button__glint"></span>
+                    <span class="relative z-10">{% if slot.meeting_resume %}Изменить итоги{% else %}Добавить итоги{% endif %}</span>
+                </button>
+            </form>
+        {% endif %}
+    </article>
+{% endif %}
