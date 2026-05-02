@@ -5,6 +5,7 @@
 {% block title %} {{ event.title|default:"Детали сессии" }} | {{ title_client_account_view|default:"ОПОРА" }} {% endblock %}
 
 {% block extra_style %}
+
 <style>
     /* ========================================================= */
     /* Анимации входа блоков */
@@ -95,8 +96,8 @@
     .cta-shine-button:hover .cta-shine-button__glint {
         transform: skewX(-30deg) translateX(12rem);
     }
-
 </style>
+
 {% endblock %}
 
 {% block content %}
@@ -139,7 +140,7 @@
             <div class="xl:col-span-8 space-y-8">
 
                 <!-- Эти блоки уже вынесены в общий сервисный слой в event_pages/therapy_session_detail,
-                     чтобы будущая specialist-страница использовала ту же общую структуру detail-страницы что и клиентская -->
+                     чтобы specialist-страница использовала ту же общую структуру detail-страницы что и клиентская -->
 
                 <!-- БЛОК 1: Общие данные встречи -->
                 {% include "core/event_pages/therapy_session_detail/_session_overview.html" %}
@@ -148,7 +149,7 @@
                 <!-- БЛОК 3: Подключение и показ результатов встречи если они были добавлены -->
                 {% include "core/event_pages/therapy_session_detail/_session_meeting_resume.html" %}
                 <!-- БЛОК 4: Управление встречей -->
-                {% include "core/event_pages/therapy_session_detail/_session_actions_client.html" %}
+                {% include "core/event_pages/therapy_session_detail/_session_actions.html" %}
                 <!-- БЛОК 5: Комментарии к встрече / форум -->
                 {% include "core/event_pages/therapy_session_detail/_session_comments_form.html" %}
 
@@ -157,7 +158,7 @@
             <!-- ===== ПРАВАЯ ЧАСТЬ ===== -->
             <aside class="xl:col-span-4 space-y-6">
 
-                <!-- БЛОК 4: Данные психолога -->
+                <!-- Данные психолога -->
                 <article class="rounded-[2rem] bg-slate-100/50 p-6 shadow-lg shadow-slate-100 backdrop-blur-md animate-fade-in-up delay-200">
                     <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-3">Терапевт</h3>
                     <div class="flex flex-col items-center text-center">
@@ -180,7 +181,7 @@
                         </div>
 
                         <h2 class="text-xl font-extrabold text-indigo-950 mb-1">{{ counterpart_full_name }}</h2>
-                        <p class="text-sm font-medium text-zinc-500 mb-5">
+                        <p class="text-sm font-medium text-zinc-500 mb-7">
                             Психолог
                         </p>
 
