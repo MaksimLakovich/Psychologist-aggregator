@@ -1,0 +1,219 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %} {{ detail_title_display|default:"Детали сессии" }} | {{ title_psychologist_account_view|default:"ОПОРА" }} {% endblock %}
+
+{% block extra_style %}
+
+<style>
+    /* ========================================================= */
+    /* Анимации входа блоков */
+    /* ========================================================= */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in-up {
+        opacity: 0;
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    .delay-100 { animation-delay: 100ms; }
+    .delay-200 { animation-delay: 200ms; }
+
+    /* ========================================================= */
+    /* Автоматическое скрытие системных уведомлений */
+    /* ========================================================= */
+    .auto-dismiss-message {
+        overflow: hidden;
+        transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        transform-origin: top center;
+        will-change: opacity, transform, filter, max-height, margin, padding;
+        max-height: 220px;
+    }
+
+    .auto-dismiss-message.is-fading {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.985);
+        filter: blur(1px);
+    }
+
+    .auto-dismiss-message.is-collapsing {
+        max-height: 0;
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        border-width: 0;
+    }
+
+    /* ========================================================= */
+    /* Унифицированный стиль полей формы */
+    /* ========================================================= */
+    .glass-input input,
+    .glass-input select,
+    .glass-input textarea {
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(228, 228, 231, 0.8);
+        border-radius: 1rem;
+        padding: 0.75rem 1rem;
+        color: #1e1b4b;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(4px);
+    }
+
+    .glass-input input:focus,
+    .glass-input select:focus,
+    .glass-input textarea:focus {
+        outline: none;
+        background-color: #ffffff;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    /* ========================================================= */
+    /* Общий shine-эффект для CTA-кнопок страницы */
+    /* ========================================================= */
+    .cta-shine-button {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-shine-button__glint {
+        position: absolute;
+        inset: 0;
+        width: 0.75rem;
+        background: rgba(255, 255, 255, 0.2);
+        transform: skewX(-30deg) translateX(-3rem);
+        transition: transform 700ms ease-in-out;
+        pointer-events: none;
+    }
+
+    .cta-shine-button:hover .cta-shine-button__glint {
+        transform: skewX(-30deg) translateX(12rem);
+    }
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+
+<section class="relative overflow-hidden min-h-screen bg-white backdrop-blur-[2px] w-full">
+
+    <div class="relative z-10 w-full px-6 sm:px-8 py-10
+        {% if show_sidebar %} lg:px-12 xl:px-24 {% else %} max-w-7xl mx-auto {% endif %}">
+
+        <!-- Уведомления -->
+        {% if messages %}
+            <div class="mb-8 space-y-3 max-w-3xl">
+                {% for message in messages %}
+                    <div data-auto-dismiss-message class="auto-dismiss-message rounded-2xl bg-emerald-50 p-6 text-emerald-700 border border-emerald-100 shadow-sm animate-fade-in-up">
+                        <p class="text-base font-semibold tracking-wide">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Кнопка назад -->
+        <div class="animate-fade-in-up mb-8">
+            <a href="{% url 'core:psychologist-events' %}{{ layout_query }}"
+                class="inline-flex items-center justify-center px-4 py-2 gap-2
+                rounded-xl border border-indigo-200 bg-white/50 text-sm font-bold text-indigo-600/80
+                shadow-sm backdrop-blur-md transition-colors group duration-200
+                hover:border-slate-200/70 hover:bg-slate-100/90 hover:text-indigo-800">
+                <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Ко всем встречам</span>
+            </a>
+        </div>
+
+        <!-- ===== ДЕТАЛИ ВСТРЕЧИ ===== -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+
+            <!-- ===== ЛЕВАЯ ЧАСТЬ ===== -->
+            <div class="xl:col-span-8 space-y-8">
+
+                <!-- БЛОК 1: Общие данные встречи -->
+                {% include "core/event_pages/therapy_session_detail/_session_overview.html" %}
+                <!-- БЛОК 2: Подключение специалиста к встрече -->
+                {% include "core/event_pages/therapy_session_detail/_session_connection_psychologist.html" %}
+                <!-- БЛОК 3: Подключение и добавление результатов встречи -->
+                {% include "core/event_pages/therapy_session_detail/_session_resume_psychologist.html" %}
+                <!-- БЛОК 4: Управление встречей -->
+                {% include "core/event_pages/therapy_session_detail/_session_actions.html" %}
+                <!-- БЛОК 5: Подключение и добавление доп описания от специалиста во встрече -->
+                {% include "core/event_pages/therapy_session_detail/_session_description_psychologist.html" %}
+                <!-- БЛОК 6: Комментарии к встрече / форум -->
+                {% include "core/event_pages/therapy_session_detail/_session_comments_form.html" %}
+
+            </div>
+
+            <!-- ===== ПРАВАЯ ЧАСТЬ ===== -->
+            <aside class="xl:col-span-4 space-y-6">
+
+                <!-- Данные клиента -->
+                <article class="rounded-[2rem] bg-slate-100/50 p-6 shadow-lg shadow-slate-100 backdrop-blur-md animate-fade-in-up delay-200">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-3">Клиент</h3>
+                    <div class="flex flex-col items-center text-center">
+
+                        <h2 class="text-xl font-extrabold text-indigo-950 mb-7">{{ counterpart_full_name }}</h2>
+
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Стоимость этой сессии</p>
+                            {% if session_price_value %}
+                                <p class="text-lg font-semibold text-zinc-900">{{ session_price_value|floatformat:0 }} {{ specialist_profile.price_currency }}</p>
+                            {% else %}
+                                <p class="text-lg font-semibold text-zinc-900">Уточняется</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+
+                <article class="rounded-[2rem] bg-slate-100/50 p-6 shadow-lg shadow-slate-100 backdrop-blur-md animate-fade-in-up delay-200">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-2 flex items-center justify-between">
+                        Совпадения по вашей анкете
+                        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold">
+                            {{ matched_topics|length|default:"0" }}
+                        </span>
+                    </h3>
+
+                    {% if matched_topics %}
+                        <div class="flex flex-wrap gap-2">
+                            {% for topic in matched_topics %}
+                                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100
+                                border border-indigo-100/80 text-sm font-medium text-indigo-800 transition-colors">
+                                    {{ topic.name }}
+                                    {% if topic.type %}
+                                        <span class="ml-2 text-[10px] uppercase tracking-wide opacity-60">{{ topic.type }}</span>
+                                    {% endif %}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="p-4 bg-zinc-50/80 rounded-2xl border border-zinc-100 text-center">
+                            <p class="text-sm text-zinc-500 font-medium">Совпадающие темы между анкетой клиента и вашим профилем не найдены</p>
+                        </div>
+                    {% endif %}
+                </article>
+
+            </aside>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% include "core/event_pages/therapy_session_detail/_modal_session_cancel.html" %}
+{% include "core/event_pages/therapy_session_detail/_modal_session_reschedule.html" %}
+
+<script type="module" src="{% static 'js/modules/auto_hide_message.js' %}"></script>
+<script type="module" src="{% static 'js/modules/messages_forum/event_forum.js' %}"></script>
+<script type="module" src="{% static 'js/modules/event_actions/cancel_reschedule_actions.js' %}"></script>
+
+{% endblock %}
