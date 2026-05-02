@@ -153,6 +153,9 @@ class PsychologistTherapySessionDetailView(PsychologistRequiredMixin, Specialist
         context["session_price_value"] = session_price_value
         context["matched_topics"] = self._build_matched_topics()
         context["can_manage_meeting_url"] = self._can_manage_meeting_url()
+        # Описание события показывается всем участникам в общем overview-блоке.
+        # Но редактировать этот текст может только специалист прямо из этого же блока
+        context["can_manage_event_description"] = True
         context["can_show_meeting_resume_block"] = self._can_show_meeting_resume_block()
         context["can_manage_meeting_resume"] = self._can_manage_meeting_resume()
         context["can_manage_slot_messages"] = self._can_manage_slot_messages()
