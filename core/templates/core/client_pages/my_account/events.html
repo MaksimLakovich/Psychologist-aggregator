@@ -345,7 +345,7 @@
              - переключение между активными и завершенными событиями;
              - возврат из фильтра по выбранному дню обратно к обычному списку запланированных встреч. -->
         <div class="animate-fade-in-up mb-8">
-            <a href="{% url 'core:client-events' %}{{ events_toggle_query }}"
+            <a href="{{ events_page_url }}{{ events_toggle_query }}"
                class="inline-flex items-center justify-center px-4 py-2 gap-2
                rounded-xl border border-indigo-200 bg-white/50 text-sm font-bold text-indigo-600/80
                shadow-sm backdrop-blur-md transition-colors group duration-200

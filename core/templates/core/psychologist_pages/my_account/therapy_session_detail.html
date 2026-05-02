@@ -146,9 +146,7 @@
                 {% include "core/event_pages/therapy_session_detail/_session_resume_psychologist.html" %}
                 <!-- БЛОК 4: Управление встречей -->
                 {% include "core/event_pages/therapy_session_detail/_session_actions.html" %}
-                <!-- БЛОК 5: Подключение и добавление доп описания от специалиста во встрече -->
-                {% include "core/event_pages/therapy_session_detail/_session_description_psychologist.html" %}
-                <!-- БЛОК 6: Комментарии к встрече / форум -->
+                <!-- БЛОК 5: Комментарии к встрече / форум -->
                 {% include "core/event_pages/therapy_session_detail/_session_comments_form.html" %}
 
             </div>
@@ -213,6 +211,7 @@
 {% include "core/event_pages/therapy_session_detail/_modal_session_reschedule.html" %}
 
 <script type="module" src="{% static 'js/modules/auto_hide_message.js' %}"></script>
+<script type="module" src="{% static 'js/modules/event_actions/event_description_editor.js' %}"></script>
 <script type="module" src="{% static 'js/modules/messages_forum/event_forum.js' %}"></script>
 <script type="module" src="{% static 'js/modules/event_actions/cancel_reschedule_actions.js' %}"></script>
 

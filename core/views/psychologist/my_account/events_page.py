@@ -60,6 +60,9 @@ class PsychologistEventsView(PsychologistRequiredMixin, SpecialistMatchingLayout
             f"{reverse('calendar_engine:web:psychologist-working-schedule')}{self._build_layout_query()}"
         )
         context["empty_events_cta_label"] = "Настроить расписание"
+        # Общий HTML-шаблон календаря переиспользуется разными ролями.
+        # Поэтому сама view сообщает шаблону, на какой календарный URL должна вести кнопка переключения режима
+        context["events_page_url"] = reverse("core:psychologist-events")
         context["current_sidebar_key"] = "all-events"
         context["show_completed"] = show_completed
         context["selected_calendar_day"] = selected_calendar_day
