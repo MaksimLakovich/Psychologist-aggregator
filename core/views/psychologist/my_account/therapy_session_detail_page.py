@@ -154,8 +154,8 @@ class PsychologistTherapySessionDetailView(PsychologistRequiredMixin, Specialist
         context["matched_topics"] = self._build_matched_topics()
         context["can_manage_meeting_url"] = self._can_manage_meeting_url()
         # Описание события показывается всем участникам в общем overview-блоке.
-        # Но редактировать этот текст может только специалист прямо из этого же блока
-        context["can_manage_event_description"] = True
+        # Но редактировать этот текст специалист может только пока встреча еще не завершена
+        context["can_manage_event_description"] = self._can_manage_event_description()
         context["can_show_meeting_resume_block"] = self._can_show_meeting_resume_block()
         context["can_manage_meeting_resume"] = self._can_manage_meeting_resume()
         context["can_manage_slot_messages"] = self._can_manage_slot_messages()
@@ -298,6 +298,20 @@ class PsychologistTherapySessionDetailView(PsychologistRequiredMixin, Specialist
 
     def _can_manage_meeting_url(self):
         """Определяет, может ли специалист сейчас добавлять/редактировать ссылку на видеовстречу."""
+        return bool(
+            self.slot
+            and self.slot.status in ["planned", "started"]
+            and not self.detail_data.is_finished_slot
+        )
+
+    def _can_manage_event_description(self):
+        """Определяет, может ли специалист добавлять или редактировать описание события.
+
+        Бизнес-смысл:
+            - описание события относится к подготовке встречи до ее завершения;
+            - после завершения специалист больше не меняет описание, а фиксирует итоги встречи
+              в отдельном блоке.
+        """
         return bool(
             self.slot
             and self.slot.status in ["planned", "started"]
@@ -472,6 +486,10 @@ class PsychologistTherapySessionDetailView(PsychologistRequiredMixin, Specialist
 
     def _handle_save_event_description(self):
         """Сохраняет описание события, которое увидят участники встречи."""
+        if not self._can_manage_event_description():
+            messages.error(self.request, "Описание можно редактировать только до завершения встречи.")
+            return redirect(self.get_success_url())
+
         event_description = (self.request.POST.get("event_description") or "").strip()
         self.event.description = event_description
         self.event.full_clean()
