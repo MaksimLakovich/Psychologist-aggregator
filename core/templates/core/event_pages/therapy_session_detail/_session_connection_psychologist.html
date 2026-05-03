@@ -6,25 +6,16 @@
     <article class="rounded-[2rem] bg-slate-100/50 p-6 sm:p-8 shadow-lg shadow-slate-100 backdrop-blur-md animate-fade-in-up delay-200">
         <div class="flex flex-col gap-6">
             <div>
-                <h2 class="text-2xl font-extrabold text-indigo-950 mb-2">
+                <h2 class="text-2xl font-extrabold text-indigo-950 mb-0">
                     Подключение
                 </h2>
             </div>
 
             {% if can_manage_meeting_url %}
-                {% if slot.meeting_url %}
-                    <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                        <div class="min-w-0">
-                            <p class="text-sm font-bold uppercase tracking-widest text-indigo-950">
-                                Ссылка на видеовстречу
-                            </p>
-                            <a href="{{ slot.meeting_url }}" target="_blank"
-                               class="mt-2 block truncate text-base font-semibold text-indigo-600 hover:text-indigo-800">
-                                {{ slot.meeting_url }}
-                            </a>
-                        </div>
+                <div data-meeting-url-editor>
 
-                        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap xl:justify-end">
+                    <div data-meeting-url-view class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        {% if slot.meeting_url %}
                             {% if can_open_meeting_url %}
                                 <a href="{{ slot.meeting_url }}" target="_blank"
                                    class="cta-shine-button group w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 gap-3 rounded-xl bg-violet-500/95
@@ -33,54 +24,44 @@
                                     <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="relative z-10 w-6 h-6 transition-transform duration-300 group-hover:-rotate-12">
                                     <span class="relative z-10">Перейти в видеочат</span>
                                 </a>
+                            {% else %}
+                                <p class="min-w-0 truncate text-base font-semibold text-indigo-600">
+                                    {{ slot.meeting_url }}
+                                </p>
                             {% endif %}
-                            <button type="button"
-                                    data-toggle-meeting-url-form
-                                    class="cta-shine-button group w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 gap-3 rounded-xl bg-indigo-700
-                                    text-white font-bold transition-all duration-200 hover:bg-indigo-800 border border-transparent">
-                                <span class="cta-shine-button__glint"></span>
-                                <span class="relative z-10">Изменить ссылку</span>
-                            </button>
-                            <form method="post">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="delete_meeting_url">
-                                <button type="submit"
-                                        class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-xl bg-slate-500/85
-                                        text-white font-bold transition-all duration-200 hover:bg-slate-500 border border-transparent">
-                                    Удалить
-                                </button>
-                            </form>
-                        </div>
+                        {% else %}
+                            <p class="text-base leading-relaxed text-zinc-400">
+                                Для добавления ссылки нажмите "Добавить ссылку"
+                            </p>
+                        {% endif %}
+                        <button type="button"
+                                data-meeting-url-open
+                                class="inline-flex shrink-0 items-center justify-center rounded-xl border border-indigo-200 bg-white/70 px-3 py-2
+                                text-xs font-bold text-indigo-700 shadow-sm transition-colors hover:bg-indigo-50">
+                            {% if slot.meeting_url %}Редактировать{% else %}Добавить ссылку{% endif %}
+                        </button>
                     </div>
 
                     <form method="post" class="hidden space-y-4 glass-input" data-meeting-url-form>
                         {% csrf_token %}
                         <input type="hidden" name="action" value="save_meeting_url">
                         {{ form.meeting_url }}
-                        <button type="submit"
-                                class="cta-shine-button group w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 gap-3 rounded-xl bg-indigo-700
-                                text-white font-bold transition-all duration-200 hover:bg-indigo-800 border border-transparent">
-                            <span class="cta-shine-button__glint"></span>
-                            <span class="relative z-10">Сохранить ссылку</span>
-                        </button>
+                        <div class="flex flex-wrap items-center gap-3 pt-1.5">
+                            <button type="submit"
+                                    class="inline-flex shrink-0 items-center justify-center rounded-xl border border-indigo-200 bg-indigo-700 px-3 py-2
+                                    text-xs font-bold text-white shadow-sm transition-colors hover:bg-indigo-800">
+                                <span>Сохранить</span>
+                            </button>
+                            <button type="button"
+                                    data-meeting-url-cancel
+                                    class="inline-flex shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white/70 px-3 py-2
+                                    text-xs font-bold text-slate-600 shadow-sm transition-colors hover:bg-slate-100 hover:text-slate-800">
+                                Отменить
+                            </button>
+                            <span class="text-xs font-medium text-zinc-400">Клиент увидит эту ссылку во встрече</span>
+                        </div>
                     </form>
-                {% else %}
-                    <form method="post" class="space-y-4 glass-input">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="save_meeting_url">
-                        <label for="{{ form.meeting_url.id_for_label }}"
-                               class="text-sm font-bold uppercase tracking-widest text-indigo-950">
-                            Ссылка на видеовстречу
-                        </label>
-                        {{ form.meeting_url }}
-                        <button type="submit"
-                                class="cta-shine-button group w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 gap-3 rounded-xl bg-indigo-700
-                                text-white font-bold transition-all duration-200 hover:bg-indigo-800 border border-transparent">
-                            <span class="cta-shine-button__glint"></span>
-                            <span class="relative z-10">Сохранить ссылку</span>
-                        </button>
-                    </form>
-                {% endif %}
+                </div>
             {% else %}
                 <p class="text-sm text-zinc-400">
                     Подключение можно редактировать только до завершения встречи
@@ -98,16 +79,3 @@
         </div>
     </article>
 {% endif %}
-
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const toggleButton = document.querySelector("[data-toggle-meeting-url-form]");
-        const form = document.querySelector("[data-meeting-url-form]");
-        if (!toggleButton || !form) {
-            return;
-        }
-        toggleButton.addEventListener("click", () => {
-            form.classList.toggle("hidden");
-        });
-    });
-</script>
