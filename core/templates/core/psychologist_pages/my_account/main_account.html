@@ -37,6 +37,7 @@
 
     .upcoming-event-slide {
         grid-area: 1 / 1;
+        border-radius: 2.5rem;
         transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
                     opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
                     filter 0.8s ease,
@@ -177,13 +178,13 @@
 
                                 <!-- 1) Общая граница + создание пропорции правой и левой части встречи -->
                                 <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.85fr)] gap-0
-                                rounded-[2.5rem] bg-white border border-slate-200/80 shadow-xl overflow-hidden">
+                                rounded-[2.5rem] bg-white border border-slate-200/80 shadow-xl overflow-hidden isolate">
 
                                     <!-- 2) Левая часть: Детали события -->
                                     <div class="p-8 md:p-10 lg:p-12 bg-gradient-to-br from-white to-slate-200/70 relative">
 
                                         <span class="text-xs md:text-sm font-bold uppercase tracking-[0.22em] text-indigo-700/90 mb-5 block">
-                                            Ближайшая встреча
+                                            {{ item.title_display|default:item.event.title }}
                                         </span>
 
                                         <div class="relative z-10">
@@ -240,7 +241,7 @@
                                                 <div class="grid grid-cols-1 gap-5 pt-6 mt-6 border-t border-indigo-300/75">
                                                     <div>
                                                         <p class="text-sm font-bold uppercase tracking-widest text-slate-700/75 mb-1">Описание события</p>
-                                                        <p class="text-base leading-relaxed text-zinc-800">{{ item.description }}</p>
+                                                        <p class="text-base leading-relaxed text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-100">{{ item.description }}</p>
                                                     </div>
                                                 </div>
                                             {% endif %}
@@ -287,6 +288,11 @@
                                                         <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-5 h-5 opacity-40 grayscale">
                                                         <span>Войти в видеочат</span>
                                                     </button>
+                                                    <span class="pointer-events-none absolute bottom-full left-1/2 z-30 mb-3 w-64 -translate-x-1/2
+                                                    rounded-xl bg-indigo-950/85 px-3 py-2 text-center text-[11px] font-semibold leading-relaxed text-white
+                                                    opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+                                                        Необходимо добавить ссылку на видеочат внутри встречи
+                                                    </span>
                                                 </div>
                                             {% endif %}
 

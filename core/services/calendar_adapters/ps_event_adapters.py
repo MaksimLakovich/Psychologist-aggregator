@@ -37,6 +37,9 @@ class TherapySessionPsychologistEventCardAdapter(BaseCalendarEventCardAdapter):
         # Для терапевтической сессии второй участник относительно психолога = клиент.
         # Это правило относится только к therapy session, поэтому оно живет здесь, а не в общей view
         counterpart_user = self._get_counterpart_user()
+        # В карточке специалиста формат встречи берется из профиля самого специалиста,
+        # а не из клиента как второго участника события.
+        specialist_profile = getattr(self.viewer_user, "psychologist_profile", None)
         # Готовим имя специалиста для краткой карточки.
         # Если в профиле пользователя имя еще не заполнено, шаблон получит мягкий fallback "Имя клиента не указано"
         counterpart_full_name = (
@@ -53,6 +56,7 @@ class TherapySessionPsychologistEventCardAdapter(BaseCalendarEventCardAdapter):
                 "counterpart_user": counterpart_user,
                 "counterpart_full_name": counterpart_full_name or "Имя клиента не указано",
                 "counterpart_caption": "Клиент",
+                "specialist_profile": specialist_profile,
                 "show_counterpart_photo": False,
             }
         )

@@ -2056,6 +2056,10 @@ input:checked + .toggle-bg {
   top: -50%;
 }
 
+.isolate {
+  isolation: isolate;
+}
+
 .z-0 {
   z-index: 0;
 }
@@ -3325,6 +3329,10 @@ input:checked + .toggle-bg {
   border-radius: 1.8rem;
 }
 
+.rounded-\[0\.5rem\] {
+  border-radius: 0.5rem;
+}
+
 .rounded-e-lg {
   border-start-end-radius: 0.5rem;
   border-end-end-radius: 0.5rem;
@@ -3643,6 +3651,10 @@ input:checked + .toggle-bg {
 
 .border-slate-900\/80 {
   border-color: rgb(15 23 42 / 0.8);
+}
+
+.border-slate-800\/80 {
+  border-color: rgb(30 41 59 / 0.8);
 }
 
 .\!bg-gray-50 {
