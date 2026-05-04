@@ -2,13 +2,13 @@
 
 {% load static %}
 
-{% block title %}{{ title_psychologist_account_view }}{% endblock %}
+{% block title %} {{ title_psychologist_account_view|default:"ОПОРА" }} {% endblock %}
 
 {% block content %}
 
 {% block extra_style %}
 <style>
-    /* Анимации входа блоков (как на странице редактирования профиля) */
+    /* === Анимации входа блоков (как на странице редактирования профиля) === */
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
@@ -26,62 +26,538 @@
         opacity: 0;
         animation: fadeInLeft 0.9s ease-out forwards;
     }
+
+    /* === 3D Карусель === */
+    .carousel-perspective {
+        perspective: 1400px;
+        transform-style: preserve-3d;
+        /* Используем CSS Grid, чтобы наложить элементы друг на друга без абсолютного позиционирования */
+        display: grid;
+        width: min(100%, 76rem);
+        margin-inline: auto;
+        overflow: visible;
+    }
+
+    .upcoming-event-slide {
+        grid-area: 1 / 1;
+        border-radius: 2.5rem;
+        height: 100%;
+        transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    filter 0.8s ease,
+                    z-index 0s;
+        transform-origin: center center;
+        will-change: transform, opacity;
+
+        /* Состояние по умолчанию: далеко позади и скрыто */
+        opacity: 0;
+        transform: translateX(0) scale(0.7) translateZ(-300px);
+        z-index: 1;
+        pointer-events: none;
+        filter: blur(8px);
+    }
+
+    .upcoming-event-slide > .upcoming-event-card {
+        height: 100%;
+    }
+
+    /* Активный слайд (в центре) */
+    .upcoming-event-slide.is-active {
+        opacity: 1;
+        transform: translateX(0) scale(1) translateZ(0) rotateY(0deg);
+        z-index: 10;
+        pointer-events: auto;
+        filter: blur(0);
+        box-shadow: 0 24px 50px rgba(79, 70, 229, 0.15);
+    }
+
+    /* Предыдущий слайд (выглядывает слева) */
+    .upcoming-event-slide.is-prev {
+        opacity: 0.4;
+        transform: translateX(-23%) scale(0.85) translateZ(-100px) rotateY(5deg);
+        z-index: 5;
+        pointer-events: auto;
+        cursor: pointer;
+        filter: blur(2px);
+    }
+
+    /* Следующий слайд (выглядывает справа) */
+    .upcoming-event-slide.is-next {
+        opacity: 0.4;
+        transform: translateX(23%) scale(0.85) translateZ(-100px) rotateY(-5deg);
+        z-index: 5;
+        pointer-events: auto;
+        cursor: pointer;
+        filter: blur(2px);
+    }
+
+    /* Эффекты наведения для боковых карточек */
+    .upcoming-event-slide.is-prev:hover {
+        opacity: 0.6;
+        transform: translateX(-21%) scale(0.88) translateZ(-80px) rotateY(3deg);
+        filter: blur(1px);
+    }
+
+    .upcoming-event-slide.is-next:hover {
+        opacity: 0.6;
+        transform: translateX(21%) scale(0.88) translateZ(-80px) rotateY(-3deg);
+        filter: blur(1px);
+    }
+
+    /* Глубоко скрытые карточки, если их больше 3 */
+    .upcoming-event-slide.hidden-prev {
+        transform: translateX(-30%) scale(0.7) translateZ(-200px);
+        opacity: 0;
+    }
+    .upcoming-event-slide.hidden-next {
+        transform: translateX(30%) scale(0.7) translateZ(-200px);
+        opacity: 0;
+    }
+
+    .psychologist-dashboard-page ::-webkit-scrollbar { width: 6px; }
+    .psychologist-dashboard-page ::-webkit-scrollbar-track { background: transparent; }
+    .psychologist-dashboard-page ::-webkit-scrollbar-thumb { background: #e0e7ff; border-radius: 10px; }
+    .psychologist-dashboard-page ::-webkit-scrollbar-thumb:hover { background: #c7d2fe; }
+
+    /* На мобильном экране карусель работает как компактный переключатель ближайших встреч.
+       Desktop-эффект с боковыми карточками здесь убираем, потому что на узком экране он создает визуальный шум. */
+    @media (max-width: 767px) {
+        .carousel-perspective {
+            width: 100%;
+            perspective: none;
+            overflow: hidden;
+            border-radius: 1.75rem;
+        }
+
+        .upcoming-event-slide,
+        .upcoming-event-slide.is-active,
+        .upcoming-event-slide.is-prev,
+        .upcoming-event-slide.is-next,
+        .upcoming-event-slide.hidden-prev,
+        .upcoming-event-slide.hidden-next,
+        .upcoming-event-slide.is-prev:hover,
+        .upcoming-event-slide.is-next:hover {
+            transform: none;
+            filter: none;
+        }
+
+        .upcoming-event-slide {
+            border-radius: 1.75rem;
+            transition: opacity 0.24s ease;
+        }
+
+        .upcoming-event-slide.is-active {
+            opacity: 1;
+            z-index: 10;
+            pointer-events: auto;
+            box-shadow: none;
+        }
+
+        .upcoming-event-slide.is-prev,
+        .upcoming-event-slide.is-next,
+        .upcoming-event-slide.hidden-prev,
+        .upcoming-event-slide.hidden-next {
+            opacity: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .upcoming-event-slide > .upcoming-event-card {
+            height: auto;
+            border-radius: 1.75rem;
+            box-shadow: 0 14px 32px rgba(79, 70, 229, 0.12);
+        }
+
+        .upcoming-event-card > div {
+            padding: 1.25rem !important;
+        }
+
+        .upcoming-event-card > div:first-child > .relative.z-10 {
+            padding: 0 !important;
+        }
+
+        .upcoming-event-card .inline-flex.rounded-full {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.72rem;
+            line-height: 1.15;
+        }
+
+        .upcoming-event-card .pt-6 {
+            padding-top: 1rem !important;
+        }
+
+        .upcoming-event-card .mt-6,
+        .upcoming-event-card .mt-10 {
+            margin-top: 1rem !important;
+        }
+
+        .upcoming-event-card .gap-6,
+        .upcoming-event-card .gap-10 {
+            gap: 1rem !important;
+        }
+
+        .upcoming-event-card .h-24.w-24 {
+            height: 4.5rem;
+            width: 4.5rem;
+            border-radius: 1.15rem;
+        }
+
+        .upcoming-event-card .h-24.w-24 span:last-child {
+            font-size: 1.55rem;
+        }
+
+        .upcoming-event-card h2 {
+            font-size: 1.55rem;
+            line-height: 1.15;
+        }
+
+        .upcoming-event-card .rounded-\[1\.5rem\] {
+            border-radius: 1rem;
+        }
+
+        .upcoming-event-card .p-5 {
+            padding: 1rem !important;
+        }
+    }
 </style>
 {% endblock %}
 
 
-<section class="relative overflow-hidden min-h-screen bg-white backdrop-blur-[2px] w-full">
+<section class="psychologist-dashboard-page relative overflow-hidden min-h-screen bg-white backdrop-blur-[2px] w-full pb-20">
 
     <!-- СТРАНИЦА -->
 
-    <div class="animate-fade-in-left mx-auto max-w-5xl px-6 py-16 sm:px-8 lg:px-10">
-        <div class="overflow-hidden rounded-[2rem] border border-indigo-100 bg-white shadow-xl shadow-indigo-100/60">
-            <div class="border-b border-indigo-100 bg-indigo-600 px-8 py-8 text-white">
-                <p class="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-100">Psychologist Account</p>
-                <h1 class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Кабинет специалиста в разработке</h1>
-                <p class="mt-4 max-w-2xl text-base leading-7 text-indigo-50 sm:text-lg">
-                    Для роли психолога уже закрыт доступ в клиентский интерфейс. Следующим шагом здесь появится
-                    отдельный кабинет со своим календарем, виджетами и рабочими сценариями специалиста.
+    <div class="relative z-10 w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-10">
+
+        <!-- Шапка страницы -->
+        <div class="mb-12 md:mb-16 animate-fade-in-left max-w-5xl">
+            <header class="w-full">
+                <h1 class="text-4xl md:text-5xl font-black text-indigo-900 tracking-tight leading-tight break-words">
+                    Добро пожаловать, <span class="text-indigo-600">{{ user.first_name|default:"специалист" }}</span>
+                </h1>
+                <p class="text-lg md:text-xl text-zinc-600 font-medium mt-4 leading-relaxed">
+                    Здесь собраны ближайшие встречи, рабочие заметки и важные действия вашего кабинета
                 </p>
+            </header>
+        </div>
+
+        <!-- ===== ВИДЖЕТЫ ===== -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 animate-fade-in-up" style="animation-delay: 0.1s;">
+
+            <!-- ===== Ближайшая встреча (3D Карусель) ===== -->
+            <div class="md:col-span-2 lg:col-span-12 min-w-0 relative py-5" data-upcoming-carousel-shell>
+
+                <!-- Кнопки карусели вынесены за пределы карточки для легкости -->
+                <div class="mb-5 flex flex-wrap items-center justify-center px-2">
+                    {% if upcoming_events|length > 1 %}
+                        <div class="flex items-center gap-5" data-upcoming-carousel-controls>
+                            <button type="button"
+                                    data-upcoming-prev
+                                    class="group flex h-11 w-11 items-center justify-center rounded-full
+                                    border border-slate-200 bg-white text-slate-500 shadow-sm transition-all
+                                    hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-md active:scale-95"
+                                    aria-label="Предыдущая встреча">
+                                <svg class="h-5 w-5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </button>
+                            <button type="button"
+                                    data-upcoming-next
+                                    class="group flex h-11 w-11 items-center justify-center rounded-full
+                                    border border-slate-200 bg-white text-slate-500 shadow-sm transition-all
+                                    hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-md active:scale-95"
+                                    aria-label="Следующая встреча">
+                                <svg class="h-5 w-5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Контейнер с каруселью встреч -->
+                <div class="carousel-perspective w-full" data-upcoming-carousel data-active-index="0">
+
+                    {% if upcoming_events %}
+                        {% for item in upcoming_events %}
+                            <!-- Единый слайд, содержащий и событие, и сайдбар -->
+                            <article data-upcoming-slide
+                                     data-index="{{ forloop.counter0 }}"
+                                     class="upcoming-event-slide {% if forloop.first %}is-active{% elif forloop.counter0 == 1 %}is-next{% else %}hidden-next{% endif %}">
+
+                                <!-- 1) Общая граница + создание пропорции правой и левой части встречи -->
+                                <div class="upcoming-event-card grid grid-cols-1 md:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.85fr)] gap-0
+                                rounded-[2.5rem] bg-white border border-slate-200/80 shadow-xl overflow-hidden isolate">
+
+                                    <!-- 2) Левая часть: Детали события -->
+                                    <div class="p-8 md:p-10 lg:p-12 bg-gradient-to-br from-white to-slate-200/70 relative">
+
+                                        <span class="text-sm font-bold uppercase tracking-[0.22em] text-indigo-700/90 mb-5 block">
+                                            {{ item.title_display|default:item.event.title }}
+                                        </span>
+
+                                        <div class="relative z-10 p-6 md:p-8">
+                                            <div class="flex flex-wrap gap-3">
+                                                <span class="inline-flex rounded-full bg-indigo-200/80 px-3 py-1
+                                                text-sm font-bold tracking-wide text-indigo-900/85 border border-indigo-300/70">
+                                                    {{ item.specialist_profile.get_therapy_format_display|default:"Онлайн" }}
+                                                </span>
+                                                <span class="inline-flex rounded-full bg-indigo-200/80 px-3 py-1
+                                                text-sm font-bold tracking-wide text-indigo-900/85 border border-indigo-300/70">
+                                                    {{ item.event_type_display }}
+                                                </span>
+                                                <span class="inline-flex rounded-full bg-indigo-200/80 px-3 py-1
+                                                text-sm font-bold tracking-wide text-indigo-900/85 border border-indigo-300/70">
+                                                    {{ item.frequency_display }}
+                                                </span>
+                                            </div>
+
+                                            <!-- Горизонтальная разделяющая черта + данные встречи -->
+                                            <div class="grid grid-cols-1 gap-5 pt-6 mt-6 border-t border-indigo-300/75">
+                                                <div class="flex flex-row lg:items-center gap-6 md:gap-10">
+
+                                                    <!-- Календарный блок -->
+                                                    <div class="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-[1.6rem]
+                                                    border border-indigo-200/70 bg-gradient-to-br from-indigo-500 via-indigo-500 to-sky-400
+                                                    text-white shadow-[0_18px_40px_rgba(79,70,229,0.24)]">
+                                                        <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                                        <span class="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-indigo-100/90 relative z-10">
+                                                            {{ item.display_month_short|upper }}
+                                                        </span>
+                                                        <span class="text-3xl font-black leading-none mt-1 relative z-10">
+                                                            {{ item.display_day_number }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="flex-1 min-w-0">
+                                                        <div class="flex items-center gap-2 mb-1">
+                                                            <p class="text-base font-bold uppercase tracking-[0.15em] text-indigo-500">
+                                                                {{ item.display_weekday }}
+                                                            </p>
+                                                        </div>
+                                                        <h2 class="text-2xl md:text-3xl font-black tracking-tight text-indigo-900/75 flex items-baseline gap-2">
+                                                            {{ item.display_time_range }}
+                                                        </h2>
+                                                        <p class="mt-1 text-xs font-medium tracking-widest text-indigo-500 flex items-center gap-1.5">
+                                                            {{ item.display_client_timezone }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Горизонтальная разделяющая черта + описание события.
+                                                 Блок показываем всегда, чтобы карточка встречи не выглядела пустой,
+                                                 если специалист еще не добавил дополнительный контекст для клиента. -->
+                                            <div class="grid grid-cols-1 gap-5 pt-6 mt-6 border-t border-indigo-300/75">
+                                                <div>
+                                                    <p class="text-sm font-bold uppercase tracking-widest text-slate-700/75 mb-3">Описание события</p>
+                                                    {% if item.description %}
+                                                        <p class="text-base leading-relaxed text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-100">{{ item.description }}</p>
+                                                    {% else %}
+                                                        <p class="text-sm leading-relaxed text-slate-400 p-5">
+                                                            При необходимости нажмите <strong>"Детали встречи"</strong> и добавьте дополнительный контекст, который увидит клиент.
+                                                        </p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 3) Правая часть: Участник и действия -->
+                                    <div class="bg-indigo-950 text-white p-8 md:p-10 lg:p-12 flex flex-col relative overflow-hidden">
+                                        <div class="relative z-10">
+                                            <p class="text-sm font-bold uppercase tracking-[0.22em] text-indigo-300 mb-5 block">Участник</p>
+                                            <div class="flex items-center gap-4">
+                                                <div class="min-w-0">
+                                                    <p class="truncate text-2xl font-bold text-white">{{ item.counterpart_full_name }}</p>
+                                                    <p class="text-sm lowercase text-white/85 mt-1.5">Клиент</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-10 rounded-[1.5rem] border border-white/10 bg-white/5 p-5 backdrop-blur-md">
+                                                <p class="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-slate-400 mb-3">Что важно</p>
+                                                <ul class="space-y-2.5 text-sm font-medium text-slate-300 leading-relaxed">
+                                                    <li class="flex items-start gap-2">
+                                                        <span class="text-xs leading-relaxed text-indigo-400">•</span>
+                                                        <span class="text-xs leading-relaxed">Управление ссылкой на видеочат доступно внутри встречи</span>
+                                                    </li>
+                                                    <li class="flex items-start gap-2">
+                                                        <span class="text-xs leading-relaxed text-indigo-400">•</span>
+                                                        <span class="text-xs leading-relaxed">После завершения можете оформить её итоги внутри встречи</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="relative z-10 mt-6 space-y-3">
+                                            {% if item.can_open_meeting_url %}
+                                                <a href="{{ item.slot.meeting_url }}"
+                                                   target="_blank"
+                                                   class="group relative flex w-full items-center justify-center px-6 py-4 gap-3 overflow-hidden rounded-[1.2rem] bg-indigo-600 text-white font-bold transition-all duration-300 hover:bg-indigo-500 hover:shadow-[0_0_30px_rgba(79,70,229,0.4)] active:scale-[0.98]">
+                                                    <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="relative z-10 w-5 h-5 transition-transform group-hover:-rotate-12">
+                                                    <span class="relative z-10">Войти в видеочат</span>
+                                                </a>
+                                            {% else %}
+                                                <div class="group relative w-full">
+                                                    <button type="button" disabled class="flex w-full items-center justify-center px-6 py-4 gap-3 rounded-[1.2rem] bg-white/5 border border-white/10 text-slate-400 font-bold cursor-not-allowed transition-all">
+                                                        <img src="{% static 'images/booking/video-white.svg' %}" alt="video" class="w-5 h-5 opacity-40 grayscale">
+                                                        <span>Войти в видеочат</span>
+                                                    </button>
+                                                    <span class="pointer-events-none absolute bottom-full left-1/2 z-30 mb-3 w-64 -translate-x-1/2
+                                                    rounded-xl bg-indigo-950/85 px-3 py-2 text-center text-[11px] font-semibold leading-relaxed text-white
+                                                    opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+                                                        Необходимо добавить ссылку на видеочат внутри встречи
+                                                    </span>
+                                                </div>
+                                            {% endif %}
+
+                                            {% if item.detail_url %}
+                                                <a href="{{ item.detail_url }}"
+                                                   class="flex w-full items-center justify-center rounded-[1.2rem] bg-white px-6 py-4 text-sm font-bold text-slate-900 transition-all duration-300 hover:bg-indigo-50 hover:text-indigo-700 active:scale-[0.98]">
+                                                    Детали встречи
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endfor %}
+
+                        {% if upcoming_events|length > 1 %}
+                            <div class="mt-4 flex justify-center gap-2 md:hidden" data-upcoming-indicators>
+                                {% for item in upcoming_events %}
+                                    <button type="button"
+                                            data-upcoming-indicator
+                                            data-index="{{ forloop.counter0 }}"
+                                            class="h-2 w-2 rounded-full transition-all duration-300 {% if forloop.first %}w-6 bg-indigo-600{% else %}bg-slate-300{% endif %}"
+                                            aria-label="Встреча {{ forloop.counter }}"></button>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    {% else %}
+                        <!-- Пустое состояние -->
+                        <div class="grid-area-1 w-full rounded-[2.5rem] border border-slate-200/80 bg-white p-10 md:p-16 shadow-xl text-center flex flex-col items-center justify-center min-h-[400px]">
+
+                            <div class="w-20 h-20 bg-indigo-500/10 rounded-full flex items-center justify-center mb-6">
+                                <img src="{% static 'images/booking/calendar.svg' %}" alt="calendar" class="w-8 h-8">
+                            </div>
+
+                            <h3 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">
+                                Пространство готово к работе
+                            </h3>
+                            <p class="text-base text-zinc-300 font-medium leading-relaxed mt-3 mb-8">
+                                Как только появится новая встреча, здесь отобразится вся информация о ней
+                            </p>
+                            <a href="{% url 'calendar_engine:web:psychologist-working-schedule' %}?layout=sidebar"
+                                class="group inline-flex items-center justify-center w-full sm:w-auto mt-6 px-6 py-2 gap-3
+                                border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
+                                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                                transition-all duration-200 shadow-md hover:shadow-lg">
+                                Настроить расписание
+                                <img src="{% static 'images/menu/look-for-white.svg' %}" alt="look-for" class="relative z-10 w-8 h-8">
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
 
-            <div class="grid gap-6 px-8 py-8 md:grid-cols-2 xl:grid-cols-4">
-                <a href="{% url 'users:web:psychologist-profile-edit' %}"
-                   class="rounded-3xl border border-zinc-200 bg-zinc-50 px-6 py-6 transition hover:border-indigo-300 hover:bg-indigo-50">
-                    <p class="text-sm font-semibold uppercase tracking-[0.22em] text-zinc-500">Профиль</p>
-                    <h2 class="mt-3 text-xl font-semibold text-zinc-900">Редактировать профиль</h2>
-                    <p class="mt-3 text-sm leading-6 text-zinc-600">Личные данные, образование, темы, методы и вся публичная карточка специалиста.</p>
-                </a>
+            <!-- ===== Заметки к встрече ===== -->
+            <div class="md:col-span-1 lg:col-span-4 bg-white/80 backdrop-blur-xl rounded-[2rem] p-8
+            border border-slate-200/80 shadow-lg hover:shadow-xl transition-shadow relative min-w-0 flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 block">
+                        Рабочие заметки ко встрече
+                    </h3>
+                    <button class="text-slate-400 hover:text-indigo-600 transition-colors flex-shrink-0 bg-slate-50 hover:bg-indigo-50 p-2 rounded-full" aria-label="Добавить заметку">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                    </button>
+                </div>
 
-                <a href="{% url 'calendar_engine:web:psychologist-working-schedule' %}"
-                   class="rounded-3xl border border-zinc-200 bg-zinc-50 px-6 py-6 transition hover:border-indigo-300 hover:bg-indigo-50">
-                    <p class="text-sm font-semibold uppercase tracking-[0.22em] text-zinc-500">Календарь</p>
-                    <h2 class="mt-3 text-xl font-semibold text-zinc-900">Рабочее расписание</h2>
-                    <p class="mt-3 text-sm leading-6 text-zinc-600">Базовые рабочие дни, интервалы внутри дня и исключения на отпуск, больничный или сокращенный график.</p>
-                </a>
+                <div class="flex-1 overflow-y-auto max-h-[250px] mb-4 pr-2">
+                    <ul class="space-y-3">
+                        <li class="group flex gap-3 items-start text-sm md:text-base text-slate-700 bg-slate-50 hover:bg-indigo-50/50 transition-colors p-4 rounded-2xl border border-slate-100">
+                            <span class="text-indigo-400 flex-shrink-0 mt-0.5 opacity-50 group-hover:opacity-100 transition-opacity">•</span>
+                            <span class="break-words font-medium leading-relaxed">Зафиксировать темы, к которым нужно вернуться на сессии</span>
+                        </li>
+                        <li class="group flex gap-3 items-start text-sm md:text-base text-slate-700 bg-slate-50 hover:bg-indigo-50/50 transition-colors p-4 rounded-2xl border border-slate-100">
+                            <span class="text-indigo-400 flex-shrink-0 mt-0.5 opacity-50 group-hover:opacity-100 transition-opacity">•</span>
+                            <span class="break-words font-medium leading-relaxed">Подготовить вопросы по динамике клиента</span>
+                        </li>
+                    </ul>
+                </div>
 
-                <a href="{% url 'core:psychologist-catalog' %}"
-                   class="rounded-3xl border border-zinc-200 bg-zinc-50 px-6 py-6 transition hover:border-indigo-300 hover:bg-indigo-50">
-                    <p class="text-sm font-semibold uppercase tracking-[0.22em] text-zinc-500">Общее</p>
-                    <h2 class="mt-3 text-xl font-semibold text-zinc-900">Каталог психологов</h2>
-                    <p class="mt-3 text-sm leading-6 text-zinc-600">Публичный каталог остается доступным для любой авторизованной роли.</p>
-                </a>
-
-                <a href="{% url 'core:faq-page' %}"
-                   class="rounded-3xl border border-zinc-200 bg-zinc-50 px-6 py-6 transition hover:border-indigo-300 hover:bg-indigo-50">
-                    <p class="text-sm font-semibold uppercase tracking-[0.22em] text-zinc-500">Помощь</p>
-                    <h2 class="mt-3 text-xl font-semibold text-zinc-900">Вопросы и ответы</h2>
-                    <p class="mt-3 text-sm leading-6 text-zinc-600">Общая справочная страница доступна без ролевых ограничений.</p>
-                </a>
-
-                <a href="{% url 'users:web:password-change' %}"
-                   class="rounded-3xl border border-zinc-200 bg-zinc-50 px-6 py-6 transition hover:border-indigo-300 hover:bg-indigo-50">
-                    <p class="text-sm font-semibold uppercase tracking-[0.22em] text-zinc-500">Безопасность</p>
-                    <h2 class="mt-3 text-xl font-semibold text-zinc-900">Смена пароля</h2>
-                    <p class="mt-3 text-sm leading-6 text-zinc-600">Общие настройки аккаунта уже доступны и не зависят от роли пользователя.</p>
-                </a>
+                <div class="w-full mt-auto relative pt-4 border-t border-slate-200">
+                    <input type="text" placeholder="Что важно не забыть?..." class="w-full text-sm font-medium border-0 border-b-2 border-transparent bg-slate-50 focus:bg-white focus:ring-0 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400">
+                </div>
             </div>
+
+            <!-- ===== Задания от терапевта ===== -->
+            <div class="md:col-span-1 lg:col-span-4 bg-white/80 backdrop-blur-xl rounded-[2rem] p-8
+            border border-slate-200/80 shadow-lg hover:shadow-xl transition-shadow relative min-w-0 flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 block">
+                        Задания клиенту
+                    </h3>
+                    <button class="text-slate-400 hover:text-indigo-600 transition-colors flex-shrink-0 bg-slate-50 hover:bg-indigo-50 p-2 rounded-full" aria-label="Добавить заметку">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <label class="flex items-start gap-4 cursor-pointer group p-3 -mx-3 rounded-xl hover:bg-slate-50 transition-colors">
+                        <div class="relative flex items-center justify-center mt-0.5">
+                            <input type="checkbox" class="peer shrink-0 w-5 h-5 appearance-none rounded-md border-2 border-slate-300 checked:bg-indigo-600 checked:border-indigo-600 focus:ring-indigo-500 transition-all">
+                            <svg class="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <span class="text-sm md:text-base text-slate-700 font-medium group-hover:text-slate-900 break-words leading-relaxed transition-colors">Подготовить домашнее задание после ближайшей встречи</span>
+                    </label>
+
+                    <label class="flex items-start gap-4 cursor-pointer group p-3 -mx-3 rounded-xl hover:bg-slate-50 transition-colors">
+                        <div class="relative flex items-center justify-center mt-0.5">
+                            <input type="checkbox" checked class="peer shrink-0 w-5 h-5 appearance-none rounded-md border-2 border-slate-300 checked:bg-slate-300 checked:border-slate-300 focus:ring-slate-500 transition-all">
+                            <svg class="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <span class="text-sm md:text-base text-slate-700 font-medium line-through break-words leading-relaxed">Проверить предыдущие рекомендации клиента</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ===== Новости ===== -->
+            <div class="md:col-span-1 lg:col-span-4 bg-slate-200/65 backdrop-blur-xl rounded-[2rem] p-8
+            border border-slate-200/80 shadow-lg hover:shadow-xl transition-shadow relative min-w-0 flex flex-col">
+                <div class="flex justify-between items-center mb-8">
+                    <h3 class="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-700/90 block">
+                        Опора • Обновления
+                    </h3>
+                </div>
+
+                <div class="space-y-4 relative z-10">
+                    <div class="bg-white/85 border border-white/10 rounded-2xl p-5 backdrop-blur-sm">
+                        <span class="inline-block px-2 py-1 bg-indigo-700 text-white/90 text-[0.65rem] font-bold uppercase tracking-widest rounded-md mb-2">Скоро</span>
+                        <p class="text-sm font-medium leading-relaxed text-slate-700">
+                            Мы работаем над новым форматом групповых мероприятий. Скоро здесь появятся новости об этом!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </section>
+
+<!--
+Логика для frontend:
+Скрипт должен брать элементы [data-upcoming-slide], определять их индекс.
+Текущему присваивать .is-active
+Предыдущему .is-prev
+Следующему .is-next
+Остальным скрывать через .hidden-prev / .hidden-next
+-->
+<script type="module" src="{% static 'js/modules/main_account_page/upcoming_events_carousel.js' %}"></script>
+
 {% endblock %}
