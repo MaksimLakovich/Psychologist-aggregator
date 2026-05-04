@@ -438,18 +438,24 @@
                     {% else %}
                         <!-- Пустое состояние -->
                         <div class="grid-area-1 w-full rounded-[2.5rem] border border-slate-200/80 bg-white p-10 md:p-16 shadow-xl text-center flex flex-col items-center justify-center min-h-[400px]">
-                            <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-6">
-                                <svg class="w-10 h-10 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+
+                            <div class="w-20 h-20 bg-indigo-500/10 rounded-full flex items-center justify-center mb-6">
+                                <img src="{% static 'images/booking/calendar.svg' %}" alt="calendar" class="w-8 h-8">
                             </div>
-                            <h2 class="text-2xl md:text-3xl font-black tracking-tight text-slate-900">
+
+                            <h3 class="text-xl md:text-2xl text-indigo-700/90 font-semibold tracking-wide">
                                 Пространство готово к работе
-                            </h2>
-                            <p class="mt-4 max-w-xl text-base leading-relaxed text-slate-500 font-medium">
-                                Как только появится новая встреча, здесь отобразится вся информация о ней.
+                            </h3>
+                            <p class="text-base text-zinc-300 font-medium leading-relaxed mt-3 mb-8">
+                                Как только появится новая встреча, здесь отобразится вся информация о ней
                             </p>
                             <a href="{% url 'calendar_engine:web:psychologist-working-schedule' %}?layout=sidebar"
-                               class="mt-8 inline-flex items-center justify-center rounded-2xl bg-slate-900 px-8 py-4 text-sm font-bold text-white transition-all hover:bg-indigo-600 hover:shadow-lg active:scale-95">
+                                class="group inline-flex items-center justify-center w-full sm:w-auto mt-6 px-6 py-2 gap-3
+                                border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700
+                                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                                transition-all duration-200 shadow-md hover:shadow-lg">
                                 Настроить расписание
+                                <img src="{% static 'images/menu/look-for-white.svg' %}" alt="look-for" class="relative z-10 w-8 h-8">
                             </a>
                         </div>
                     {% endif %}
