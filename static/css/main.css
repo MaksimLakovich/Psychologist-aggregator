@@ -2938,6 +2938,10 @@ input:checked + .toggle-bg {
   resize: both;
 }
 
+.scroll-mt-24 {
+  scroll-margin-top: 6rem;
+}
+
 .list-disc {
   list-style-type: disc;
 }

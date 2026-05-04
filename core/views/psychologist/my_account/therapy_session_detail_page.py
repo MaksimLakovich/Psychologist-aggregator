@@ -241,7 +241,7 @@ class PsychologistTherapySessionDetailView(PsychologistRequiredMixin, Specialist
             self._create_slot_message(form)
             messages.success(self.request, "Сообщение добавлено!")
 
-        return redirect(self.get_success_url())
+        return redirect(self._get_comments_success_url())
 
     def form_invalid(self, form):
         """Разводит обработку ошибок для добавления и inline-редактирования сообщения.
@@ -258,13 +258,17 @@ class PsychologistTherapySessionDetailView(PsychologistRequiredMixin, Specialist
                 error_text = next(iter(form.errors.get("message", [])), "Не удалось обновить сообщение!")
 
             messages.error(self.request, error_text)
-            return redirect(self.get_success_url())
+            return redirect(self._get_comments_success_url())
 
         return super().form_invalid(form)
 
     def get_success_url(self):
         """После сохранения остаемся на той же detail-странице и сохраняем текущий layout."""
         return f"{self.request.path}{self._build_layout_query()}"
+
+    def _get_comments_success_url(self):
+        """После добавления или редактирования сообщения возвращаем пользователя сразу к переписке."""
+        return f"{self.get_success_url()}#session-comments"
 
     def _get_event_detail_url(self, *, event_id):
         """Возвращает URL детальной страницы для указанного события после таких действий, как редактирование или
