@@ -33,11 +33,15 @@
         transform-style: preserve-3d;
         /* Используем CSS Grid, чтобы наложить элементы друг на друга без абсолютного позиционирования */
         display: grid;
+        width: min(100%, 76rem);
+        margin-inline: auto;
+        overflow: visible;
     }
 
     .upcoming-event-slide {
         grid-area: 1 / 1;
         border-radius: 2.5rem;
+        height: 100%;
         transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
                     opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
                     filter 0.8s ease,
@@ -53,6 +57,10 @@
         filter: blur(8px);
     }
 
+    .upcoming-event-slide > .upcoming-event-card {
+        height: 100%;
+    }
+
     /* Активный слайд (в центре) */
     .upcoming-event-slide.is-active {
         opacity: 1;
@@ -66,7 +74,7 @@
     /* Предыдущий слайд (выглядывает слева) */
     .upcoming-event-slide.is-prev {
         opacity: 0.4;
-        transform: translateX(-15%) scale(0.85) translateZ(-100px) rotateY(5deg);
+        transform: translateX(-26%) scale(0.85) translateZ(-100px) rotateY(5deg);
         z-index: 5;
         pointer-events: auto;
         cursor: pointer;
@@ -76,7 +84,7 @@
     /* Следующий слайд (выглядывает справа) */
     .upcoming-event-slide.is-next {
         opacity: 0.4;
-        transform: translateX(15%) scale(0.85) translateZ(-100px) rotateY(-5deg);
+        transform: translateX(26%) scale(0.85) translateZ(-100px) rotateY(-5deg);
         z-index: 5;
         pointer-events: auto;
         cursor: pointer;
@@ -86,13 +94,13 @@
     /* Эффекты наведения для боковых карточек */
     .upcoming-event-slide.is-prev:hover {
         opacity: 0.6;
-        transform: translateX(-12%) scale(0.88) translateZ(-80px) rotateY(3deg);
+        transform: translateX(-24%) scale(0.88) translateZ(-80px) rotateY(3deg);
         filter: blur(1px);
     }
 
     .upcoming-event-slide.is-next:hover {
         opacity: 0.6;
-        transform: translateX(12%) scale(0.88) translateZ(-80px) rotateY(-3deg);
+        transform: translateX(24%) scale(0.88) translateZ(-80px) rotateY(-3deg);
         filter: blur(1px);
     }
 
@@ -177,7 +185,7 @@
                                      class="upcoming-event-slide {% if forloop.first %}is-active{% elif forloop.counter0 == 1 %}is-next{% else %}hidden-next{% endif %}">
 
                                 <!-- 1) Общая граница + создание пропорции правой и левой части встречи -->
-                                <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.85fr)] gap-0
+                                <div class="upcoming-event-card grid grid-cols-1 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.85fr)] gap-0
                                 rounded-[2.5rem] bg-white border border-slate-200/80 shadow-xl overflow-hidden isolate">
 
                                     <!-- 2) Левая часть: Детали события -->
