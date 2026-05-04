@@ -3052,6 +3052,10 @@ input:checked + .toggle-bg {
   gap: 0px;
 }
 
+.gap-40 {
+  gap: 10rem;
+}
+
 .gap-x-20 {
   -moz-column-gap: 5rem;
        column-gap: 5rem;
@@ -3635,6 +3639,10 @@ input:checked + .toggle-bg {
 .border-slate-800 {
   --tw-border-opacity: 1;
   border-color: rgb(30 41 59 / var(--tw-border-opacity, 1));
+}
+
+.border-slate-900\/80 {
+  border-color: rgb(15 23 42 / 0.8);
 }
 
 .\!bg-gray-50 {
@@ -4264,6 +4272,30 @@ input:checked + .toggle-bg {
   --tw-gradient-to: transparent var(--tw-gradient-to-position);
 }
 
+.to-slate-500\/80 {
+  --tw-gradient-to: rgb(100 116 139 / 0.8) var(--tw-gradient-to-position);
+}
+
+.to-slate-100\/80 {
+  --tw-gradient-to: rgb(241 245 249 / 0.8) var(--tw-gradient-to-position);
+}
+
+.to-indigo-300\/80 {
+  --tw-gradient-to: rgb(180 198 252 / 0.8) var(--tw-gradient-to-position);
+}
+
+.to-slate-300\/80 {
+  --tw-gradient-to: rgb(203 213 225 / 0.8) var(--tw-gradient-to-position);
+}
+
+.to-slate-200\/80 {
+  --tw-gradient-to: rgb(226 232 240 / 0.8) var(--tw-gradient-to-position);
+}
+
+.to-slate-200\/70 {
+  --tw-gradient-to: rgb(226 232 240 / 0.7) var(--tw-gradient-to-position);
+}
+
 .bg-clip-text {
   -webkit-background-clip: text;
           background-clip: text;
@@ -4459,6 +4491,11 @@ input:checked + .toggle-bg {
 .px-3\.5 {
   padding-left: 0.875rem;
   padding-right: 0.875rem;
+}
+
+.px-20 {
+  padding-left: 5rem;
+  padding-right: 5rem;
 }
 
 .pb-0 {
@@ -5183,6 +5220,26 @@ input:checked + .toggle-bg {
 
 .text-transparent {
   color: transparent;
+}
+
+.text-indigo-50\/10 {
+  color: rgb(240 245 255 / 0.1);
+}
+
+.text-indigo-300\/20 {
+  color: rgb(180 198 252 / 0.2);
+}
+
+.text-indigo-300\/80 {
+  color: rgb(180 198 252 / 0.8);
+}
+
+.text-white\/90 {
+  color: rgb(255 255 255 / 0.9);
+}
+
+.text-white\/50 {
+  color: rgb(255 255 255 / 0.5);
 }
 
 .line-through {
@@ -7273,6 +7330,10 @@ input:checked + .toggle-bg {
     padding: 3rem;
   }
 
+  .lg\:p-2 {
+    padding: 0.5rem;
+  }
+
   .lg\:px-12 {
     padding-left: 3rem;
     padding-right: 3rem;
@@ -7402,6 +7463,14 @@ input:checked + .toggle-bg {
 
   .xl\:grid-cols-\[minmax\(0\2c 1\.55fr\)_minmax\(320px\2c 0\.85fr\)\] {
     grid-template-columns: minmax(0,1.55fr) minmax(320px,0.85fr);
+  }
+
+  .xl\:grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  .xl\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .xl\:p-0 {
