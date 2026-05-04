@@ -292,7 +292,7 @@
                                     <!-- 2) Левая часть: Детали события -->
                                     <div class="p-8 md:p-10 lg:p-12 bg-gradient-to-br from-white to-slate-200/70 relative">
 
-                                        <span class="text-xs md:text-sm font-bold uppercase tracking-[0.22em] text-indigo-700/90 mb-5 block">
+                                        <span class="text-sm font-bold uppercase tracking-[0.22em] text-indigo-700/90 mb-5 block">
                                             {{ item.title_display|default:item.event.title }}
                                         </span>
 
@@ -314,7 +314,7 @@
 
                                             <!-- Горизонтальная разделяющая черта + данные встречи -->
                                             <div class="grid grid-cols-1 gap-5 pt-6 mt-6 border-t border-indigo-300/75">
-                                                <div class="flex flex-col lg:flex-row lg:items-center gap-6 md:gap-10">
+                                                <div class="flex flex-row lg:items-center gap-6 md:gap-10">
 
                                                     <!-- Календарный блок -->
                                                     <div class="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-[1.6rem]
@@ -358,7 +358,7 @@
                                     </div>
 
                                     <!-- 3) Правая часть: Участник и действия -->
-                                    <div class="bg-slate-900 text-white p-8 md:p-10 lg:p-12 flex flex-col justify-between relative overflow-hidden">
+                                    <div class="bg-slate-900 text-white p-8 md:p-10 lg:p-12 flex flex-col relative overflow-hidden">
                                         <div class="relative z-10">
                                             <p class="text-xs md:text-sm font-bold uppercase tracking-[0.22em] text-indigo-300 mb-5 block">Участник</p>
                                             <div class="flex items-center gap-4">
@@ -372,18 +372,18 @@
                                                 <p class="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-slate-400 mb-3">Что важно</p>
                                                 <ul class="space-y-2.5 text-sm font-medium text-slate-300 leading-relaxed">
                                                     <li class="flex items-start gap-2">
-                                                        <span class="text-indigo-400 mt-0.5">•</span>
-                                                        <span class="text-xs">Управление ссылкой на видеочат доступно внутри встречи</span>
+                                                        <span class="text-xs leading-relaxed text-indigo-400">•</span>
+                                                        <span class="text-xs leading-relaxed">Управление ссылкой на видеочат доступно внутри встречи</span>
                                                     </li>
                                                     <li class="flex items-start gap-2">
-                                                        <span class="text-indigo-400 mt-0.5">•</span>
-                                                        <span class="text-xs">После завершения можете оформить её итоги внутри встречи</span>
+                                                        <span class="text-xs leading-relaxed text-indigo-400">•</span>
+                                                        <span class="text-xs leading-relaxed">После завершения можете оформить её итоги внутри встречи</span>
                                                     </li>
                                                 </ul>
                                             </div>
                                         </div>
 
-                                        <div class="relative z-10 mt-10 space-y-3">
+                                        <div class="relative z-10 mt-6 space-y-3">
                                             {% if item.can_open_meeting_url %}
                                                 <a href="{{ item.slot.meeting_url }}"
                                                    target="_blank"

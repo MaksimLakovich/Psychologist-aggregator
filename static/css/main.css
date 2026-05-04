@@ -7350,6 +7350,10 @@ input:checked + .toggle-bg {
     padding: 0.5rem;
   }
 
+  .lg\:p-8 {
+    padding: 2rem;
+  }
+
   .lg\:px-12 {
     padding-left: 3rem;
     padding-right: 3rem;
