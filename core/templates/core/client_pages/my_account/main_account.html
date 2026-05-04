@@ -80,11 +80,15 @@
             padding: 1.25rem !important;
         }
 
+        .client-upcoming-event-card > div:first-child {
+            padding-bottom: 2.5rem !important;
+        }
+
         .client-upcoming-event-card > div:first-child > .relative.z-10 {
             padding: 0 !important;
         }
 
-        .client-upcoming-event-card .inline-flex.rounded-full {
+        .client-upcoming-event-card > div:first-child .flex.flex-wrap.gap-3 > .inline-flex.rounded-full {
             padding: 0.35rem 0.6rem;
             font-size: 0.72rem;
             line-height: 1.15;
@@ -229,10 +233,10 @@
                         <div class="absolute -right-16 -bottom-16 h-64 w-64 rounded-full bg-indigo-50/30 blur-3xl pointer-events-none"></div>
                     </div>
 
-                    <div class="bg-slate-900 text-white p-8 md:p-10 lg:p-12 flex flex-col relative overflow-hidden">
+                    <div class="bg-indigo-950 text-white p-8 md:p-10 lg:p-12 flex flex-col relative overflow-hidden">
                         {% if upcoming_event %}
                             <div class="relative z-10">
-                                <p class="text-xs md:text-sm font-bold uppercase tracking-[0.22em] text-indigo-300 mb-5 block">Участник</p>
+                                <p class="text-sm font-bold uppercase tracking-[0.22em] text-indigo-300 mb-5 block">Участник</p>
                                 <div class="flex items-center gap-4">
                                     <div class="relative shrink-0">
                                         <img src="{{ upcoming_event.specialist_photo_url }}"
