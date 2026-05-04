@@ -1,7 +1,8 @@
 <!-- БЛОК 5: Сообщения внутри встречи -->
 
 {% if slot or message_items or can_manage_slot_messages %}
-<article class="rounded-[2rem] bg-slate-100/50 p-6 sm:p-8 shadow-lg shadow-slate-100 backdrop-blur-md animate-fade-in-up delay-200">
+<article id="session-comments"
+         class="scroll-mt-24 rounded-[2rem] bg-slate-100/50 p-6 sm:p-8 shadow-lg shadow-slate-100 backdrop-blur-md animate-fade-in-up delay-200">
 
     <!-- Шапка блока и подсчет количества сообщений -->
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -13,16 +14,30 @@
         </span>
     </div>
 
-    <!-- История сообщений сортируется от новых к старым -->
+    <!-- История сообщений идет от старых к новым, чтобы переписка читалась как обычный диалог -->
     {% if message_items %}
         <div class="space-y-4"
              data-comments-thread
              data-visible-comments-limit="{{ visible_messages_limit }}"
              data-hidden-comments-count="{{ remaining_comments_count }}">
 
+            <!-- Кнопка "Показать еще" открывает более ранние сообщения над текущей видимой историей -->
+            {% if remaining_comments_count > 0 %}
+                <div class="pb-3 text-center">
+                    <button type="button"
+                            data-show-more-comments
+                            data-show-more-count="{{ remaining_comments_count }}"
+                            class="w-full sm:w-auto inline-flex items-center justify-center
+                            text-sm italic text-slate-400 transition-all duration-200 hover:text-indigo-900">
+                        Показать еще {{ remaining_comments_count }}
+                    </button>
+                </div>
+            {% endif %}
+
             {% for item in message_items %}
-                <div class="{% if item.is_own_message %}flex justify-end{% else %}flex justify-start{% endif %} {% if forloop.counter > visible_messages_limit %}hidden{% endif %}"
+                <div class="{% if item.is_own_message %}flex justify-end{% else %}flex justify-start{% endif %} {% if forloop.revcounter > visible_messages_limit %}hidden{% endif %}"
                      data-comment-item
+                     data-comment-id="{{ item.id }}"
                      data-comment-index="{{ forloop.counter }}">
 
                     <div class="w-full max-w-[85%] sm:max-w-[78%]">
@@ -109,19 +124,6 @@
 
                 </div>
             {% endfor %}
-
-            <!-- Кнопка "Показать еще" -->
-            {% if remaining_comments_count > 0 %}
-                <div class="pt-3 text-center">
-                    <button type="button"
-                            data-show-more-comments
-                            data-show-more-count="{{ remaining_comments_count }}"
-                            class="w-full sm:w-auto inline-flex items-center justify-center
-                            text-sm italic text-slate-400 transition-all duration-200 hover:text-indigo-900">
-                        Показать еще {{ remaining_comments_count }}
-                    </button>
-                </div>
-            {% endif %}
         </div>
 
     {% else %}
