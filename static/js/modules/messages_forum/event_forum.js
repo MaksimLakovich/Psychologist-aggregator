@@ -3,12 +3,14 @@ import { pluralizeRu } from "../../utils/pluralize_ru.js";
 // Этот модуль оживляет messages-блок на detail-странице события.
 // 1. Здесь нет бизнес-логики доступа - backend уже решил, можно ли писать и редактировать сообщения.
 // 2. JS отвечает только за UX:
-//     - показать скрытые старые сообщения;
+//     - показать скрытые более ранние сообщения над текущей перепиской;
 //     - развернуть длинный текст сообщения;
 //     - открыть/закрыть inline-форму редактирования.
 
 const thread = document.querySelector("[data-comments-thread]");
 const messageCountBadge = document.querySelector("[data-message-count-badge]");
+const commentsArticle = document.querySelector("#session-comments");
+const commentsScrollTargetKey = "therapySessionCommentsScrollTarget";
 
 function buildMessagesCountLabel(count) {
   return `${count} ${pluralizeRu(count, "сообщение", "сообщения", "сообщений")}`;
@@ -33,11 +35,26 @@ if (thread) {
   }
 
   function collapseCommentsToInitialChunk() {
-    commentNodes.forEach((commentNode) => {
-      const commentIndex = Number(commentNode.dataset.commentIndex || 0);
-      const shouldStayVisible = commentIndex <= visibleCommentsLimit;
+    const firstVisibleIndex = Math.max(commentNodes.length - visibleCommentsLimit, 0);
+
+    commentNodes.forEach((commentNode, commentIndex) => {
+      const shouldStayVisible = commentIndex >= firstVisibleIndex;
 
       commentNode.classList.toggle("hidden", !shouldStayVisible);
+    });
+  }
+
+  function revealCommentFromHistory(commentNode) {
+    const commentIndex = commentNodes.indexOf(commentNode);
+    const firstVisibleIndex = commentNodes.findIndex((node) => !node.classList.contains("hidden"));
+
+    if (commentIndex < 0 || firstVisibleIndex < 0 || commentIndex >= firstVisibleIndex) {
+      commentNode.classList.remove("hidden");
+      return;
+    }
+
+    commentNodes.slice(commentIndex, firstVisibleIndex).forEach((node) => {
+      node.classList.remove("hidden");
     });
   }
 
@@ -78,16 +95,16 @@ if (thread) {
         return;
       }
 
-      // В качестве якоря берем последний уже прочитанный видимый комментарий.
-      // После раскрытия следующей порции возвращаем его на ту же позицию экрана,
-      // чтобы пользователь продолжал читать историю с того же места, а не оказывался внизу у кнопки.
+      // В качестве якоря берем первое видимое сообщение.
+      // Когда пользователь раскрывает более раннюю историю сверху,
+      // это сообщение остается на той же позиции экрана и переписка не прыгает.
       const visibleComments = getVisibleComments();
-      const anchorComment = visibleComments[visibleComments.length - 1];
+      const anchorComment = visibleComments[0];
       const anchorTopBeforeExpand = anchorComment
         ? anchorComment.getBoundingClientRect().top
         : null;
 
-      hiddenComments.slice(0, visibleCommentsLimit).forEach((commentNode) => {
+      hiddenComments.slice(-visibleCommentsLimit).forEach((commentNode) => {
         commentNode.classList.remove("hidden");
       });
 
@@ -104,6 +121,54 @@ if (thread) {
         syncShowMoreButtonLabel();
       });
     });
+  }
+
+  if (commentsArticle) {
+    commentsArticle.querySelectorAll("form").forEach((form) => {
+      form.addEventListener("submit", () => {
+        const formData = new FormData(form);
+        const action = formData.get("action") || "add_message";
+        const messageId = formData.get("message_id") || "";
+
+        sessionStorage.setItem(
+          commentsScrollTargetKey,
+          JSON.stringify({
+            action,
+            messageId,
+          }),
+        );
+      });
+    });
+
+    const savedTarget = sessionStorage.getItem(commentsScrollTargetKey);
+    if (savedTarget) {
+      sessionStorage.removeItem(commentsScrollTargetKey);
+
+      try {
+        const targetData = JSON.parse(savedTarget);
+        const visibleComments = getVisibleComments();
+        const targetComment = targetData.action === "edit_message"
+          ? commentNodes.find((commentNode) => commentNode.dataset.commentId === targetData.messageId)
+          : visibleComments[visibleComments.length - 1];
+
+        if (targetComment) {
+          revealCommentFromHistory(targetComment);
+          syncShowMoreButtonLabel();
+
+          requestAnimationFrame(() => {
+            targetComment.scrollIntoView({
+              block: "center",
+              behavior: "auto",
+            });
+          });
+        }
+      } catch {
+        commentsArticle.scrollIntoView({
+          block: "start",
+          behavior: "auto",
+        });
+      }
+    }
   }
 
   thread.querySelectorAll("[data-toggle-message-full]").forEach((toggleButton) => {
