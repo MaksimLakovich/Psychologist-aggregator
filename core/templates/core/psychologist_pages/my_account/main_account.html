@@ -345,15 +345,21 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Горизонтальная разделяющая черта + данные встречи -->
-                                            {% if item.description %}
-                                                <div class="grid grid-cols-1 gap-5 pt-6 mt-6 border-t border-indigo-300/75">
-                                                    <div>
-                                                        <p class="text-sm font-bold uppercase tracking-widest text-slate-700/75 mb-1">Описание события</p>
+                                            <!-- Горизонтальная разделяющая черта + описание события.
+                                                 Блок показываем всегда, чтобы карточка встречи не выглядела пустой,
+                                                 если специалист еще не добавил дополнительный контекст для клиента. -->
+                                            <div class="grid grid-cols-1 gap-5 pt-6 mt-6 border-t border-indigo-300/75">
+                                                <div>
+                                                    <p class="text-sm font-bold uppercase tracking-widest text-slate-700/75 mb-1">Описание события</p>
+                                                    {% if item.description %}
                                                         <p class="text-base leading-relaxed text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-100">{{ item.description }}</p>
-                                                    </div>
+                                                    {% else %}
+                                                        <p class="text-base leading-relaxed text-slate-500 bg-slate-50/80 p-5 rounded-2xl border border-dashed border-slate-200">
+                                                            Описание пока не добавлено. При необходимости откройте детали встречи и добавьте дополнительный контекст, который увидит клиент.
+                                                        </p>
+                                                    {% endif %}
                                                 </div>
-                                            {% endif %}
+                                            </div>
                                         </div>
                                     </div>
 
