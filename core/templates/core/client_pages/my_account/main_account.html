@@ -95,8 +95,9 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 animate-fade-in-up" style="animation-delay: 0.1s;">
 
             <!-- ===== Ближайшая встреча ===== -->
-            <div class="md:col-span-2 lg:col-span-12 rounded-[2rem] p-6 md:p-7 min-w-0 bg-gradient-to-br from-white to-slate-200/70 backdrop-blur-md
-            border border-indigo-100/80 shadow-sm relative">
+            <div class="md:col-span-2 lg:col-span-12 rounded-[2.5rem] p-8 md:p-10 lg:p-12 min-w-0 bg-gradient-to-br from-white to-slate-200/70 backdrop-blur-md
+            border border-slate-200/80 shadow-xl relative mb-5">
+
                 <span class="text-xs md:text-sm font-bold uppercase tracking-[0.22em] text-indigo-700/90 mb-5 block">
                     Ближайшая встреча
                 </span>
@@ -190,8 +191,8 @@
                                 {% if upcoming_event.description %}
                                     <div class="grid grid-cols-1 gap-5 pt-6 mt-6 border-t border-indigo-300/75">
                                         <div>
-                                            <p class="text-sm font-bold uppercase tracking-widest text-slate-700/75 mb-1">Описание события</p>
-                                            <p class="text-base leading-relaxed text-zinc-800">{{ upcoming_event.description }}</p>
+                                            <p class="text-sm font-bold uppercase tracking-widest text-slate-700/75 mb-3">Описание события</p>
+                                            <p class="text-base leading-relaxed text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-100">{{ upcoming_event.description }}</p>
                                         </div>
                                     </div>
                                 {% endif %}
