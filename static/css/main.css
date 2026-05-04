@@ -6970,6 +6970,10 @@ input:checked + .toggle-bg {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
+  .md\:grid-cols-\[minmax\(0\2c 1\.55fr\)_minmax\(320px\2c 0\.85fr\)\] {
+    grid-template-columns: minmax(0,1.55fr) minmax(320px,0.85fr);
+  }
+
   .md\:flex-row {
     flex-direction: row;
   }

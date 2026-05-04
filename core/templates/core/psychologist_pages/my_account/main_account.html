@@ -118,6 +118,107 @@
     .psychologist-dashboard-page ::-webkit-scrollbar-track { background: transparent; }
     .psychologist-dashboard-page ::-webkit-scrollbar-thumb { background: #e0e7ff; border-radius: 10px; }
     .psychologist-dashboard-page ::-webkit-scrollbar-thumb:hover { background: #c7d2fe; }
+
+    /* На мобильном экране карусель работает как компактный переключатель ближайших встреч.
+       Desktop-эффект с боковыми карточками здесь убираем, потому что на узком экране он создает визуальный шум. */
+    @media (max-width: 767px) {
+        .carousel-perspective {
+            width: 100%;
+            perspective: none;
+            overflow: hidden;
+            border-radius: 1.75rem;
+        }
+
+        .upcoming-event-slide,
+        .upcoming-event-slide.is-active,
+        .upcoming-event-slide.is-prev,
+        .upcoming-event-slide.is-next,
+        .upcoming-event-slide.hidden-prev,
+        .upcoming-event-slide.hidden-next,
+        .upcoming-event-slide.is-prev:hover,
+        .upcoming-event-slide.is-next:hover {
+            transform: none;
+            filter: none;
+        }
+
+        .upcoming-event-slide {
+            border-radius: 1.75rem;
+            transition: opacity 0.24s ease;
+        }
+
+        .upcoming-event-slide.is-active {
+            opacity: 1;
+            z-index: 10;
+            pointer-events: auto;
+            box-shadow: none;
+        }
+
+        .upcoming-event-slide.is-prev,
+        .upcoming-event-slide.is-next,
+        .upcoming-event-slide.hidden-prev,
+        .upcoming-event-slide.hidden-next {
+            opacity: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .upcoming-event-slide > .upcoming-event-card {
+            height: auto;
+            border-radius: 1.75rem;
+            box-shadow: 0 14px 32px rgba(79, 70, 229, 0.12);
+        }
+
+        .upcoming-event-card > div {
+            padding: 1.25rem !important;
+        }
+
+        .upcoming-event-card > div:first-child > .relative.z-10 {
+            padding: 0 !important;
+        }
+
+        .upcoming-event-card .inline-flex.rounded-full {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.72rem;
+            line-height: 1.15;
+        }
+
+        .upcoming-event-card .pt-6 {
+            padding-top: 1rem !important;
+        }
+
+        .upcoming-event-card .mt-6,
+        .upcoming-event-card .mt-10 {
+            margin-top: 1rem !important;
+        }
+
+        .upcoming-event-card .gap-6,
+        .upcoming-event-card .gap-10 {
+            gap: 1rem !important;
+        }
+
+        .upcoming-event-card .h-24.w-24 {
+            height: 4.5rem;
+            width: 4.5rem;
+            border-radius: 1.15rem;
+        }
+
+        .upcoming-event-card .h-24.w-24 span:last-child {
+            font-size: 1.55rem;
+        }
+
+        .upcoming-event-card h2 {
+            font-size: 1.55rem;
+            line-height: 1.15;
+        }
+
+        .upcoming-event-card .rounded-\[1\.5rem\] {
+            border-radius: 1rem;
+        }
+
+        .upcoming-event-card .p-5 {
+            padding: 1rem !important;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -185,7 +286,7 @@
                                      class="upcoming-event-slide {% if forloop.first %}is-active{% elif forloop.counter0 == 1 %}is-next{% else %}hidden-next{% endif %}">
 
                                 <!-- 1) Общая граница + создание пропорции правой и левой части встречи -->
-                                <div class="upcoming-event-card grid grid-cols-1 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.85fr)] gap-0
+                                <div class="upcoming-event-card grid grid-cols-1 md:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.85fr)] gap-0
                                 rounded-[2.5rem] bg-white border border-slate-200/80 shadow-xl overflow-hidden isolate">
 
                                     <!-- 2) Левая часть: Детали события -->
@@ -315,6 +416,18 @@
                                 </div>
                             </article>
                         {% endfor %}
+
+                        {% if upcoming_events|length > 1 %}
+                            <div class="mt-4 flex justify-center gap-2 md:hidden" data-upcoming-indicators>
+                                {% for item in upcoming_events %}
+                                    <button type="button"
+                                            data-upcoming-indicator
+                                            data-index="{{ forloop.counter0 }}"
+                                            class="h-2 w-2 rounded-full transition-all duration-300 {% if forloop.first %}w-6 bg-indigo-600{% else %}bg-slate-300{% endif %}"
+                                            aria-label="Встреча {{ forloop.counter }}"></button>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
 
                     {% else %}
                         <!-- Пустое состояние -->
