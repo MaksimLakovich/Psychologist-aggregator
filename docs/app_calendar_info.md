@@ -215,7 +215,6 @@ calendar_engine/
     │    │    ├── base.py                 # Абстрактный контракт TimePolicy (доменная временная сетка)
     │    │    ├── policy.py               # 💡 Основная DomainTimePolicy домена (генерация доменной временной сетки)
     │    │    └── exceptions.py           # Бизнес-исключения доменной временной сетки (Domain Business Exceptions)
-    │    │
     │    ├── availability/              # Чистая логика доступности конкретного специалиста
     │    │    ├── base.py                   # Абстрактные контракты AvailabilityRule и AvailabilityException
     │    │    ├── user_rules.py             # Индивидуальные правила доступности специалиста - AvailabilityRule
@@ -223,7 +222,6 @@ calendar_engine/
     │    │    ├── dto.py                    # SlotDTO
     │    │    ├── domain_slot_generator.py  # Генерирует все возможные доменные временные слоты по правилам домена для будущей фильтрации
     │    │    └── get_user_slots.py         # 💡 Фильтр доменных слотов специалиста по его индивидуальным правилам доступности (оставляет только те SlotDTO, которые разрешены правилами дня)
-    │    │
     │    └── matching/                  # Алгоритмы сопоставления time_policy и availability
     │         ├── dto.py                  # MatchResultDTO
     │         ├── base.py                 # Абстрактный контракт временного matching
@@ -235,16 +233,15 @@ calendar_engine/
     │    │    ├── get_domain_slots_use_case.py        # Use-case для UI: генерация и показ клиенту всех возможных временных слотов домена (общее правило домена)
     │    │    ├── filter_and_match_availability.py    # Use-case фильтрации и matching предпочитаемых клиентом слотов с доступными слотами специалиста
     │    │    └── specialist_schedule.py              # Use-case получения актуального расписания специалиста (ближайшее время + доступное расписание)
-    │    │
     │    ├── mappers/
     │    │    ├── rule_mapper.py               # Адаптирует django-объект AvailabilityRule / AvailabilityRuleTimeWindow в доменное правило доступности AbsAvailabilityRule (WeeklyAvailabilityRule) для factories
     │    │    ├── exception_mapper.py          # Адаптирует django-объект AvailabilityException / AvailabilityExceptionTimeWindow в доменное правило доступности AbsAvailabilityException (DateAvailabilityException / DateAvailabilityException) для factories
     │    │    ├── preferred_slots_mapper.py    # Адаптирует preferred_slots из БД в доменный формат matcher-а
     │    │    └── match_result_mapper.py       # Адаптирует MatchResultDTO в JSON-совместимый формат для API, потому что web-слой НЕ работает с доменными DTO напрямую
-    │    │    
-    │    └── factories/
-    │         ├── generate_and_match_factory.py              # 💡 ИТОГОВЫЙ ПОДБОР СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - этот модуль использует use-cases, передает на вход "СПЕЦИАЛИСТА + ВЫБРАННЫЕ КЛИЕНТОМ "СЛОТЫ" и запускает ПОДБОР
-    │         └── generate_specialist_schedule_factory.py    # 💡 ПОЛУЧИТЬ РАСПИСАНИЕ СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - генерация расписания специалиста
+    │    ├── factories/
+    │    │    ├── generate_and_match_factory.py              # 💡 ИТОГОВЫЙ ПОДБОР СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - этот модуль использует use-cases, передает на вход "СПЕЦИАЛИСТА + ВЫБРАННЫЕ КЛИЕНТОМ "СЛОТЫ" и запускает ПОДБОР
+    │    │    ├── generate_specialist_schedule_factory.py    # 💡 ПОЛУЧИТЬ РАСПИСАНИЕ СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - генерация расписания специалиста
+    │    │    └── ...
     │
     ├── booking/                      # ⭐ Создание встреч/событий и работа с ними
     │    ├── use_cases/
@@ -261,7 +258,6 @@ calendar_engine/
     │    │    ├── event_status_resolver.py     # Вспомогательные функции для use_cases: системное изменение статусов + "перенос"/"отмена"
     │    │    ├── slot_action_validator.py     # Проверяет, что со слотом еще можно выполнить действие пользователя (action_name = "Отменить" / "Перенести")
     │    │    └── ...
-    │    │
     │    ├── use_cases/
     │    │    ├── apply_time_based_status_transitions.py    # Автоматические переходы/изменения статусов событий/слотов
     │    │    ├── cancel_event.py                           # Отмена события
