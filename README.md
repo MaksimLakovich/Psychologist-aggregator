@@ -336,82 +336,96 @@
 │    └── urls.py                      # Корневой маршрутизатор users/
 │
 ├── calendar_engine/            # ⭐️ Приложение django-проекта ("Календарь"). Управление расписаниями и записями: создание, перенос, отмена, проверка пересечений, генерация доступных слотов
-│    ├── _api/
+│    ├── _api/                           # ⭐ API-сценарии для календаря
 │    │    ├── serializers/
-│    │    │    ├── availability.py
-│    │    │    ├── events.py
+│    │    │    ├── availability.py         # Сериализаторы для рабочего расписания специалиста (правило доступности и исключения)
+│    │    │    ├── events.py               # Сериализаторы для создания встречи
 │    │    │    └── ...
 │    │    ├── views/
-│    │    │    ├── availability.py
-│    │    │    ├── events.py
+│    │    │    ├── availability.py         # API-endpoint для работы с рабочим графиком / Получение возможных доменных слотов / Получение отфильтрованных слотов на основе рабочего расписания + брони
+│    │    │    ├── events.py               # API-endpoint для клиента по выполнению им сценария создания встречи со специалистом
 │    │    │    └── ...
 │    │    └── urls.py
-│    ├── _web/
+│    ├── _web/                           # ⭐ WEB-сценарии для календаря
+│    │    ├── forms/
+│    │    │    └── psychologist/
+│    │    │         ├── form_working_schedule.py    # Форма для рабочего расписания специалиста
+│    │    │         └── ...
 │    │    ├── views/
-│    │    │    └── ...
+│    │    │    └── psychologist/
+│    │    │         ├── working_schedule_page.py    # Настройка рабочего расписания специалиста
+│    │    │         └── ...
 │    │    └── urls.py
-│    ├── domain/
-│    │    ├── time_policy/
-│    │    │    ├── base.py
-│    │    │    ├── exceptions.py
-│    │    │    ├── policy.py
+│    ├── templates/                      # ⭐ html-шаблоны для календаря (работа с рабочим расписанием)
+│    │    └── calendar_engine/
+│    │         └── psychologist_pages/
+│    │              ├── working_schedule.html
+│    │              └── ...
+│    ├── domain/                       # ⭐ Бизнес-логика (НЕ Django)
+│    │    ├── time_policy/               # ДОМЕННЫЕ правила временной сетки календаря
+│    │    │    ├── base.py                 # Абстрактный контракт TimePolicy (доменная временная сетка)
+│    │    │    ├── policy.py               # 💡 Основная DomainTimePolicy домена (генерация доменной временной сетки)
+│    │    │    ├── exceptions.py           # Бизнес-исключения доменной временной сетки (Domain Business Exceptions)
 │    │    │    └── ...
-│    │    ├── matching/
-│    │    │    ├── base.py
-│    │    │    ├── dto.py
-│    │    │    ├── matcher.py
+│    │    ├── availability/              # Чистая логика доступности конкретного специалиста
+│    │    │    ├── base.py                   # Абстрактные контракты AvailabilityRule и AvailabilityException
+│    │    │    ├── user_rules.py             # Индивидуальные правила доступности специалиста - AvailabilityRule
+│    │    │    ├── user_exceptions.py        # Исключения из правил (day-off, отпуск, больничный) - AvailabilityException
+│    │    │    ├── dto.py                    # SlotDTO
+│    │    │    ├── domain_slot_generator.py  # Генерирует все возможные доменные временные слоты по правилам домена для будущей фильтрации
+│    │    │    ├── get_user_slots.py         # 💡 Фильтр доменных слотов специалиста по его индивидуальным правилам доступности (оставляет только те SlotDTO, которые разрешены правилами дня)
 │    │    │    └── ...
-│    │    └── availability/
-│    │         ├── base.py
-│    │         ├── domain_slot_generator.py
-│    │         ├── dto.py
-│    │         ├── get_user_slots.py
-│    │         ├── user_exceptions.py
-│    │         ├── user_rules.py
+│    │    └── matching/                  # Алгоритмы сопоставления time_policy и availability
+│    │         ├── dto.py                  # MatchResultDTO
+│    │         ├── base.py                 # Абстрактный контракт временного matching
+│    │         ├── matcher.py              # 💡 Основной пользовательский matcher - оставляет только тех специалистов, свободные слоты у которых совпадают с пользовательским запросом
 │    │         └── ...
-│    ├── application/
-│    │    ├── factories/
-│    │    │    ├── generate_and_match_factory.py
-│    │    │    ├── generate_specialist_schedule_factory.py
+│    ├── application/                  # ⭐ Оркестрация процессов
+│    │    ├── use_cases/
+│    │    │    ├── base.py                             # Абстрактный контракт базовой логики use-cases
+│    │    │    ├── get_domain_slots_use_case.py        # Use-case для UI: генерация и показ клиенту всех возможных временных слотов домена (общее правило домена)
+│    │    │    ├── filter_and_match_availability.py    # Use-case фильтрации и matching предпочитаемых клиентом слотов с доступными слотами специалиста
+│    │    │    ├── specialist_schedule.py              # Use-case получения актуального расписания специалиста (ближайшее время + доступное расписание)
 │    │    │    └── ...
 │    │    ├── mappers/
-│    │    │    ├── exception_mapper.py
-│    │    │    ├── match_result_mapper.py
-│    │    │    ├── preferred_slots_mapper.py
-│    │    │    ├── rule_mapper.py
+│    │    │    ├── rule_mapper.py               # Адаптирует django-объект AvailabilityRule / AvailabilityRuleTimeWindow в доменное правило доступности AbsAvailabilityRule (WeeklyAvailabilityRule) для factories
+│    │    │    ├── exception_mapper.py          # Адаптирует django-объект AvailabilityException / AvailabilityExceptionTimeWindow в доменное правило доступности AbsAvailabilityException (DateAvailabilityException / DateAvailabilityException) для factories
+│    │    │    ├── preferred_slots_mapper.py    # Адаптирует preferred_slots из БД в доменный формат matcher-а
+│    │    │    ├── match_result_mapper.py       # Адаптирует MatchResultDTO в JSON-совместимый формат для API, потому что web-слой НЕ работает с доменными DTO напрямую
 │    │    │    └── ...
-│    │    └── use_cases/
-│    │         ├── base.py
-│    │         ├── filter_and_match_availability.py
-│    │         ├── get_domain_slots_use_case.py
-│    │         ├── specialist_schedule.py
-│    │         └── ...
-│    ├── booking/
+│    │    ├── factories/
+│    │    │    ├── generate_and_match_factory.py              # 💡 ИТОГОВЫЙ ПОДБОР СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - этот модуль использует use-cases, передает на вход "СПЕЦИАЛИСТА + ВЫБРАННЫЕ КЛИЕНТОМ "СЛОТЫ" и запускает ПОДБОР
+│    │    │    ├── generate_specialist_schedule_factory.py    # 💡 ПОЛУЧИТЬ РАСПИСАНИЕ СПЕЦИАЛИСТОВ (это composition layer, а не бизнес-логика, которая в use-case) - генерация расписания специалиста
+│    │    │    └── ...
+│    ├── booking/                      # ⭐ Создание встреч/событий и работа с ними
 │    │    ├── use_cases/
-│    │    │    └── therapy_session_create.py
-│    │    ├── exceptions.py
-│    │    ├── services.py
+│    │    │    ├── therapy_session_create.py           # Прикладной сценарий для клиента по созданию встречи (терапевтическая сессия) со специалистом
+│    │    │    └── ...
+│    │    ├── exceptions.py               # Кастомные исключения для booking-модуля
+│    │    ├── services.py                 # Вспомогательные функции (build_booking_therapy_session_title, get_specialist_profile_for_booking_therapy_session, build_specialist_live_indicator и прочее)
+│    │    ├── validators.py               # Кастомные валидаторы для booking-flow
 │    │    ├── throttles.py
-│    │    └── validators.py
-│    ├── lifecycle/
+│    │    └── ...
+│    ├── lifecycle/                    # ⭐ Жизненный цикл встреч/событий - изменение статусов и управление событием
 │    │    ├── services/
-│    │    │    ├── event_status_resolver.py
-│    │    │    ├── reschedule_chain_resolver.py
-│    │    │    ├── slot_action_validator.py
-│    │    │    ├── slot_status_display.py
+│    │    │    ├── event_status_resolver.py        # Вспомогательные функции для use_cases: системное изменение статусов + "перенос"/"отмена"
+│    │    │    ├── reschedule_chain_resolver.py    # Возвращает актуального потомка события по цепочке previous_event
+│    │    │    ├── slot_action_validator.py        # Проверяет, что со слотом еще можно выполнить действие пользователя (action_name = "Отменить" / "Перенести")
+│    │    │    ├── slot_status_display.py          # Возвращает пользовательский display-статус слота/события для UI
 │    │    │    └── ...
 │    │    ├── use_cases/
-│    │    │    ├── apply_time_based_status_transitions.py
-│    │    │    ├── cancel_event.py
-│    │    │    ├── reschedule_therapy_session.py
+│    │    │    ├── apply_time_based_status_transitions.py    # Автоматические переходы/изменения статусов событий/слотов
+│    │    │    ├── cancel_event.py                           # Отмена события
+│    │    │    ├── reschedule_therapy_session.py             # Перенос события
 │    │    │    └── ...
-│    │    └── exceptions.py
+│    │    ├── exceptions.py               # Кастомные исключения для lifecycle-модуля
+│    │    └── ...
 │    ├── migrations/
 │    ├── apps.py
-│    ├── constants.py                 # Статические справочники и переменные
+│    ├── constants.py                 # Параметры доменной политики (базовые размеры слотов) + значения справочников
 │    ├── models.py                    # Модели данных
 │    ├── admin.py                     # Админки для моделей данных
-│    ├── services.py                  # normalize_range()
+│    ├── services.py                  # Вспомогательные сервисные функции (например, normalize_range(), get_local_date_for_user(), time_windows_have_overlap()...)
 │    └── urls.py                      # Корневой маршрутизатор calendar_engine/
 │
 ├── aggregator/                 # ⭐️ Приложение django-проекта ("ПУБЛИЧНЫЙ КАТАЛОГ ПСИХОЛОГОВ - подбор психолога")
@@ -419,7 +433,8 @@
 │    │    ├── filters.py              # Кастомный фильтр для фильтрации по "slug", а не "id"
 │    │    ├── serializers.py
 │    │    ├── views.py                # Публичный каталог психологов / AJAX-запрос для автоматического запуска фильтрации + возврат JSON с готовыми данными для карточки психолога
-│    │    └── urls.py                         # Все API-роуты
+│    │    ├──  urls.py                         # Все API-роуты
+│    │    └── ...
 │    ├── _web/                        # ℹ️ WEB-часть (формы + HTML)
 │    │    ├── selectors/
 │    │    │    ├── psychologist_selectors.py    # Отдельные методы фильтрации психологов по различным параметрам + аннотация доп полей (расчет коэфф совпадения и т.д.)

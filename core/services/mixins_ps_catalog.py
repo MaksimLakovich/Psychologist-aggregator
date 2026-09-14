@@ -78,7 +78,7 @@ class CatalogPsychologistQuerysetMixin:
         """Возвращает базовый QuerySet для каталога психологов.
 
         Основная бизнес-логика:
-            1) берем только активных и верифицированных специалистов;
+            1) берем только активных и верифицированных специалистов с действующим рабочим расписанием;
             2) сразу подтягиваем связанные данные через select_related/prefetch_related, чтобы избежать N+1;
             3) базовую сортировку оставляем стабильной по id, а реальную случайность применяем безопасно
                на уровне списка id (random.shuffle() + ключ случайного порядка).
@@ -88,7 +88,12 @@ class CatalogPsychologistQuerysetMixin:
         """
         return (
             PsychologistProfile.objects
-            .filter(is_verified=True, user__is_active=True)
+            .filter(
+                is_verified=True,
+                user__is_active=True,
+                user__availability_rules__is_active=True,
+                user__availability_rules__time_windows__isnull=False,
+            )
             .select_related("user")
             .prefetch_related(
                 "methods",
@@ -100,6 +105,7 @@ class CatalogPsychologistQuerysetMixin:
                     to_attr="prefetched_active_availability_rules",
                 ),
             )
+            .distinct()
             .order_by("id")
         )
 
@@ -390,13 +396,14 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
         """
         age_bounds = self._build_catalog_age_bounds()
         experience_bounds = self._build_catalog_experience_bounds()
+        normalized_filters_state = self._extract_filters_state(
+            filters_state,
+            age_bounds=age_bounds,
+            experience_bounds=experience_bounds,
+        )
         queryset = apply_catalog_basic_filters(
             self.get_queryset(),
-            self._extract_filters_state(
-                filters_state,
-                age_bounds=age_bounds,
-                experience_bounds=experience_bounds,
-            ),
+            normalized_filters_state,
             age_bounds=age_bounds,
             experience_bounds=experience_bounds,
         )
@@ -561,13 +568,14 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
         """
         age_bounds = self._build_catalog_age_bounds()
         experience_bounds = self._build_catalog_experience_bounds()
+        normalized_filters_state = self._extract_filters_state(
+            filters_state,
+            age_bounds=age_bounds,
+            experience_bounds=experience_bounds,
+        )
         filtered_queryset = apply_catalog_basic_filters(
             self.get_queryset(),
-            self._extract_filters_state(
-                filters_state,
-                age_bounds=age_bounds,
-                experience_bounds=experience_bounds,
-            ),
+            normalized_filters_state,
             age_bounds=age_bounds,
             experience_bounds=experience_bounds,
         )
@@ -575,9 +583,5 @@ class CatalogPageDataMixin(CatalogPsychologistQuerysetMixin, CatalogDetailLinkMi
         return {
             "status": "ok",
             "total_count": filtered_queryset.count(),
-            "active_filters": self._extract_filters_state(
-                filters_state,
-                age_bounds=age_bounds,
-                experience_bounds=experience_bounds,
-            ),
+            "active_filters": normalized_filters_state,
         }

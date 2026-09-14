@@ -8,13 +8,25 @@ from users.models import PsychologistProfile
 
 
 def base_queryset():
-    """Метод возвращает базовый QuerySet, содержащий всех активных/верифицированных психологов из базы данных."""
+    """Метод возвращает базовый QuerySet психологов, которых можно показывать клиенту.
+
+    Бизнес-правило:
+        - в подборе участвуют только активные и верифицированные специалисты с действующим рабочим расписанием;
+        - у специалиста должно быть действующее рабочее расписание с рабочими окнами,
+          иначе клиент не сможет выбрать время и записаться на встречу.
+    """
 
     return (
         PsychologistProfile.objects
-        .filter(is_verified=True, user__is_active=True)
+        .filter(
+            is_verified=True,
+            user__is_active=True,
+            user__availability_rules__is_active=True,
+            user__availability_rules__time_windows__isnull=False,
+        )
         .select_related("user")
         .prefetch_related("methods", "topics")
+        .distinct()
     )
 
 
