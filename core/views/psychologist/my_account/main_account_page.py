@@ -55,7 +55,7 @@ class PsychologistAccountView(PsychologistRequiredMixin, TemplateView):
                 ),
             )
             .distinct()
-            .order_by("first_slot_start", "created_at")[:5]
+            .order_by("first_slot_start", "created_at")[:20]
         )
 
         event_cards = []
